@@ -1,0 +1,19 @@
+/* app/(admin-panel)/admin-globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0b0f19] text-gray-200; /* رنگ پس‌زمینه اختصاصی برای پنل */
+  }
+}
+
+/* استایل‌های اختصاصی پنل مدیریت (مثلا برای اسکرول‌بار یا جدول‌ها) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}

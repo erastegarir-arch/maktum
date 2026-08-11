@@ -1,0 +1,271 @@
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn[wght].woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================= */
+/* تنظیمات پایه (Body) - اصلاح شده برای رفع خط دو رنگ */
+/* ========================================= */
+@layer base {
+  html, body {
+    /* کلاس bg-[#0b0f19] که باعث دو رنگ شدن پایین صفحه میشد حذف شد */
+    @apply text-gray-100 overflow-x-hidden scroll-smooth;
+    
+    /* رنگ پس‌زمینه یکپارچه و دقیقاً هم‌رنگ با layout.js تنظیم شد */
+    background-color: #030712; 
+    direction: rtl;
+    min-height: 100vh;
+  }
+
+  /* این خطوط محافظتی (Safeguard) اضافه شدند تا اگر افزونه یا کامپوننتی 
+     هاله‌ی کاذب به پایین body چسباند، به زور آن را پاک کند */
+  body::after, body::before {
+    display: none !important;
+  }
+}
+
+/* ========================================= */
+/* کامپوننت‌ها و استایل‌های سفارشی سایت */
+/* ========================================= */
+@layer components {
+  /* افکت گلس برای کارت‌ها */
+  .glass-card {
+    @apply backdrop-blur-md border border-gray-800/50 rounded-3xl transition-all duration-300;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-500 ease-out;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  /* ----------------------------------------- */
+  /* کلاس پایه متون داخلی (مقالات، وبلاگ، توضیحات) */
+  /* ----------------------------------------- */
+  .rich-text {
+    @apply text-gray-200 leading-8 text-justify;
+  }
+
+  /* ۱. استایل لینک‌ها */
+  .rich-text a {
+    @apply text-purple-400 no-underline border-b border-dashed border-purple-500/50 transition-all duration-300;
+  }
+  .rich-text a:hover {
+    @apply text-purple-300 border-solid border-purple-400;
+    text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+  }
+
+  /* ۲. استایل خط زیر متن (گسترش به هایلایت شیشه‌ای) */
+  .rich-text u {
+    text-decoration: none;
+    background-image: linear-gradient(to top, rgba(168, 85, 247, 0.4) 100%, transparent 0%);
+    background-size: 100% 2px;
+    background-position: bottom 0 left 0;
+    background-repeat: no-repeat;
+    transition: background-size 0.3s ease, color 0.3s ease;
+  }
+  .rich-text u:hover {
+    background-size: 100% 100%;
+    @apply text-white;
+  }
+
+  /* ۳. استایل هایلایت ساده */
+  .rich-text mark {
+    @apply bg-fuchsia-500/20 text-fuchsia-100 px-1.5 py-0.5 mx-0.5 rounded border border-fuchsia-500/40;
+  }
+
+  /* ۴. استایل نقل‌قول (راست‌چین شده برای زبان فارسی) */
+  .rich-text blockquote {
+    @apply relative pr-5 pl-4 py-4 my-6 border-r-4 border-fuchsia-500 bg-white/5 rounded-l-lg rounded-r-sm italic text-gray-300 shadow-lg shadow-black/20;
+  }
+
+  /* ۵. استایل کلمات تخصصی یا لاتین */
+  .rich-text code {
+    @apply bg-black/40 text-purple-300 px-1.5 py-0.5 mx-0.5 rounded text-sm font-mono border border-white/10;
+  }
+}
+
+/* ========================================= */
+/* سیستم نوتیفیکیشن لحظه‌ای (Madar Toast System) */
+/* ========================================= */
+.madar-toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none; /* اجازه کلیک روی فضای خالی بین توست‌ها */
+}
+
+.madar-toast {
+    position: relative;
+    min-width: 300px;
+    max-width: 400px;
+    background: rgba(18, 18, 24, 0.65); /* پس‌زمینه تیره و نیمه‌شفاف */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: #ffffff;
+    font-family: inherit;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    pointer-events: auto; /* فعال کردن کلیک روی خود توست */
+    transform: translateX(120%);
+    animation: toastSlideIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.madar-toast.closing {
+    animation: toastSlideOut 0.3s ease-in forwards;
+}
+
+/* افکت‌های نئونی بر اساس نوع پیام */
+.madar-toast.success {
+    border-right: 4px solid #00ff88;
+    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.15), inset 0 0 10px rgba(0, 255, 136, 0.05);
+}
+
+.madar-toast.error {
+    border-right: 4px solid #ff0055;
+    box-shadow: 0 4px 20px rgba(255, 0, 85, 0.15), inset 0 0 10px rgba(255, 0, 85, 0.05);
+}
+
+.madar-toast.warning {
+    border-right: 4px solid #ffcc00;
+    box-shadow: 0 4px 20px rgba(255, 204, 0, 0.15), inset 0 0 10px rgba(255, 204, 0, 0.05);
+}
+
+.madar-toast.info {
+    border-right: 4px solid #00d4ff;
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.15), inset 0 0 10px rgba(0, 212, 255, 0.05);
+}
+
+/* محتوای پیام */
+.madar-toast-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+.madar-toast-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+
+.madar-toast-message {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    line-height: 1.5;
+}
+
+/* دکمه بستن */
+.madar-toast-close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 0 0 12px;
+    transition: color 0.2s;
+}
+
+.madar-toast-close:hover {
+    color: #ffffff;
+}
+
+/* نوار پیشرفت (Progress Bar) */
+.madar-toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.5);
+    animation: toastProgress linear forwards;
+}
+
+.madar-toast.success .madar-toast-progress { background: #00ff88; }
+.madar-toast.error .madar-toast-progress { background: #ff0055; }
+.madar-toast.warning .madar-toast-progress { background: #ffcc00; }
+.madar-toast.info .madar-toast-progress { background: #00d4ff; }
+
+/* انیمیشن‌ها */
+@keyframes toastSlideIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toastSlideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(120%); opacity: 0; }
+}
+
+@keyframes toastProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* ========================================= */
+/* اسکرول‌بار اختصاصی و باریک (CSS استاندارد) */
+/* ========================================= */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.5); }
+
+/* ========================================= */
+/* سیستم سرکوب و یکپارچه‌سازی قطعی رنگ‌های SVG */
+/* ========================================= */
+
+/* مجبور کردن کادر اصلی به دریافت رنگ */
+.svg-inherit-color svg {
+  color: inherit !important;
+}
+
+/* ۱. شلیک مستقیم به تمام خطوط و اشکال داخلی با قدرت !important */
+/* این بخش تمام رنگ‌های کلاس‌دارِ مخفی (خروجی ایلوستریتور) را باطل می‌کند */
+.svg-inherit-color svg path,
+.svg-inherit-color svg rect,
+.svg-inherit-color svg circle,
+.svg-inherit-color svg polygon,
+.svg-inherit-color svg ellipse,
+.svg-inherit-color svg polyline,
+.svg-inherit-color svg line {
+  fill: currentColor !important;
+}
+
+/* ۲. سپر محافظتی برای آیکون‌های توخالی (که طراح عمداً نامرئی کرده) */
+.svg-inherit-color svg [fill="none"],
+.svg-inherit-color svg [fill="transparent"],
+.svg-inherit-color svg [style*="fill: none"],
+.svg-inherit-color svg [style*="fill:none"],
+.svg-inherit-color svg [style*="fill: transparent"] {
+  fill: none !important;
+}
+
+/* محافظت مضاعف: اگر خطی فقط حاشیه دارد، داخل آن را پُر نکن */
+.svg-inherit-color svg [stroke]:not([fill]) {
+  fill: none !important;
+}
+
+/* ۳. همگام‌سازی رنگ حاشیه‌ها (تنها در صورتی که آیکون حاشیه داشته باشد) */
+.svg-inherit-color svg [stroke]:not([stroke="none"]):not([stroke="transparent"]),
+.svg-inherit-color svg [style*="stroke:"]:not([style*="stroke: none"]):not([style*="stroke:none"]) {
+  stroke: currentColor !important;
+}

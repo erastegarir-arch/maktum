@@ -1,0 +1,86 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// برای شروع و تست محلی، از دیتابیس فایلی SQLite استفاده می‌کنیم تا بدون نیاز به نصب نرم‌افزار اضافی، سریعاً کار کند.
+// در زمان استقرار روی سرور نهایی، این کلمه را به "postgresql" تغییر خواهیم داد.
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------
+// جدول تنظیمات هسته سایت
+// ------------------------------------------------
+model Setting {
+  id        String   @id @default(cuid())
+  
+  // کلید تنظیم (مثلا: "maintenance_mode" یا "site_logo")
+  key       String   @unique 
+  
+  // مقدار تنظیم (می‌تواند کلمه، عدد یا کدهای طولانی JSON باشد)
+  value     String   
+  
+  // گروه تنظیمات (مثلا: "CONNECTION", "IDENTITY", "DATETIME")
+  // این فیلد کمک می‌کند در پنل ادمین، تنظیمات را دسته‌بندی شده فراخوانی کنیم
+  group     String   
+  
+  // تاریخ آخرین باری که ادمین این تنظیم را تغییر داده است
+  updatedAt DateTime @updatedAt
+}
+
+// جدول مدیریت فایل‌ها و رسانه‌ها
+model Media {
+  id        String   @id @default(cuid())
+  url       String   // آدرس فایل آپلود شده
+  fileType  String   // نوع فایل: IMAGE, VIDEO, AUDIO, DOCUMENT
+  mimeType  String   // فرمت دقیق مثل image/jpeg یا video/mp4
+  size      Int      // حجم فایل به بایت
+  title     String?  // عنوان فایل (برای مدیریت بهتر)
+  altText   String?  // متن جایگزین برای سئو (بسیار مهم)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+// جدول کتابخانه آیکون‌های داینامیک
+model IconLibrary {
+  id        String   @id @default(cuid())
+  name      String   @unique // نام انگلیسی و یکتا (مثال: rocket)
+  label     String?  // نام فارسی برای جستجوی راحت‌تر (مثال: موشک)
+  svgCode   String   // کدهای خام SVG
+  createdAt DateTime @default(now())
+}
+
+// تعریف انواع سرشاخه‌ها (Taxonomy Types)
+enum TaxonomyType {
+  CATEGORY   // دسته‌بندی
+  HASHTAG    // هشتگ
+  CREATOR    // پدیدآورنده
+}
+
+model Taxonomy {
+  id          String       @id @default(cuid())
+  type        TaxonomyType // نوع: دسته‌بندی، هشتگ یا پدیدآورنده
+  
+  name        String       // نام (مثل: معلم)
+  slug        String       // لینک انگلیسی (مثل: teacher) - برای URL
+  
+  preTitle    String?      // روتیتر (باکس بالای عنوان)
+  description String?      // توضیحات
+  imageUrl    String?      // تصویر پروفایل (مخصوص پدیدآورنده - متصل به رسانه)
+
+  // سئو (متا) - در صورتی که خالی باشند، سیستم فرانت‌اند خودکار از نام و توضیحات استفاده می‌کند
+  metaTitle   String?
+  metaDesc    String?
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // این دو خط، قانون طلایی شماست: نام و لینک فقط در نوع خودشان باید یکتا باشند
+  // یعنی "معلم" در دسته بندی می‌تواند باشد، و همزمان "معلم" در هشتگ هم می‌تواند باشد
+  @@unique([type, name])
+  @@unique([type, slug])
+}
