@@ -1,9 +1,10 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 
 export async function getSetting(key) {
+  noStore(); // 🚀 این دستور کَش را نابود می‌کند تا فرانت‌اند همیشه مستقیماً از دیتابیس بخواند
   try {
     const setting = await prisma.setting.findUnique({
       where: { key },
@@ -19,7 +20,7 @@ export async function saveSetting(key, value, group = 'GENERAL') {
   try {
     await prisma.setting.upsert({
       where: { key },
-      update: { value },
+      update: { value, group },
       create: {
         key,
         value,
@@ -27,7 +28,7 @@ export async function saveSetting(key, value, group = 'GENERAL') {
       },
     });
     
-    // بازنشانی کامل کش تمام صفحات و لی‌آوت اصلی سایت
+    // بازنشانی کامل کش تمام صفحات
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {

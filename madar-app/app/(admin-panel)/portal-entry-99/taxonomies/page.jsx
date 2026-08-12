@@ -1,10 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { getTaxonomies, createTaxonomy, deleteTaxonomy, updateTaxonomy } from '@/app/actions/taxonomies';
 import Icon from '@/app/components/Icon';
+import MediaLibraryPage from '@/app/(admin-panel)/portal-entry-99/media/page';
+import toast from 'react-hot-toast';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+const cn = (...inputs) => twMerge(clsx(inputs));
 
 export default function TaxonomiesPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('CATEGORY'); // CATEGORY, HASHTAG, CREATOR
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +27,6 @@ export default function TaxonomiesPage() {
   
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
 
   // استیت‌های جستجو و صفحه‌بندی
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,7 +34,7 @@ export default function TaxonomiesPage() {
   
   // استیت مودال‌ها
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
-  const [deletingItem, setDeletingItem] = useState(null); // آیتمی که قرار است حذف شود
+  const [deletingItem, setDeletingItem] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // تولید خودکار اسلاگ
@@ -45,11 +52,18 @@ export default function TaxonomiesPage() {
 
   const loadData = async () => {
     setLoading(true);
-    const res = await getTaxonomies(activeTab);
-    if (res.success) {
-      setItems(res.data);
+    try {
+      const res = await getTaxonomies(activeTab);
+      if (res.success) {
+        setItems(res.data);
+      } else {
+        toast.error('خطا در دریافت لیست اطلاعات!');
+      }
+    } catch (error) {
+      toast.error('خطا در برقراری ارتباط با دیتابیس!');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const resetForm = () => {
@@ -60,7 +74,6 @@ export default function TaxonomiesPage() {
     setDescription('');
     setImageUrl('');
     setErrorMsg('');
-    setSuccessMsg('');
   };
 
   useEffect(() => {
@@ -74,12 +87,12 @@ export default function TaxonomiesPage() {
     e.preventDefault();
     if (!name.trim()) {
       setErrorMsg('نام آیتم الزامی است.');
+      toast.error('لطفاً نام آیتم را وارد کنید.');
       return;
     }
 
     setSubmitting(true);
     setErrorMsg('');
-    setSuccessMsg('');
 
     const payload = {
       type: activeTab,
@@ -90,21 +103,31 @@ export default function TaxonomiesPage() {
       imageUrl: activeTab === 'CREATOR' ? imageUrl : null
     };
 
-    let res;
-    if (editingId) {
-      res = await updateTaxonomy(editingId, payload);
-    } else {
-      res = await createTaxonomy(payload);
-    }
+    const actionPromise = editingId 
+      ? updateTaxonomy(editingId, payload)
+      : createTaxonomy(payload);
 
-    if (res.success) {
-      setSuccessMsg(editingId ? 'با موفقیت ویرایش شد.' : 'با موفقیت ثبت شد.');
-      resetForm();
-      loadData();
-    } else {
-      setErrorMsg(res.error || 'خطایی رخ داد.');
-    }
-    setSubmitting(false);
+    toast.promise(
+      actionPromise,
+      {
+        loading: editingId ? 'در حال ویرایش آیتم...' : 'در حال ثبت آیتم جدید...',
+        success: (res) => {
+          setSubmitting(false);
+          if (res.success) {
+            resetForm();
+            loadData();
+            router.refresh();
+            return editingId ? 'آیتم با موفقیت ویرایش شد.' : 'آیتم با موفقیت ثبت شد.';
+          }
+          setErrorMsg(res.error || 'خطایی رخ داد.');
+          throw new Error(res.error || 'خطا در ثبت اطلاعات');
+        },
+        error: (err) => {
+          setSubmitting(false);
+          return err?.message || 'خطا در انجام عملیات!';
+        }
+      }
+    );
   };
 
   const handleEdit = (item) => {
@@ -115,21 +138,33 @@ export default function TaxonomiesPage() {
     setDescription(item.description || '');
     setImageUrl(item.imageUrl || '');
     setErrorMsg('');
-    setSuccessMsg('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const confirmDelete = async () => {
     if (!deletingItem) return;
     setIsDeleting(true);
-    const res = await deleteTaxonomy(deletingItem.id);
-    if (res.success) {
-      setDeletingItem(null);
-      loadData();
-    } else {
-      alert(res.error || 'خطا در حذف آیتم');
-    }
-    setIsDeleting(false);
+
+    toast.promise(
+      deleteTaxonomy(deletingItem.id),
+      {
+        loading: 'در حال حذف آیتم...',
+        success: (res) => {
+          setIsDeleting(false);
+          if (res.success) {
+            setDeletingItem(null);
+            loadData();
+            router.refresh();
+            return 'آیتم با موفقیت حذف شد.';
+          }
+          throw new Error(res.error || 'خطا در حذف آیتم');
+        },
+        error: (err) => {
+          setIsDeleting(false);
+          return err?.message || 'خطا در حذف آیتم!';
+        }
+      }
+    );
   };
 
   const getTabTitle = () => {
@@ -167,11 +202,12 @@ export default function TaxonomiesPage() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+              className={cn(
+                "px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer",
                 activeTab === tab.key 
                   ? 'bg-[#06b6d4] text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]' 
                   : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-              }`}
+              )}
             >
               {tab.label}
             </button>
@@ -196,7 +232,7 @@ export default function TaxonomiesPage() {
                 value={name} 
                 onChange={handleNameChange} 
                 placeholder={`مثال: ${activeTab === 'CREATOR' ? 'آنتونی گیدنز' : 'فلسفه'}`} 
-                className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#06b6d4]" 
+                className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#06b6d4] transition-colors" 
               />
             </div>
 
@@ -207,7 +243,7 @@ export default function TaxonomiesPage() {
                 value={slug} 
                 onChange={(e) => setSlug(e.target.value)} 
                 placeholder="تولید خودکار یا دستی..." 
-                className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#06b6d4] dir-ltr text-left" 
+                className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#06b6d4] dir-ltr text-left transition-colors" 
               />
             </div>
 
@@ -218,30 +254,47 @@ export default function TaxonomiesPage() {
                 value={preTitle} 
                 onChange={(e) => setPreTitle(e.target.value)} 
                 placeholder="مثال: پرونده ویژه / استاد برجسته" 
-                className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#06b6d4]" 
+                className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#06b6d4] transition-colors" 
               />
             </div>
 
-            {/* تصویر پروفایل برای پدیدآورندگان */}
+            {/* تصویر پروفایل متصل به کتابخانه رسانه برای پدیدآورندگان */}
             {activeTab === 'CREATOR' && (
-              <div className="space-y-1">
-                <label className="text-xs text-gray-300">تصویر پروفایل</label>
-                <div className="flex gap-2">
-                  <input 
-                    type="text" 
-                    value={imageUrl} 
-                    onChange={(e) => setImageUrl(e.target.value)} 
-                    placeholder="لینک تصویر..." 
-                    className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#06b6d4] dir-ltr text-left" 
-                  />
+              <div className="space-y-2">
+                <label className="text-xs text-gray-300">تصویر پروفایل پدیدآورنده</label>
+                {imageUrl ? (
+                  <div className="flex items-center gap-3 p-3 bg-[#080c16] border border-white/10 rounded-xl">
+                    <img src={imageUrl} alt="تصویر پروفایل" className="w-12 h-12 object-cover rounded-lg border border-white/10 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-emerald-400 font-bold truncate">تصویر با موفقیت انتخاب شد</p>
+                      <p className="text-[10px] text-gray-400 truncate dir-ltr text-right">{imageUrl}</p>
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={() => setIsMediaModalOpen(true)}
+                      className="px-3 py-1.5 bg-white/10 hover:bg-[#06b6d4] text-white text-xs rounded-lg transition-colors cursor-pointer shrink-0"
+                    >
+                      تغییر
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => setImageUrl('')}
+                      className="p-1.5 text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer shrink-0"
+                      title="حذف تصویر"
+                    >
+                      <Icon name="close" className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
                   <button 
                     type="button"
                     onClick={() => setIsMediaModalOpen(true)}
-                    className="bg-white/10 hover:bg-[#06b6d4] text-white px-3 rounded-xl transition-colors cursor-pointer text-xs shrink-0"
+                    className="w-full py-4 bg-[#080c16] border border-dashed border-white/20 hover:border-[#06b6d4] text-gray-300 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    رسانه
+                    <Icon name="image" className="w-5 h-5 text-[#06b6d4]" />
+                    انتخاب تصویر از کتابخانه رسانه
                   </button>
-                </div>
+                )}
               </div>
             )}
 
@@ -252,14 +305,13 @@ export default function TaxonomiesPage() {
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)} 
                 placeholder="توضیحات تکمیلی..." 
-                className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#06b6d4]" 
+                className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#06b6d4] transition-colors" 
               />
             </div>
 
-            {errorMsg && <p className="text-xs text-rose-500 bg-rose-500/10 p-2.5 rounded-lg">{errorMsg}</p>}
-            {successMsg && <p className="text-xs text-emerald-500 bg-emerald-500/10 p-2.5 rounded-lg">{successMsg}</p>}
+            {errorMsg && <p className="text-xs text-rose-500 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">{errorMsg}</p>}
 
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2 mt-2 border-t border-white/10 pt-3">
               <button 
                 type="submit" 
                 disabled={submitting} 
@@ -305,9 +357,9 @@ export default function TaxonomiesPage() {
           </div>
 
           {loading ? (
-            <div className="text-center py-20 text-gray-400 text-sm">در حال دریافت اطلاعات...</div>
+            <div className="text-center py-20 text-gray-400 text-sm font-sans">در حال دریافت اطلاعات...</div>
           ) : filteredItems.length === 0 ? (
-            <div className="text-center py-20 bg-white/5 border border-white/5 rounded-xl text-gray-500 text-sm">
+            <div className="text-center py-20 bg-white/5 border border-white/5 rounded-xl text-gray-500 text-sm font-sans">
               موردی یافت نشد.
             </div>
           ) : (
@@ -341,7 +393,6 @@ export default function TaxonomiesPage() {
 
                   {/* دکمه‌های عملیات (ویرایش و حذف) */}
                   <div className="flex items-center gap-2">
-                    {/* دکمه ویرایش */}
                     <button 
                       onClick={() => handleEdit(item)}
                       className="p-2.5 text-[#06b6d4] hover:bg-[#06b6d4]/10 border border-transparent hover:border-[#06b6d4]/30 rounded-xl transition-all cursor-pointer flex items-center gap-1 text-xs"
@@ -352,7 +403,6 @@ export default function TaxonomiesPage() {
                       </svg>
                     </button>
 
-                    {/* دکمه حذف */}
                     <button 
                       onClick={() => setDeletingItem(item)}
                       className="p-2.5 text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/30 rounded-xl transition-all cursor-pointer flex items-center gap-1 text-xs"
@@ -382,7 +432,7 @@ export default function TaxonomiesPage() {
 
       </div>
 
-      {/* مودال تأیید حذف (اختصاصی قالب مدار) */}
+      {/* مودال تأیید حذف */}
       {deletingItem && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-[#080c16]/80 backdrop-blur-md p-4 animate-[fadeIn_0.2s_ease-out]">
           <div className="bg-[#0b0f19] border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] relative overflow-hidden text-right space-y-5">
@@ -421,33 +471,24 @@ export default function TaxonomiesPage() {
         </div>
       )}
 
-      {/* مودال موقت انتخاب رسانه */}
+      {/* مودال کتابخانه رسانه برای انتخاب تصویر پدیدآورنده */}
       {isMediaModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#080c16]/80 backdrop-blur-md p-4">
-          <div className="bg-[#0b0f19] border border-white/10 rounded-2xl w-full max-w-xl p-6 shadow-2xl relative text-right">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#080c16]/80 backdrop-blur-md">
+          <div className="bg-[#0b0f19] border border-white/10 rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto p-6 relative shadow-2xl">
             <button 
+              type="button"
               onClick={() => setIsMediaModalOpen(false)}
-              className="absolute top-4 left-4 p-2 text-gray-400 hover:text-white bg-white/5 rounded-full"
+              className="absolute top-4 left-4 p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full z-10 transition-colors cursor-pointer"
             >
               <Icon name="close" className="w-4 h-4" />
             </button>
-            <h3 className="text-lg font-bold text-white mb-4">انتخاب از کتابخانه رسانه</h3>
-            <p className="text-sm text-gray-400 mb-6">آدرس تصویر مورد نظر را وارد کنید:</p>
-            
-            <input 
-              type="text" 
-              value={imageUrl} 
-              onChange={(e) => setImageUrl(e.target.value)} 
-              placeholder="https://..." 
-              className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#06b6d4] dir-ltr text-left mb-4" 
+            <MediaLibraryPage
+              isPickerMode={true}
+              onSelectMedia={(media) => {
+                setImageUrl(media.url);
+                setIsMediaModalOpen(false);
+              }}
             />
-            
-            <button 
-              onClick={() => setIsMediaModalOpen(false)}
-              className="w-full py-3 rounded-xl bg-[#06b6d4] text-white font-bold text-sm cursor-pointer"
-            >
-              تایید و بستن
-            </button>
           </div>
         </div>
       )}

@@ -3,6 +3,11 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { getMedia, updateMedia, deleteMedia, renameMediaFile } from '@/app/actions/media';
 import Icon from '@/app/components/Icon';
+import toast from 'react-hot-toast';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+const cn = (...inputs) => twMerge(clsx(inputs));
 
 // ==========================================
 // توابع کمکی مشترک
@@ -19,7 +24,6 @@ const formatTime = (seconds) => {
   return toPersianDigits(`${m}:${s < 10 ? '0' : ''}${s}`);
 };
 
-// کامپوننت تول‌تیپ گرافیکی اختصاصی
 function Tooltip({ text, children }) {
   if (!text) return children;
   return (
@@ -56,9 +60,7 @@ function CustomAudioPlayer({ src, title }) {
     setIsPlaying(!isPlaying);
   };
 
-  const skip = (time) => {
-    audioRef.current.currentTime += time;
-  };
+  const skip = (time) => { audioRef.current.currentTime += time; };
 
   const handleTimeUpdate = () => {
     const current = audioRef.current.currentTime;
@@ -80,16 +82,14 @@ function CustomAudioPlayer({ src, title }) {
     <div className="w-full max-w-lg p-6 rounded-3xl bg-[#0b0f19] border border-white/5 shadow-2xl flex flex-col gap-6 font-sans">
       <audio ref={audioRef} src={src} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleTimeUpdate} onEnded={() => setIsPlaying(false)} loop={isLooping} className="hidden" />
 
-      {/* عنوان فایل به همراه نقطه چشمک‌زن */}
       <div className="flex items-center justify-center gap-2 px-4">
         <span className="relative flex h-2.5 w-2.5 shrink-0">
           {isPlaying && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#06b6d4] opacity-75"></span>}
-          <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isPlaying ? 'bg-[#06b6d4]' : 'bg-gray-600'}`}></span>
+          <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", isPlaying ? 'bg-[#06b6d4]' : 'bg-gray-600')}></span>
         </span>
         <h4 className="text-white font-bold truncate text-sm dir-rtl">{title || 'فایل صوتی'}</h4>
       </div>
 
-      {/* گرافیک امواج صوتی */}
       <div className="relative w-full h-16 flex items-center justify-between gap-[2px]" dir="ltr">
         {waveformBars.map((height, i) => {
           const fillPercentage = (i / waveformBars.length) * 100;
@@ -97,7 +97,7 @@ function CustomAudioPlayer({ src, title }) {
           return (
             <div 
               key={i} 
-              className={`flex-1 rounded-full transition-colors duration-150 ${isFilled ? 'bg-[#06b6d4]' : 'bg-gray-700'}`} 
+              className={cn("flex-1 rounded-full transition-colors duration-150", isFilled ? 'bg-[#06b6d4]' : 'bg-gray-700')} 
               style={{ height: `${height}%` }}
             ></div>
           );
@@ -105,19 +105,15 @@ function CustomAudioPlayer({ src, title }) {
         <input type="range" min="0" max="100" value={progress} onChange={handleSeek} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
       </div>
 
-      {/* زمان‌ها */}
       <div className="flex justify-between items-center text-xs text-gray-400" dir="ltr">
         <span>{formatTime(currentTime)}</span>
         <span>{formatTime(duration)}</span>
       </div>
 
-      {/* کنترلرها با تول‌تیپ‌های گرافیکی و آیکون‌های اصلاح‌شده */}
       <div className="relative flex items-center justify-center w-full mt-2" dir="ltr">
-        
         <div className="flex items-center gap-6">
           <Tooltip text="۱۵ ثانیه به عقب">
-            <button onClick={() => skip(-15)} className="text-gray-400 hover:text-white transition-colors p-1">
-              {/* آیکون عقب رفتن (اشاره به چپ) */}
+            <button onClick={() => skip(-15)} className="text-gray-400 hover:text-white transition-colors p-1 cursor-pointer">
               <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.25 15l-3-3m0 0l3-3m-3 3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -125,16 +121,15 @@ function CustomAudioPlayer({ src, title }) {
           </Tooltip>
 
           <Tooltip text={isPlaying ? 'توقف' : 'پخش'}>
-            <button onClick={togglePlay} className="w-16 h-16 flex items-center justify-center bg-[#06b6d4] hover:bg-[#0891b2] rounded-full text-white shadow-lg shadow-[#06b6d4]/20 hover:scale-105 transition-transform">
-              <svg className={`w-7 h-7 ${!isPlaying ? 'ml-1' : ''}`} fill="currentColor" viewBox="0 0 24 24">
+            <button onClick={togglePlay} className="w-16 h-16 flex items-center justify-center bg-[#06b6d4] hover:bg-[#0891b2] rounded-full text-white shadow-lg shadow-[#06b6d4]/20 hover:scale-105 transition-transform cursor-pointer">
+              <svg className={cn("w-7 h-7", !isPlaying ? 'ml-1' : '')} fill="currentColor" viewBox="0 0 24 24">
                 {isPlaying ? <path d="M6 4h4v16H6zm8 0h4v16h-4z" /> : <path d="M8 5v14l11-7z" />}
               </svg>
             </button>
           </Tooltip>
 
           <Tooltip text="۱۵ ثانیه به جلو">
-            <button onClick={() => skip(15)} className="text-gray-400 hover:text-white transition-colors p-1">
-              {/* آیکون جلو رفتن (اشاره به راست) */}
+            <button onClick={() => skip(15)} className="text-gray-400 hover:text-white transition-colors p-1 cursor-pointer">
               <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -144,7 +139,7 @@ function CustomAudioPlayer({ src, title }) {
 
         <div className="absolute right-0">
           <Tooltip text={isLooping ? 'تکرار: فعال' : 'تکرار: غیرفعال'}>
-            <button onClick={() => setIsLooping(!isLooping)} className={`p-2 transition-colors ${isLooping ? 'text-[#06b6d4]' : 'text-gray-500 hover:text-gray-300'}`}>
+            <button onClick={() => setIsLooping(!isLooping)} className={cn("p-2 transition-colors cursor-pointer", isLooping ? 'text-[#06b6d4]' : 'text-gray-500 hover:text-gray-300')}>
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
               </svg>
@@ -198,12 +193,10 @@ function CustomVideoPlayer({ src, mimeType, title }) {
 
   return (
     <div ref={containerRef} className="relative group w-full h-full flex items-center justify-center bg-black rounded-xl overflow-hidden shadow-[0_0_40px_rgba(6,182,212,0.15)] max-h-[75vh] font-sans">
-      
-      {/* هدر بالای ویدیو (عنوان و نقطه چشمک‌زن) */}
       <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-20">
         <span className="relative flex h-2.5 w-2.5 shrink-0">
           {isPlaying && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#06b6d4] opacity-75"></span>}
-          <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isPlaying ? 'bg-[#06b6d4]' : 'bg-gray-500'}`}></span>
+          <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", isPlaying ? 'bg-[#06b6d4]' : 'bg-gray-500')}></span>
         </span>
         <h4 className="text-white text-xs font-bold truncate dir-rtl">{title || 'ویدیو'}</h4>
       </div>
@@ -215,9 +208,7 @@ function CustomVideoPlayer({ src, mimeType, title }) {
         <source src={`${src}#t=0.1`} type={mimeType} />
       </video>
 
-      {/* کنترلرهای ویدیویی */}
       <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-3 z-20">
-        
         <div className="w-full flex items-center gap-3 px-2" dir="ltr">
           <input 
             type="range" min="0" max="100" value={progress} onChange={handleSeek}
@@ -228,16 +219,14 @@ function CustomVideoPlayer({ src, mimeType, title }) {
 
         <div className="flex items-center justify-between px-2" dir="ltr">
           <div className="flex items-center gap-4">
-            
             <Tooltip text={isPlaying ? 'توقف' : 'پخش'}>
-              <button onClick={togglePlay} className="text-white hover:text-[#06b6d4] transition-colors p-1">
+              <button onClick={togglePlay} className="text-white hover:text-[#06b6d4] transition-colors p-1 cursor-pointer">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">{isPlaying ? <path d="M6 4h4v16H6zm8 0h4v16h-4z" /> : <path d="M8 5v14l11-7z" strokeWidth={0} />}</svg>
               </button>
             </Tooltip>
 
             <Tooltip text="۱۵ ثانیه به عقب">
-              <button onClick={() => skip(-15)} className="text-gray-300 hover:text-white p-1">
-                {/* آیکون عقب رفتن (اشاره به چپ) */}
+              <button onClick={() => skip(-15)} className="text-gray-300 hover:text-white p-1 cursor-pointer">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.25 15l-3-3m0 0l3-3m-3 3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -245,8 +234,7 @@ function CustomVideoPlayer({ src, mimeType, title }) {
             </Tooltip>
 
             <Tooltip text="۱۵ ثانیه به جلو">
-              <button onClick={() => skip(15)} className="text-gray-300 hover:text-white p-1">
-                {/* آیکون جلو رفتن (اشاره به راست) */}
+              <button onClick={() => skip(15)} className="text-gray-300 hover:text-white p-1 cursor-pointer">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -259,7 +247,7 @@ function CustomVideoPlayer({ src, mimeType, title }) {
           </div>
 
           <Tooltip text="تمام‌صفحه">
-            <button onClick={toggleFullScreen} className="text-gray-300 hover:text-white transition-colors p-1">
+            <button onClick={toggleFullScreen} className="text-gray-300 hover:text-white transition-colors p-1 cursor-pointer">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
               </svg>
@@ -270,66 +258,150 @@ function CustomVideoPlayer({ src, mimeType, title }) {
     </div>
   );
 }
-// ==========================================
 
-export default function MediaLibraryPage() {
+// ==========================================
+// کامپوننت اصلی مدیریت و انتخابگر رسانه
+// ==========================================
+export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }) {
+  // ۱. تمام استیت‌ها و هوک‌ها در بالاترین سطح کامپوننت تعریف می‌شوند
+  const [isMounted, setIsMounted] = useState(false);
   const [mediaList, setMediaList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('ALL');
-  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
   const [visibleCount, setVisibleCount] = useState(24);
-  
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editAlt, setEditAlt] = useState('');
   const [editFileName, setEditFileName] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
-
+  const [copied, setCopied] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, type: null, payload: null });
 
   const fileInputRef = useRef(null);
 
+  // ۲. تعریف همه‌ی useEffectها و useMemoها قبل از هرگونه Early Return
+  useEffect(() => {
+    setIsMounted(true);
+    loadMedia();
+  }, []);
+
+  useEffect(() => { setVisibleCount(24); }, [activeTab, searchTerm]);
+
+  // فیلتر بر اساس تب و جستجو با useMemo
+  const filteredMedia = useMemo(() => {
+    return mediaList.filter(m => {
+      const matchesTab = activeTab === 'ALL' || m.fileType === activeTab;
+      const term = searchTerm.trim().toLowerCase();
+      const matchesSearch = !term || 
+        (m.title && m.title.toLowerCase().includes(term)) ||
+        (m.url && m.url.toLowerCase().includes(term)) ||
+        (m.altText && m.altText.toLowerCase().includes(term));
+      return matchesTab && matchesSearch;
+    });
+  }, [mediaList, activeTab, searchTerm]);
+
   const loadMedia = async () => {
     setLoading(true);
-    const data = await getMedia();
-    setMediaList(data);
-    setLoading(false);
+    try {
+      const data = await getMedia();
+      setMediaList(data || []);
+    } catch (error) {
+      toast.error('خطا در دریافت رسانه‌ها از سرور');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { loadMedia(); }, []);
-  useEffect(() => { setVisibleCount(24); }, [activeTab]);
+  // ۳. اکنون پس از تعریف تمام هوک‌ها، می‌توانیم شرط rander را بررسی کنیم
+  if (!isMounted) {
+    return <div className="max-w-7xl mx-auto p-6 font-sans text-right text-gray-400">در حال بارگذاری رسانه‌ها...</div>;
+  }
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // ۴. آپلود چندتایی فایل
+  const handleFilesUpload = async (files) => {
+    if (!files || files.length === 0) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
+    let hasError = false;
+    const toastId = toast.loading('در حال آپلود فایل‌ها...');
 
-    try {
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.success) await loadMedia();
-      else alert(data.error || 'خطا در آپلود فایل');
-    } catch (error) {
-      alert('خطا در برقراری ارتباط با سرور هنگام آپلود');
+    for (let i = 0; i < files.length; i++) {
+      const formData = new FormData();
+      formData.append('file', files[i]);
+
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!data.success) hasError = true;
+      } catch (error) {
+        hasError = true;
+      }
     }
+
+    if (hasError) {
+      toast.error('برخی فایل‌ها آپلود نشدند یا با خطا مواجه شدند.', { id: toastId });
+    } else {
+      toast.success('فایل‌ها با موفقیت آپلود شدند.', { id: toastId });
+    }
+    
+    await loadMedia();
 
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  // ۵. رویدادهای کشیدن و رها کردن (Drag & Drop)
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFilesUpload(e.dataTransfer.files);
+    }
+  };
+
+  const handleCopyUrl = () => {
+    if (!selectedMedia?.url) return;
+    navigator.clipboard.writeText(selectedMedia.url);
+    setCopied(true);
+    toast.success('لینک فایل کپی شد!');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleUpdateMedia = async () => {
     setSaveStatus('در حال ذخیره...');
-    const res = await updateMedia(selectedMedia.id, { title: editTitle, altText: editAlt });
-    if (res.success) {
-      setSaveStatus('ذخیره شد!');
-      setMediaList(prev => prev.map(m => m.id === selectedMedia.id ? { ...m, title: editTitle, altText: editAlt } : m));
-      setSelectedMedia(prev => ({ ...prev, title: editTitle, altText: editAlt }));
-      setTimeout(() => setSaveStatus(''), 2000);
-    } else setSaveStatus('خطا در ذخیره!');
+    toast.promise(
+      updateMedia(selectedMedia.id, { title: editTitle, altText: editAlt }),
+      {
+        loading: 'در حال ذخیره تغییرات...',
+        success: (res) => {
+          if (res.success) {
+            setSaveStatus('ذخیره شد!');
+            setMediaList(prev => prev.map(m => m.id === selectedMedia.id ? { ...m, title: editTitle, altText: editAlt } : m));
+            setSelectedMedia(prev => ({ ...prev, title: editTitle, altText: editAlt }));
+            setTimeout(() => setSaveStatus(''), 2000);
+            return 'تغییرات با موفقیت ذخیره شد.';
+          }
+          throw new Error('خطا');
+        },
+        error: () => {
+          setSaveStatus('خطا در ذخیره!');
+          return 'خطا در ذخیره تغییرات!';
+        }
+      }
+    );
   };
   
   const requestRename = () => {
@@ -340,19 +412,30 @@ export default function MediaLibraryPage() {
   const executeRename = async () => {
     setConfirmDialog({ isOpen: false, type: null, payload: null });
     setSaveStatus('در حال تغییر نام...');
-    const res = await renameMediaFile(selectedMedia.id, editFileName);
     
-    if (res.success) {
-      setSaveStatus('نام تغییر کرد!');
-      const updatedMedia = { ...selectedMedia, url: res.newUrl, title: res.newTitle };
-      setSelectedMedia(updatedMedia);
-      setEditFileName(res.newTitle);
-      setEditTitle(res.newTitle);
-      setMediaList(prev => prev.map(m => m.id === selectedMedia.id ? updatedMedia : m));
-      setTimeout(() => setSaveStatus(''), 3000);
-    } else {
-      setSaveStatus('خطا در تغییر نام!');
-    }
+    toast.promise(
+      renameMediaFile(selectedMedia.id, editFileName),
+      {
+        loading: 'در حال تغییر نام...',
+        success: (res) => {
+          if (res.success) {
+            setSaveStatus('نام تغییر کرد!');
+            const updatedMedia = { ...selectedMedia, url: res.newUrl, title: res.newTitle };
+            setSelectedMedia(updatedMedia);
+            setEditFileName(res.newTitle);
+            setEditTitle(res.newTitle);
+            setMediaList(prev => prev.map(m => m.id === selectedMedia.id ? updatedMedia : m));
+            setTimeout(() => setSaveStatus(''), 3000);
+            return 'نام فایل تغییر یافت.';
+          }
+          throw new Error('خطا');
+        },
+        error: () => {
+          setSaveStatus('خطا در تغییر نام!');
+          return 'خطا در تغییر نام فایل!';
+        }
+      }
+    );
   };
 
   const requestDelete = (id) => {
@@ -363,11 +446,21 @@ export default function MediaLibraryPage() {
     const id = confirmDialog.payload;
     setConfirmDialog({ isOpen: false, type: null, payload: null });
     
-    const res = await deleteMedia(id);
-    if (res.success) {
-      setSelectedMedia(null);
-      setMediaList(prev => prev.filter(m => m.id !== id));
-    }
+    toast.promise(
+      deleteMedia(id),
+      {
+        loading: 'در حال حذف رسانه...',
+        success: (res) => {
+          if (res.success) {
+            setSelectedMedia(null);
+            setMediaList(prev => prev.filter(m => m.id !== id));
+            return 'رسانه با موفقیت حذف شد.';
+          }
+          throw new Error('خطا');
+        },
+        error: 'خطا در حذف رسانه!'
+      }
+    );
   };
 
   const openEditModal = (media) => {
@@ -376,9 +469,9 @@ export default function MediaLibraryPage() {
     setEditAlt(media.altText || '');
     setEditFileName(media.title || media.url.split('/').pop());
     setSaveStatus('');
+    setCopied(false);
   };
 
-  const filteredMedia = activeTab === 'ALL' ? mediaList : mediaList.filter(m => m.fileType === activeTab);
   const paginatedMedia = filteredMedia.slice(0, visibleCount);
 
   const formatBytes = (bytes) => {
@@ -399,9 +492,31 @@ export default function MediaLibraryPage() {
     return badges[type] || badges['DOCUMENT'];
   };
 
+  const TAB_ITEMS = [
+    { label: 'همه', val: 'ALL' },
+    { label: 'تصاویر', val: 'IMAGE' },
+    { label: 'ویدیوها', val: 'VIDEO' },
+    { label: 'صوت‌ها', val: 'AUDIO' },
+    { label: 'اسناد', val: 'DOCUMENT' },
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-10 relative">
+    <div 
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className="max-w-7xl mx-auto space-y-6 pb-10 relative text-right font-sans"
+    >
       
+      {/* اورلی رها کردن فایل (Drag & Drop Zone) */}
+      {isDragging && (
+        <div className="fixed inset-0 z-[300] bg-[#06b6d4]/20 backdrop-blur-md border-4 border-dashed border-[#06b6d4] rounded-3xl flex flex-col items-center justify-center gap-4 m-4 pointer-events-none animate-pulse">
+          <Icon name="upload" className="w-16 h-16 text-[#06b6d4]" />
+          <p className="text-xl font-bold text-white">فایل‌ها را برای آپلود سریع رها کنید</p>
+        </div>
+      )}
+
+      {/* هدر صفحه */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
         <div>
           <h1 className="text-2xl font-bold text-white mb-2">کتابخانه رسانه</h1>
@@ -409,40 +524,57 @@ export default function MediaLibraryPage() {
         </div>
         
         <div>
-          <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={(e) => handleFilesUpload(e.target.files)} 
+            multiple 
+            className="hidden" 
+          />
           <button 
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] disabled:opacity-50 cursor-pointer"
           >
             <Icon name="upload" className="w-5 h-5" />
-            {uploading ? 'در حال آپلود...' : 'افزودن رسانه جدید'}
+            {uploading ? 'در حال آپلود فایل‌ها...' : 'افزودن رسانه جدید'}
           </button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {[
-          { label: 'همه', val: 'ALL' },
-          { label: 'تصاویر', val: 'IMAGE' },
-          { label: 'ویدیوها', val: 'VIDEO' },
-          { label: 'صوت‌ها', val: 'AUDIO' },
-          { label: 'اسناد', val: 'DOCUMENT' },
-        ].map(tab => (
-          <button
-            key={tab.val}
-            onClick={() => setActiveTab(tab.val)}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
-              activeTab === tab.val 
-                ? 'bg-[#06b6d4] text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]' 
-                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* تب‌ها و باکس سرچ */}
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+        <div className="flex flex-wrap gap-2">
+          {TAB_ITEMS.map(tab => (
+            <button
+              key={tab.val}
+              onClick={() => setActiveTab(tab.val)}
+              className={cn(
+                "px-5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer border",
+                activeTab === tab.val 
+                  ? "bg-[#06b6d4] text-white border-transparent shadow-[0_0_15px_rgba(6,182,212,0.4)]" 
+                  : "bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 hover:text-white"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* اینپوت سرچ */}
+        <div className="relative w-full sm:w-72">
+          <Icon name="search" className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
+          <input 
+            type="text" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="جستجوی نام یا آدرس..." 
+            className="w-full bg-[#080c16] border border-white/10 rounded-full py-2 pr-10 pl-4 text-sm text-white outline-none focus:border-[#06b6d4] transition-colors"
+          />
+        </div>
       </div>
 
+      {/* گرید نمایش فایل‌ها */}
       {loading ? (
         <div className="text-center py-20 text-gray-400">در حال دریافت فایل‌ها از سرور...</div>
       ) : filteredMedia.length === 0 ? (
@@ -502,6 +634,7 @@ export default function MediaLibraryPage() {
         </>
       )}
 
+      {/* مودال جزئیات رسانه */}
       {selectedMedia && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-[#030712]/90 backdrop-blur-md" onClick={() => setSelectedMedia(null)}></div>
@@ -509,7 +642,6 @@ export default function MediaLibraryPage() {
           <div className="relative w-full max-w-5xl bg-[#0b0f19] border border-white/10 rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden max-h-[90vh]">
             
             <div className="w-full md:w-3/5 bg-black/50 flex flex-col items-center justify-center p-6 border-b md:border-b-0 md:border-l border-white/10 relative overflow-hidden">
-              
               {selectedMedia.fileType === 'IMAGE' && (
                 <img src={selectedMedia.url} alt={selectedMedia.altText} className="max-w-full max-h-[75vh] object-contain rounded-xl drop-shadow-2xl" />
               )}
@@ -552,41 +684,63 @@ export default function MediaLibraryPage() {
                   </button>
                 </div>
 
-                <div className="space-y-1 text-xs text-gray-300 bg-black/30 p-4 rounded-xl border border-white/5 dir-ltr text-left">
-                  <p><strong className="text-gray-500">URL:</strong> {selectedMedia.url}</p>
-                  <p><strong className="text-gray-500">Type:</strong> {selectedMedia.mimeType}</p>
-                  <p><strong className="text-gray-500">Size:</strong> {formatBytes(selectedMedia.size)}</p>
+                {/* آدرس فایل همراه با دکمه کپی سریع لینک */}
+                <div className="space-y-2 bg-black/30 p-4 rounded-xl border border-white/5 dir-ltr text-left">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-gray-300 truncate"><strong className="text-gray-500">URL:</strong> {selectedMedia.url}</p>
+                    <button 
+                      onClick={handleCopyUrl}
+                      className="px-3 py-1 bg-white/10 hover:bg-[#06b6d4] text-white rounded-lg transition-colors font-sans text-xs cursor-pointer shrink-0"
+                    >
+                      {copied ? 'کپی شد!' : 'کپی لینک'}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-300"><strong className="text-gray-500">Type:</strong> {selectedMedia.mimeType}</p>
+                  <p className="text-xs text-gray-300"><strong className="text-gray-500">Size:</strong> {formatBytes(selectedMedia.size)}</p>
                 </div>
 
                 <div className="space-y-2 p-4 bg-[#06b6d4]/5 rounded-xl border border-[#06b6d4]/20">
                   <label className="block text-sm font-bold text-[#06b6d4]">تغییر نام اصلی فایل</label>
                   <p className="text-[10px] text-gray-400 leading-tight">توجه: تغییر نام باعث تغییر لینک می‌شود.</p>
                   <div className="flex gap-2 mt-2">
-                    <input type="text" value={editFileName} onChange={(e) => setEditFileName(e.target.value)} className="flex-1 bg-[#080c16] border border-[#06b6d4]/30 rounded-lg p-2 text-sm text-white focus:border-[#06b6d4] dir-ltr font-sans" />
+                    <input type="text" value={editFileName} onChange={(e) => setEditFileName(e.target.value)} className="flex-1 bg-[#080c16] border border-[#06b6d4]/30 rounded-lg p-2 text-sm text-white focus:border-[#06b6d4] dir-ltr font-sans outline-none" />
                     <button onClick={requestRename} className="px-3 bg-[#06b6d4]/20 hover:bg-[#06b6d4]/40 text-[#06b6d4] rounded-lg text-xs font-bold transition-colors cursor-pointer">اعمال نام</button>
                   </div>
                 </div>
 
-                {/* عنوان قابل نمایش در پلیر */}
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-300">عنوان نمایش در پلیر / عنوان فایل</label>
-                  <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full bg-[#080c16] border border-white/10 rounded-lg p-2 text-sm text-white focus:border-[#06b6d4] font-sans" placeholder="عنوان دلخواه برای نمایش در پلیر..." />
+                  <label className="block text-sm font-medium text-gray-300">عنوان فایل</label>
+                  <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full bg-[#080c16] border border-white/10 rounded-lg p-2 text-sm text-white focus:border-[#06b6d4] font-sans outline-none" placeholder="عنوان دلخواه..." />
                 </div>
 
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-300">
                     متن جایگزین (Alt Text) <span className="text-xs text-rose-400">*سئو</span>
                   </label>
-                  <textarea rows="3" value={editAlt} onChange={(e) => setEditAlt(e.target.value)} className="w-full bg-[#080c16] border border-white/10 rounded-lg p-2 text-sm text-white focus:border-[#06b6d4] font-sans" placeholder="توضیح تصویر/فایل..."></textarea>
+                  <textarea rows="3" value={editAlt} onChange={(e) => setEditAlt(e.target.value)} className="w-full bg-[#080c16] border border-white/10 rounded-lg p-2 text-sm text-white focus:border-[#06b6d4] font-sans outline-none" placeholder="توضیح تصویر/فایل..."></textarea>
                 </div>
               </div>
 
+              {/* فوتر مودال همراه با دکمه انتخابگر برای استفاده مجدد */}
               <div className="p-6 bg-black/20 border-t border-white/10 flex items-center justify-between font-sans">
                 <button onClick={() => requestDelete(selectedMedia.id)} className="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors cursor-pointer">
                   حذف دائم
                 </button>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold text-[#10b981]">{saveStatus}</span>
+                  
+                  {onSelectMedia && (
+                    <button 
+                      onClick={() => {
+                        onSelectMedia(selectedMedia);
+                        setSelectedMedia(null);
+                      }} 
+                      className="px-6 py-2.5 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] cursor-pointer"
+                    >
+                      انتخاب این رسانه
+                    </button>
+                  )}
+
                   <button onClick={handleUpdateMedia} className="px-8 py-2.5 bg-gradient-to-r from-[#06b6d4] to-[#3b82f6] hover:scale-105 text-white rounded-xl text-sm font-bold transition-transform shadow-[0_0_20px_rgba(6,182,212,0.3)] cursor-pointer">
                     ذخیره
                   </button>
@@ -598,13 +752,14 @@ export default function MediaLibraryPage() {
         </div>
       )}
 
+      {/* مودال تأیید حذف یا تغییر نام */}
       {confirmDialog.isOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 font-sans">
           <div className="absolute inset-0 bg-[#030712]/90 backdrop-blur-sm" onClick={() => setConfirmDialog({ isOpen: false, type: null, payload: null })}></div>
           
           <div className="relative bg-[#0b0f19] border border-white/10 rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${confirmDialog.type === 'DELETE' ? 'bg-rose-500/20 text-rose-500' : 'bg-amber-500/20 text-amber-500'}`}>
+              <div className={cn("w-12 h-12 rounded-full flex items-center justify-center", confirmDialog.type === 'DELETE' ? 'bg-rose-500/20 text-rose-500' : 'bg-amber-500/20 text-amber-500')}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
@@ -626,7 +781,7 @@ export default function MediaLibraryPage() {
               </button>
               <button 
                 onClick={confirmDialog.type === 'DELETE' ? executeDelete : executeRename} 
-                className={`px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all shadow-lg hover:scale-105 cursor-pointer ${confirmDialog.type === 'DELETE' ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-500/20' : 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/20'}`}
+                className={cn("px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all shadow-lg hover:scale-105 cursor-pointer", confirmDialog.type === 'DELETE' ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-500/20' : 'bg-amber-600 hover:bg-amber-500 shadow-amber-500/20')}
               >
                 بله، مطمئنم
               </button>

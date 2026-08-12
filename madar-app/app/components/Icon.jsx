@@ -1,263 +1,108 @@
 export default function Icon({ name, className = "w-6 h-6" }) {
-  // این شیء (Object)، گاوصندوق آیکون‌های شماست!
+  if (!name) return null;
+
+  const camelCaseName = name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+  const kebabCaseName = name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+
   const icons = {
     search: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" className={className}>
         <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" />
       </svg>
     ),
-    
     user: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" className={className}>
         <path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z" />
       </svg>
     ),
-    
     menu: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" className={className}>
         <path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z" />
       </svg>
     ),
-    
-    handHeart: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" className={className}>
-        <path d="M240,104c0,34.42-35.31,63.15-56.12,77.72A15.86,15.86,0,0,1,176.4,184c-.4,0-.81,0-1.21-.05L127,178.69l-13.81,10.74A16,16,0,0,1,88,177.34V152H72a32,32,0,0,1,0-64h8v-8a48,48,0,0,1,48-48h55a32,32,0,0,1,32,32v6.64A47.53,47.53,0,0,1,240,104Zm-16,0a31.62,31.62,0,0,0-13.3-25.75,8,8,0,0,1-3.37-9.5,16,16,0,0,0-10.4-20.61A34.49,34.49,0,0,0,183,48H128a32,32,0,0,0-32,32v84a44.6,44.6,0,0,1-8-2.61V177.34l31.54-24.52a16,16,0,0,1,18.4,1.44l37,21.8a45.69,45.69,0,0,0,10.41-5.18C201.21,159.5,224,134.41,224,104Zm-144,32H72a16,16,0,0,0,0,32h8Z" />
-      </svg>
-    ),
-
     close: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
     ),
-
     video: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
       </svg>
     ),
-
     article: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
       </svg>
     ),
-
-    history: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-      </svg>
-    ),
-
-    clock: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-
     trend: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
       </svg>
     ),
-
     compass: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" />
       </svg>
     ),
-
     fingerprint: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 01-3.6 9.75m6.633-4.596a18.666 18.666 0 01-2.485 5.33" />
       </svg>
     ),
-
     mobile: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
       </svg>
     ),
-
-    arrowLeft: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-      </svg>
-    ),
-
     password: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
       </svg>
     ),
-
     check: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-
     pencil: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
       </svg>
     ),
-
     loading: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`${className} animate-spin`}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
       </svg>
     ),
-
-    // --- آیکون‌های جدید مخصوص داشبورد ---
     download: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
       </svg>
     ),
-
-    heart: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-      </svg>
-    ),
-
     bell: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
       </svg>
     ),
-
     signOut: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
       </svg>
     ),
-
     idCard: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
       </svg>
     ),
-
     lock: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
       </svg>
     ),
-
-    calendar: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-      </svg>
-    ),
-
-donate: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 15v3.75A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V15" />
-      </svg>
-    ),
-
-    caretDown: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-      </svg>
-    ),
-
     save: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
-      </svg>
-    ),
-
-    pdf: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-      </svg>
-    ),
-
-    videoFile: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-      </svg>
-    ),
-
-    info: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-      </svg>
-    ),
-
-    caretLeft: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-      </svg>
-    ),
-    telegram: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.875L5.999 12Zm0 0h7.5" />
-      </svg>
-    ),
-
-    chat: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.745.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-      </svg>
-    ),
-    
-    twitter: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.25l13.5 13.5m0-13.5L5.25 18.75" />
-      </svg>
-    ),
-
-    youtube: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
-      </svg>
-    ),
-
-    creditCard: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
-      </svg>
-    ),
-
-    wallet: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12v7.5A2.25 2.25 0 0118.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H18A2.25 2.25 0 0120.25 8.25V12M21 12h-4.5a2.25 2.25 0 00-2.25 2.25v1.5a2.25 2.25 0 002.25 2.25H21m0-6.75V9.75A2.25 2.25 0 0018.75 7.5H5.25A2.25 2.25 0 003 9.75v2.25" />
-      </svg>
-    ),
-
-
-    infinity: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 10.875a2.625 2.625 0 115.25 0 2.625 2.625 0 01-5.25 0zM10.875 15.75a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0zM15.75 10.875a2.625 2.625 0 115.25 0 2.625 2.625 0 01-5.25 0zM18.375 15.75a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0zM2.25 12c0-3.375 5.25-6 9.75-6s9.75 2.625 9.75 6-5.25 6-9.75 6-9.75-2.625-9.75-6z" />
-      </svg>
-    ),
-    target: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 15h2.25m8.024-9.75c.011.05.028.1.052.148.591 1.2.924 2.55.924 3.977a8.96 8.96 0 01-.999 4.125m.023-8.25c-.076-.365.183-.75.575-.75h.908c.889 0 1.713.518 1.972 1.368.339 1.11.521 2.287.521 3.507 0 1.553-.295 3.036-.831 4.398C20.613 14.547 19.833 15 19 15h-1.053c-.472 0-.745-.508-.55-.945.204-.457.382-.93.53-1.42.062-.204-.11-.409-.328-.387a1.002 1.002 0 01-.892-.472c-.174-.3-.509-.476-.856-.476h-1.048c-.28 0-.55-.098-.773-.272L12 9" />
-        <circle cx="12" cy="12" r="9" />
-        <circle cx="12" cy="12" r="5" />
-        <circle cx="12" cy="12" r="2" fill="currentColor" />
-      </svg>
-    ),
-    globeEast: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-      </svg>
-    ),
-    cpu: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
-      </svg>
-    ),
-    handshake: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
       </svg>
     ),
     phoneCall: (
@@ -275,45 +120,6 @@ donate: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
       </svg>
     ),
-    instagram: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-        <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
-        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-      </svg>
-    ),
-    videoCamera: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-      </svg>
-    ),
-    chatText: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75h.01M11.625 9.75h.01M14.625 9.75h.01M8.625 13.5h.01M11.625 13.5h.01M14.625 13.5h.01M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-      </svg>
-    ),
-    appWindow: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 9h18M9 21V9" />
-      </svg>
-    ),
-
-    filePdf: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-      </svg>
-    ),
-    fileVideo: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375" />
-      </svg>
-    ),
-    fileAudio: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-      </svg>
-    ),
     fileText: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -324,51 +130,9 @@ donate: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    hardDrives: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
-      </svg>
-    ),
-    files: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-      </svg>
-    ),
-    textAa: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10.5V6a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 6v4.5m-18 0v8.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75v-8.25M8.25 12h7.5" />
-      </svg>
-    ),
-
-    star: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-      </svg>
-    ),
-    bookOpen: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-      </svg>
-    ),
-    calendarBlank: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-      </svg>
-    ),
-
     eye: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM12 15a3 3 0 100-6 3 3 0 000 6z" />
-      </svg>
-    ),
-    bookmarkSimple: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 3h-10.5a2.25 2.25 0 00-2.25 2.25v15.75l7.5-4.5 7.5 4.5V5.25a2.25 2.25 0 00-2.25-2.25z" />
-      </svg>
-    ),
-    shareNetwork: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
       </svg>
     ),
     play: (
@@ -391,11 +155,6 @@ donate: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
       </svg>
     ),
-    quotes: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.213 14.852c0-2.355 1.554-4.225 3.614-4.887a.75.75 0 00.5-1.042l-1.002-2.004a.75.75 0 00-1.08-.256C8.887 9.535 6 12.42 6 16.5c0 1.93.987 3.5 2.625 3.5 1.45 0 2.625-1.175 2.625-2.625 0-1.45-1.175-2.625-2.625-2.625h.135A3.208 3.208 0 0111.213 14.852zm9 0c0-2.355 1.554-4.225 3.614-4.887a.75.75 0 00.5-1.042l-1.002-2.004a.75.75 0 00-1.08-.256C17.887 9.535 15 12.42 15 16.5c0 1.93.987 3.5 2.625 3.5 1.45 0 2.625-1.175 2.625-2.625 0-1.45-1.175-2.625-2.625-2.625h.135A3.208 3.208 0 0120.213 14.852z" />
-      </svg>
-    ),
     checkCircle: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -406,23 +165,7 @@ donate: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
       </svg>
     ),
-    arrowLeft: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-      </svg>
-    ),
-    tag: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3zM6 7.5h.008v.008H6V7.5z" />
-      </svg>
-    ),
-
-    compass: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" />
-      </svg>
-    ),
-    "hash": (
+    hash: (
       <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
         <path d="M23,7H18.191l.8-5.865a1,1,0,1,0-1.982-.27L16.173,7H9.191l.8-5.865A1,1,0,1,0,8.009.865L7.173,7H2A1,1,0,0,0,2,9H6.9l-.818,6H1a1,1,0,0,0,0,2H5.809l-.8,5.865a1,1,0,0,0,1.982.27L7.827,17h6.982l-.8,5.865a1,1,0,0,0,1.982.27L16.827,17H22a1,1,0,0,0,0-2H17.1l.818-6H23A1,1,0,0,0,23,7Zm-7.918,8H8.1l.818-6H15.9Z" />
       </svg>
@@ -432,52 +175,16 @@ donate: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
       </svg>
     ),
-    trendUp: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-      </svg>
-    ),
-
-    treeStructure: ( // آیکون جدید برای هدر همکاری با شبکه
+    treeStructure: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
       </svg>
     ),
-    monitorPlay: ( // آیکون جدید برای محتوای تولیدی
+    monitorPlay: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 8.25l4.5 3-4.5 3v-6z" />
-      </svg>
-    ),
-    uploadSimple: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-      </svg>
-    ),
-    megaphone: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .7-.316 1.322-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
-      </svg>
-    ),
-    buildings: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
-      </svg>
-    ),
-    paperPlaneTilt: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-      </svg>
-    ),
-    code: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-      </svg>
-    ),
-    terminalWindow: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
       </svg>
     ),
     lightbulb: (
@@ -485,29 +192,9 @@ donate: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.82 1.508-2.316a7.5 7.5 0 10-7.516 0c.85.496 1.508 1.333 1.508 2.316V18" />
       </svg>
     ),
-    paperPlaneRight: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-      </svg>
-    ),
     playCircle: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0zM15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
-      </svg>
-    ),
-    play: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-      </svg>
-    ),
-    calendarBlank: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-      </svg>
-    ),
-    eye: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM12 15a3 3 0 100-6 3 3 0 000 6z" />
       </svg>
     ),
     caretDown: (
@@ -515,63 +202,6 @@ donate: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
       </svg>
     ),
-    caretLeft: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-      </svg>
-    ),
-    handHeart: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-      </svg>
-    ),
-    telegram: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-      </svg>
-    ),
-    instagram: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-      </svg>
-    ),
-    xlogo: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    ),
-
-    infinity: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9c-3.166 0-5.25 2.5-5.25 5s2.084 5 5.25 5c3.166 0 5.25-2.5 5.25-5 0-1.5-.78-2.825-1.92-3.71m7.67-1.29c1.14-.885 1.92-2.21 1.92-3.71 0-2.5-2.084-5-5.25-5-3.166 0-5.25 2.5-5.25 5 0 1.5.78 2.825 1.92 3.71" />
-      </svg>
-    ),
-    bookOpen: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-      </svg>
-    ),
-    files: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-      </svg>
-    ),
-    filePdf: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-      </svg>
-    ),
-    hardDrives: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
-      </svg>
-    ),
-    fileAudio: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-      </svg>
-    ),
-
     heart: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -597,45 +227,9 @@ donate: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
       </svg>
     ),
-    downloadSimple: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-      </svg>
-    ),
-    fileVideo: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375" />
-      </svg>
-    ),
-    
-    shieldCheck: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-      </svg>
-    ),
-    listBullets: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-      </svg>
-    ),
-    caretLeft: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-      </svg>
-    ),
-    bookOpen: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-      </svg>
-    ),
     files: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
-      </svg>
-    ),
-    filePdf: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
       </svg>
     ),
     hardDrives: (
@@ -643,12 +237,6 @@ donate: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
       </svg>
     ),
-    fileAudio: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-      </svg>
-    ),
-
     star: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
@@ -659,51 +247,14 @@ donate: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
       </svg>
     ),
-    plus: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-      </svg>
-    ),
     calendarBlank: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
       </svg>
     ),
-    eye: (
-      <svg fill="none" view5Box="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM12 15a3 3 0 100-6 3 3 0 000 6z" />
-      </svg>
-    ),
-
-cpu: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M12 3v1.5m3.75-1.5v1.5m-9 15V21m3.75-1.5V21m3.75-1.5V21M3 8.25h1.5M3 12h1.5m-1.5 3.75h1.5m15-9H21m-1.5 3.75H21m-1.5 3.75H21M6.75 6.75h10.5v10.5H6.75V6.75zm3 3h4.5v4.5h-4.5v-4.5z" />
-      </svg>
-    ),
-    plugsConnected: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15.75l-3-3m0 0l-3 3m3-3v7.5M15.75 8.25l3 3m0 0l3-3m-3 3V3m-9 3.75h9v4.5h-9v-4.5zM6.75 15.75h9v4.5h-9v-4.5z" />
-      </svg>
-    ),
-    arrowsClockwise: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-      </svg>
-    ),
-    house: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-      </svg>
-    ),
-
-    database: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-      </svg>
-    ),
-    videoCamera: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+   videoCamera: (
+      <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+        <path d="m22.575,10.152c-.866-.358-1.854-.163-2.517.5l-.438.438c-.433-1.044-1.21-1.91-2.189-2.458.965-.912,1.568-2.203,1.568-3.633,0-2.757-2.243-5-5-5-1.634,0-3.087.788-4,2.003-.913-1.216-2.366-2.003-4-2.003C3.243,0,1,2.243,1,5c0,1.429.603,2.721,1.568,3.633-1.531.856-2.568,2.493-2.568,4.367v6c0,2.757,2.243,5,5,5h10c2.081,0,3.869-1.278,4.621-3.09l.438.438c.443.443,1.031.678,1.63.678.298,0,.599-.058.886-.177.866-.358,1.425-1.196,1.425-2.133v-7.429c0-.938-.56-1.775-1.425-2.133ZM14,2c1.654,0,3,1.346,3,3s-1.346,3-3,3-3-1.346-3-3,1.346-3,3-3Zm-8,0c1.654,0,3,1.346,3,3s-1.346,3-3,3-3-1.346-3-3,1.346-3,3-3Zm12,17c0,1.654-1.346,3-3,3H5c-1.654,0-3-1.346-3-3v-6c0-1.654,1.346-3,3-3h10c1.654,0,3,1.346,3,3v6Zm4,.714c0,.171-.104.25-.191.286-.086.036-.215.054-.337-.067l-1.472-1.472v-4.922l1.472-1.472c.122-.121.251-.103.337-.067.087.036.191.115.191.286v7.429Z" />
       </svg>
     ),
     quotes: (
@@ -711,102 +262,14 @@ cpu: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M5.248 20.246H9.05l2.25-8.25v-6.75H4.5v6.75h3.75l-3.002 8.25zM14.248 20.246h3.803l2.25-8.25v-6.75H13.5v6.75h3.75l-3.002 8.25z" />
       </svg>
     ),
-    textAa: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5H3.75v-5.25z" />
-      </svg>
-    ),
-
-    calendarBlank: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-      </svg>
-    ),
-    eye: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM12 15a3 3 0 100-6 3 3 0 000 6z" />
-      </svg>
-    ),
-
-    cubeTransparent: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-      </svg>
-    ),
     users: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
       </svg>
-    ),
-
-    warning: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2.25m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-
-    compass: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-6 1.5L10.5 9l6-1.5L15 15z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-
-    house: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.592 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-      </svg>
-    ),
-
-    // components/Icon.jsx (ادامه لیست آیکون‌های شما)
-
-    // آیکون اصلی: هسته پردازشی آسیب دیده با جرقه
-    brokenCircuit: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25zM11.25 11.25h1.5m-1.5 1.5h1.5m3-3h1.5m-1.5 1.5h1.5M7.5 11.25h1.5m-1.5 1.5h1.5" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v3m0 6v3m-3-4.5h3m3 0h3m-9-3h3m3 0h3" className="animate-pulse" stroke="#f59e0b" />
-      </svg>
-    ),
-
-    // آیکون بج وضعیت: نقص بحرانی
-    criticalStatus: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-      </svg>
-    ),
+    ), 
     "pen-nib": (
       <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
         <path d="m23.854,7.465c-.195-.195-.512-.195-.707,0l-2.783,2.783-6.611-6.611,2.783-2.783c.195-.195.195-.512,0-.707s-.512-.195-.707,0l-3.059,3.059-6.24,2.309c-1.394.516-2.47,1.677-2.878,3.106L.095,21.087c-.238.81-.024,1.649.572,2.246.437.437,1.003.668,1.592.668.215,0,.434-.031.649-.095l12.425-3.53c1.424-.405,2.584-1.474,3.104-2.859l2.357-6.286,3.059-3.059c.195-.195.195-.512,0-.707ZM1.102,22.224s-.001-.003-.002-.004c.003,0,.004,0,.002.004Zm.674.674s.003,0,.002,0c0,0-.002,0-.002,0Zm15.724-5.733c-.409,1.09-1.321,1.931-2.441,2.249l-12.429,3.532c-.282.082-.572.066-.831-.039l6.323-6.323c.395.262.869.415,1.378.415,1.378,0,2.5-1.122,2.5-2.5s-1.122-2.5-2.5-2.5-2.5,1.122-2.5,2.5c0,.509.153.982.415,1.378l-6.323,6.323c-.105-.259-.121-.55-.037-.835l3.558-12.47c.321-1.125,1.167-2.038,2.263-2.443l6.043-2.236,6.864,6.864-2.282,6.085Zm-9.5-2.666c0-.827.673-1.5,1.5-1.5s1.5.673,1.5,1.5-.673,1.5-1.5,1.5-1.5-.673-1.5-1.5Z"/>
-      </svg>
-    ),
-
-    // components/Icon.jsx (ادامه لیست آیکون‌های شما)
-
-    // آیکون عملیاتی جدید: تلاش مجدد/آیکون رفرش
-    arrowsClockwise: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.992 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-      </svg>
-    ),
-
-    server: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3.75h16.5m-16.5 0a3 3 0 01-3-3m3 3a3 3 0 100-6h13.5a3 3 0 100-6M5.25 10.5h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100-6h13.5a3 3 0 100-6" />
-      </svg>
-    ),
-    lockKey: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-      </svg>
-    ),
-    shieldWarning: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2.25m0 3h.01m-6.938 4.21c-1.393-2.18-2.062-4.707-2.062-7.46V6.155C3 5.485 3.447 4.908 4.092 4.743l7.5-1.928a1.5 1.5 0 01.816 0l7.5 1.928C20.553 4.908 21 5.485 21 6.155v4.846c0 2.753-.669 5.28-2.062 7.46-1.572 2.457-3.924 4.382-6.75 5.289a1.5 1.5 0 01-.376.05 1.5 1.5 0 01-.376-.05c-2.826-.907-5.178-2.832-6.75-5.29z" />
-      </svg>
-    ),
-    user: (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
       </svg>
     ),
     arrowRight: (
@@ -814,53 +277,249 @@ cpu: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
       </svg>
     ),
-
-    "bookmark-star": (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25l1.04 2.112 2.331.34-1.686 1.644.398 2.322L12 13.548l-2.083 1.096.398-2.322-1.686-1.644 2.331-.34L12 8.25z" />
-      </svg>
-    ),
-
-    "microscope": (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 21h6m-3-15v9m0-9a3 3 0 00-3-3h-.5a1.5 1.5 0 00-1.5 1.5v2A1.5 1.5 0 006.5 8H9m3-2a3 3 0 013-3h.5A1.5 1.5 0 0117 4.5v2A1.5 1.5 0 0115.5 8H12m0 7a3 3 0 00-3-3h-.5a1.5 1.5 0 00-1.5 1.5v2A1.5 1.5 0 006.5 17H9m3-2a3 3 0 013-3h.5a1.5 1.5 0 011.5 1.5v2A1.5 1.5 0 0115.5 17H12" />
-      </svg>
-    ),
-
-    "eye": (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-
-    "database": (
+    database: (
       <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
       </svg>
     ),
+    jebhe: (
+      <svg fill="currentColor" viewBox="0 0 500 520" className={className}>
+       <path d="M 119.01 0.00 L 477.64 0.00 C 487.70 -0.28 497.96 6.61 500.00 16.69 L 500.00 120.03 C 500.69 125.83 496.32 129.98 492.02 133.01 C 474.82 145.01 458.31 157.95 441.65 170.67 C 419.18 187.18 396.91 203.94 374.54 220.58 C 356.27 235.08 336.84 248.05 318.69 262.71 C 293.14 281.86 267.45 300.81 241.97 320.05 C 214.47 340.92 186.42 361.07 159.00 382.05 C 149.73 389.12 139.96 395.53 131.03 403.04 C 124.60 408.36 117.57 412.88 110.95 417.95 C 101.90 424.94 92.54 431.51 83.64 438.69 C 77.70 443.50 71.23 447.59 65.16 452.22 C 45.49 467.24 25.70 482.13 5.78 496.81 C 4.01 497.95 1.98 498.58 0.00 499.28 L 0.00 371.05 L 0.01 372.07 C 2.39 369.36 5.36 367.31 8.31 365.28 C 104.04 296.38 199.82 227.54 295.54 158.62 C 307.30 149.52 320.14 141.95 331.90 132.86 C 334.32 130.92 336.35 128.57 338.37 126.25 C 327.59 125.71 316.79 125.87 306.00 125.84 C 243.66 125.86 181.33 125.84 118.99 125.84 C 91.27 124.86 63.08 133.91 41.64 151.65 C 20.64 168.23 6.97 192.95 1.58 218.96 C 1.19 218.76 0.40 218.36 0.00 218.16 L 0.00 123.74 C 0.35 109.97 3.26 96.42 7.53 83.37 C 17.78 54.44 39.27 29.81 66.29 15.35 C 83.28 5.92 102.64 1.87 121.84 0.29 L 119.01 0.00 Z" />
+       <path d="M 484.43 218.35 C 486.52 216.80 488.62 215.09 491.17 214.35 C 494.68 213.58 497.87 215.90 500.00 218.47 L 500.00 392.89 C 499.67 406.38 495.64 419.44 490.98 431.99 C 484.11 449.88 473.71 466.52 459.98 479.95 C 456.93 482.90 454.06 486.05 450.86 488.85 C 435.58 500.87 418.34 510.95 399.26 515.43 C 389.95 517.93 380.37 519.21 370.78 520.00 L 127.50 520.00 C 126.48 519.74 124.45 519.23 123.44 518.97 C 118.39 517.03 118.00 509.93 121.20 506.21 C 124.89 501.82 129.93 498.89 134.33 495.29 C 142.42 488.72 150.86 482.58 158.75 475.77 C 163.76 471.38 169.42 467.81 174.46 463.45 C 184.06 455.25 194.75 448.47 204.46 440.42 C 212.15 434.02 220.43 428.37 228.07 421.92 C 231.40 419.26 234.54 416.29 238.27 414.18 C 241.37 412.55 246.01 412.82 248.03 416.01 C 249.96 419.53 249.51 424.59 246.06 427.04 C 240.20 431.85 234.15 436.43 228.55 441.55 C 220.99 448.52 212.00 453.63 204.12 460.20 C 188.19 473.32 171.70 485.73 155.73 498.79 C 154.32 500.11 153.17 501.67 151.97 503.19 C 154.97 503.53 157.99 503.81 161.02 503.82 C 229.02 503.81 297.02 503.79 365.02 503.84 C 377.85 503.91 390.53 501.33 402.78 497.68 C 415.52 493.17 427.43 486.44 437.98 478.00 C 446.04 472.09 452.46 464.34 458.75 456.66 C 475.44 435.14 484.07 408.04 485.40 381.01 C 485.25 333.31 485.71 285.60 485.20 237.89 C 469.65 249.30 454.76 261.61 439.79 273.77 C 433.05 278.98 427.06 285.10 420.00 289.90 C 415.08 293.26 411.00 297.84 405.60 300.49 C 400.42 303.11 393.50 297.63 394.77 291.97 C 395.13 289.42 397.34 287.77 399.15 286.21 C 427.56 263.56 456.11 241.10 484.43 218.35 Z" />
+       <path d="M 318.53 311.72 C 329.93 309.89 342.07 309.74 353.01 313.90 C 363.05 317.52 372.12 323.87 378.89 332.14 C 381.55 335.44 384.84 338.26 387.04 341.91 C 390.95 351.80 394.32 362.23 393.76 373.01 C 393.84 382.65 391.17 392.18 386.58 400.62 C 383.37 405.91 379.23 410.54 375.25 415.25 C 367.85 423.58 357.50 428.65 346.91 431.61 C 340.39 433.18 333.64 432.41 327.01 432.55 C 320.10 432.73 313.44 430.55 307.18 427.84 C 294.43 422.60 284.35 412.20 277.66 400.33 C 269.69 385.37 268.38 367.11 274.07 351.16 C 280.91 331.62 298.25 316.06 318.53 311.72 Z" />
+      </svg>
+   ),
+    aparat: (
+      <svg fill="currentColor" viewBox="0 0 520 520" className={className}>
+        <path d="M 97.91 19.89 C 110.40 9.75 125.86 3.37 141.82 1.51 C 150.49 1.21 159.31 0.72 167.83 2.71 C 187.28 6.96 206.60 11.78 226.07 15.96 C 225.87 16.27 225.46 16.88 225.26 17.18 C 217.07 17.61 209.00 19.28 200.99 20.99 C 163.57 29.30 128.28 47.14 99.49 72.45 C 82.26 87.19 67.78 104.93 55.58 123.98 C 55.72 120.95 56.79 118.08 57.42 115.13 C 60.86 99.66 64.60 84.26 68.08 68.79 C 72.10 49.75 82.62 32.01 97.91 19.89 Z" />
+        <path d="M 179.47 70.64 C 216.56 54.69 258.39 50.31 298.03 57.77 C 301.64 58.67 305.51 58.81 308.95 60.26 C 350.85 70.17 389.29 94.02 416.98 126.97 C 443.22 157.87 460.06 196.68 464.47 236.98 C 467.53 264.93 465.06 293.55 456.64 320.42 C 444.71 359.88 420.43 395.52 388.05 421.05 C 360.68 442.87 327.64 457.51 293.09 463.12 C 288.86 463.58 284.69 464.69 280.41 464.50 C 280.38 464.71 280.33 465.14 280.31 465.36 C 271.21 465.26 262.11 465.94 253.00 465.59 C 239.42 465.56 226.02 462.98 212.73 460.47 C 212.57 460.29 212.26 459.93 212.10 459.76 C 197.00 456.87 182.54 451.10 168.74 444.42 C 120.91 421.11 83.22 378.25 65.80 328.01 C 56.01 300.54 52.57 270.96 55.00 241.95 C 59.04 195.45 79.36 150.45 111.98 117.01 C 131.05 97.23 154.18 81.39 179.47 70.64 M 204.87 121.67 C 204.73 121.84 204.44 122.18 204.29 122.36 C 185.32 123.94 168.60 138.72 163.66 156.96 C 159.88 169.65 161.92 183.77 168.73 195.08 C 177.05 209.00 192.69 218.29 208.96 218.50 C 219.42 218.84 229.91 215.55 238.39 209.43 C 249.00 202.04 256.16 190.05 258.03 177.29 C 260.36 163.04 255.55 147.89 245.72 137.37 C 238.01 128.96 227.14 123.08 215.68 122.36 C 215.57 122.18 215.37 121.82 215.27 121.64 C 211.80 121.68 208.34 121.68 204.87 121.67 M 344.66 162.07 C 334.12 163.22 323.94 167.86 316.37 175.32 C 299.33 190.89 296.52 219.10 310.08 237.76 C 318.25 249.94 332.42 257.64 346.99 258.53 C 361.14 259.42 375.55 253.62 385.15 243.19 C 393.68 234.38 398.12 222.14 398.38 209.98 C 398.03 197.62 393.25 185.31 384.52 176.45 C 374.36 165.97 359.15 160.38 344.66 162.07 M 257.56 235.88 C 244.52 236.97 233.93 249.99 235.97 263.00 C 237.15 273.31 245.68 282.28 255.96 283.84 C 267.34 286.12 279.50 278.59 282.96 267.59 C 285.86 259.37 283.65 249.71 277.60 243.46 C 272.59 237.99 264.92 235.11 257.56 235.88 M 148.55 266.55 C 134.82 273.25 124.71 286.87 122.44 301.99 C 122.33 304.62 123.09 307.25 122.57 309.88 C 122.26 307.91 122.10 305.92 121.85 303.95 C 120.76 315.38 123.54 327.26 130.02 336.79 C 137.52 348.16 150.14 355.97 163.64 357.67 C 184.42 361.12 206.27 348.51 214.46 329.23 C 220.92 314.84 219.66 297.27 211.08 284.01 C 204.45 273.19 193.25 265.38 180.89 262.63 C 170.10 260.03 158.43 261.53 148.55 266.55 M 283.97 308.94 C 272.62 315.91 264.56 327.93 262.27 341.04 C 260.20 351.02 261.77 361.63 266.22 370.77 C 272.83 384.83 286.66 395.25 302.04 397.55 C 304.61 397.83 307.26 396.58 309.77 397.55 C 307.84 397.83 305.89 397.88 303.95 398.09 C 315.13 399.24 326.75 396.55 336.16 390.37 C 355.50 378.32 363.76 351.65 354.29 330.87 C 348.34 316.65 335.13 305.70 320.03 302.57 C 307.80 299.83 294.51 302.14 283.97 308.94 Z" />
+        <path d="M 396.02 55.58 C 398.38 55.70 400.66 56.37 402.94 56.96 C 419.63 60.81 436.32 64.70 453.03 68.48 C 471.39 72.71 488.39 83.08 500.13 97.87 C 510.46 110.57 516.94 126.35 518.57 142.62 C 518.78 151.72 519.33 161.09 516.76 169.91 C 512.88 187.68 508.62 205.37 504.60 223.11 C 504.17 224.75 503.55 226.34 502.96 227.94 C 501.95 209.87 497.37 192.17 491.65 175.07 C 476.15 130.85 446.98 91.47 408.79 64.25 C 404.67 61.16 400.21 58.57 396.02 55.58 Z" />
+        <path d="M 16.84 292.15 C 23.09 362.06 64.21 427.70 124.04 464.30 C 121.62 464.41 119.31 463.64 117.01 463.05 C 99.62 459.03 82.22 455.05 64.84 450.99 C 37.19 444.10 13.38 422.29 5.33 394.82 C 5.16 394.68 4.82 394.41 4.65 394.27 C 3.46 388.22 1.45 382.27 1.38 376.04 C 1.45 372.98 0.34 369.96 0.87 366.91 C 1.48 362.99 1.64 359.02 1.58 355.06 C 1.84 356.04 2.09 357.02 2.35 358.01 C 1.93 353.23 3.60 348.66 4.55 344.05 C 8.69 326.76 12.18 309.30 16.84 292.15 Z" />
+        <path d="M 461.87 399.77 C 462.68 398.49 463.54 397.24 464.44 396.03 C 461.90 409.41 458.37 422.64 455.43 435.96 C 452.62 447.35 450.91 459.16 445.75 469.81 C 433.66 496.73 406.46 516.00 377.08 518.56 C 372.71 518.58 368.39 519.83 364.05 518.76 C 356.88 518.66 349.93 516.76 342.98 515.20 C 325.99 511.20 308.92 507.53 292.02 503.21 C 360.45 497.01 424.88 457.64 461.87 399.77 Z" />
+     </svg>
+),
+bale: (
+  <svg fill="currentColor" viewBox="0 0 1000 999.63" className={className}>
+    <path
+      d="M1009.65,466.44c-1.3-21.39-5-42.79-9.7-63.78C987.56,346,964.66,291.8,933.47,242.91,863.09,132.24,747.53,51,619,24a411.57,411.57,0,0,0-57.28-9.1,443.14,443.14,0,0,0-76.38-1.7,388.45,388.45,0,0,0-61.88,7.2c-18.7,2.6-36.89,7.8-55,12.69-16.9,5.3-33.69,11.3-50.09,18.2a469.62,469.62,0,0,0-45.78,22.09,437.61,437.61,0,0,0-42.69,26.29,100.06,100.06,0,0,1-10.6,6.8c-34.19-26-68.78-51.38-104.77-74.77-9.89-6.1-19.49-13-30.59-16.7-18.19-6.4-39.48-1.5-53.78,11.5C16.55,38.57,10.66,57.37,12.26,75.26c.1,23.79-.1,47.69.2,71.48-.3,24-.1,48.18-.2,72.18s-.1,48,.1,72q-.3,42,0,83.87-.3,40.78.1,81.57c.2,34-1.6,68.18,2.19,102.07,2.7,34.89,9.9,69.48,20.3,102.77,47.38,154.85,175.24,283,330.8,328.3l.1.6c32.39,9.6,65.68,16.7,99.27,19.29,37.28,3.6,75.07,3.5,112.16-2.19,19.9-1.5,39.39-6.4,58.88-10.7A566.24,566.24,0,0,0,702,974.59c20.1-8.6,40-17.9,58.89-29.1a455,455,0,0,0,48.38-31.59,496.83,496.83,0,0,0,51.28-43.48,486.75,486.75,0,0,0,35.19-38A500,500,0,0,0,926.27,792c8.6-12.79,16.6-26.09,24.3-39.49,7.89-15.19,15.49-30.39,22.29-46.08,7.4-18.8,14.7-37.69,19.89-57.18,4.4-16,9.2-32,10.8-48.49,4.2-17.39,6.1-35.69,6.8-53.48A412.52,412.52,0,0,0,1009.65,466.44ZM826.51,400.86c-6.1,16.2-16.8,30.09-29.5,41.69-11.09,11-22.09,22.09-33.19,33.19-11.79,11.79-23.59,23.49-35.28,35.39-11.3,11.19-22.6,22.39-33.89,33.79-12.3,12.29-24.7,24.59-36.89,36.89-14,14.09-28.09,28-42.09,42.08-13.2,13.3-26.49,26.49-39.79,39.79s-26.79,26.69-40.09,40.09c-12.29,11.79-23.49,24.89-37.38,35a105.49,105.49,0,0,1-57.89,16c-23.59-1.5-46.68-10.79-63.68-27.39q-78.42-78.42-156.95-157c-12.79-12.7-21.39-29.09-26-46.39-4.8-23.89-2-49.48,10.3-70.77,9.39-16.5,23.79-29.6,40.18-39a107.88,107.88,0,0,1,57.89-9.7c21.39,3.2,41.88,13,56.88,28.79,28.39,28.39,56.68,56.88,85.27,85.18,8.6-8.2,16.9-16.8,25.1-25.3,12-11.49,23.79-23.29,35.28-35.39,11.4-10.59,22.3-21.79,33.09-33.09,7.7-6.89,14.7-14.49,22.1-21.79,12-11.7,23.69-23.59,35.39-35.49,11.29-10.79,22.19-22,33.09-33,11.79-11.49,23.29-23.29,35-34.89a106.64,106.64,0,0,1,42.18-26.39A107.77,107.77,0,0,1,768,274.5c25.7,9.8,46.29,30,57.59,54.88C833.9,352.28,834.9,377.87,826.51,400.86Z"
+      transform="translate(-12 -12.19)"
+    />
+  </svg>
+),
 
-    "shield-check": (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+eitaa: (
+  <svg fill="currentColor" viewBox="0 0 3584.55 3673.6" className={className}>
+    <g id="Isolation_Mode" data-name="Isolation Mode">
+      <path
+        d="M1071.43,2.75H2607.66C3171,2.75,3631.82,462.91,3631.82,1026.2v493.93c-505,227-1014.43,1348.12-1756.93,1104.51-61.16,43.46-202.11,222.55-212,358.43-257.11-34.24-553.52-328.88-517.95-646.62C717,2026.91,1070.39,1455.5,1409.74,1225.51c727.32-492.94,1737.05-69,1175.39,283.45-341.52,214.31-1071.84,355.88-995.91-170.24-200.34,57.78-328.58,431.34-87.37,626-223.45,219.53-180.49,623.07,58.36,755.57,241.56-625.87,1082.31-544.08,1422-1291.2,255.57-562-123.34-1202.37-880.91-1104C1529.56,399.34,993.64,881.63,725.62,1453.64,453.68,2034,494.15,2811.15,1052.55,3202.82c657.15,460.92,1356.78,34.13,1780.52-523.68,249.77-328.78,468-693,798.75-903.37v875.72c0,563.28-460.88,1024.86-1024.16,1024.86H1071.43c-563.29,0-1024.16-460.87-1024.16-1024.16V1026.9C47.27,463.61,508.14,2.74,1071.43,2.74Z"
+        transform="translate(-47.27 -2.74)"
+        fillRule="evenodd"
+      />
+    </g>
+  </svg>
+),
+github: (
+  <svg fill="currentColor" viewBox="0 0 520 506" className={className}>
+    <path d="M 254.23 0.00 L 266.73 0.00 C 322.24 0.94 377.11 20.93 420.57 55.40 C 463.09 88.70 494.74 135.63 509.56 187.56 C 521.47 228.85 522.81 273.12 513.64 315.09 C 505.77 351.15 490.03 385.45 467.91 414.98 C 436.88 456.61 393.13 488.66 343.93 505.33 C 342.58 505.72 341.18 505.91 339.79 506.00 L 334.73 506.00 C 329.88 504.95 325.84 500.92 325.15 495.97 C 324.42 490.35 325.04 484.67 325.12 479.04 C 325.15 463.03 325.24 447.02 325.26 431.02 C 325.22 424.31 325.51 417.57 324.59 410.91 C 323.27 397.22 318.06 383.54 308.00 373.89 C 334.95 370.92 362.69 364.41 384.75 347.85 C 401.32 335.64 412.88 317.53 418.98 298.04 C 423.48 284.14 425.23 269.54 426.06 255.01 C 427.12 236.01 424.31 216.45 415.62 199.36 C 411.42 190.85 405.88 183.07 399.56 176.02 C 408.00 153.95 405.63 128.98 397.00 107.34 C 390.80 105.69 384.30 106.97 378.16 108.28 C 359.19 113.04 341.90 122.81 325.88 133.78 C 283.55 122.37 238.16 122.10 195.87 133.84 C 178.76 122.69 160.66 112.16 140.50 107.79 C 135.19 107.00 129.64 105.78 124.35 107.36 C 115.67 128.99 113.48 153.96 121.81 176.04 C 105.36 193.83 95.78 217.69 95.31 241.92 C 94.77 269.40 98.67 298.07 113.15 321.94 C 124.34 340.70 142.57 354.53 162.78 362.36 C 178.80 368.72 195.89 371.99 212.97 373.86 C 203.63 383.17 198.41 395.78 196.68 408.73 C 182.78 414.98 166.58 417.96 151.77 413.20 C 140.79 409.91 131.56 402.26 124.94 393.05 C 121.29 387.79 118.14 382.14 113.70 377.47 C 105.45 368.07 93.91 360.39 80.98 360.69 C 77.41 361.04 73.25 360.79 70.38 363.29 C 68.43 364.83 69.54 367.56 70.81 369.15 C 75.14 375.41 83.00 377.49 88.01 383.01 C 94.66 390.00 99.82 398.25 104.44 406.67 C 108.11 413.16 109.87 420.61 114.45 426.60 C 122.83 438.44 136.94 444.84 150.98 446.87 C 165.80 449.03 180.85 447.56 195.54 445.13 C 195.48 461.44 195.72 477.75 195.73 494.06 C 195.89 499.94 191.11 504.98 185.46 506.00 L 180.32 506.00 C 179.23 505.88 178.16 505.68 177.10 505.41 C 127.31 488.79 83.00 456.46 51.69 414.36 C 29.94 385.22 14.40 351.46 6.59 315.94 C 1.11 290.27 -0.99 263.77 1.38 237.59 C 6.39 172.93 37.20 110.80 85.37 67.41 C 131.02 25.49 192.21 0.87 254.23 0.00 Z" />
+  </svg>
+),
+instagram: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="M12,2.162c3.204,0,3.584,0.012,4.849,0.07c1.308,0.06,2.655,0.358,3.608,1.311c0.962,0.962,1.251,2.296,1.311,3.608c0.058,1.265,0.07,1.645,0.07,4.849c0,3.204-0.012,3.584-0.07,4.849c-0.059,1.301-0.364,2.661-1.311,3.608c-0.962,0.962-2.295,1.251-3.608,1.311c-1.265,0.058-1.645,0.07-4.849,0.07s-3.584-0.012-4.849-0.07c-1.291-0.059-2.669-0.371-3.608-1.311c-0.957-0.957-1.251-2.304-1.311-3.608c-0.058-1.265-0.07-1.645-0.07-4.849c0-3.204,0.012-3.584,0.07-4.849c0.059-1.296,0.367-2.664,1.311-3.608c0.96-0.96,2.299-1.251,3.608-1.311C8.416,2.174,8.796,2.162,12,2.162 M12,0C8.741,0,8.332,0.014,7.052,0.072C5.197,0.157,3.355,0.673,2.014,2.014C0.668,3.36,0.157,5.198,0.072,7.052C0.014,8.332,0,8.741,0,12c0,3.259,0.014,3.668,0.072,4.948c0.085,1.853,0.603,3.7,1.942,5.038c1.345,1.345,3.186,1.857,5.038,1.942C8.332,23.986,8.741,24,12,24c3.259,0,3.668-0.014,4.948-0.072c1.854-0.085,3.698-0.602,5.038-1.942c1.347-1.347,1.857-3.184,1.942-5.038C23.986,15.668,24,15.259,24,12c0-3.259-0.014-3.668-0.072-4.948c-0.085-1.855-0.602-3.698-1.942-5.038c-1.343-1.343-3.189-1.858-5.038-1.942C15.668,0.014,15.259,0,12,0z" />
+    <path d="M12,5.838c-3.403,0-6.162,2.759-6.162,6.162c0,3.403,2.759,6.162,6.162,6.162s6.162-2.759,6.162-6.162C18.162,8.597,15.403,5.838,12,5.838z M12,16c-2.209,0-4-1.791-4-4s1.791-4,4-4s4,1.791,4,4S14.209,16,12,16z" />
+    <circle cx="18.406" cy="5.594" r="1.44" />
+  </svg>
+),
+jaryan: (
+  <svg fill="currentColor" viewBox="0 0 520 306" className={className}>
+    <path d=" M 419.46 0.00 L 437.64 0.00 C 440.66 1.01 443.71 1.94 446.87 2.46 C 467.26 6.30 486.34 17.28 499.32 33.56 C 510.45 46.49 517.03 62.76 520.00 79.44 L 520.00 107.65 C 517.70 121.27 511.66 133.81 505.64 146.09 C 503.79 145.56 503.58 142.90 502.53 141.45 C 496.11 127.64 484.72 115.97 470.29 110.66 C 447.63 102.07 419.65 109.49 404.79 128.79 C 385.30 154.57 370.17 183.27 351.27 209.45 C 345.05 218.04 338.65 226.62 330.69 233.71 C 315.61 246.98 296.14 255.58 275.96 256.43 C 256.46 257.28 236.60 250.07 222.36 236.67 C 207.87 222.16 199.90 202.21 197.25 182.10 C 196.46 174.93 195.60 167.70 196.31 160.49 C 198.04 162.18 198.29 164.67 199.11 166.83 C 204.03 180.56 214.57 191.82 227.19 198.89 C 252.32 213.18 284.80 213.17 310.03 199.12 C 317.28 194.96 323.60 189.37 329.24 183.23 C 341.73 169.31 350.40 152.61 359.53 136.43 C 371.28 115.68 383.95 94.93 401.76 78.76 C 412.35 69.43 424.51 60.46 439.00 58.98 C 448.36 57.29 457.88 58.67 467.12 60.42 C 459.64 55.76 452.71 50.26 445.04 45.91 C 420.95 32.11 388.68 35.99 367.61 53.72 C 362.14 58.69 358.06 64.95 354.13 71.15 C 339.58 95.22 333.10 122.94 321.31 148.30 C 314.75 162.59 302.59 174.15 288.10 180.20 C 280.16 183.53 271.50 184.64 262.97 185.00 C 234.17 184.37 208.97 159.40 206.13 131.09 C 205.73 117.06 205.18 103.02 205.32 88.98 C 205.76 77.99 205.17 66.98 205.73 55.99 C 205.85 52.69 205.82 49.38 205.64 46.08 C 205.24 40.83 206.27 35.61 206.00 30.35 C 203.73 27.59 200.98 24.57 197.05 24.77 C 193.06 24.46 190.27 27.57 188.01 30.37 C 187.94 60.93 188.07 91.49 187.94 122.05 C 187.42 132.59 186.44 143.22 183.48 153.39 C 176.85 174.77 161.41 192.73 142.61 204.52 C 128.52 213.52 111.76 218.30 95.04 218.11 C 72.80 218.72 50.67 210.45 33.47 196.49 C 18.34 183.84 7.31 166.28 2.71 147.08 C 1.36 141.70 0.93 136.15 0.00 130.69 L 0.00 115.43 C 1.74 101.74 5.93 88.19 13.75 76.72 C 31.20 49.62 68.66 37.78 98.60 49.54 C 108.54 52.88 116.87 59.52 124.68 66.31 C 128.50 69.83 132.87 72.76 136.26 76.73 C 131.89 74.60 128.30 71.22 123.99 68.98 C 116.31 64.89 107.82 61.92 99.05 61.72 C 84.18 60.82 69.12 67.07 59.02 77.99 C 43.14 94.57 38.16 121.93 50.18 142.04 C 59.09 157.25 75.46 167.74 92.91 169.88 C 105.83 171.00 118.87 166.73 129.41 159.35 C 140.89 151.09 149.84 138.34 151.07 123.98 C 151.86 103.34 152.55 82.67 151.52 62.03 C 151.69 54.05 151.26 46.05 151.71 38.08 C 154.48 35.96 157.73 34.59 160.69 32.76 C 176.09 23.58 190.84 12.79 208.06 7.20 C 210.59 6.46 213.28 5.28 215.94 6.14 C 224.12 8.47 232.36 12.69 237.08 20.05 C 240.54 25.37 240.07 31.95 240.83 37.99 C 241.49 58.67 240.52 79.37 241.09 100.06 C 241.64 111.89 246.24 123.75 254.96 131.95 C 260.96 137.93 269.67 140.05 277.87 140.59 C 286.77 140.89 295.91 138.46 303.02 132.97 C 312.96 125.07 320.51 114.56 326.30 103.34 C 336.30 83.73 341.99 62.18 352.92 43.03 C 364.45 23.54 384.46 10.14 405.96 3.94 C 410.43 2.51 415.29 2.33 419.46 0.00 Z" />
+    <path d=" M 271.00 3.91 C 281.34 -1.89 296.76 2.05 301.62 13.28 C 304.04 32.11 301.97 51.13 302.73 70.04 C 296.01 76.97 288.87 83.72 283.83 92.04 C 283.26 92.65 282.88 94.53 281.91 93.30 C 282.13 77.00 282.32 60.68 281.74 44.39 C 280.43 38.14 282.36 31.31 279.48 25.43 C 276.03 19.58 268.87 17.48 262.49 16.94 C 258.79 19.98 255.04 22.96 251.15 25.74 C 251.69 23.14 254.11 21.66 255.71 19.74 C 260.44 14.13 265.38 8.63 271.00 3.91 Z" />
+    <path d=" M 92.52 88.53 C 105.12 85.11 117.84 94.39 122.02 106.00 C 125.23 115.03 122.50 125.89 115.40 132.34 C 110.54 137.13 103.74 139.69 96.99 139.94 C 86.67 139.60 76.45 132.74 73.43 122.64 C 69.55 111.46 73.90 97.24 84.62 91.53 C 87.12 90.22 89.84 89.40 92.52 88.53 Z" />
+    <path d=" M 428.23 137.24 C 434.09 131.82 442.05 128.59 450.08 129.01 C 464.47 129.72 478.14 139.25 483.53 152.66 C 488.52 166.36 484.74 183.02 473.65 192.69 C 469.72 195.94 465.34 199.08 460.26 200.15 C 460.61 191.50 457.23 183.01 451.72 176.43 C 444.28 167.77 432.00 164.37 420.95 166.50 C 413.80 167.86 406.47 170.90 402.13 177.02 C 397.83 181.44 394.91 187.12 390.07 190.99 C 391.28 187.50 393.64 184.61 395.39 181.40 C 404.58 165.52 414.04 149.23 428.23 137.24 Z" />
+    <path d=" M 179.11 221.07 C 180.60 217.91 181.45 214.45 183.39 211.51 C 186.68 229.10 196.81 245.05 210.63 256.27 C 226.62 269.81 247.26 276.96 267.94 278.91 C 288.95 279.91 309.89 273.52 327.85 262.85 C 341.14 254.88 351.58 243.22 361.81 231.79 C 365.10 228.74 367.39 224.64 371.26 222.23 C 363.08 236.65 353.48 251.01 339.42 260.32 C 314.33 283.17 282.85 299.82 248.96 304.20 C 246.46 304.65 244.05 305.46 241.57 306.00 L 226.46 306.00 C 220.89 304.06 215.00 303.41 209.39 301.62 C 188.26 295.13 169.71 280.79 157.91 262.12 C 148.91 275.70 143.56 292.14 130.62 302.75 C 126.71 305.22 121.73 306.89 117.18 305.23 C 112.76 303.68 108.24 302.19 104.38 299.47 C 94.15 292.61 87.12 282.27 79.36 272.94 C 88.49 256.85 97.95 240.95 106.72 224.65 C 109.29 228.30 111.73 232.04 114.64 235.44 C 125.20 248.62 140.38 258.18 157.09 261.12 C 164.37 247.73 172.80 234.96 179.11 221.07 Z" />
+  </svg>
+),
+link: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="M7.896,16.104c-.586-.585-.586-1.536,0-2.121,.586-.586,1.535-.586,2.121,0,1.326,1.326,3.64,1.327,4.966,0l4.989-4.989c1.369-1.369,1.369-3.597,0-4.966s-3.597-1.369-4.966,0c-.586,.586-1.535,.586-2.121,0-.586-.585-.586-1.536,0-2.121,2.538-2.539,6.67-2.539,9.208,0,2.539,2.539,2.539,6.669,0,9.208l-4.989,4.989c-1.27,1.27-2.937,1.904-4.604,1.904s-3.335-.635-4.604-1.904Zm-1.384,7.893c1.667,0,3.334-.635,4.604-1.904,.586-.585,.586-1.536,0-2.121-.586-.586-1.535-.586-2.121,0-1.37,1.37-3.598,1.369-4.966,0-1.369-1.369-1.369-3.597,0-4.966l4.961-4.961c1.37-1.37,3.598-1.37,4.966,0,.586,.586,1.535,.586,2.121,0,.586-.585,.586-1.536,0-2.121-2.539-2.539-6.669-2.539-9.208,0L1.907,12.885c-2.539,2.539-2.539,6.669,0,9.208,1.27,1.27,2.937,1.904,4.604,1.904Z" />
+  </svg>
+),
+linkedin: (
+  <svg fill="currentColor" viewBox="0 0 520 520" className={className}>
+    <path d="M 33.90 0.00 L 486.01 0.00 C 493.34 1.32 500.62 3.89 506.43 8.67 C 513.77 14.56 518.09 23.45 520.00 32.52 L 520.00 486.74 C 518.19 498.03 511.80 508.94 501.60 514.57 C 495.23 518.52 487.65 519.50 480.32 520.00 L 40.71 520.00 C 28.55 519.98 15.79 515.63 8.31 505.60 C 2.80 498.88 0.83 490.23 0.00 481.77 L 0.00 44.87 C 0.29 35.66 0.70 25.90 5.87 17.91 C 11.65 7.79 22.71 1.96 33.90 0.00 M 110.08 72.07 C 94.17 73.96 79.86 85.17 74.19 100.15 C 69.55 111.95 70.26 125.76 76.18 136.99 C 82.59 149.45 95.19 158.56 109.09 160.51 C 122.50 162.63 136.77 158.20 146.53 148.75 C 155.71 140.20 160.90 127.60 160.47 115.07 C 160.15 102.32 154.03 89.86 144.13 81.84 C 134.78 74.07 122.13 70.43 110.08 72.07 M 317.68 194.80 C 304.31 199.75 292.51 208.58 283.75 219.80 C 281.30 222.79 279.45 226.22 276.90 229.13 C 276.59 217.84 276.81 206.53 276.79 195.23 C 252.12 194.93 227.40 195.07 202.74 195.15 C 202.72 277.82 202.62 360.49 202.79 443.16 C 228.43 443.25 254.07 443.25 279.71 443.16 C 279.81 406.12 279.73 369.08 279.76 332.03 C 279.83 324.35 279.49 316.64 280.20 308.98 C 280.97 298.20 282.16 287.06 287.36 277.39 C 291.49 269.51 298.46 263.12 306.80 259.94 C 316.02 256.39 326.22 256.08 335.90 257.59 C 345.08 259.13 353.41 264.86 358.05 272.95 C 364.77 284.06 365.15 297.39 366.11 309.97 C 366.27 354.37 366.17 398.78 366.22 443.18 C 391.87 443.22 417.52 443.26 443.17 443.16 C 443.37 402.44 443.33 361.71 443.20 320.98 C 443.20 297.27 443.70 273.17 437.32 250.10 C 433.62 234.82 426.70 219.83 414.80 209.20 C 400.79 196.37 381.72 190.70 363.10 189.33 C 347.81 187.76 332.10 189.37 317.68 194.80 M 77.32 195.14 C 77.30 255.43 77.32 315.72 77.31 376.00 C 77.44 398.44 77.06 420.89 77.50 443.31 C 103.11 443.07 128.73 443.29 154.34 443.20 C 154.42 360.50 154.42 277.81 154.34 195.12 C 128.67 195.08 103.00 194.93 77.32 195.14 Z" />
+  </svg>
+),
+mydote: (
+  <svg fill="currentColor" viewBox="0 0 518 520" className={className}>
+    <path d="M 234.09 1.63 C 269.63 -2.07 305.96 2.03 339.82 13.44 C 374.91 25.17 407.38 44.38 434.96 68.98 C 443.12 76.50 451.45 84.01 457.79 93.20 C 464.58 103.01 472.69 111.86 479.00 122.03 C 491.68 141.66 501.00 163.29 508.21 185.47 C 514.83 205.09 517.59 225.83 518.00 246.47 L 518.00 269.50 C 518.21 304.87 509.17 339.97 493.72 371.68 C 478.16 403.78 455.98 432.55 429.37 456.26 C 405.90 475.42 379.96 491.99 351.38 502.40 C 307.10 520.13 257.67 523.98 210.94 514.96 C 164.55 505.93 120.90 483.73 85.65 452.34 C 64.95 433.95 48.00 411.66 34.23 387.71 C 14.29 352.80 2.41 313.21 0.58 273.01 C 0.34 264.00 0.31 254.99 0.60 246.00 C 2.51 209.32 12.77 173.21 29.79 140.70 C 46.86 108.23 70.35 78.88 99.48 56.44 C 138.18 26.31 185.24 6.76 234.09 1.63 M 210.98 137.34 C 162.13 148.51 121.27 190.36 113.07 240.06 C 105.39 282.35 120.59 328.45 153.12 356.84 C 159.23 361.75 165.03 367.09 171.70 371.27 C 191.11 383.78 214.08 390.08 237.01 391.39 C 274.53 392.02 311.11 374.69 336.74 347.72 C 342.99 340.37 347.99 332.04 352.53 323.55 C 365.88 298.22 373.36 270.42 384.45 244.12 C 396.12 215.94 404.01 186.31 416.78 158.57 C 398.34 149.81 378.85 143.52 359.77 136.31 C 354.39 151.54 348.98 166.77 342.80 181.70 C 342.43 182.60 341.92 183.42 341.29 184.17 C 312.24 144.73 258.52 125.22 210.98 137.34 M 378.47 328.84 C 371.37 330.61 364.69 334.38 360.12 340.19 C 354.23 347.58 350.76 357.83 353.93 367.10 C 357.72 380.74 370.87 391.01 385.03 391.25 C 400.62 390.85 414.30 377.51 415.65 362.07 C 417.96 342.60 397.74 323.93 378.47 328.84 Z" />
+    <path d="M 236.11 194.05 C 270.84 191.65 304.43 220.35 307.52 255.04 C 311.98 285.63 291.13 316.21 262.81 326.88 C 251.80 331.18 239.62 331.74 228.04 329.90 C 206.01 325.72 186.88 310.01 177.40 289.84 C 171.50 277.47 169.73 263.19 172.73 249.79 C 178.08 219.72 205.96 196.21 236.11 194.05 Z" />
+  </svg>
+),
+rubika: (
+  <svg fill="currentColor" viewBox="0 0 460 520" className={className}>
+    <path d="M 229.31 0.00 L 230.64 0.00 C 236.44 0.11 242.03 2.05 246.95 5.06 C 312.46 42.89 377.96 80.73 443.47 118.55 C 453.63 123.93 459.96 135.59 459.37 147.01 C 459.33 220.36 459.36 293.70 459.35 367.04 C 459.30 372.23 459.69 377.53 458.24 382.58 C 456.17 389.98 451.57 396.94 444.79 400.77 C 380.37 438.05 315.90 475.23 251.46 512.47 C 245.85 515.74 240.13 519.25 233.53 520.00 L 226.58 520.00 C 221.73 519.43 217.18 517.52 213.03 515.02 C 147.24 477.14 81.54 439.10 15.80 401.14 C 5.93 395.66 0.09 384.12 0.61 372.97 C 0.67 297.32 0.57 221.66 0.66 146.01 C 0.56 135.15 6.31 124.11 15.97 118.85 C 81.70 80.95 147.35 42.91 213.11 5.06 C 217.99 2.07 223.54 0.09 229.31 0.00 M 115.50 193.79 C 115.31 237.91 115.44 282.05 115.43 326.18 C 153.61 348.23 191.79 370.28 229.98 392.32 C 268.16 370.27 306.39 348.31 344.55 326.21 C 344.56 282.14 344.51 238.07 344.57 194.00 C 306.43 171.82 268.18 149.83 229.96 127.77 C 191.77 149.70 153.69 171.85 115.50 193.79 Z" />
+  </svg>
+),
+site: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="m23.414,16.09l-8.674-3.944c-.03-.014-.06-.025-.09-.036-.728-.248-1.518-.065-2.062.479s-.727,1.334-.442,2.151l3.944,8.675c.159.351.506.579.892.586h.019c.378,0,.725-.214.895-.553l1.851-3.702,3.702-1.851c.345-.173.56-.527.553-.913-.007-.385-.235-.732-.586-.892Zm-10.502,5.869c-.172.015-.345.026-.52.033-.668-.661-2.41-2.518-3.624-4.992h.732c.552,0,1-.447,1-1s-.448-1-1-1h-1.53c-.291-.952-.47-1.96-.47-3s.18-2.047.472-3h8.057c.118.387.218.783.295,1.187.104.543.629.901,1.169.795.542-.103.898-.627.795-1.169-.052-.275-.114-.546-.183-.813h3.393c.013,0,.027,0,.04,0,.299.948.46,1.956.46,3.001,0,.307-.014.61-.041.91-.049.55.356,1.036.906,1.086.552.054,1.037-.356,1.086-.906.032-.359.049-.723.049-1.09C24,5.383,18.617,0,12,0S0,5.383,0,12s5.383,12,11.999,12h0c.367,0,.73-.017,1.088-.049.55-.049.957-.534.908-1.085-.049-.549-.533-.955-1.084-.907Zm-7.02-6.959h-3.392c-.013,0-.026,0-.04,0-.299-.948-.46-1.956-.46-3.001s.161-2.053.46-3.001c.013,0,.026,0,.04,0h3.392c-.245.955-.392,1.959-.392,3s.146,2.045.392,3Zm2.881-8c1.021-2.077,2.415-3.724,3.229-4.588.815.863,2.209,2.507,3.23,4.588h-6.459Zm11.885,0h-3.228c-.791-1.886-1.888-3.488-2.832-4.657,2.579.695,4.749,2.397,6.06,4.657ZM9.4,2.344c-.944,1.169-2.042,2.771-2.832,4.656h-3.226c1.31-2.26,3.479-3.962,6.058-4.656Zm-6.058,14.656h3.226c.79,1.886,1.888,3.487,2.832,4.656-2.578-.695-4.747-2.397-6.058-4.656Z" />
+  </svg>
+),
+soroush: (
+  <svg fill="currentColor" viewBox="0 0 976.38 1000" className={className}>
+    <g id="File">
+      <path
+        d="M985.14,433.25A458,458,0,0,0,968,349a454.07,454.07,0,0,0-31.5-79.87A491,491,0,0,0,879.64,181,485.78,485.78,0,0,0,738.89,62.37c-23-12.62-46.75-24.24-71.62-32.74a431,431,0,0,0-68.38-19.38C575.64,4.75,551.77,3.38,528.14,0H472.77c-7.63,1.38-15.5,2-23.25,2.75A483.65,483.65,0,0,0,193.77,108.13c-13.63,10.49-26.25,22.12-38.5,34-26.75,27.12-51,57-70.75,89.5a440.47,440.47,0,0,0-36.88,72.62,436.29,436.29,0,0,0-24.75,80c-5.12,22.13-8,44.75-10,67.25-2.25,37.38-1.12,74.88,4.75,111.75A480.18,480.18,0,0,0,43,659.38a488.63,488.63,0,0,0,362.5,306.37c93.37,18.5,192.37,9.12,280.37-27.5,38.38,20.13,76,41.75,114.5,61.75h7.88a68.83,68.83,0,0,0,4.5-7.62c2.12-43.51,1-87.5.75-131.13C872,812.13,919.27,749.38,949,678.88a469.45,469.45,0,0,0,33.5-117.51A483.44,483.44,0,0,0,985.14,433.25ZM699.52,592.38a209.69,209.69,0,0,1-24.63,75.37c-32.87,56-89.12,96-150.5,115.38-86.87,28-186.5,10.49-258.87-45.13-20.25-17-41.63-34.62-54.75-58,10.25,1.63,18.75,7.63,28.37,10.75,44.5,14.63,96.5,6.63,132.5-23.75,25.25-20.12,43.38-49.38,49.63-81,6.12-29.37,1.5-59.75-6.88-88.13-7.25-27.24-17.62-53.74-23-81.49-4.37-26-4.62-52.63.5-78.5a203.46,203.46,0,0,1,44.25-91c40.38-45.5,101.38-72.75,162.5-67.38.63.5,1.75,1.38,2.25,1.75-29.25,22.25-44.5,62.63-32.25,98.13,8.13,24.74,22.75,47,38.38,67.75,16.62,23.62,35.12,45.87,50.75,70.37,13.5,22.88,25,47.13,32.87,72.63C699.89,523.25,704,558.13,699.52,592.38Z"
+        transform="translate(-11.81)"
+      />
+    </g>
+  </svg>
+),
+telegram: (
+  <svg fill="currentColor" viewBox="0 0 520 520" className={className}>
+    <path d="M 231.53 1.73 C 273.51 -2.84 316.65 2.76 355.88 18.46 C 410.30 39.93 456.87 80.47 485.76 131.31 C 506.74 167.97 518.56 209.80 519.66 252.04 C 520.95 293.63 512.30 335.57 493.99 372.98 C 478.84 404.51 457.10 432.80 430.76 455.80 C 401.77 481.18 366.99 499.92 329.89 510.31 C 284.03 523.09 234.66 522.92 188.86 509.97 C 146.55 497.87 107.30 474.94 76.31 443.65 C 53.03 420.56 34.32 392.92 21.38 362.80 C 2.96 320.75 -3.39 273.67 2.14 228.16 C 8.05 178.18 29.28 130.20 61.89 91.91 C 104.21 41.72 166.17 8.52 231.53 1.73 M 357.66 154.65 C 319.20 170.47 280.90 186.69 242.42 202.47 C 199.97 220.04 157.44 237.41 115.01 255.02 C 107.37 258.33 98.81 260.69 92.95 266.95 C 90.07 269.72 89.34 274.63 92.12 277.71 C 94.18 281.03 98.13 282.02 101.61 283.10 C 113.41 287.07 125.28 290.86 137.16 294.62 C 144.59 296.92 152.12 299.28 159.96 299.53 C 167.37 299.87 175.28 298.83 181.44 294.39 C 212.87 273.17 244.34 252.03 275.77 230.83 C 284.95 224.83 293.77 218.04 303.98 213.83 C 306.72 212.72 310.95 211.36 312.54 214.83 C 310.52 224.32 302.72 230.66 296.15 237.12 C 272.87 260.24 248.83 282.55 224.82 304.90 C 220.63 308.55 217.16 314.25 218.95 319.96 C 220.78 326.20 226.57 329.80 231.37 333.62 C 254.73 351.34 279.62 366.89 303.96 383.20 C 311.97 388.32 320.63 392.85 330.07 394.53 C 334.27 394.91 338.89 395.03 342.53 392.53 C 348.37 388.69 351.17 381.72 352.20 375.06 C 360.74 321.39 369.45 267.76 377.56 214.03 C 379.95 198.04 382.66 182.09 384.17 166.00 C 383.94 160.95 382.10 155.04 376.89 153.12 C 370.65 150.89 363.67 152.28 357.66 154.65 Z" />
+  </svg>
+),
+virasty: (
+  <svg fill="currentColor" viewBox="0 0 520 520" className={className}>
+    <path d="M 250.73 0.00 L 347.31 0.00 C 347.47 27.33 347.16 54.66 347.51 81.99 C 347.66 90.68 347.16 99.48 349.06 108.03 C 356.03 142.88 388.25 171.37 424.03 172.46 C 455.84 173.04 487.66 172.62 519.47 172.74 C 519.16 201.83 519.49 230.91 519.47 260.00 C 520.50 331.22 489.27 401.79 437.09 450.04 C 389.12 494.77 323.68 520.50 258.03 519.48 C 252.26 519.68 246.42 518.95 240.71 520.00 L 24.36 520.00 C 23.95 511.34 24.08 502.65 24.21 493.98 C 24.36 484.55 26.03 474.94 30.71 466.64 C 38.95 451.48 54.63 440.32 71.88 438.40 C 93.53 436.88 115.25 438.64 136.91 437.57 C 143.52 437.08 145.74 427.87 141.57 423.40 C 139.31 420.47 135.25 420.79 131.95 420.63 C 115.96 420.54 99.98 420.74 83.99 420.53 C 74.88 420.42 65.63 421.15 56.97 424.16 C 41.35 429.09 28.15 439.92 18.62 453.07 C 17.84 449.07 18.52 444.99 18.38 440.96 C 18.19 428.98 18.17 416.99 18.30 405.01 C 18.23 379.89 36.88 356.39 61.00 349.90 C 71.70 346.86 82.95 347.56 93.93 347.72 C 149.62 347.60 205.31 347.71 261.00 347.66 C 288.86 347.46 316.05 332.79 331.81 309.88 C 344.70 291.87 349.87 268.73 346.59 246.89 C 344.54 232.47 338.68 218.67 329.83 207.11 C 316.43 189.26 296.01 176.84 274.00 173.16 C 256.58 170.36 238.33 172.90 222.39 180.51 C 201.31 190.36 184.64 209.06 176.96 231.00 C 171.28 246.65 170.35 263.94 174.27 280.12 C 179.11 300.02 191.35 317.72 207.25 330.45 C 165.50 330.36 123.74 330.81 81.99 330.37 C 75.95 330.38 69.86 330.34 63.91 331.51 C 46.62 334.55 30.95 344.17 19.17 357.02 C -0.16 310.16 -4.52 257.48 5.37 207.86 C 15.10 158.91 39.56 113.09 74.56 77.55 C 102.91 48.66 138.08 26.46 176.47 13.57 C 200.38 5.37 225.51 1.09 250.73 0.00 Z" />
+    <path d="M 364.70 0.00 L 485.99 0.00 C 503.00 1.24 518.58 15.62 519.28 32.97 C 519.76 73.59 519.10 114.21 519.45 154.83 C 486.62 154.51 453.80 155.72 420.98 154.68 C 391.40 152.38 365.89 125.66 365.06 95.98 C 363.98 63.99 365.08 31.99 364.70 0.00 M 396.99 123.17 C 406.06 131.02 417.79 136.37 429.98 135.76 C 453.42 135.74 476.87 135.73 500.31 135.45 C 499.90 102.30 500.49 69.14 500.07 35.99 C 499.95 31.78 497.56 28.18 495.75 24.52 C 462.75 57.33 429.96 90.34 396.99 123.17 Z" />
+    <path d="M 257.92 190.87 C 275.78 190.41 293.66 197.06 307.01 208.90 C 318.81 219.13 326.64 233.63 329.13 249.01 C 331.51 263.50 329.27 278.71 322.83 291.91 C 316.33 305.31 305.12 316.23 291.89 322.96 C 275.03 331.26 254.94 332.58 237.05 326.90 C 224.35 322.84 213.01 314.84 204.58 304.54 C 194.58 292.05 188.91 276.04 189.21 260.01 C 189.20 241.75 196.81 223.60 210.05 210.98 C 222.65 198.39 240.19 191.40 257.92 190.87 Z" />
+  </svg>
+),
+virgool: (
+  <svg fill="currentColor" viewBox="0 0 414 520" className={className}>
+    <path d="M 140.89 11.17 C 170.91 1.00 203.19 -1.76 234.60 1.99 C 198.02 49.25 161.04 96.20 124.30 143.35 C 118.85 150.18 114.11 157.60 110.57 165.61 C 100.09 188.84 98.96 215.99 107.17 240.09 C 114.79 263.05 130.58 283.11 151.03 296.01 C 172.38 309.71 198.75 315.43 223.82 311.41 C 247.98 307.75 270.71 295.08 286.22 276.16 C 300.92 258.61 309.23 235.90 309.42 213.03 C 309.74 191.50 303.06 170.00 290.85 152.29 C 274.16 127.89 246.87 111.05 217.58 107.08 C 240.91 76.94 264.55 47.03 287.89 16.89 C 328.31 33.79 362.92 64.11 385.25 101.78 C 402.44 130.65 412.30 163.79 414.00 197.33 L 414.00 218.57 C 412.25 251.10 402.83 283.22 386.41 311.38 C 377.42 327.22 365.53 341.11 354.48 355.51 C 311.60 410.32 268.83 465.21 225.91 520.00 L 96.03 520.00 C 123.53 484.09 151.74 448.72 179.39 412.93 C 141.89 407.98 105.96 392.25 76.56 368.50 C 49.15 346.39 27.57 317.14 14.58 284.41 C 6.12 263.43 1.44 241.03 0.00 218.47 L 0.00 199.29 C 1.43 161.70 13.24 124.47 34.23 93.21 C 59.35 55.04 97.50 25.58 140.89 11.17 Z" />
+  </svg>
+),
+whatsapp: (
+  <svg fill="currentColor" viewBox="0 0 516 520" className={className}>
+    <path d="M 200.43 7.74 C 239.11 -1.97 280.12 -2.52 319.01 6.36 C 379.68 19.88 434.51 57.05 470.04 107.98 C 495.24 143.81 510.88 186.30 514.78 229.94 C 519.17 277.07 510.15 325.41 488.64 367.61 C 472.27 399.99 448.83 428.76 420.46 451.37 C 393.27 473.11 361.55 489.17 327.89 498.08 C 266.59 514.58 199.13 506.90 143.28 476.64 C 142.01 476.10 140.72 474.87 139.25 475.46 C 92.86 490.19 46.56 505.22 0.16 519.91 C 15.44 474.64 30.56 429.32 45.88 384.06 C 15.97 335.04 3.98 275.58 11.86 218.74 C 15.77 190.01 24.70 161.96 38.14 136.25 C 58.29 97.52 88.68 64.19 125.36 40.52 C 148.37 25.57 173.85 14.51 200.43 7.74 M 115.56 102.52 C 90.10 127.43 70.94 158.79 60.79 192.96 C 51.26 224.62 49.57 258.55 55.38 291.08 C 60.90 322.02 73.78 351.47 92.06 376.98 C 83.45 403.02 74.45 428.93 65.98 455.01 C 93.02 446.60 119.90 437.69 146.92 429.24 C 176.55 449.11 211.48 460.89 247.03 463.51 C 284.89 466.39 323.52 458.77 357.38 441.56 C 390.48 424.87 419.02 399.30 439.23 368.22 C 461.71 333.97 473.78 292.98 473.35 252.00 C 473.40 195.98 449.48 140.58 409.05 101.86 C 370.24 63.94 316.26 41.97 261.95 42.57 C 207.77 42.31 154.16 64.61 115.56 102.52 Z" />
+    <path d="M 171.34 130.33 C 177.75 128.18 184.46 130.26 191.00 130.30 C 193.22 130.44 195.65 130.11 197.66 131.28 C 200.94 133.12 202.84 136.60 204.24 139.96 C 210.83 157.36 217.00 174.93 223.74 192.28 C 225.26 195.70 224.57 199.59 222.70 202.72 C 219.39 209.95 213.46 215.39 208.27 221.24 C 205.59 224.16 201.66 226.70 201.34 231.02 C 201.39 234.37 203.39 237.23 204.90 240.09 C 214.06 256.03 225.03 271.07 238.46 283.69 C 251.67 296.33 267.01 306.71 283.62 314.35 C 287.60 316.06 291.35 319.18 295.94 318.75 C 299.04 318.71 301.13 316.12 303.13 314.10 C 310.35 306.30 317.51 298.43 324.00 290.01 C 325.68 287.90 328.07 286.00 330.92 286.23 C 335.90 286.51 340.24 289.29 344.66 291.32 C 360.00 299.25 375.27 307.35 390.33 315.79 C 396.21 318.94 394.04 326.53 393.53 331.86 C 391.60 341.48 389.34 351.90 382.00 358.97 C 374.68 366.18 365.67 371.58 356.15 375.36 C 352.26 376.87 348.25 378.25 344.05 378.55 C 339.01 378.94 334.11 380.66 329.02 380.30 C 318.68 379.58 308.86 375.98 299.14 372.66 C 285.59 367.55 272.14 362.10 259.07 355.86 C 227.55 339.84 201.53 314.77 180.11 286.98 C 173.24 278.02 166.88 268.68 160.95 259.09 C 149.08 241.63 139.26 222.06 136.70 200.87 C 134.38 180.66 140.15 159.23 153.93 144.02 C 159.03 138.70 163.97 132.49 171.34 130.33 Z" />
+  </svg>
+),
+x: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="m18.9,1.153h3.682l-8.042,9.189,9.46,12.506h-7.405l-5.804-7.583-6.634,7.583H.469l8.6-9.831L0,1.153h7.593l5.241,6.931,6.065-6.931Zm-1.293,19.494h2.039L6.482,3.239h-2.19l13.314,17.408Z" />
+  </svg>
+),
+youtube: (
+      <svg fill="currentColor" viewBox="0 0 520 360" className={className}>
+        <path d="M 181.34 1.45 C 194.24 1.42 207.12 0.60 220.02 0.68 C 278.04 0.10 336.09 0.72 394.04 3.70 C 414.44 5.15 434.97 5.78 455.15 9.36 C 470.26 12.07 484.74 19.44 494.80 31.18 C 501.50 38.86 506.39 48.11 508.82 58.01 C 514.06 79.97 516.49 102.49 518.20 124.97 C 520.42 159.23 520.39 193.65 518.47 227.94 C 516.83 252.73 514.30 277.55 509.13 301.89 C 503.69 325.45 483.62 344.67 459.98 349.47 C 439.81 353.51 419.23 354.78 398.75 356.28 C 387.49 356.92 376.23 357.61 364.96 357.83 C 352.31 358.82 339.60 358.33 326.94 359.13 C 274.63 359.93 222.29 359.84 170.00 358.09 C 134.65 356.50 99.13 355.49 64.10 350.03 C 39.06 346.53 17.39 326.58 11.59 302.01 C 6.34 279.72 4.24 256.84 2.64 234.05 C 0.09 189.76 0.61 145.25 4.77 101.08 C 6.40 86.75 8.06 72.38 11.28 58.30 C 16.78 34.65 37.14 15.26 61.00 10.81 C 90.05 5.78 119.55 4.18 148.95 2.61 C 159.75 2.32 170.53 1.58 181.34 1.45 M 210.03 161.01 C 209.79 179.67 210.01 198.32 210.10 216.97 C 209.63 230.30 210.03 243.64 209.85 256.97 C 211.08 256.48 212.28 255.95 213.47 255.37 C 257.55 230.16 301.83 205.29 345.85 180.00 C 300.79 154.12 255.48 128.66 210.37 102.86 C 209.51 122.24 210.43 141.62 210.03 161.01 Z" />
       </svg>
     ),
+home: (
+  <svg fill="currentColor" viewBox="0 0 512 512" className={className}>
+    <g>
+      <path d="M256,319.841c-35.346,0-64,28.654-64,64v128h128v-128C320,348.495,291.346,319.841,256,319.841z" />
+      <g>
+        <path d="M362.667,383.841v128H448c35.346,0,64-28.654,64-64V253.26c0.005-11.083-4.302-21.733-12.011-29.696l-181.29-195.99 c-31.988-34.61-85.976-36.735-120.586-4.747c-1.644,1.52-3.228,3.103-4.747,4.747L12.395,223.5 C4.453,231.496-0.003,242.31,0,253.58v194.261c0,35.346,28.654,64,64,64h85.333v-128c0.399-58.172,47.366-105.676,104.073-107.044 C312.01,275.383,362.22,323.696,362.667,383.841z" />
+        <path d="M256,319.841c-35.346,0-64,28.654-64,64v128h128v-128C320,348.495,291.346,319.841,256,319.841z" />
+      </g>
+    </g>
+  </svg>
+),
+browser: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="m0 9v9a5.006 5.006 0 0 0 5 5h14a5.006 5.006 0 0 0 5-5v-9zm14 10h-8a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2zm4-4h-12a1 1 0 0 1 0-2h12a1 1 0 0 1 0 2zm6-8v-1a5.006 5.006 0 0 0 -5-5h-14a5.006 5.006 0 0 0 -5 5v1zm-14-4a1 1 0 1 1 -1 1 1 1 0 0 1 1-1zm-3 0a1 1 0 1 1 -1 1 1 1 0 0 1 1-1zm-3 0a1 1 0 1 1 -1 1 1 1 0 0 1 1-1z" />
+  </svg>
+),
+layout: (
+  <svg fill="currentColor" viewBox="0 0 512 512" className={className}>
+    <g>
+      <path d="M42.667,234.667h234.667C300.897,234.667,320,215.564,320,192V42.667C320,19.103,300.897,0,277.333,0H42.667 C19.103,0,0,19.103,0,42.667V192C0,215.564,19.103,234.667,42.667,234.667z" />
+      <path d="M504.704,18.816C496.775,7.054,483.518,0.002,469.333,0h-64c-23.564,0-42.667,19.103-42.667,42.667V192 c0,23.564,19.102,42.667,42.667,42.667h64C492.898,234.667,512,215.564,512,192V42.667 C512.014,34.165,509.472,25.855,504.704,18.816z" />
+      <path d="M130.517,284.629c-7.039-4.768-15.349-7.31-23.851-7.296h-64C19.103,277.333,0,296.436,0,320v149.333 C0,492.898,19.103,512,42.667,512h64c23.564,0,42.667-19.103,42.667-42.667V320C149.331,305.815,142.279,292.559,130.517,284.629z" />
+      <path d="M493.184,284.629c-7.039-4.768-15.349-7.31-23.851-7.296H234.667C211.103,277.333,192,296.436,192,320v149.333 C192,492.898,211.103,512,234.667,512h234.667C492.898,512,512,492.898,512,469.333V320 C511.998,305.815,504.946,292.559,493.184,284.629z" />
+    </g>
+  </svg>
+),
+chart: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="M19,1H5C2.243,1,0,3.243,0,6V14c0,2.757,2.243,5,5,5h6v2H7c-.552,0-1,.448-1,1s.448,1,1,1h10c.552,0,1-.448,1-1s-.448-1-1-1h-4v-2h6c2.757,0,5-2.243,5-5V6c0-2.757-2.243-5-5-5Zm1,9.978c0,.552-.448,1-1,1s-1-.448-1-1v-1.563l-3.504,3.504c-.881,.882-2.418,.882-3.299,0l-1.862-1.862c-.13-.13-.341-.13-.471,0l-3.154,3.154c-.195,.195-.451,.293-.707,.293s-.512-.098-.707-.293c-.391-.391-.391-1.023,0-1.414l3.154-3.154c.909-.91,2.39-.91,3.299,0l1.862,1.862c.17,.17,.301,.17,.471,0l3.504-3.504h-1.586c-.552,0-1-.448-1-1s.448-1,1-1h3.5c.827,0,1.5,.673,1.5,1.5v3.478Z" />
+  </svg>
+),
+foldertree: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="M10,8v-1H2V15c0,1.654,1.346,3,3,3h5v-2c0-1.654,1.346-3,3-3h2.586c.534,0,1.036,.208,1.414,.586l1.414,1.414h2.586c1.654,0,3,1.346,3,3v3c0,1.654-1.346,3-3,3H13c-1.654,0-3-1.346-3-3v-1H5c-2.757,0-5-2.243-5-5V1C.006-.308,1.995-.307,2,1V5H10V3c0-1.654,1.346-3,3-3h2.586c.534,0,1.036,.208,1.414,.586l1.414,1.414h2.586c1.654,0,3,1.346,3,3v3c0,1.654-1.346,3-3,3H13c-1.654,0-3-1.346-3-3Z" />
+  </svg>
+),
+comment: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="M20,0H4A4,4,0,0,0,0,4V16a4,4,0,0,0,4,4H6.9l4.451,3.763a1,1,0,0,0,1.292,0L17.1,20H20a4,4,0,0,0,4-4V4A4,4,0,0,0,20,0ZM7,5h5a1,1,0,0,1,0,2H7A1,1,0,0,1,7,5ZM17,15H7a1,1,0,0,1,0-2H17a1,1,0,0,1,0,2Zm0-4H7A1,1,0,0,1,7,9H17a1,1,0,0,1,0,2Z" />
+  </svg>
+),
+setting: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="m23.958 14.186c-.342 2.745-2.688 4.814-5.458 4.814h-5v2h2.5c.829 0 1.5.671 1.5 1.5s-.671 1.5-1.5 1.5h-8c-.829 0-1.5-.671-1.5-1.5s.671-1.5 1.5-1.5h2.5v-2h-5c-3.033 0-5.5-2.467-5.5-5.5v-6c0-3.033 2.467-5.5 5.5-5.5h3c.829 0 1.5.671 1.5 1.5s-.671 1.5-1.5 1.5h-3c-1.378 0-2.5 1.122-2.5 2.5v6c0 1.378 1.122 2.5 2.5 2.5h13c1.259 0 2.325-.939 2.481-2.186.102-.823.854-1.409 1.674-1.303.822.103 1.405.852 1.303 1.674zm-11.038-6.485.663-.383c-.049-.266-.083-.538-.083-.818s.033-.552.083-.818l-.663-.383c-.717-.414-.963-1.332-.549-2.049.415-.718 1.332-.963 2.049-.549l.676.39c.413-.352.884-.629 1.404-.815v-.776c0-.829.671-1.5 1.5-1.5s1.5.671 1.5 1.5v.776c.521.186.992.463 1.404.815l.676-.39c.719-.415 1.635-.169 2.049.549.415.717.168 1.635-.549 2.049l-.663.383c.049.266.083.538.083.818s-.033.552-.083.818l.663.383c.717.414.963 1.332.549 2.049-.417.724-1.344.96-2.049.549l-.676-.39c-.413.352-.884.629-1.404.815v.776c0 .829-.671 1.5-1.5 1.5s-1.5-.671-1.5-1.5v-.776c-.521-.186-.992-.463-1.404-.815l-.676.39c-.705.411-1.632.175-2.049-.549-.415-.717-.168-1.635.549-2.049zm3.58-1.201c0 .827.673 1.5 1.5 1.5s1.5-.673 1.5-1.5-.673-1.5-1.5-1.5-1.5.673-1.5 1.5z" />
+  </svg>
+),
+datetime: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="M24,7v1H0v-1C0,4.239,2.239,2,5,2h1V1c0-.552,.448-1,1-1h0c.552,0,1,.448,1,1v1h8V1c0-.552,.448-1,1-1h0c.552,0,1,.448,1,1v1h1c2.761,0,5,2.239,5,5Zm0,10c0,3.86-3.141,7-7,7s-7-3.14-7-7,3.141-7,7-7,7,3.14,7,7Zm-5,.586l-1-1v-1.586c0-.552-.448-1-1-1h0c-.552,0-1,.448-1,1v2c0,.265,.105,.52,.293,.707l1.293,1.293c.39,.39,1.024,.39,1.414,0h0c.39-.39,.39-1.024,0-1.414Zm-11-.586c0-2.829,1.308-5.35,3.349-7H0v9c0,2.761,2.239,5,5,5h6.349c-2.041-1.65-3.349-4.171-3.349-7Z" />
+  </svg>
+),
+logout: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="M11.5,16A1.5,1.5,0,0,0,10,17.5v.8A2.7,2.7,0,0,1,7.3,21H5.7A2.7,2.7,0,0,1,3,18.3V5.7A2.7,2.7,0,0,1,5.7,3H7.3A2.7,2.7,0,0,1,10,5.7v.8a1.5,1.5,0,0,0,3,0V5.7A5.706,5.706,0,0,0,7.3,0H5.7A5.706,5.706,0,0,0,0,5.7V18.3A5.706,5.706,0,0,0,5.7,24H7.3A5.706,5.706,0,0,0,13,18.3v-.8A1.5,1.5,0,0,0,11.5,16Z" />
+    <path d="M22.561,9.525,17.975,4.939a1.5,1.5,0,0,0-2.121,2.122l3.411,3.411L7,10.5a1.5,1.5,0,0,0,0,3H7l12.318-.028-3.467,3.467a1.5,1.5,0,0,0,2.121,2.122l4.586-4.586A3.505,3.505,0,0,0,22.561,9.525Z" />
+  </svg>
+),
+solarsystem: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="m17,4.5c0-1.381,1.119-2.5,2.5-2.5s2.5,1.119,2.5,2.5-1.119,2.5-2.5,2.5-2.5-1.119-2.5-2.5Zm-9,5.5c1.105,0,2-.895,2-2s-.895-2-2-2-2,.895-2,2,.895,2,2,2Zm5.5,2c0-.828-.672-1.5-1.5-1.5s-1.5.672-1.5,1.5.672,1.5,1.5,1.5,1.5-.672,1.5-1.5Zm10.282-2.284c-.157-.814-.949-1.348-1.757-1.188-.813.157-1.346.943-1.188,1.757.108.562.163,1.139.163,1.716,0,4.963-4.037,9-9,9S3,16.963,3,12,7.037,3,12,3c.577,0,1.154.055,1.716.163.804.156,1.6-.374,1.757-1.188.157-.813-.375-1.6-1.188-1.757-.748-.145-1.517-.218-2.284-.218C5.383,0,0,5.383,0,12s5.383,12,12,12,12-5.383,12-12c0-.768-.073-1.536-.218-2.284Zm-11.726-3.417c-.226.797.237,1.626,1.035,1.852,1.712.484,2.908,2.067,2.908,3.85,0,2.206-1.794,4-4,4-1.782,0-3.365-1.196-3.85-2.908-.226-.798-1.056-1.263-1.852-1.035-.798.226-1.261,1.055-1.035,1.852.849,2.998,3.618,5.092,6.736,5.092,3.859,0,7-3.141,7-7,0-3.118-2.094-5.888-5.092-6.736-.794-.227-1.626.237-1.852,1.035Z" />
+  </svg>
+),
+code: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="m3 5.5c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5zm5.5 1.5c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5-1.5.672-1.5 1.5.672 1.5 1.5 1.5zm15.5-1v12c0 2.757-2.243 5-5 5h-14c-2.757 0-5-2.243-5-5v-12c0-2.757 2.243-5 5-5h14c2.757 0 5 2.243 5 5zm-22 0v2h20v-2c0-1.654-1.346-3-3-3h-14c-1.654 0-3 1.346-3 3zm20 12v-8h-20v8c0 1.654 1.346 3 3 3h14c1.654 0 3-1.346 3-3zm-11.793-4.793c.391-.391.391-1.023 0-1.414s-1.023-.391-1.414 0l-2.181 2.181c-.872.872-.872 2.29.019 3.18l2.181 2.071c.399.381 1.033.365 1.413-.036.381-.4.364-1.033-.036-1.413l-2.162-2.054c-.092-.092-.092-.242 0-.334l2.181-2.181zm5-1.414c-.391-.391-1.023-.391-1.414 0s-.391 1.023 0 1.414l2.181 2.181c.092.092.092.242.011.323l-2.159 2.093c-.396.384-.406 1.018-.021 1.414.385.397 1.018.406 1.414.021l2.17-2.104c.872-.872.872-2.29 0-3.162l-2.181-2.181z" />
+  </svg>
+),
+portfolio: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="m14 5.5c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5zm-.274 4.5h3.548c.405 0 .685-.39.502-.719-.42-.759-1.279-1.281-2.276-1.281s-1.856.521-2.276 1.281c-.182.329.097.719.502.719zm10.166 4.29-1.532 6.116c-.642 2.143-2.611 3.594-4.801 3.594h-12.559c-2.757 0-5-2.23-5-4.987v-11c0-1.418.762-2.742 1.988-3.457.479-.276 1.089-.116 1.368.361.278.477.116 1.089-.361 1.367-.614.357-.995 1.02-.995 1.729v11c0 .695.238 1.336.636 1.845l2.19-7.138c.048-.139.112-.267.174-.398v-7.322c0-2.206 1.794-4 4-4h.556c.694-1.19 1.97-2 3.444-2h5c2.206 0 4 1.794 4 4v7.064c.593.13 1.12.464 1.494.966.351.471.506.999.506 1.598 0 .221-.043.443-.108.661zm-12.892-10.29v7h9v-7c0-1.103-.897-2-2-2h-5c-1.103 0-2 .897-2 2zm-4 2v5.353c.5-.223 1.045-.353 1.615-.353h.385v-7c-1.103 0-2 .897-2 2zm14.889 7.224c-.062-.083-.203-.224-.446-.224h-12.828c-.85 0-1.609.539-1.889 1.342l-2.334 7.609c.196.04.399.062.607.062h12.558c1.314 0 2.496-.878 2.873-2.137l1.532-6.116c.082-.276-.012-.452-.074-.536z" />
+  </svg>
+),
+group: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="m10,2c0-1.105.895-2,2-2s2,.895,2,2-.895,2-2,2-2-.895-2-2Zm4,15c0-1.105-.895-2-2-2s-2,.895-2,2,.895,2,2,2,2-.895,2-2Zm6.5-9c-1.105,0-2,.895-2,2s.895,2,2,2,2-.895,2-2-.895-2-2-2Zm-15,2c0-1.105-.895-2-2-2s-2,.895-2,2,.895,2,2,2,2-.895,2-2Zm1.224,6.633c.19-.232.265-.538.206-.832-.33-1.623-1.772-2.801-3.43-2.801S.4,14.178.07,15.801c-.06.294.016.6.206.832s.474.367.774.367h4.899c.3,0,.584-.135.774-.367Zm5.276-11.633c-1.657,0-3.1,1.178-3.43,2.801-.06.294.016.6.206.832s.474.367.774.367h4.899c.3,0,.584-.135.774-.367s.265-.538.206-.832c-.33-1.623-1.772-2.801-3.43-2.801Zm0,15c-1.657,0-3.1,1.178-3.43,2.801-.06.294.016.6.206.832s.474.367.774.367h4.899c.3,0,.584-.135.774-.367s.265-.538.206-.832c-.33-1.623-1.772-2.801-3.43-2.801Zm8.5-7.5c-1.657,0-3.1,1.178-3.43,2.801-.06.294.016.6.206.832s.474.367.774.367h4.899c.3,0,.584-.135.774-.367s.265-.538.206-.832c-.33-1.623-1.772-2.801-3.43-2.801ZM7,2h-1c-2.206,0-4,1.794-4,4,0,.553.448,1,1,1s1-.447,1-1c0-1.103.897-2,2-2h1c.552,0,1-.447,1-1s-.448-1-1-1Zm11,2c1.103,0,2,.897,2,2,0,.553.448,1,1,1s1-.447,1-1c0-2.206-1.794-4-4-4h-1c-.552,0-1,.447-1,1s.448,1,1,1h1Zm3.162,14.057c-.52-.181-1.092.089-1.276.61-.282.797-1.04,1.333-1.886,1.333-.552,0-1,.447-1,1s.448,1,1,1c1.692,0,3.208-1.071,3.772-2.667.184-.521-.089-1.092-.61-1.276Zm-15.162,1.943c-.847,0-1.604-.536-1.886-1.333-.184-.521-.754-.79-1.276-.61-.521.185-.794.756-.61,1.276.563,1.596,2.08,2.667,3.772,2.667.552,0,1-.447,1-1s-.448-1-1-1Z" />
+  </svg>
+),
+shareNetwork: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="M19.333,14.667a4.66,4.66,0,0,0-3.839,2.024L8.985,13.752a4.574,4.574,0,0,0,.005-3.488l6.5-2.954a4.66,4.66,0,1,0-.827-2.643,4.633,4.633,0,0,0,.08.786L7.833,8.593a4.668,4.668,0,1,0-.015,6.827l6.928,3.128a4.736,4.736,0,0,0-.079.785,4.667,4.667,0,1,0,4.666-4.666ZM19.333,2a2.667,2.667,0,1,1-2.666,2.667A2.669,2.669,0,0,1,19.333,2ZM4.667,14.667A2.667,2.667,0,1,1,7.333,12,2.67,2.67,0,0,1,4.667,14.667ZM19.333,22A2.667,2.667,0,1,1,22,19.333,2.669,2.669,0,0,1,19.333,22Z" />
+  </svg>
+),
+networking: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="m24,12.5c0,2.062-.819,3.984-2.308,5.412-.399.382-1.031.369-1.414-.029-.382-.398-.369-1.031.029-1.414,1.092-1.047,1.692-2.457,1.692-3.969,0-2.614-1.857-4.882-4.417-5.394-.958-.191-1.744-.8-2.158-1.673-1.182-2.494-3.816-3.832-6.568-3.329-2.406.44-4.368,2.439-4.771,4.862-.122.737-.114,1.471.023,2.18.191.989-.178,2.047-.962,2.762-.729.663-1.147,1.606-1.147,2.591,0,1.787,1.337,3.282,3.11,3.479.549.061.944.556.884,1.104-.057.511-.49.89-.993.89-.036,0-.073-.002-.111-.006-2.787-.309-4.89-2.659-4.89-5.467,0-1.546.656-3.03,1.801-4.07.272-.248.405-.594.346-.902-.184-.943-.194-1.916-.033-2.889C2.66,3.349,5.226.736,8.497.137c3.591-.658,7.184,1.167,8.734,4.439.141.295.411.502.742.569,3.492.697,6.026,3.79,6.026,7.354Zm-5.693,7.279l-1.307,1.243v-9.022c0-.552-.447-1-1-1s-1,.448-1,1v9.037l-1.307-1.258c-.398-.383-1.031-.371-1.414.027-.383.397-.371,1.031.027,1.414l2.279,2.193c.392.392.906.587,1.419.587.508,0,1.015-.192,1.396-.573l2.293-2.207c.398-.383.41-1.017.027-1.414-.384-.398-1.018-.41-1.414-.027Zm-6.307-4.279c.263,0,.524-.103.721-.307.383-.397.371-1.031-.027-1.414l-2.279-2.193c-.779-.78-2.049-.78-2.814-.014l-2.293,2.207c-.398.383-.41,1.017-.027,1.414.383.398,1.018.41,1.414.027l1.307-1.243v9.022c0,.553.447,1,1,1s1-.447,1-1v-9.037l1.307,1.258c.194.187.443.279.693.279Z" />
+  </svg>
+),
+law: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="M23.944,12.669l-3.031-8.66c-.42-1.202-1.559-2.01-2.832-2.01h-5.081V1c-.006-1.308-1.995-1.307-2,0v1H5.919c-1.273,0-2.412,.808-2.832,2.009L.056,12.669c-.037,.106-.056,.632-.056,.632,0,2.506,1.871,4.567,4.26,4.692,1.241,.069,2.434-.371,3.338-1.229,.892-.846,1.402-2.036,1.402-3.264,0,0-.021-.732-.061-.842L5.794,4.008c.041-.005,.083-.008,.125-.008h5.081V22H5c-1.308,.006-1.307,1.995,0,2h14c1.308-.006,1.307-1.995,0-2h-6V4h5.081c.042,0,.084,.002,.125,.008l-3.146,8.65c-.04,.109-.061,.842-.061,.842,0,1.229,.511,2.418,1.402,3.264,2.809,2.701,7.648,.752,7.598-3.462,0,0-.019-.526-.056-.632Zm-17.372-.669H2.409l2.042-5.833,2.121,5.833Zm12.977-5.833l2.042,5.833h-4.163l2.121-5.833Z" />
+  </svg>
+),
+product: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="M19,0H5C2.243,0,0,2.243,0,5V13c0,2.757,2.243,5,5,5h14c2.757,0,5-2.243,5-5V5c0-2.757-2.243-5-5-5Zm3,13c0,1.654-1.346,3-3,3H5c-1.654,0-3-1.346-3-3V5c0-1.654,1.346-3,3-3h14c1.654,0,3,1.346,3,3V13Zm-12,9c0,1.105-.895,2-2,2s-2-.895-2-2,.895-2,2-2,2,.895,2,2ZM15.329,7.009l-3.997-2.221c-1.444-.867-3.44,.307-3.384,1.991v4.441c-.057,1.684,1.94,2.857,3.384,1.991l3.998-2.221c1.539-.795,1.539-3.187,0-3.981Zm-.972,2.233l-3.997,2.221c-.115,.064-.213,.033-.275-.003-.062-.037-.137-.108-.137-.239V6.779c0-.131,.074-.203,.137-.239,.036-.021,.084-.041,.141-.041,.041,0,.086,.01,.135,.037l3.997,2.221c.119,.066,.144,.168,.144,.243s-.025,.177-.143,.243Zm9.643,12.757c0,.553-.448,1-1,1H13c-.552,0-1-.447-1-1s.448-1,1-1h10c.552,0,1,.447,1,1Zm-20,0c0,.553-.448,1-1,1H1c-.552,0-1-.447-1-1s.448-1,1-1H3c.552,0,1,.447,1,1Z" />
+  </svg>
+),
+footage: (
+  <svg fill="currentColor" viewBox="0 0 24 24" className={className}>
+    <path d="m10 12h-3c-1.654 0-3 1.346-3 3v2c0 1.654 1.346 3 3 3h3c1.42 0 2.606-.994 2.916-2.321l1.46 1.117c.669.502 1.625.024 1.625-.812v-3.939c0-.836-.956-1.314-1.625-.812l-1.458 1.094c-.308-1.329-1.495-2.326-2.917-2.326zm1 5c0 .551-.449 1-1 1h-3c-.551 0-1-.449-1-1v-2c0-.551.449-1 1-1h3c.551 0 1 .449 1 1zm4.216-6.337c.77.449 1.684.447 2.464.007l5.069-3.03c.783-.441 1.251-1.241 1.251-2.139s-.468-1.698-1.229-2.126l-5.114-3.057c-.769-.432-1.68-.423-2.441.02-.762.445-1.216 1.237-1.216 2.119v6.087c0 .882.454 1.674 1.216 2.119zm.784-8.206c0-.375.33-.592.654-.409l5.114 3.057c.332.262.332.542-.022.805l-5.069 3.03c-.378.148-.677.005-.677-.396zm8 8.543v8c0 2.757-2.243 5-5 5h-14c-2.757 0-5-2.243-5-5v-12c0-2.757 2.243-5 5-5h2.528c.463 0 .927.109 1.341.316l2.578 1.289c.494.247.694.848.447 1.342s-.847.696-1.342.447l-2.578-1.289c-.138-.069-.293-.105-.447-.105h-2.528c-1.654 0-3 1.346-3 3v1h9.001c.552 0 1 .448 1 1s-.448 1-1 1h-9v9c0 1.654 1.346 3 3 3h14c1.654 0 3-1.346 3-3v-8c0-.552.447-1 1-1s1 .448 1 1z" />
+  </svg>
+),
 
-    "podcast": (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
-      </svg>
-    ),
 
-    "device-analytics": (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
-      </svg>
-    ),
 
-    "allah": (
+
+
+
+
+
+
+    allah: (
       <svg viewBox="-1 -0.97 2 1.97" fill="currentColor" className={className}>
         <g id="A">
           <path d="M-.548.836A.912.912 0 0 0 .329-.722 1 1 0 0 1-.548.836"/>
@@ -870,39 +529,12 @@ cpu: (
         <use transform="scale(-1 1)" xlinkHref="#A"/>
       </svg>
     ),
-
-    "target": (
-      <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    "radar": (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <circle cx="12" cy="12" r="9" />
-        <circle cx="12" cy="12" r="5" />
-        <circle cx="12" cy="12" r="1" />
-        <path d="M12 12L12 3" />
-        <path d="M12 12L5.636 5.636" />
-      </svg>
-    ),
-
-    "network-nodes": (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <circle cx="18" cy="5" r="3" />
-        <circle cx="6" cy="12" r="3" />
-        <circle cx="18" cy="19" r="3" />
-        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-      </svg>
-    ),
-
-    "folderSlash": (
+    folderSlash: (
     <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776m-16.5 0h16.5" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
     </svg>
     ),
-
     "ya-fatemeh": (
       <svg viewBox="0 0 1030 1024" fill="none" className={className}>
         <g>
@@ -923,17 +555,16 @@ cpu: (
         </g>
       </svg>
     ),
+};
 
-  };
+  // یافتن آیکون بر اساس اسم اصلی یا حالت‌های تبدیل‌شده (camelCase / kebab-case)
+  const iconComponent = icons[name] || icons[camelCaseName] || icons[kebabCaseName];
 
-  // اگر اسم آیکونی که وارد کردید در لیست بالا نبود، چیزی نشان نده تا سایت خراب نشه
-  if (!icons[name]) {
+  // اگر آیکون با هیچ فرمتی پیدا نشد، هشدار بده
+  if (!iconComponent) {
     console.warn(`آیکون "${name}" در سیستم یافت نشد.`);
     return null;
   }
 
-
-  
-  // نمایش آیکون درخواستی
-  return icons[name];
+  return iconComponent;
 }

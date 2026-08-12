@@ -1,4 +1,5 @@
 import './globals.css';
+import { Toaster } from 'react-hot-toast';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
 import { getSetting } from '@/app/actions/settings';
@@ -62,8 +63,30 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="fa" dir="rtl">
       <body className="bg-[#080c16] text-white min-h-screen flex flex-col antialiased">
+        {/* سیستم پیام‌های شناور توست در کل پروژه */}
+        <Toaster 
+          position="bottom-center"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#0b0f19',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.1)',
+              direction: 'rtl',
+              fontSize: '14px',
+              borderRadius: '12px',
+            },
+            success: {
+              iconTheme: { primary: '#10b981', secondary: '#0b0f19' },
+            },
+            error: {
+              iconTheme: { primary: '#ef4444', secondary: '#0b0f19' },
+            },
+          }}
+        />
+
         <Header initialData={headerData} />
-        <main className="flex-1">{children}</main>
+        {children}
         <Footer initialData={footerData} />
       </body>
     </html>

@@ -396,7 +396,7 @@ export default function UserDashboard() {
                             <div>
                               <label className="block text-[10px] text-gray-500 uppercase mb-1">تاریخ عضویت</label>
                               <div className="flex items-center gap-2 text-gray-300 font-sans text-sm bg-white/5 px-3 py-2 rounded-lg cursor-not-allowed">
-                                <Icon name="calendar" className="w-4 h-4 text-gray-500" /> ۱۴۰۲/۰۸/۱۵
+                                <Icon name="calendarBlank" className="w-4 h-4 text-gray-500" /> ۱۴۰۲/۰۸/۱۵
                               </div>
                             </div>
                             <div>

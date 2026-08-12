@@ -1,10 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { getIcons, uploadIcon, deleteIcon } from '@/app/actions/icons';
 import Icon from '@/app/components/Icon';
+import toast from 'react-hot-toast';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+const cn = (...inputs) => twMerge(clsx(inputs));
 
 export default function IconLibraryPage() {
+  const router = useRouter();
   const [icons, setIcons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,17 +22,26 @@ export default function IconLibraryPage() {
   const [uploadError, setUploadError] = useState('');
   const [newIconData, setNewIconData] = useState({ name: '', label: '', file: null });
 
-  // استیت‌های مُدال نمایش و حذف
+  // استیت‌های مُدال نمایش
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [copied, setCopied] = useState(false);
+  
+  // استیت‌های مُدال اختصاصی حذف
+  const [deletingIcon, setDeletingIcon] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const fileInputRef = useRef(null);
 
   const loadIcons = async () => {
     setLoading(true);
-    const data = await getIcons();
-    setIcons(data);
-    setLoading(false);
+    try {
+      const data = await getIcons();
+      setIcons(data || []);
+    } catch (error) {
+      toast.error('خطا در بارگذاری آیکون‌ها!');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { loadIcons(); }, []);
@@ -42,7 +58,6 @@ export default function IconLibraryPage() {
     if (file) {
       const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
       if (isSvg) {
-        // تبدیل نام فایل به شناسه استاندارد انگلیسی (حروف کوچک و خط‌تیره)
         const autoSlug = file.name
           .replace(/\.svg$/i, '')
           .toLowerCase()
@@ -56,7 +71,9 @@ export default function IconLibraryPage() {
         }));
         setUploadError('');
       } else {
-        setUploadError('لطفاً فقط فایل با فرمت SVG انتخاب کنید.');
+        const errorText = 'لطفاً فقط فایل با فرمت SVG انتخاب کنید.';
+        setUploadError(errorText);
+        toast.error(errorText);
       }
     }
   };
@@ -70,7 +87,9 @@ export default function IconLibraryPage() {
   const submitUpload = async (e) => {
     e.preventDefault();
     if (!newIconData.file || !newIconData.name) {
-      setUploadError('نام انگلیسی و فایل SVG الزامی است.');
+      const errorText = 'نام انگلیسی و فایل SVG الزامی است.';
+      setUploadError(errorText);
+      toast.error(errorText);
       return;
     }
 
@@ -80,34 +99,68 @@ export default function IconLibraryPage() {
     formData.append('name', newIconData.name);
     formData.append('label', newIconData.label);
 
-    const res = await uploadIcon(formData);
-    
-    if (res.success) {
-      closeModal();
-      await loadIcons();
-    } else {
-      setUploadError(res.error);
-    }
-    setUploading(false);
+    toast.promise(
+      uploadIcon(formData),
+      {
+        loading: 'در حال آپلود آیکون...',
+        success: (res) => {
+          setUploading(false);
+          if (res.success) {
+            closeModal();
+            loadIcons();
+            router.refresh();
+            return 'آیکون با موفقیت آپلود و ذخیره شد.';
+          }
+          setUploadError(res.error || 'خطا در آپلود آیکون');
+          throw new Error(res.error || 'خطا در آپلود');
+        },
+        error: (err) => {
+          setUploading(false);
+          return err?.message || 'خطا در ثبت آیکون!';
+        }
+      }
+    );
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('آیا از حذف این آیکون مطمئن هستید؟')) return;
-    const res = await deleteIcon(id);
-    if (res.success) {
-      setSelectedIcon(null);
-      setIcons(prev => prev.filter(i => i.id !== id));
-    }
+  // تابع حذف قطعی پس از تایید در پاپ‌آپ
+  const confirmDelete = async () => {
+    if (!deletingIcon) return;
+    setIsDeleting(true);
+    
+    const targetId = deletingIcon.id;
+
+    toast.promise(
+      deleteIcon(targetId),
+      {
+        loading: 'در حال حذف آیکون...',
+        success: (res) => {
+          setIsDeleting(false);
+          if (res.success) {
+            setDeletingIcon(null);
+            setSelectedIcon(null);
+            setIcons(prev => prev.filter(i => i.id !== targetId));
+            router.refresh();
+            return 'آیکون با موفقیت حذف شد.';
+          }
+          throw new Error(res.error || 'خطا در حذف');
+        },
+        error: (err) => {
+          setIsDeleting(false);
+          return err?.message || 'خطا در حذف آیکون!';
+        }
+      }
+    );
   };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
+    toast.success('کد استفاده در حافظه کپی شد!');
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-10 font-sans">
+    <div className="max-w-7xl mx-auto space-y-6 pb-10 font-sans text-right">
       
       {/* هدر صفحه و جستجو */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
@@ -141,10 +194,10 @@ export default function IconLibraryPage() {
 
       {/* گرید آیکون‌ها */}
       {loading ? (
-        <div className="text-center py-20 text-gray-400">در حال بارگذاری آیکون‌ها...</div>
+        <div className="text-center py-20 text-gray-400 font-sans">در حال بارگذاری آیکون‌ها...</div>
       ) : filteredIcons.length === 0 ? (
         <div className="text-center py-20 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-          <p className="text-gray-400">هیچ آیکونی یافت نشد.</p>
+          <p className="text-gray-400 font-sans">هیچ آیکونی یافت نشد.</p>
         </div>
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
@@ -171,7 +224,7 @@ export default function IconLibraryPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-[#030712]/90 backdrop-blur-md" onClick={closeModal}></div>
           
-          <div className="relative w-full max-w-md bg-[#0b0f19] border border-white/10 rounded-2xl shadow-2xl p-6 flex flex-col gap-6">
+          <div className="relative w-full max-w-md bg-[#0b0f19] border border-white/10 rounded-2xl shadow-2xl p-6 flex flex-col gap-6 text-right">
             <h3 className="text-xl font-bold text-white border-b border-white/10 pb-4">آپلود آیکون SVG</h3>
             
             <form onSubmit={submitUpload} className="space-y-4">
@@ -180,10 +233,13 @@ export default function IconLibraryPage() {
                 <label className="block text-sm font-medium text-gray-300">فایل SVG *</label>
                 <div 
                   onClick={() => fileInputRef.current?.click()} 
-                  className={`w-full border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${newIconData.file ? 'border-[#10b981] bg-[#10b981]/10' : 'border-white/20 hover:border-[#06b6d4] bg-white/5'}`}
+                  className={cn(
+                    "w-full border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors",
+                    newIconData.file ? 'border-[#10b981] bg-[#10b981]/10' : 'border-white/20 hover:border-[#06b6d4] bg-white/5'
+                  )}
                 >
                   <input type="file" ref={fileInputRef} accept=".svg" onChange={handleFileChange} className="hidden" />
-                  <span className={`text-sm ${newIconData.file ? 'text-[#10b981]' : 'text-gray-400'}`}>
+                  <span className={cn("text-sm", newIconData.file ? 'text-[#10b981]' : 'text-gray-400')}>
                     {newIconData.file ? `انتخاب شد: ${newIconData.file.name}` : 'کلیک برای انتخاب فایل SVG'}
                   </span>
                 </div>
@@ -197,7 +253,7 @@ export default function IconLibraryPage() {
                   value={newIconData.name} 
                   onChange={(e) => setNewIconData({...newIconData, name: e.target.value})} 
                   placeholder="مثال: arrow-right" 
-                  className="w-full bg-[#080c16] border border-white/10 rounded-lg p-3 text-sm text-white focus:border-[#06b6d4] dir-ltr text-left outline-none" 
+                  className="w-full bg-[#080c16] border border-white/10 rounded-lg p-3 text-sm text-white focus:border-[#06b6d4] dir-ltr text-left outline-none transition-colors" 
                 />
               </div>
 
@@ -208,11 +264,11 @@ export default function IconLibraryPage() {
                   value={newIconData.label} 
                   onChange={(e) => setNewIconData({...newIconData, label: e.target.value})} 
                   placeholder="مثال: فلش راست" 
-                  className="w-full bg-[#080c16] border border-white/10 rounded-lg p-3 text-sm text-white focus:border-[#06b6d4] outline-none" 
+                  className="w-full bg-[#080c16] border border-white/10 rounded-lg p-3 text-sm text-white focus:border-[#06b6d4] outline-none transition-colors" 
                 />
               </div>
 
-              {uploadError && <p className="text-xs text-rose-500 bg-rose-500/10 p-2 rounded-lg">{uploadError}</p>}
+              {uploadError && <p className="text-xs text-rose-500 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">{uploadError}</p>}
 
               <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
                 <button type="button" onClick={closeModal} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-sm text-gray-300 transition-colors cursor-pointer">انصراف</button>
@@ -230,7 +286,7 @@ export default function IconLibraryPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-[#030712]/90 backdrop-blur-md" onClick={() => setSelectedIcon(null)}></div>
           
-          <div className="relative w-full max-w-lg bg-[#0b0f19] border border-white/10 rounded-2xl shadow-2xl p-6 flex flex-col gap-6">
+          <div className="relative w-full max-w-lg bg-[#0b0f19] border border-white/10 rounded-2xl shadow-2xl p-6 flex flex-col gap-6 text-right">
             
             <div className="flex justify-between items-start border-b border-white/10 pb-4">
               <h3 className="text-lg font-bold text-white">جزئیات و استفاده از آیکون</h3>
@@ -274,10 +330,49 @@ export default function IconLibraryPage() {
 
             <div className="flex justify-end pt-4 border-t border-white/10">
               <button 
-                onClick={() => handleDelete(selectedIcon.id)}
+                onClick={() => setDeletingIcon(selectedIcon)}
                 className="px-5 py-2 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-sm font-medium transition-colors cursor-pointer"
               >
                 حذف دائم آیکون
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* پاپ‌آپ اختصاصی و مدرن تأیید حذف آیکون */}
+      {deletingIcon && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-[#080c16]/80 backdrop-blur-md p-4 animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-[#0b0f19] border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] relative overflow-hidden text-right space-y-5">
+            
+            <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 mx-auto">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-bold text-white">حذف آیکون SVG</h3>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                آیا از حذف آیکون <span className="text-rose-400 font-bold dir-ltr inline-block">«{deletingIcon.name}»</span> اطمینان دارید؟ این عملیات غیرقابل بازگشت است.
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl transition-all shadow-[0_0_20px_rgba(225,29,72,0.3)] cursor-pointer disabled:opacity-50"
+              >
+                {isDeleting ? 'در حال حذف...' : 'حذف قطعی'}
+              </button>
+              <button
+                onClick={() => setDeletingIcon(null)}
+                disabled={isDeleting}
+                className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-bold text-sm rounded-xl transition-all cursor-pointer"
+              >
+                انصراف
               </button>
             </div>
 

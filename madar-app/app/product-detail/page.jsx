@@ -85,9 +85,9 @@ const productData = {
     { version: "v0.9", date: "۱۵ آذر ۱۴۰۲", title: "ثبت طرح و پژوهش اولیه مستند در سامانه", isLatest: false }
   ],
   downloads: [
-    { title: "مستند کامل - 1080p", meta: "حجم: ۱.۸ GB | فرمت: MP4", icon: "fileVideo" },
-    { title: "مستند کامل - 720p", meta: "حجم: ۸۵۰ MB | فرمت: MP4", icon: "fileVideo" },
-    { title: "جزوه منابع و ارجاعات", meta: "حجم: ۱۲ MB | فرمت: PDF", icon: "fileText" }
+    { title: "مستند کامل - 1080p", meta: "حجم: ۱.۸ GB | فرمت: MP4", icon: "Video" },
+    { title: "مستند کامل - 720p", meta: "حجم: ۸۵۰ MB | فرمت: MP4", icon: "Video" },
+    { title: "جزوه منابع و ارجاعات", meta: "حجم: ۱۲ MB | فرمت: PDF", icon: "Video" }
   ],
   isUserLoggedIn: false,
   relatedContent: [
@@ -319,7 +319,7 @@ export default function ProductDetailPage() {
               <div className={`absolute -right-10 -top-10 w-32 h-32 ${currentTheme.primaryBg} opacity-10 rounded-full blur-3xl pointer-events-none`}></div>
               
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10">
-                <Icon name="downloadSimple" className={`w-6 h-6 ${currentTheme.fillCurrent}`} /> دانلود فایل‌ها
+                <Icon name="download" className={`w-6 h-6 ${currentTheme.fillCurrent}`} /> دانلود فایل‌ها
               </h3>
 
               {!productData.isUserLoggedIn && (
@@ -344,7 +344,7 @@ export default function ProductDetailPage() {
                       </div>
                     </div>
                     <button className={`w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 ${currentTheme.hoverBg} hover:text-deep-base transition-colors cursor-pointer`}>
-                      <Icon name="downloadSimple" className="w-4 h-4" />
+                      <Icon name="download" className="w-4 h-4" />
                     </button>
                   </div>
                 ))}

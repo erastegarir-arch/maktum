@@ -1,9 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { getSetting, saveSetting } from '@/app/actions/settings';
+import toast from 'react-hot-toast';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+const cn = (...inputs) => twMerge(clsx(inputs));
 
 export default function DateTimeSettingsPage() {
+  const router = useRouter();
   const [timezone, setTimezone] = useState('Asia/Tehran');
   const [useDst, setUseDst] = useState(false); // ساعت تابستانی
   const [calendarType, setCalendarType] = useState('jalali'); // jalali | gregorian
@@ -11,15 +18,26 @@ export default function DateTimeSettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [statusMessage, setStatusMessage] = useState({ text: '', isError: false });
 
   useEffect(() => {
     async function loadSettings() {
-      setTimezone(await getSetting('timezone') || 'Asia/Tehran');
-      setUseDst((await getSetting('use_dst')) === 'true');
-      setCalendarType(await getSetting('calendar_type') || 'jalali');
-      setDateFormat(await getSetting('date_format') || 'full');
-      setLoading(false);
+      try {
+        const [tz, dst, cal, format] = await Promise.all([
+          getSetting('timezone'),
+          getSetting('use_dst'),
+          getSetting('calendar_type'),
+          getSetting('date_format')
+        ]);
+        
+        setTimezone(tz || 'Asia/Tehran');
+        setUseDst(dst === 'true');
+        setCalendarType(cal || 'jalali');
+        setDateFormat(format || 'full');
+      } catch (error) {
+        toast.error('خطا در دریافت تنظیمات از دیتابیس!');
+      } finally {
+        setLoading(false);
+      }
     }
     loadSettings();
   }, []);
@@ -27,27 +45,38 @@ export default function DateTimeSettingsPage() {
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setStatusMessage({ text: '', isError: false });
 
-    const results = await Promise.all([
+    const savePromise = Promise.all([
       saveSetting('timezone', timezone, 'DATETIME'),
       saveSetting('use_dst', useDst ? 'true' : 'false', 'DATETIME'),
       saveSetting('calendar_type', calendarType, 'DATETIME'),
       saveSetting('date_format', dateFormat, 'DATETIME'),
     ]);
 
-    setSaving(false);
-    if (results.every(res => res.success)) {
-      setStatusMessage({ text: 'تنظیمات تاریخ و زمان با موفقیت ذخیره شد.', isError: false });
-    } else {
-      setStatusMessage({ text: 'خطا در ثبت اطلاعات در دیتابیس!', isError: true });
-    }
+    toast.promise(
+      savePromise,
+      {
+        loading: 'در حال ذخیره‌سازی تنظیمات...',
+        success: (results) => {
+          setSaving(false);
+          if (results.every(res => res?.success)) {
+            router.refresh();
+            return 'تنظیمات تاریخ و زمان با موفقیت ذخیره شد.';
+          }
+          throw new Error('خطا در ثبت اطلاعات');
+        },
+        error: () => {
+          setSaving(false);
+          return 'خطا در ثبت اطلاعات در دیتابیس!';
+        }
+      }
+    );
   };
 
-  if (loading) return <div className="text-gray-400 p-6">در حال دریافت تنظیمات...</div>;
+  if (loading) return <div className="text-gray-400 p-6 font-sans">در حال دریافت تنظیمات...</div>;
 
   return (
-    <div className="max-w-4xl space-y-6 pb-10">
+    <div className="max-w-4xl space-y-6 pb-10 font-sans text-right">
       <div>
         <h1 className="text-2xl font-bold text-white mb-2">تاریخ و زمان</h1>
         <p className="text-sm text-gray-400">مدیریت منطقه زمانی، نوع تقویم و فرمت نمایش تاریخ در سراسر سایت</p>
@@ -65,7 +94,7 @@ export default function DateTimeSettingsPage() {
               <select
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
-                className="w-full bg-[#0b0f19] border border-white/10 rounded-xl p-3 text-gray-200 text-sm focus:outline-none focus:border-[#10b981] dir-ltr text-right"
+                className="w-full bg-[#0b0f19] border border-white/10 rounded-xl p-3 text-gray-200 text-sm focus:outline-none focus:border-[#10b981] dir-ltr text-right cursor-pointer"
               >
                 <option value="Asia/Tehran">ایران (Asia/Tehran +3:30)</option>
                 <option value="Asia/Dubai">دبی (Asia/Dubai +4:00)</option>
@@ -82,9 +111,10 @@ export default function DateTimeSettingsPage() {
               <button
                 type="button"
                 onClick={() => setUseDst(!useDst)}
-                className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 flex-shrink-0 ${
+                className={cn(
+                  "w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 flex-shrink-0 cursor-pointer",
                   useDst ? 'bg-[#10b981] justify-end' : 'bg-gray-700 justify-start'
-                }`}
+                )}
               >
                 <div className="w-4 h-4 rounded-full bg-white shadow-md"></div>
               </button>
@@ -161,14 +191,9 @@ export default function DateTimeSettingsPage() {
           </div>
         </div>
 
-        {statusMessage.text && (
-          <div className={`p-4 rounded-xl text-sm ${statusMessage.isError ? 'bg-red-500/10 text-red-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
-            {statusMessage.text}
-          </div>
-        )}
-
+        {/* دکمه ذخیره */}
         <div className="flex justify-end pt-4 border-t border-white/10">
-          <button type="submit" disabled={saving} className="px-8 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm shadow-[0_0_20px_rgba(16,185,129,0.2)] disabled:opacity-50">
+          <button type="submit" disabled={saving} className="px-8 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm shadow-[0_0_20px_rgba(16,185,129,0.2)] disabled:opacity-50 cursor-pointer">
             {saving ? 'در حال ذخیره‌سازی...' : 'ذخیره تنظیمات تاریخ'}
           </button>
         </div>

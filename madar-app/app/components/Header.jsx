@@ -3,169 +3,261 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import Icon from './Icon';
-import AuthModal from './AuthModal';
 import SearchModal from './SearchModal';
+import AuthModal from './AuthModal';
+import { getSetting } from '@/app/actions/settings';
 
-export default function Header({ initialData }) {
+const cn = (...inputs) => twMerge(clsx(inputs));
+
+const toPersianDigits = (num) => {
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num?.toString().replace(/\d/g, (x) => persianDigits[x]) || '۰';
+};
+
+// کامپوننت تول‌تیپ اختصاصی هدر
+function HeaderTooltip({ text, children }) {
+  if (!text) return children;
+  return (
+    <div className="relative group/tooltip flex items-center justify-center">
+      {children}
+      <div className="absolute top-full mt-3 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out]">
+        <div className="w-0 h-0 border-x-[5px] border-x-transparent border-b-[6px] border-b-black/90 backdrop-blur-md"></div>
+        <div className="bg-black/90 backdrop-blur-md text-white text-[11px] py-1.5 px-3 rounded-lg border border-white/10 shadow-xl whitespace-nowrap font-sans">
+          {text}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Header() {
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
+  const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
+  
+  // استیت‌های مودال‌ها
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-  if (pathname?.startsWith('/portal-entry-99')) {
+  // ==========================================
+  // وضعیت‌های ورود و اعلانات (به سیستم لایو متصل کنید)
+  // ==========================================
+  const isLoggedIn = true; // وضعیت ورود کاربر (true / false)
+  const unreadNotifications = 5; // تعداد اعلان‌های نخوانده (اگر 0 باشد دایره قرمز کلاً مخفی می‌شود)
+
+  const [headerSettings, setHeaderSettings] = useState({
+    logoIcon: 'allah',
+    logoColor: '#06b6d4',
+    logoHoverColor: '#38bdf8',
+    siteTitle: 'مدار',
+    showSiteTitle: true,
+    headerOpacity: 80,
+    activeColor: '#06b6d4',
+    navItems: []
+  });
+
+  // دریافت پویای تنظیمات هدر از دیتابیس
+  useEffect(() => {
+    setIsMounted(true);
+    async function loadHeaderSettings() {
+      try {
+        const stored = await getSetting('header_settings');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setHeaderSettings(prev => ({
+            ...prev,
+            ...parsed,
+            navItems: Array.isArray(parsed.navItems) ? parsed.navItems : prev.navItems
+          }));
+        } else {
+          const fallbackIcon = await getSetting('header_icon');
+          const fallbackText = await getSetting('header_text');
+          
+          setHeaderSettings(prev => ({
+            ...prev,
+            logoIcon: fallbackIcon || 'allah',
+            siteTitle: fallbackText || 'مدار'
+          }));
+        }
+      } catch (e) {
+        console.error("خطا در دریافت تنظیمات هدر:", e);
+      } finally {
+        setIsSettingsLoaded(true);
+      }
+    }
+    loadHeaderSettings();
+  }, []);
+
+  // ۱. عدم نمایش هدر در پنل مدیریت
+  if (pathname?.startsWith('/portal-entry-99') || pathname?.startsWith('/admin')) {
+    return null; 
+  }
+
+  // ۲. جلوگیری از چشمک‌زدن و خطای Hydration
+  if (!isMounted || !isSettingsLoaded) {
     return null;
   }
 
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(15);
+  // درصد شفافیت واقعی به صورت RGBA
+  const opacityValue = (headerSettings.headerOpacity ?? 80) / 100;
+  const activeColor = headerSettings.activeColor || '#06b6d4';
 
-  useEffect(() => {
-    const logged = localStorage.getItem('isLoggedIn') === 'true';
-    setIsLoggedIn(logged);
-  }, []);
+  // رندر هوشمند لوگو (بر اساس نام آیکون، کد SVG یا آدرس عکس)
+  const renderLogoIcon = () => {
+    const icon = headerSettings.logoIcon || 'allah';
+    if (!icon) return null;
 
-  const handleLoginSuccess = () => {
-    localStorage.setItem('isLoggedIn', 'true');
-    setIsLoggedIn(true);
-    setIsLoginOpen(false);
+    if (icon.startsWith('<svg')) {
+      return (
+        <div 
+          className="w-7 h-7 flex items-center justify-center text-[var(--logo-color)] group-hover:text-[var(--logo-hover-color)] transition-colors duration-300 [&>svg]:w-full [&>svg]:h-full"
+          dangerouslySetInnerHTML={{ __html: icon }}
+        />
+      );
+    }
+    
+    if (icon.startsWith('http') || icon.startsWith('/') || icon.startsWith('.')) {
+      return (
+        <img src={icon} alt="Logo" className="w-7 h-7 object-contain" />
+      );
+    }
+
+    return (
+      <Icon 
+        name={icon} 
+        className="w-7 h-7 text-[var(--logo-color)] group-hover:text-[var(--logo-hover-color)] transition-colors duration-300" 
+      />
+    );
   };
-
-  const toPersianDigits = (num) => {
-    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    return num.toString().replace(/\d/g, (x) => persianDigits[x]);
-  };
-
-  const getDisplayCount = (count) => {
-    if (count > 9) return '۹+';
-    return toPersianDigits(count);
-  };
-
-  const displayCount = getDisplayCount(notificationCount);
-
-  const allIcons = initialData?.allIcons || [];
-  const headerIcon = initialData?.headerIcon || '';
-  const headerText = initialData?.headerText || '';
-  const navItems = initialData?.headerLinks?.length > 0 
-    ? initialData.headerLinks.map(i => ({ title: i.title, path: i.url || i.path || '#' }))
-    : [
-        { title: 'محتوای خام', path: '/archive' },
-        { title: 'محتوای تولیدی', path: '/produced' },
-        { title: 'ابزارها', path: '/tools' },
-        { title: 'بلاگ', path: '/blog' },
-        { title: 'دسته‌بندی‌ها', path: '/categories' }
-      ];
-
-  const headerIconSvg = allIcons.find(i => i.name === headerIcon)?.svgCode;
 
   return (
     <>
-      <div className="fixed top-4 md:top-6 left-0 right-0 z-50 px-4 flex justify-center pointer-events-none font-sans">
-        <div className="w-full max-w-7xl relative pointer-events-auto">
+      <header className="fixed top-4 inset-x-0 z-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 font-sans">
+        <div 
+          style={{ backgroundColor: `rgba(11, 15, 25, ${opacityValue})` }}
+          className="glass-card border border-white/10 backdrop-blur-xl rounded-full px-6 py-3 shadow-2xl flex items-center justify-between transition-colors duration-300"
+        >
           
-          <header className="glass-card px-4 md:px-6 py-3 w-full flex items-center justify-between border border-white/10 rounded-2xl md:rounded-full shadow-[0_15px_40px_-10px_rgba(0,0,0,0.8)] bg-[#080c16]/30 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:bg-[#080c16]/50 hover:border-white/20">
+          {/* ۱. سمت راست: آیکون لوگو -> کلمه عنوان -> لینک‌های منو (راست‌چین) */}
+          <div className="flex items-center gap-6">
             
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-full bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.1)_0%,transparent_70%)] pointer-events-none"></div>
-
-            <div className="flex items-center gap-6 lg:gap-10 relative z-10">
-              
-              <Link href="/" aria-label="مدار" className="flex items-center gap-3 group cursor-pointer py-1">
-                {headerIconSvg && (
-                  <div className="svg-inherit-color w-8 h-8 text-[#06b6d4] group-hover:text-[#a855f7] transition-colors duration-300 [&>svg]:w-full [&>svg]:h-full drop-shadow-[0_0_12px_rgba(6,182,212,0.4)]" dangerouslySetInnerHTML={{ __html: headerIconSvg }} />
-                )}
-                
-                {headerText && (
-                  <span className="text-white font-black text-lg tracking-wider drop-shadow-md transition-colors duration-300 group-hover:text-gray-200">
-                    {headerText}
-                  </span>
-                )}
-              </Link>
-              
-              <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-gray-300">
-                {navItems.map((item, index) => (
-                  <Link key={index} href={item.path} className="relative py-2 group hover:text-white transition-colors">
-                    <span>{item.title}</span>
-                    <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[#06b6d4] rounded-full transition-all duration-300 group-hover:w-full group-hover:left-0 shadow-[0_0_8px_#06b6d4]"></span>
-                  </Link>
-                ))}
-              </nav>
-            </div>
-
-            <div className="flex items-center gap-2 md:gap-3 relative z-10">
-              
-              <div className="relative group/tooltip flex items-center justify-center">
-                <button 
-                  onClick={() => setIsSearchOpen(true)}
-                  className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-[#06b6d4] hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all border border-white/5 cursor-pointer"
-                >
-                  <Icon name="search" className="w-5 h-5" />
-                </button>
-                <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 hidden group-hover/tooltip:block bg-[#0b0f19] text-white text-[11px] py-1 px-2.5 rounded-lg border border-white/10 shadow-xl whitespace-nowrap z-30 pointer-events-none">
-                  جستجو
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-[#0b0f19]"></div>
-                </div>
+            <Link href="/" className="flex items-center gap-3 group cursor-pointer shrink-0">
+              <div 
+                className="flex items-center justify-center transition-colors duration-300"
+                style={{
+                  '--logo-color': headerSettings.logoColor || '#06b6d4',
+                  '--logo-hover-color': headerSettings.logoHoverColor || '#38bdf8'
+                }}
+              >
+                {renderLogoIcon()}
               </div>
-              
-              <div className="relative group/tooltip flex items-center justify-center">
-                {!isLoggedIn ? (
-                  <button 
-                    onClick={() => setIsLoginOpen(true)}
-                    className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#06b6d4]/50 rounded-full px-4 md:px-5 py-2 text-sm font-bold transition-all text-white flex items-center gap-2 cursor-pointer hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] group"
+
+              {headerSettings.showSiteTitle !== false && headerSettings.siteTitle && (
+                <span className="font-black text-xl text-white group-hover:text-gray-200 transition-colors">
+                  {headerSettings.siteTitle}
+                </span>
+              )}
+            </Link>
+
+            {/* لینک‌های منو پویا با هاور آبی کمرنگ */}
+            <nav className="hidden md:flex items-center gap-1 mr-2">
+              {headerSettings.navItems?.map((item, idx) => {
+                const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+
+                return (
+                  <Link
+                    key={item.href || idx}
+                    href={item.href || '#'}
+                    style={{ '--active-color': activeColor }}
+                    className={cn(
+                      "relative text-sm font-bold transition-all duration-300 py-2 px-4 cursor-pointer flex items-center",
+                      isActive
+                        ? "text-[var(--active-color)]"
+                        : "text-gray-300 hover:text-[#06b6d4]/80"
+                    )}
                   >
-                    <Icon name="user" className="w-4 h-4 text-[#06b6d4] group-hover:scale-110 transition-transform" /> 
-                    <span className="hidden sm:inline">ورود / عضویت</span>
-                    <span className="sm:hidden">ورود</span>
-                  </button>
-                ) : (
-                  <Link 
-                    href="/portal-entry-99" 
-                    className="relative w-10 h-10 rounded-full bg-gradient-to-tr from-[#06b6d4]/20 to-[#a855f7]/20 flex items-center justify-center text-white transition-all border border-[#06b6d4]/30 cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] group"
-                  >
-                    <Icon name="user" className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
-                    
-                    {notificationCount > 0 && (
-                      <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center z-10">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-[18px] w-[18px] bg-rose-600 border-[1.5px] border-[#080c16] text-[9px] font-bold text-white items-center justify-center shadow-md">
-                          {displayCount}
-                        </span>
-                      </div>
+                    <span>{item.label}</span>
+
+                    {/* خط انیمیشنی زیر کلمه برای صفحه فعال (بدون کادر) */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeNavIndicator"
+                        style={{ backgroundColor: activeColor, boxShadow: `0 0 8px ${activeColor}` }}
+                        className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
                     )}
                   </Link>
-                )}
-                
-                <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 hidden group-hover/tooltip:block bg-[#0b0f19] text-white text-[11px] py-1 px-2.5 rounded-lg border border-white/10 shadow-xl whitespace-nowrap z-30 pointer-events-none">
-                  {isLoggedIn ? 'پیشخوان کاربری' : 'ورود یا عضویت'}
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-[#0b0f19]"></div>
-                </div>
-              </div>
-              
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* ۲. سمت چپ: آیکون جستجو و پروفایل کاربری / ورود */}
+          <div className="flex items-center gap-3">
+            
+            {/* دکمه جستجو متصل به SearchModal.jsx */}
+            <HeaderTooltip text="جستجو در سایت">
               <button 
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-300 hover:text-white border border-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                type="button" 
+                onClick={() => setIsSearchOpen(true)}
+                className="w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:border-white/30 flex items-center justify-center text-gray-300 hover:text-white transition-all cursor-pointer"
               >
-                <Icon name={isMobileMenuOpen ? "close" : "listBullets"} className="w-5 h-5" />
+                <Icon name="search" className="w-5 h-5" />
               </button>
-            </div>
-          </header>
+            </HeaderTooltip>
 
-          {isMobileMenuOpen && (
-            <div className="absolute top-[75px] md:top-[85px] left-0 right-0 glass-card bg-[#080c16]/95 backdrop-blur-2xl border-t-2 border-t-[#06b6d4] rounded-3xl p-6 flex flex-col gap-2 shadow-[0_20px_50px_rgba(0,0,0,0.8)] lg:hidden animate-[slideUpFade_0.3s_ease-out]">
-              <nav className="flex flex-col text-sm font-bold text-gray-300">
-                {navItems.map((item, index) => (
-                  <Link key={index} href={item.path} onClick={() => setIsMobileMenuOpen(false)} className="py-4 border-b border-white/5 hover:text-[#06b6d4] hover:bg-white/5 hover:pl-2 rounded-lg transition-all flex items-center gap-2 group">
-                    <Icon name="caretLeft" className="w-3 h-3 text-gray-600 group-hover:text-[#06b6d4] transition-colors" />
-                    {item.title}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-          )}
+            {/* دکمه پروفایل کاربری / ورود / عضویت */}
+            {isLoggedIn ? (
+              <HeaderTooltip text="ورود به داشبورد کاربری">
+                <Link 
+                  href="/profile" 
+                  className="relative w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:border-[#06b6d4] flex items-center justify-center text-gray-300 hover:text-white transition-all cursor-pointer"
+                >
+                  <Icon name="user" className="w-5 h-5" />
+                  
+                  {/* نشانگر چشمک‌زن قرمز اعلان‌ها */}
+                  {unreadNotifications > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-500 text-white text-[10px] font-bold items-center justify-center border border-[#0b0f19]">
+                        {unreadNotifications > 9 ? '+۹' : toPersianDigits(unreadNotifications)}
+                      </span>
+                    </span>
+                  )}
+                </Link>
+              </HeaderTooltip>
+            ) : (
+              <HeaderTooltip text="از این قسمت وارد حساب کاربری بشوید یا عضو شوید">
+                <button 
+                  type="button"
+                  onClick={() => setIsAuthOpen(true)}
+                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-[#06b6d4] hover:bg-[#06b6d4]/10 text-gray-200 hover:text-[#06b6d4] text-xs font-bold transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <Icon name="user" className="w-4 h-4" />
+                  <span>ورود / عضویت</span>
+                </button>
+              </HeaderTooltip>
+            )}
+
+          </div>
+
         </div>
-      </div>
+      </header>
 
-      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-      <AuthModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onLoginSuccess={handleLoginSuccess} />
+      {/* مودال واقعی جستجو موجود در پروژه */}
+      {isSearchOpen && (
+        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      )}
+
+      {/* مودال واقعی ورود و عضویت موجود در پروژه */}
+      {isAuthOpen && (
+        <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      )}
     </>
   );
 }

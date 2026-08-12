@@ -178,7 +178,7 @@ export default function ArchivesPage() {
             <div className="glass-card p-8 border-t-2 border-t-transparent hover:border-t-neon-purple transition-colors duration-500">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b border-white/5 pb-4 gap-4">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Icon name="trendUp" className="w-6 h-6 text-neon-purple" /> ابر کلیدواژه‌ها
+                  <Icon name="trend" className="w-6 h-6 text-neon-purple" /> ابر کلیدواژه‌ها
                 </h2>
                 {!isLoading && (
                   <span className="text-xs text-gray-400 font-sans bg-black/50 border border-white/5 px-4 py-2 rounded-full">
