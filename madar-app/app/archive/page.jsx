@@ -1,11 +1,12 @@
 'use client';
+
 import { useState, useEffect, useRef } from 'react';
 import Breadcrumbs from '../components/Breadcrumbs';
-import Icon from '../components/Icon'; // اتصال به کتابخانه مرکزی آیکون‌ها
-import EmptyState from '../components/EmptyState'; // وارد کردن کامپوننت حالت‌های خالی
-import BlurImage from '../components/BlurImage'; // وارد کردن کامپوننت لودینگ تنبل و بلور تصاویر
+import Icon from '../components/Icon';
+import EmptyState from '../components/EmptyState';
+import BlurImage from '../components/BlurImage';
 
-// === ۱. هسته محتوایی صفحه (کاملاً آماده برای اتصال به پنل مدیریت سایت / ادمین) ===
+// === ۱. هسته محتوایی صفحه ===
 const pageContent = {
   hero: {
     badge: "بانک داده مدار",
@@ -13,14 +14,33 @@ const pageContent = {
     titlePart2: "محتوای خام و فوتیج",
     description: "دسترسی بدون واسطه به اسناد، دست‌نوشته‌ها، ویدیوهای خام و فایل‌های صوتی افشا شده جهت تحلیل و بررسی پژوهشگران."
   },
-  featuredDoc: {
-    badge: "محتوای پیشنهادی سردبیر",
-    title: "اسناد طبقه‌بندی شده پروژه استارگیت",
-    description: "مجموعه کامل و بدون سانسور اسناد مرتبط با آزمایش‌های ذهنی، روانی و پروژه‌های فوق‌محرمانه در دوران جنگ سرد. این فایل شامل ۱۲۰ صفحه دست‌نویس و گزارش‌های تایپ شده است.",
-    meta: "حجم فایل: ۴۵ مگابایت (ZIP)",
-    btnText: "بررسی اسناد",
-    image: "/images/classified-folder.png"
-  },
+  // آرایه اسلایدر محتوای منتخب
+  featuredDocList: [
+    {
+      id: 1,
+      badge: "محتوای پیشنهادی سردبیر",
+      title: "اسناد طبقه‌بندی شده پروژه استارگیت",
+      description: "مجموعه کامل و بدون سانسور اسناد مرتبط با آزمایش‌های ذهنی، روانی و پروژه‌های فوق‌محرمانه در دوران جنگ سرد. این فایل شامل ۱۲۰ صفحه دست‌نویس و گزارش‌های تایپ شده است.",
+      btnText: "بررسی اسناد",
+      image: "/images/classified-folder.png"
+    },
+    {
+      id: 2,
+      badge: "سند ویژه افشا شده",
+      title: "دست‌نوشته‌های محرمانه انجمن‌های مخفی",
+      description: "بررسی مستقیم دست‌نوشته‌ها، نمادها و مکاتبات داخلی اعضای کلیدی لژهای قرن نوزدهم به همراه نسخه‌های اسکن شده با کیفیت اصلی.",
+      btnText: "مشاهده اسناد",
+      image: "/images/doc-pdf.png"
+    },
+    {
+      id: 3,
+      badge: "راش و فوتیج خام",
+      title: "آرشیو تصاویر ویدیویی گردهمایی‌های پنهان",
+      description: "فوتیج‌های تصویری دست‌نخورده و بدون تدوین از جلسات و نشست‌های سران سیاسی و اقتصادی در دهه‌های گذشته جهت استفاده مستندسازان.",
+      btnText: "دریافت فوتیج",
+      image: "/images/doc-video.png"
+    }
+  ],
   rawItems: [
     {
       id: 1,
@@ -115,7 +135,7 @@ const pageContent = {
   ]
 };
 
-// === ۲. کامپوننت پایه اسکلتون با افکت Shimmer ===
+// === ۲. کامپوننت پایه اسکلتون ===
 const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
   return (
     <div className={`relative overflow-hidden bg-white/5 border border-white/5 backdrop-blur-sm ${rounded} ${className}`}>
@@ -127,13 +147,16 @@ const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
 // === ۳. کامپوننت اسکلتون کارت محتوا ===
 const RawItemCardSkeleton = () => {
   return (
-    <div className="glass-card flex flex-col p-4 rounded-2xl relative overflow-hidden border-t-2 border-white/10 h-full">
+    <div className="relative flex flex-col p-5 rounded-2xl border border-white/10 overflow-hidden h-full">
+      <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-90 pointer-events-none" />
+      
       <BaseSkeleton className="w-full h-40 mb-4" rounded="rounded-xl" />
-      <div className="flex-grow space-y-2 mb-4">
+      <div className="flex-grow space-y-3 mb-4">
         <BaseSkeleton className="w-full h-4" rounded="rounded-md" />
         <BaseSkeleton className="w-2/3 h-4" rounded="rounded-md" />
       </div>
-      <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between">
+      <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
         <BaseSkeleton className="w-20 h-3" rounded="rounded-sm" />
         <BaseSkeleton className="w-14 h-3" rounded="rounded-sm" />
       </div>
@@ -141,37 +164,40 @@ const RawItemCardSkeleton = () => {
   );
 };
 
-// === ۴. کامپوننت اسکلتون کل صفحه (زمان لودینگ اولیه) ===
+// === ۴. کامپوننت اسکلتون کل صفحه ===
 const RawContentPageSkeleton = () => {
   return (
     <div className="relative min-h-screen flex flex-col">
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pb-20 w-full relative z-10 pt-0">
         <div className="w-32 h-6 bg-white/5 rounded-lg"></div>
 
-        {/* اسکلتون بنر صفحه */}
-        <section className="glass-card rounded-3xl p-8 md:p-12 space-y-4 flex flex-col items-center">
+        <section className="relative rounded-3xl border border-white/10 p-8 md:p-12 space-y-5 flex flex-col items-center overflow-hidden">
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#fbbf24] to-transparent opacity-90 pointer-events-none" />
+          
           <BaseSkeleton className="w-36 h-6" rounded="rounded-full" />
-          <BaseSkeleton className="w-3/4 h-12" rounded="rounded-xl" />
+          <BaseSkeleton className="w-3/4 h-12 md:h-16" rounded="rounded-xl" />
           <BaseSkeleton className="w-1/2 h-6" rounded="rounded-md" />
         </section>
 
-        {/* اسکلتون بخش سند ویژه */}
-        <section className="glass-card rounded-3xl p-8 md:p-12 flex flex-col md:flex-row gap-10">
-          <div className="flex-1 space-y-6">
+        <section className="relative rounded-3xl border border-white/10 p-8 md:p-12 flex flex-col md:flex-row gap-10 overflow-hidden">
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#fbbf24] to-transparent opacity-90 pointer-events-none" />
+
+          <div className="flex-1 space-y-6 relative z-10">
             <BaseSkeleton className="w-44 h-6" rounded="rounded" />
             <BaseSkeleton className="w-full h-10" rounded="rounded-xl" />
             <BaseSkeleton className="w-full h-20" rounded="rounded-xl" />
             <BaseSkeleton className="w-36 h-12" rounded="rounded-xl" />
           </div>
-          <div className="w-full md:w-5/12 flex justify-center items-center">
-            <BaseSkeleton className="w-64 h-64" rounded="rounded-full" />
+          <div className="w-full md:w-5/12 flex justify-center items-center relative z-10">
+            <BaseSkeleton className="w-64 h-64 md:w-80 md:h-80" rounded="rounded-full" />
           </div>
         </section>
 
-        {/* اسکلتون لیست آرشیو */}
         <section className="space-y-6">
           <div className="flex items-end justify-between border-b border-white/10 pb-4">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <BaseSkeleton className="w-40 h-7" rounded="rounded" />
               <BaseSkeleton className="w-60 h-4" rounded="rounded" />
             </div>
@@ -202,25 +228,27 @@ const RawItemCard = ({ item }) => {
 
   return (
     <a 
-      href="#" 
+      href={`/raw-materials/${item.id}`}
       ref={cardRef} 
       onMouseMove={handleMouseMove} 
-      className={`glass-card group flex flex-col p-4 rounded-2xl relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 border-t-2 ${item.theme.borderTop} hover:border-[#fbbf24]/40 hover:shadow-[0_35px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_20px_rgba(251,191,36,0.15)]`}
+      className="group flex flex-col p-5 rounded-2xl relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 border border-white/10 hover:border-[#fbbf24]/40 h-full shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(251,191,36,0.3)]"
     >
+      {/* لایه پس‌زمینه شیشه‌ای */}
+      <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+
+      {/* نوار نوری بالای کارت */}
+      <div className="absolute top-0 inset-x-0 h-[2px] transition-opacity duration-300 opacity-0 group-hover:opacity-100 pointer-events-none z-20 bg-gradient-to-r from-transparent via-[#fbbf24] to-transparent" />
+
       {/* لایه Spotlight */}
-      <div className="absolute inset-0 pointer-events-none rounded-inherit z-0 bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.04),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 pointer-events-none rounded-inherit bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(251,191,36,0.06),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
       
-      {/* تصویر کاور با لودینگ تنبل و بلور */}
-      <div className="relative z-10 w-full h-40 rounded-xl bg-gray-900 overflow-hidden mb-4 flex items-center justify-center">
+      {/* تصویر کاور (بدون بج‌های مزاحم) */}
+      <div className="relative z-10 w-full h-40 rounded-xl bg-black/60 overflow-hidden mb-5 flex items-center justify-center border border-white/5">
         <BlurImage 
           src={item.image} 
           alt={item.title} 
           className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 opacity-60 group-hover:opacity-100" 
         />
-            
-        <div className={`absolute top-2 right-2 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] font-bold border z-10 bg-[#0b0f19]/70 ${item.theme.badgeBg} ${item.theme.badgeText} shadow-lg`}>
-          {item.badgeText}
-        </div>
       </div>
       
       {/* عنوان فایل */}
@@ -230,13 +258,13 @@ const RawItemCard = ({ item }) => {
         </h3>
       </div>
       
-      {/* فوتر کارت (تاریخ انتشار و تعداد بازدید) */}
-      <div className="relative z-10 mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-500 font-sans">
-        <span className="flex items-center gap-1">
-          <Icon name="calendarBlank" className="w-3 h-3" /> {item.date}
+      {/* فوتر کارت */}
+      <div className="relative z-10 mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-gray-400 font-sans">
+        <span className="flex items-center gap-1.5">
+          <Icon name="calendarBlank" className="w-3.5 h-3.5" /> {item.date}
         </span>
-        <span className="flex items-center gap-1">
-          <Icon name="eye" className="w-3 h-3" /> {item.views}
+        <span className="flex items-center gap-1.5">
+          <Icon name="eye" className="w-3.5 h-3.5" /> {item.views}
         </span>
       </div>
     </a>
@@ -247,13 +275,24 @@ export default function RawContentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const featuredRef = useRef(null);
 
-  // شبیه‌سازی بارگذاری اولیه صفحه (مثلاً ۱ ثانیه)
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  // تایمر خودکار اسلایدر
+  useEffect(() => {
+    if (isLoading || isPaused) return;
+    const slideInterval = setInterval(() => {
+      setCurrentSlide((prev) => (prev === pageContent.featuredDocList.length - 1 ? 0 : prev + 1));
+    }, 5000);
+    return () => clearInterval(slideInterval);
+  }, [isLoading, isPaused]);
 
   const handleFeaturedMouseMove = (e) => {
     if (!featuredRef.current) return;
@@ -264,13 +303,12 @@ export default function RawContentPage() {
     featuredRef.current.style.setProperty('--mouse-y', `${y}px`);
   };
 
-  // اگر صفحه در حال لودینگ بود، اسکلتون اختصاصی نمایش داده می‌شود
   if (isLoading) {
     return <RawContentPageSkeleton />;
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col">
+    <div className="relative min-h-screen flex flex-col font-sans select-none text-right">
       
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pb-20 w-full relative z-10 pt-0">
         
@@ -282,13 +320,16 @@ export default function RawContentPage() {
           ]} 
         />
 
-        {/* بنر عنوان صفحه (متصل به آبجکت مدیریت) */}
-        <section className="glass-card rounded-3xl p-8 md:p-12 relative overflow-hidden flex flex-col justify-center items-center text-center border-t-2 border-t-[#fbbf24] animate-[fadeIn_0.5s_ease-out]">
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fbbf24_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#fbbf24]/10 rounded-full blur-3xl pointer-events-none"></div>
+        {/* بنر عنوان صفحه */}
+        <section className="relative rounded-3xl border border-white/10 p-8 md:p-12 overflow-hidden flex flex-col justify-center items-center text-center shadow-2xl animate-[fadeIn_0.5s_ease-out] group">
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#fbbf24] to-transparent opacity-90 pointer-events-none z-20" />
           
-          <div className="relative z-10 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#fbbf24]/10 border border-[#fbbf24]/30 rounded-full text-xs font-bold text-[#fbbf24] tracking-widest">
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fbbf24_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none -z-10"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#fbbf24]/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+          
+          <div className="relative z-10 space-y-5">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#fbbf24]/10 border border-[#fbbf24]/30 rounded-full text-xs font-bold text-[#fbbf24] tracking-widest shadow-inner">
               <span className="relative flex h-3 w-3 items-center justify-center">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500 shadow-[0_0_10px_#f59e0b]"></span>
@@ -300,72 +341,107 @@ export default function RawContentPage() {
               {pageContent.hero.titlePart1} <span className="text-[#fbbf24]">{pageContent.hero.titlePart2}</span>
             </h1>
             
-            <p className="text-gray-400 text-sm md:text-base max-w-2xl mx-auto font-light leading-relaxed text-justify">
+            <p className="text-gray-300 text-sm md:text-base max-w-2xl mx-auto font-light leading-relaxed text-justify">
               {pageContent.hero.description}
             </p>
           </div>
         </section>
 
-        {/* بخش سند ویژه سردبیر (متصل به آبجکت مدیریت) */}
+        {/* بخش سند ویژه سردبیر (اسلایدر انیمیشنی) */}
         <section 
           ref={featuredRef}
           onMouseMove={handleFeaturedMouseMove}
-          className="glass-card rounded-3xl p-8 md:p-12 relative overflow-hidden border-t-2 border-t-[#fbbf24] group transition-all duration-400 hover:-translate-y-1 hover:shadow-[0_35px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_20px_rgba(251,191,36,0.2)] hover:border-[#fbbf24]/50"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          className="relative rounded-3xl border border-white/10 p-8 md:p-12 overflow-hidden shadow-2xl transition-all duration-400 hover:border-[#fbbf24]/50 group"
         >
-          <div className="absolute inset-0 pointer-events-none rounded-inherit z-0 bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.04),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="absolute -right-32 -top-32 w-96 h-96 bg-[#fbbf24]/10 rounded-full blur-[80px] pointer-events-none"></div>
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#fbbf24] to-transparent opacity-90 pointer-events-none z-20" />
           
-          <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
-            <div className="flex-1 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#fbbf24]/10 border border-[#fbbf24]/30 rounded text-xs font-bold text-[#fbbf24]">
-                <Icon name="star" className="w-4 h-4 fill-current" /> {pageContent.featuredDoc.badge}
-              </div>
-              
-              <h2 className="text-3xl md:text-4xl font-black text-white leading-tight">
-                {pageContent.featuredDoc.title}
-              </h2>
-              
-              <p className="text-sm md:text-base text-gray-400 leading-relaxed font-light border-r-2 border-[#fbbf24]/50 pr-4 text-justify">
-                {pageContent.featuredDoc.description}
-              </p>
-              
-              <div className="flex items-center gap-4 pt-2">
-                <button className="bg-[#fbbf24] text-gray-950 px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.4)] transition-all cursor-pointer">
-                  {pageContent.featuredDoc.btnText}
-                </button>
-              </div>
-            </div>
+          <div className="absolute inset-0 pointer-events-none rounded-inherit bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(251,191,36,0.06),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+          <div className="absolute -right-32 -top-32 w-96 h-96 bg-[#fbbf24]/10 rounded-full blur-[80px] pointer-events-none -z-10"></div>
+          
+          {/* کانتینر اسلایدها */}
+          <div className="relative min-h-[400px] md:min-h-[350px] flex items-center">
+            {pageContent.featuredDocList.map((slide, index) => (
+              <div 
+                key={slide.id}
+                className={`absolute inset-0 w-full flex flex-col md:flex-row items-center gap-10 transition-all duration-700 ease-in-out ${
+                  index === currentSlide 
+                    ? 'opacity-100 translate-x-0 z-10 pointer-events-auto' 
+                    : 'opacity-0 -translate-x-10 z-0 pointer-events-none'
+                }`}
+              >
+                <div className="flex-1 space-y-6">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#fbbf24]/10 border border-[#fbbf24]/30 rounded-lg text-xs font-bold text-[#fbbf24]">
+                    <Icon name="star" className="w-4 h-4 fill-current" /> {slide.badge}
+                  </div>
+                  
+                  <h2 className="text-3xl md:text-4xl font-black text-white leading-tight">
+                    {slide.title}
+                  </h2>
+                  
+                  <p className="text-sm md:text-base text-gray-300 leading-relaxed font-light border-r-2 border-[#fbbf24]/50 pr-4 text-justify">
+                    {slide.description}
+                  </p>
+                  
+                  <div className="pt-4">
+                    <button className="bg-[#fbbf24] hover:bg-amber-400 text-gray-950 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center shadow-[0_0_20px_rgba(251,191,36,0.3)] hover:shadow-[0_0_25px_rgba(251,191,36,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
+                      {slide.btnText}
+                    </button>
+                  </div>
+                </div>
 
-            <div className="w-full md:w-5/12 flex justify-center items-center">
-              <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
-                <div className="absolute inset-0 bg-[#fbbf24]/20 blur-2xl rounded-full"></div>
-                <BlurImage 
-                  src={pageContent.featuredDoc.image} 
-                  alt="تصویر گرافیکی سند" 
-                  className="relative z-10 w-full h-full object-contain animate-[float_6s_ease-in-out_infinite] drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)]" 
-                />
+                <div className="w-full md:w-5/12 flex justify-center items-center">
+                  <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-[#fbbf24]/20 blur-2xl rounded-full pointer-events-none"></div>
+                    <BlurImage 
+                      src={slide.image} 
+                      alt={slide.title} 
+                      className={`relative z-10 w-full h-full object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] transition-transform duration-[2000ms] ${index === currentSlide ? 'scale-100' : 'scale-90'}`} 
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
+          </div>
+
+          {/* نقطه‌های ناوبری اسلایدر (Dots) */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+            {pageContent.featuredDocList.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  index === currentSlide 
+                    ? 'w-8 h-1.5 bg-[#fbbf24] shadow-[0_0_8px_#fbbf24]' 
+                    : 'w-1.5 h-1.5 bg-gray-600 hover:bg-gray-400'
+                }`}
+                aria-label={`رفتن به اسلاید ${index + 1}`}
+              />
+            ))}
           </div>
         </section>
 
         {/* لیست آرشیو محتوای خام */}
-        <section className="space-y-6">
+        <section className="space-y-8">
           <div className="flex items-end justify-between border-b border-white/10 pb-4">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-1">آرشیو محتوا</h2>
+              <h2 className="text-2xl font-black text-white mb-1">آرشیو محتوا</h2>
               <p className="text-sm text-gray-400 font-light">تمامی فایل‌های بارگذاری شده در سامانه</p>
             </div>
           </div>
 
-          {/* بررسی خالی بودن لیست و نمایش EmptyState در صورت نیاز */}
           {pageContent.rawItems.length === 0 ? (
-            <EmptyState 
-              icon="folder" 
-              title="هیچ سند یا محتوای خامی وجود ندارد!" 
-              description="بخش آرشیو محتوای خام و فوتیج‌های مدار در حال به‌روزرسانی است. اسناد و فایل‌های جدید به زودی در این قسمت بارگذاری خواهند شد."
-              color="text-[#fbbf24]"
-            />
+            <div className="relative rounded-2xl border border-white/10 p-10 overflow-hidden shadow-2xl">
+               <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+               <EmptyState 
+                icon="folder" 
+                title="هیچ سند یا محتوای خامی وجود ندارد!" 
+                description="بخش آرشیو محتوای خام و فوتیج‌های مدار در حال به‌روزرسانی است. اسناد و فایل‌های جدید به زودی در این قسمت بارگذاری خواهند شد."
+                color="text-[#fbbf24]"
+               />
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {pageContent.rawItems.map((item) => (
@@ -374,12 +450,11 @@ export default function RawContentPage() {
             </div>
           )}
 
-          {/* دکمه نمایش بیشتر (فقط زمانی که فایلی وجود داشته باشد) */}
           {pageContent.rawItems.length > 0 && (
-            <div className="flex justify-center pt-8">
-              <button className="relative group bg-white/5 border border-white/10 text-white px-10 py-3 rounded-full font-bold flex items-center gap-3 hover:bg-white/10 hover:border-[#fbbf24] hover:text-[#fbbf24] transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] cursor-pointer">
+            <div className="flex justify-center pt-6">
+              <button className="relative group bg-[#080c16] border border-white/10 text-white px-10 py-3.5 rounded-full font-bold flex items-center gap-3 hover:bg-white/5 hover:border-[#fbbf24] hover:text-[#fbbf24] transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] cursor-pointer">
                 <span>نمایش موارد بیشتر</span>
-                <Icon name="caretDown" className="w-5 h-5" />
+                <Icon name="caretDown" className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
               </button>
             </div>
           )}

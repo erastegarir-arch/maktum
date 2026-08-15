@@ -22,108 +22,102 @@ const authorData = {
       id: 1,
       title: "سایه‌های معماری مدرن: واکاوی نمادها",
       filterType: "produced",
-      typeBadge: "مستند",
       category: "محتوای تولیدی",
       image: "/images/content-documentary.jpg", 
       metaIcon: "calendarBlank",
       metaText: "۱۴۰۲/۱۱/۲۰",
       theme: {
         borderTop: "border-t-[#f43f5e]",
-        badgeBorder: "border-[#f43f5e]/40",
         badgeText: "text-[#f43f5e]",
         hoverTitle: "group-hover:text-[#f43f5e]",
-        hoverShadow: "hover:border-[#f43f5e]/40 hover:shadow-[0_35px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_20px_rgba(244,63,94,0.15)]"
+        gradientVia: "via-[#f43f5e]",
+        hoverShadow: "hover:border-[#f43f5e]/40 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.3)]"
       }
     },
     {
       id: 2,
       title: "نقش انجمن سلطنتی در شکل‌گیری علم مدرن",
       filterType: "blog",
-      typeBadge: "مقاله",
       category: "بلاگ",
       image: "/images/content-article.jpg", 
       metaIcon: "calendarBlank",
       metaText: "۱۴۰۲/۱۱/۱۵",
       theme: {
         borderTop: "border-t-[#b45309]",
-        badgeBorder: "border-[#b45309]/40",
         badgeText: "text-[#b45309]",
         hoverTitle: "group-hover:text-[#b45309]",
-        hoverShadow: "hover:border-[#b45309]/40 hover:shadow-[0_35px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_20px_rgba(180,83,9,0.15)]"
+        gradientVia: "via-[#b45309]",
+        hoverShadow: "hover:border-[#b45309]/40 hover:shadow-[0_20px_40px_-15px_rgba(180,83,9,0.3)]"
       }
     },
     {
       id: 3,
       title: "دست‌نوشته‌های اصلی ایزاک نیوتن",
       filterType: "raw",
-      typeBadge: "سند PDF",
       category: "محتوای خام",
       image: "/images/content-document.jpg", 
       metaIcon: "calendarBlank",
       metaText: "۱۴۰۲/۱۱/۱۰",
       theme: {
         borderTop: "border-t-[#fbbf24]",
-        badgeBorder: "border-[#fbbf24]/40",
         badgeText: "text-[#fbbf24]",
         hoverTitle: "group-hover:text-[#fbbf24]",
-        hoverShadow: "hover:border-[#fbbf24]/40 hover:shadow-[0_35px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_20px_rgba(251,191,36,0.15)]"
+        gradientVia: "via-[#fbbf24]",
+        hoverShadow: "hover:border-[#fbbf24]/40 hover:shadow-[0_20px_40px_-15px_rgba(251,191,36,0.3)]"
       }
     },
     {
       id: 4,
       title: "گراف ارتباطات شبکه‌ای و مالی",
       filterType: "tools",
-      typeBadge: "تحلیل داده",
       category: "ابزارها",
       image: "/images/tool-1.jpg", 
       metaIcon: "calendarBlank",
       metaText: "۱۴۰۲/۱۱/۰۸",
       theme: {
         borderTop: "border-t-[#10b981]",
-        badgeBorder: "border-[#10b981]/40",
         badgeText: "text-[#10b981]",
         hoverTitle: "group-hover:text-[#10b981]",
-        hoverShadow: "hover:border-[#10b981]/40 hover:shadow-[0_35px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_20px_rgba(16,185,129,0.15)]"
+        gradientVia: "via-[#10b981]",
+        hoverShadow: "hover:border-[#10b981]/40 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.3)]"
       }
     },
     {
       id: 5,
       title: "شنود جلسات انجمن در دهه ۷۰",
       filterType: "raw",
-      typeBadge: "فایل صوتی",
       category: "محتوای خام",
       image: "/images/content-audio.jpg", 
       metaIcon: "calendarBlank",
       metaText: "۱۴۰۲/۱۱/۰۵",
       theme: {
         borderTop: "border-t-[#fbbf24]",
-        badgeBorder: "border-[#fbbf24]/40",
         badgeText: "text-[#fbbf24]",
         hoverTitle: "group-hover:text-[#fbbf24]",
-        hoverShadow: "hover:border-[#fbbf24]/40 hover:shadow-[0_35px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_20px_rgba(251,191,36,0.15)]"
+        gradientVia: "via-[#fbbf24]",
+        hoverShadow: "hover:border-[#fbbf24]/40 hover:shadow-[0_20px_40px_-15px_rgba(251,191,36,0.3)]"
       }
     },
     {
       id: 6,
       title: "پادکست تصویری: راز انجمن‌ها (اپیزود ۴)",
       filterType: "produced",
-      typeBadge: "پادکست تصویری",
       category: "محتوای تولیدی",
       image: "/images/prod-2.jpg", 
       metaIcon: "calendarBlank",
       metaText: "۱۴۰۲/۱۰/۲۸",
       theme: {
         borderTop: "border-t-[#f43f5e]",
-        badgeBorder: "border-[#f43f5e]/40",
         badgeText: "text-[#f43f5e]",
         hoverTitle: "group-hover:text-[#f43f5e]",
-        hoverShadow: "hover:border-[#f43f5e]/40 hover:shadow-[0_35px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_20px_rgba(244,63,94,0.15)]"
+        gradientVia: "via-[#f43f5e]",
+        hoverShadow: "hover:border-[#f43f5e]/40 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.3)]"
       }
     }
   ]
 };
 
-// === ۲. کامپوننت پایه اسکلتون با افکت Shimmer ===
+// === ۲. کامپوننت پایه اسکلتون با افکت Shimmer (گرافیک کلی1) ===
 const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
   return (
     <div className={`relative overflow-hidden bg-white/5 border border-white/5 backdrop-blur-sm ${rounded} ${className}`}>
@@ -132,16 +126,17 @@ const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
   );
 };
 
-// === ۳. کامپوننت اسکلتون کارت محتوا ===
+// === ۳. کامپوننت اسکلتون کارت محتوا (گرافیک کلی1) ===
 const ContentCardSkeleton = () => {
   return (
-    <div className="glass-card flex flex-col p-4 rounded-3xl relative overflow-hidden border-t-2 border-white/10 h-full">
+    <div className="relative flex flex-col p-5 rounded-3xl border border-white/10 overflow-hidden h-full shadow-lg">
+      <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
       <BaseSkeleton className="w-full h-48 mb-4" rounded="rounded-2xl" />
-      <div className="flex-grow space-y-2 mb-4">
+      <div className="flex-grow space-y-3 mb-4">
         <BaseSkeleton className="w-full h-4" rounded="rounded-md" />
         <BaseSkeleton className="w-2/3 h-4" rounded="rounded-md" />
       </div>
-      <div className="mt-auto pt-3 border-t border-white/5 flex items-center justify-between">
+      <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
         <BaseSkeleton className="w-20 h-3" rounded="rounded-sm" />
         <BaseSkeleton className="w-14 h-3" rounded="rounded-sm" />
       </div>
@@ -152,13 +147,16 @@ const ContentCardSkeleton = () => {
 // === ۴. کامپوننت اسکلتون کل صفحه پدیدآورنده (زمان لودینگ اولیه) ===
 const CreatorProfilePageSkeleton = () => {
   return (
-    <div className="relative min-h-screen flex flex-col">
+    <div className="relative min-h-screen flex flex-col font-sans select-none text-right">
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pb-12 w-full relative z-10 pt-0">
         <div className="w-32 h-6 bg-white/5 rounded-lg"></div>
 
-        {/* اسکلتون هدر پروفایل */}
-        <section className="glass-card relative overflow-hidden p-8 md:p-12 rounded-3xl border-t-2 border-t-white/10">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+        {/* اسکلتون هدر پروفایل (گرافیک کلی1) */}
+        <section className="relative overflow-hidden p-8 md:p-12 rounded-3xl border border-white/10 shadow-2xl">
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
+
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 relative z-10">
             <BaseSkeleton className="w-32 h-32 md:w-40 md:h-40 shrink-0" rounded="rounded-full" />
             <div className="flex-grow space-y-4 w-full text-center md:text-right">
               <BaseSkeleton className="w-32 h-6 mx-auto md:mx-0" rounded="rounded-full" />
@@ -191,7 +189,7 @@ const CreatorProfilePageSkeleton = () => {
   );
 };
 
-// === ۵. کامپوننت داخلی کارت محتوا اصلی ===
+// === ۵. کامپوننت داخلی کارت محتوا اصلی (بدون بج روی پوستر و با استایل GKS1) ===
 const ContentCard = ({ item }) => {
   const cardRef = useRef(null);
 
@@ -209,33 +207,37 @@ const ContentCard = ({ item }) => {
       href="#" 
       ref={cardRef} 
       onMouseMove={handleMouseMove} 
-      className={`glass-card group flex flex-col p-4 rounded-3xl border-t-2 ${item.theme.borderTop} relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 ${item.theme.hoverShadow}`}
+      className={`group flex flex-col p-5 rounded-3xl border border-white/10 relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 shadow-lg ${item.theme.hoverShadow}`}
     >
-      <div className="absolute inset-0 pointer-events-none rounded-inherit z-0 bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.04),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      {/* ۱. لایه پس‌زمینه شیشه‌ای ایزوله ثابت */}
+      <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+
+      {/* ۲. نوار نوری بالای کارت محتوا در هاور */}
+      <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${item.theme.gradientVia} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20`} />
+
+      {/* لایه Spotlight موس */}
+      <div className="absolute inset-0 pointer-events-none rounded-inherit bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.05),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
       
-      <div className="relative w-full h-48 rounded-2xl bg-gray-900 overflow-hidden mb-4 z-10 flex items-center justify-center">
+      {/* پوستر بدون هیچ کادر و متن اضافه روی آن */}
+      <div className="relative w-full h-48 rounded-2xl bg-gray-900 overflow-hidden mb-5 z-10 flex items-center justify-center border border-white/5">
         <BlurImage 
           src={item.image} 
           alt={item.title} 
           className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
         />
-        
-        <div className={`absolute top-3 right-3 bg-[#0b0f19]/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-bold border ${item.theme.badgeBorder} ${item.theme.badgeText} shadow-lg z-20`}>
-          {item.typeBadge}
-        </div>
       </div>
       
       <div className="relative z-10 flex-grow">
-        <h3 className={`text-base font-bold text-white mb-2 leading-relaxed line-clamp-2 transition-colors ${item.theme.hoverTitle}`}>
+        <h3 className={`text-base font-bold text-white mb-2.5 leading-relaxed line-clamp-2 transition-colors ${item.theme.hoverTitle}`}>
           {item.title}
         </h3>
       </div>
       
-      <div className="relative z-10 mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-500 font-sans">
-        <span className="flex items-center gap-1">
-          <Icon name={item.metaIcon} className="w-3 h-3" /> {item.metaText}
+      <div className="relative z-10 mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-gray-400 font-sans">
+        <span className="flex items-center gap-1.5">
+          <Icon name={item.metaIcon} className="w-3.5 h-3.5" /> {item.metaText}
         </span>
-        <span className={`${item.theme.badgeText} font-bold opacity-80`}>{item.category}</span>
+        <span className={`${item.theme.badgeText} font-bold opacity-90`}>{item.category}</span>
       </div>
     </a>
   );
@@ -264,9 +266,9 @@ export default function CreatorProfilePage() {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col scroll-smooth">
-      {/* پس‌زمینه نئونی شناور (حفظ رنگ فیروزه‌ای و سبز مخصوص پروفایل) */}
-      <div className="fixed inset-0 z-[-1] bg-deep-base overflow-hidden pointer-events-none">
+    <div className="relative min-h-screen flex flex-col scroll-smooth font-sans select-none text-right">
+      {/* پس‌زمینه نئونی شناور (رنگ فیروزه‌ای و سبز مخصوص پروفایل) */}
+      <div className="fixed inset-0 z-[-10] bg-[#050810] overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[80vw] h-[80vw] rounded-full blur-[120px] opacity-15 bg-[radial-gradient(circle,#06b6d4_0%,transparent_60%)] animate-[drift_30s_infinite_linear_alternate]" />
         <div className="absolute bottom-[-20%] right-[-20%] w-[80vw] h-[80vw] rounded-full blur-[120px] opacity-15 bg-[radial-gradient(circle,#10b981_0%,transparent_60%)] animate-[drift_40s_infinite_linear_alternate-reverse]" />
       </div>
@@ -283,15 +285,18 @@ export default function CreatorProfilePage() {
           ]} 
         />
 
-        {/* هدر پروفایل پدیدآورنده */}
-        <section className="glass-card relative overflow-hidden p-8 md:p-12 group border-t-2 border-t-[#10b981] animate-[fadeIn_0.5s_ease-out] rounded-3xl">
-          <div className="absolute left-0 top-0 w-1/2 h-full bg-[#10b981]/5 blur-3xl rounded-full transform -translate-x-1/2 -translate-y-1/4 pointer-events-none"></div>
+        {/* هدر پروفایل پدیدآورنده (گرافیک کلی1) */}
+        <section className="relative overflow-hidden p-8 md:p-12 group rounded-3xl border border-white/10 shadow-2xl animate-[fadeIn_0.5s_ease-out]">
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
+          
+          <div className="absolute left-0 top-0 w-1/2 h-full bg-[#10b981]/5 blur-3xl rounded-full transform -translate-x-1/2 -translate-y-1/4 pointer-events-none -z-10"></div>
 
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 relative z-20">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 relative z-10">
             
             {/* تصویر پروفایل با افکت هاور بزرگ‌نمایی */}
             <div className="flex-shrink-0 relative cursor-pointer group/avatar">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/10 shadow-[0_0_30px_rgba(16,185,129,0.2)] bg-deep-surface flex items-center justify-center relative group-hover/avatar:border-[#10b981]/50 transition-colors duration-500">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/10 shadow-[0_0_30px_rgba(16,185,129,0.2)] bg-black/50 flex items-center justify-center relative group-hover/avatar:border-[#10b981]/60 transition-colors duration-500">
                 <BlurImage 
                   src={authorData.avatar} 
                   alt={authorData.name} 
@@ -303,12 +308,12 @@ export default function CreatorProfilePage() {
             {/* اطلاعات متنی و آمار */}
             <div className="flex-grow text-center md:text-right mt-4 md:mt-0">
               
-              {/* بج چشمک‌زن پژوهشگر ارشد (نوشته شده به صورت مستقیم در خط) */}
+              {/* بج چشمک‌زن پژوهشگر ارشد */}
               <div className="flex justify-center md:justify-start mb-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#10b981]/10 border border-[#10b981]/30 rounded-full text-xs font-bold text-[#10b981] tracking-widest">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#10b981]/10 border border-[#10b981]/30 rounded-full text-xs font-bold text-[#10b981] tracking-widest shadow-inner">
                   <span className="relative flex h-3 w-3 items-center justify-center">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10b981] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10b981] shadow-[0_0_10px_currentColor]"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10b981] shadow-[0_0_10px_#10b981]"></span>
                   </span>
                   {authorData.badge}
                 </div>
@@ -318,18 +323,17 @@ export default function CreatorProfilePage() {
                 {authorData.name}
               </h1>
               
-              <div className="rich-text text-gray-400 text-sm md:text-base leading-relaxed max-w-3xl font-light text-justify mx-auto md:mx-0">
+              <div className="rich-text text-gray-300 text-sm md:text-base leading-relaxed max-w-3xl font-light text-justify mx-auto md:mx-0">
                 <p>{authorData.bio}</p>
               </div>
 
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 mt-8 border-t border-white/10 pt-6">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-8 mt-8 border-t border-white/10 pt-6">
                 {authorData.stats.map((stat, index) => (
                   <div key={index} className="flex flex-col items-center md:items-start">
-                    <span className="text-xl font-bold text-white">{stat.value}</span>
-                    <span className="text-xs text-gray-500 font-sans">{stat.label}</span>
+                    <span className="text-2xl font-black text-white font-sans">{stat.value}</span>
+                    <span className="text-xs text-gray-400 font-sans mt-0.5">{stat.label}</span>
                   </div>
                 ))}
-                <div className="w-px h-8 bg-white/10 hidden md:block"></div>
               </div>
             </div>
           </div>
@@ -339,11 +343,12 @@ export default function CreatorProfilePage() {
         <section className="space-y-6">
           <div className="flex flex-col md:flex-row items-center justify-between border-b border-white/10 pb-4 gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-2 text-center md:text-right">محتوای مرتبط با این شخص</h2>
+              <h2 className="text-2xl font-black text-white mb-1 text-center md:text-right">محتوای مرتبط با این شخص</h2>
               <p className="text-sm text-gray-400 font-light text-center md:text-right">مستندات، اخبار، راش‌ها و ابزارها</p>
             </div>
             
-            <div className="flex gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5 overflow-x-auto max-w-full hide-scroll">
+            {/* نوار فیلترها (GKS1) */}
+            <div className="flex gap-2 bg-[#080c16] p-1.5 rounded-2xl border border-white/10 overflow-x-auto max-w-full hide-scroll shadow-inner">
               {[
                 { id: 'all', label: 'همه موارد' },
                 { id: 'raw', label: 'محتوای راش و فوتیج' },
@@ -354,7 +359,7 @@ export default function CreatorProfilePage() {
                 <button 
                   key={filter.id}
                   onClick={() => setActiveFilter(filter.id)}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${activeFilter === filter.id ? 'bg-white/10 text-white shadow-md' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${activeFilter === filter.id ? 'bg-white/15 text-white shadow-md border border-white/15' : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'}`}
                 >
                   {filter.label}
                 </button>
@@ -362,26 +367,29 @@ export default function CreatorProfilePage() {
             </div>
           </div>
 
-          {/* رندر گرید یا حالت خالی استاندارد (EmptyState) بر اساس تب فعال */}
+          {/* رندر گرید یا حالت خالی استاندارد (EmptyState) */}
           {filteredItems.length === 0 ? (
-            <EmptyState 
-              icon={
-                activeFilter === 'raw' ? 'folder' :
-                activeFilter === 'produced' ? 'video' :
-                activeFilter === 'tools' ? 'pen-nib' :
-                activeFilter === 'blog' ? 'article' : 'search'
-              }
-              title={
-                activeFilter === 'all' ? 'این پدیدآورنده هنوز محتوایی منتشر نکرده است' :
-                activeFilter === 'raw' ? 'محتوای خامی از این پژوهشگر ثبت نشده است' :
-                activeFilter === 'produced' ? 'محتوای تولیدی در این بخش وجود ندارد' :
-                activeFilter === 'tools' ? 'ابزاری توسط این کاربر ارائه نشده است' : 'مقاله‌ای در این بخش یافت نشد'
-              }
-              description="به محض انتشار آثار جدید در این دسته‌بندی توسط پدیدآورنده، مستندات و پژوهش‌ها در این صفحه قابل مشاهده خواهند بود."
-              actionText="نمایش همه موارد"
-              onAction={() => setActiveFilter('all')}
-              color="text-[#10b981]"
-            />
+            <div className="relative rounded-3xl border border-white/10 p-10 overflow-hidden shadow-2xl">
+              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <EmptyState 
+                icon={
+                  activeFilter === 'raw' ? 'folder' :
+                  activeFilter === 'produced' ? 'video' :
+                  activeFilter === 'tools' ? 'pen-nib' :
+                  activeFilter === 'blog' ? 'article' : 'search'
+                }
+                title={
+                  activeFilter === 'all' ? 'این پدیدآورنده هنوز محتوایی منتشر نکرده است' :
+                  activeFilter === 'raw' ? 'محتوای خامی از این پژوهشگر ثبت نشده است' :
+                  activeFilter === 'produced' ? 'محتوای تولیدی در این بخش وجود ندارد' :
+                  activeFilter === 'tools' ? 'ابزاری توسط این کاربر ارائه نشده است' : 'مقاله‌ای در این بخش یافت نشد'
+                }
+                description="به محض انتشار آثار جدید در این دسته‌بندی توسط پدیدآورنده، مستندات و پژوهش‌ها در این صفحه قابل مشاهده خواهند بود."
+                actionText="نمایش همه موارد"
+                onAction={() => setActiveFilter('all')}
+                color="text-[#10b981]"
+              />
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-[fadeIn_0.4s_ease-out]">
               {filteredItems.map((item) => (
@@ -393,9 +401,9 @@ export default function CreatorProfilePage() {
           {/* دکمه نمایش بیشتر */}
           {filteredItems.length > 0 && (
             <div className="flex justify-center pt-8">
-              <button className="relative group bg-white/5 border border-white/10 text-white px-10 py-3 rounded-full font-bold flex items-center gap-3 hover:bg-white/10 hover:border-[#10b981] hover:text-[#10b981] transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] cursor-pointer">
+              <button className="relative group bg-[#080c16] border border-white/10 text-white px-10 py-3.5 rounded-full font-bold flex items-center gap-3 hover:bg-white/5 hover:border-[#10b981] hover:text-[#10b981] transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] cursor-pointer">
                 <span>نمایش موارد بیشتر</span>
-                <Icon name="caretDown" className="w-5 h-5" />
+                <Icon name="caretDown" className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
               </button>
             </div>
           )}

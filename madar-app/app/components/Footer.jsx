@@ -17,13 +17,13 @@ function SocialIconItem({ social, allIcons }) {
   return (
     <div className="relative group/tooltip">
       <motion.div
-        whileHover={{ scale: 1.2 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.2, y: -2 }}
+        whileTap={{ scale: 0.95 }}
       >
         <Link
           href={social.url || '#'}
-          className="block p-1 text-gray-400 transition-colors duration-300 hover:text-[var(--hover-color)]"
-          style={{ '--hover-color': social.hoverColor || '#10b981' }}
+          className="p-1.5 text-gray-400 flex items-center justify-center hover:text-[var(--hover-color)] transition-colors duration-300 cursor-pointer"
+          style={{ '--hover-color': social.hoverColor || '#06b6d4' }}
         >
           {iconSvg ? (
             <div className="w-6 h-6 [&>svg]:w-full [&>svg]:h-full" dangerouslySetInnerHTML={{ __html: iconSvg }} />
@@ -33,14 +33,14 @@ function SocialIconItem({ social, allIcons }) {
         </Link>
       </motion.div>
 
-      {/* Tooltip */}
+      {/* Tooltip شیشه‌ای GKS1 */}
       <AnimatePresence>
         {social.tooltip && (
           <motion.div 
             initial={{ opacity: 0, y: 5 }}
             whileInView={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 5 }}
-            className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover/tooltip:block bg-[#0b0f19] text-white text-[11px] py-1 px-2.5 rounded-lg border border-white/10 shadow-xl whitespace-nowrap z-30 pointer-events-none"
+            className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover/tooltip:block bg-[#0b0f19]/95 backdrop-blur-xl text-white text-[11px] py-1.5 px-3 rounded-lg border border-white/10 shadow-2xl whitespace-nowrap z-30 pointer-events-none font-sans font-medium"
           >
             {social.tooltip}
             <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#0b0f19]"></div>
@@ -74,23 +74,30 @@ export default function Footer({ initialData }) {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
-      className="w-full bg-[#080c16] border-t border-white/10 text-gray-300 py-12 px-4 md:px-8 mt-auto relative z-10 overflow-hidden font-sans"
+      className="w-full bg-[#0b0f19]/80 backdrop-blur-xl border-t border-white/10 text-gray-300 py-12 px-4 md:px-8 mt-auto relative z-10 overflow-hidden font-sans select-none shadow-2xl"
     >
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.12)_0%,transparent_70%)] pointer-events-none"></div>
+      {/* ۱. لایه پس‌زمینه شیشه‌ای ایزوله ثابت */}
+      <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+
+      {/* ۲. نوار نوری گرادینت فیروزه‌ای بالای فوتر (GKS1) */}
+      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 pointer-events-none z-20" />
+
+      {/* ۳. هاله هوور نوری پس‌زمینه */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.15)_0%,transparent_70%)] pointer-events-none -z-10"></div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
         
         {/* لوگو و توضیحات */}
         <div className="md:col-span-1 space-y-4">
-          <Link href="/" className="flex items-center gap-3 w-fit">
+          <Link href="/" className="flex items-center gap-3 w-fit group cursor-pointer">
             {footerIconSvg && (
-              <div className="w-10 h-10 text-[#06b6d4] [&>svg]:w-full [&>svg]:h-full drop-shadow-[0_0_12px_rgba(6,182,212,0.4)]" dangerouslySetInnerHTML={{ __html: footerIconSvg }} />
+              <div className="w-10 h-10 text-[#06b6d4] [&>svg]:w-full [&>svg]:h-full drop-shadow-[0_0_12px_rgba(6,182,212,0.5)] group-hover:scale-105 transition-transform duration-300" dangerouslySetInnerHTML={{ __html: footerIconSvg }} />
             )}
             {footerText && (
-              <span className="text-white font-black text-xl tracking-wider">{footerText}</span>
+              <span className="text-white font-black text-xl tracking-wider group-hover:text-gray-200 transition-colors">{footerText}</span>
             )}
           </Link>
-          <p className="text-sm text-gray-400 leading-relaxed mt-2">{footerDesc}</p>
+          <p className="text-sm text-gray-400 font-light leading-relaxed mt-2">{footerDesc}</p>
         </div>
 
         {/* لیست‌ها (دسترسی سریع و همراهان) */}
@@ -112,7 +119,7 @@ export default function Footer({ initialData }) {
                     className="flex items-center gap-2 group relative"
                   >
                     <span className="w-1.5 h-1.5 rounded-full transition-transform duration-300 group-hover:scale-150" style={{ backgroundColor: section.color }}></span>
-                    <Link href={link.url || '#'} className="hover:text-white transition-colors">
+                    <Link href={link.url || '#'} className="hover:text-white transition-colors font-medium">
                       {link.title}
                     </Link>
                   </motion.li>
@@ -124,9 +131,9 @@ export default function Footer({ initialData }) {
           </div>
         ))}
 
-        {/* شبکه‌های اجتماعی و نمادها */}
+        {/* شبکه‌های اجتماعی و نمادها (بدون پس‌زمینه) */}
         <div className="space-y-6 flex flex-col justify-end">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3">
             {socialLinks.map((social) => (
               <SocialIconItem key={social.id} social={social} allIcons={allIcons} />
             ))}
@@ -134,13 +141,13 @@ export default function Footer({ initialData }) {
 
           <div className="flex flex-wrap items-center gap-4 pt-2">
             {[{data: enamad, name: 'اینماد'}, {data: samandehi, name: 'ساماندهی'}, {data: satra, name: 'ساترا'}].map((badge, idx) => (
-              <div key={idx}>
+              <div key={idx} className="transition-opacity hover:opacity-80">
                 {badge.data.type === 'code' && badge.data.code && (
                   <div dangerouslySetInnerHTML={{ __html: badge.data.code }} />
                 )}
                 {badge.data.type === 'image' && badge.data.img && (
-                  <Link href={badge.data.url || '#'} target="_blank" className="hover:opacity-80 transition-opacity">
-                    <img src={badge.data.img} alt={badge.name} className="h-14 w-auto object-contain" />
+                  <Link href={badge.data.url || '#'} target="_blank" className="block">
+                    <img src={badge.data.img} alt={badge.name} className="h-12 w-auto object-contain" />
                   </Link>
                 )}
               </div>
@@ -149,7 +156,7 @@ export default function Footer({ initialData }) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/5 text-center text-xs text-gray-500 relative z-10">
+      <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/10 text-center text-xs text-gray-500 font-medium relative z-10">
         {copyrightText}
       </div>
     </motion.footer>

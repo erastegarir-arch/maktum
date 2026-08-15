@@ -1,53 +1,429 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { useMemo } from 'react';
-import 'react-quill-new/dist/quill.snow.css'; // نام استایل هم تغییر کرد
+import { useEffect, useState } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import { Extension } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
+import Placeholder from '@tiptap/extension-placeholder';
+// وارد کردن آیکون از فایل جداگانه (در صورت تمایل می‌توانید آیکون‌ها را اینجا هم مستقیم قرار دهید)
+// در این اصلاحیه آیکون‌ها به صورت مستقیم درون کد قرار گرفته‌اند تا مشکل بارگذاری آیکون حل شود.
 
-// اینجا هم import به react-quill-new تغییر کرد
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+// ================= کامپوننت داخلی برای SVG آیکون‌ها (حل مشکل عدم پیدا شدن آیکون) =================
+const EditorIcon = ({ name, className = "w-4 h-4" }) => {
+  const icons = {
+    // آیکون‌های فرمت متن
+    bold: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" /><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
+      </svg>
+    ),
+    italic: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="19" y1="4" x2="10" y2="4" /><line x1="14" y1="20" x2="5" y2="20" /><line x1="15" y1="4" x2="9" y2="20" />
+      </svg>
+    ),
+    underline: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 4v6a6 6 0 0 0 12 0V4" /><line x1="4" y1="20" x2="20" y2="20" />
+      </svg>
+    ),
+    strike: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 4H9a3 3 0 0 0-2.83 4" /><path d="M14 12a4 4 0 0 1 0 8H6" /><line x1="4" y1="12" x2="20" y2="12" />
+      </svg>
+    ),
+    // آیکون‌های تیتر
+    h2: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1" />
+      </svg>
+    ),
+    h3: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5a2 2 0 0 1-2 2" /><path d="M17 17.5c2 1.5 4 0 4-1.5a2 2 0 0 0-2-2" />
+      </svg>
+    ),
+    // آیکون‌های جهت متن
+    directionRtl: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 15h8c2.21 0 4-1.79 4-4s-1.79-4-4-4H5l4 4m-4-4 4-4"/>
+        </svg>
+    ),
+    directionLtr: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 15H6c-2.21 0-4-1.79-4-4s1.79-4 4-4h13l-4 4m4-4-4-4"/>
+        </svg>
+    ),
+    // آیکون‌های تراز متن
+    alignRight: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="12" x2="9" y2="12" /><line x1="21" y1="18" x2="7" y2="18" />
+      </svg>
+    ),
+    alignCenter: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="6" /><line x1="21" y1="12" x2="3" y2="12" /><line x1="18" y1="18" x2="6" y2="18" />
+      </svg>
+    ),
+    alignLeft: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="21" y1="6" x2="3" y2="6" /><line x1="15" y1="12" x2="3" y2="12" /><line x1="17" y1="18" x2="3" y2="18" />
+      </svg>
+    ),
+    alignJustify: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    ),
+    // آیکون‌های لیست و نقل‌قول
+    listBullets: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4" cy="6" r="2" fill="currentColor" /><circle cx="4" cy="12" r="2" fill="currentColor" /><circle cx="4" cy="18" r="2" fill="currentColor" />
+      </svg>
+    ),
+    listNumbers: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="10" y1="6" x2="21" y2="6" /><line x1="10" y1="12" x2="21" y2="12" /><line x1="10" y1="18" x2="21" y2="18" /><path d="M4 6h2v4H4" /><path d="M4 14h3v4H4" />
+      </svg>
+    ),
+    textBlockquote: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+      </svg>
+    ),
+    media: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
+      </svg>
+    ),
+  };
 
-export default function RichTextEditor({ value, onChange, placeholder = "متن خود را اینجا بنویسید..." }) {
+  return icons[name] || null;
+};
+
+// ================= افزونه هوشمند جهت متن (RTL / LTR) =================
+const TextDirection = Extension.create({
+  name: 'textDirection',
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['paragraph', 'heading', 'blockquote', 'orderedList', 'bulletList', 'listItem'],
+        attributes: {
+          dir: {
+            default: null,
+            parseHTML: element => element.getAttribute('dir'),
+            renderHTML: attributes => {
+              if (!attributes.dir) return {};
+              return { dir: attributes.dir };
+            },
+          },
+        },
+      },
+    ];
+  },
+  addCommands() {
+    return {
+      setDirection: (dir) => ({ chain }) => {
+        return chain()
+          .updateAttributes('paragraph', { dir })
+          .updateAttributes('heading', { dir })
+          .updateAttributes('blockquote', { dir })
+          .updateAttributes('orderedList', { dir })
+          .updateAttributes('bulletList', { dir })
+          .updateAttributes('listItem', { dir })
+          .run();
+      },
+    };
+  },
+});
+
+export default function RichTextEditor({ 
+  value, 
+  onChange, 
+  placeholder = "متن خود را اینجا بنویسید...",
+  activeTheme = { bg: 'bg-[#06b6d4]', text: 'text-[#06b6d4]' }, 
+  onOpenMedia 
+}) {
   
-  const modules = useMemo(() => ({
-    toolbar: [
-      [{ 'header': [2, 3, 4, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'direction': 'rtl' }, { 'align': [] }],
-      ['link', 'image', 'video'],
-      ['clean']
+  const editor = useEditor({
+    immediatelyRender: false, // ✅ رفع باگ کنسول Next.js
+    extensions: [
+      StarterKit.configure({
+        bulletList: { keepMarks: true, keepAttributes: true },
+        orderedList: { keepMarks: true, keepAttributes: true },
+        // غیرفعال کردن کدهای پیش‌فرض برای جلوگیری از تداخل
+        bold: false,
+        italic: false,
+        strike: false,
+        heading: false,
+      }),
+      // اضافه کردن ماژول‌های تمیز و بدون تداخل
+      Underline,
+      TextAlign.configure({ 
+        types: ['heading', 'paragraph', 'blockquote', 'listItem', 'orderedList', 'bulletList'], 
+        alignments: ['left', 'center', 'right', 'justify'] 
+      }),
+      TextDirection,
+      Placeholder.configure({
+        placeholder: placeholder,
+        emptyEditorClass: 'is-editor-empty',
+      }),
     ],
-  }), []);
+    content: value || '',
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class: 'min-h-[300px] outline-none text-sm leading-loose font-light p-5 text-gray-200 font-sans focus:outline-none',
+        dir: 'rtl' 
+      }
+    }
+  });
+
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value || '', false);
+    }
+  }, [value, editor]);
+
+  if (!editor) return null;
+
+  const getDir = () => {
+    if (editor.isActive({ dir: 'ltr' })) return 'ltr';
+    if (editor.isActive({ dir: 'rtl' })) return 'rtl';
+    return 'rtl'; 
+  };
+  
+  const currentDir = getDir();
+  const isRtl = currentDir === 'rtl';
+  const isLtr = currentDir === 'ltr';
+
+  const ToolbarButton = ({ onClick, isActive, children, title }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={`min-w-[34px] h-[34px] px-2 rounded-xl transition-all duration-200 flex items-center justify-center font-sans text-xs cursor-pointer border ${
+        isActive 
+          ? `${activeTheme.bg} text-white border-white/20 shadow-md scale-105 font-bold` 
+          : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:text-white hover:border-white/10'
+      }`}
+    >
+      {children}
+    </button>
+  );
 
   return (
-    <div className="w-full bg-white/5 border border-white/10 rounded-xl overflow-hidden focus-within:border-[#06b6d4] transition-colors">
-      <ReactQuill 
-        theme="snow" 
-        value={value || ''} 
-        onChange={onChange} 
-        modules={modules}
-        placeholder={placeholder}
-        className="text-white dir-rtl"
-      />
+    <div className="w-full bg-[#080c16] border border-white/10 rounded-2xl focus-within:border-white/30 transition-all shadow-2xl flex flex-col font-sans relative GKEditorWrp">
       
+      {/* نوار ابزار چسبان */}
+      <div className="sticky -top-8 z-40 bg-[#0b0f19]/95 backdrop-blur-xl border-b border-white/10 p-2.5 flex flex-wrap gap-1.5 items-center shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] rounded-t-2xl GKEditorToolbar">
+        
+        {/* ۱. فرمت‌های پایه متن */}
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive('bold')} title="بولد (ضخیم)">
+          <EditorIcon name="bold"/>
+        </ToolbarButton>
+
+        <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive('italic')} title="ایتالیک (مورب)">
+          <EditorIcon name="italic"/>
+        </ToolbarButton>
+
+        <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive('underline')} title="خط زیر متن">
+          <EditorIcon name="underline"/>
+        </ToolbarButton>
+
+        <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} isActive={editor.isActive('strike')} title="خط‌خورده">
+          <EditorIcon name="strike"/>
+        </ToolbarButton>
+
+        <div className="w-px h-6 bg-white/10 mx-1.5"></div>
+
+        {/* ۲. تیترها */}
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive('heading', { level: 2 })} title="تیتر بزرگ (H2)">
+          <EditorIcon name="h2"/>
+        </ToolbarButton>
+
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} isActive={editor.isActive('heading', { level: 3 })} title="تیتر متوسط (H3)">
+          <EditorIcon name="h3"/>
+        </ToolbarButton>
+
+        <div className="w-px h-6 bg-white/10 mx-1.5"></div>
+
+        {/* ۳. جهت متن (RTL / LTR هماهنگ با تراز) */}
+        <ToolbarButton 
+          onClick={() => editor.chain().focus().setDirection('rtl').setTextAlign('right').run()} 
+          isActive={isRtl} 
+          title="راست‌چین (متن و اعداد فارسی)"
+        >
+          <EditorIcon name="directionRtl"/>
+        </ToolbarButton>
+
+        <ToolbarButton 
+          onClick={() => editor.chain().focus().setDirection('ltr').setTextAlign('left').run()} 
+          isActive={isLtr} 
+          title="چپ‌چین (متن و اعداد انگلیسی)"
+        >
+          <EditorIcon name="directionLtr"/>
+        </ToolbarButton>
+
+        <div className="w-px h-6 bg-white/10 mx-1.5"></div>
+
+        {/* ۴. ترازهای متنی */}
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} isActive={editor.isActive({ textAlign: 'right' })} title="تراز به راست">
+          <EditorIcon name="alignRight"/>
+        </ToolbarButton>
+
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('center').run()} isActive={editor.isActive({ textAlign: 'center' })} title="تراز وسط">
+          <EditorIcon name="alignCenter"/>
+        </ToolbarButton>
+
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('left').run()} isActive={editor.isActive({ textAlign: 'left' })} title="تراز به چپ">
+          <EditorIcon name="alignLeft"/>
+        </ToolbarButton>
+
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('justify').run()} isActive={editor.isActive({ textAlign: 'justify' })} title="تراز هم‌اندازه (جاستی‌فای)">
+          <EditorIcon name="alignJustify"/>
+        </ToolbarButton>
+
+        <div className="w-px h-6 bg-white/10 mx-1.5"></div>
+
+        {/* ۵. لیست‌ها و نقل‌قول */}
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive('bulletList')} title="لیست نقطه‌ای">
+          <EditorIcon name="listBullets"/>
+        </ToolbarButton>
+
+        <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive('orderedList')} title="لیست عددی">
+          <EditorIcon name="listNumbers"/>
+        </ToolbarButton>
+
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} isActive={editor.isActive('blockquote')} title="نقل‌قول">
+          <EditorIcon name="textBlockquote"/>
+        </ToolbarButton>
+
+        {/* ۶. دکمه افزودن رسانه */}
+        {onOpenMedia && (
+          <>
+            <div className="w-px h-6 bg-white/10 mx-1.5"></div>
+            <button 
+              type="button" 
+              onClick={() => onOpenMedia(editor)} 
+              className={`h-[34px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 hover:${activeTheme.bg} hover:text-white hover:border-transparent transition-all flex items-center gap-2 cursor-pointer mr-auto shadow-inner GKEditorMediaBtn`}
+              title="انتخاب و درج تصویر، ویدیو یا صوت از کتابخانه رسانه"
+            >
+              <EditorIcon name="media"/>
+              <span className="text-xs font-bold font-sans">افزودن رسانه</span>
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* ناحیه ویرایش متن */}
+      <EditorContent editor={editor} className="font-sans flex-grow ProseMirror-content ProseMirror-base" />
+
+      {/* استایل‌های جامع: رفع باگ همراهی بالت‌ها، اعداد فارسی/انگلیسی و نقل‌قول‌ها */}
       <style jsx global>{`
-        .ql-toolbar.ql-snow {
-          border: none !important;
-          border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-          background: rgba(0,0,0,0.2) !important;
+        /* نمایش ترازهای متن با اولویت بالا */
+        .ProseMirror [style*="text-align: right"] { text-align: right !important; }
+        .ProseMirror [style*="text-align: center"] { text-align: center !important; }
+        .ProseMirror [style*="text-align: left"] { text-align: left !important; }
+        .ProseMirror [style*="text-align: justify"] { text-align: justify !important; }
+        
+        .ProseMirror [dir="rtl"] { direction: rtl; }
+        .ProseMirror [dir="ltr"] { direction: ltr; }
+
+        .is-editor-empty:first-child::before {
+          content: attr(data-placeholder);
+          float: right;
+          color: #6b7280;
+          pointer-events: none;
+          height: 0;
+          font-style: normal;
         }
-        .ql-container.ql-snow {
-          border: none !important;
-          min-height: 200px;
-          font-family: inherit !important;
-          font-size: 14px;
+        
+        .ProseMirror p {
+          margin-bottom: 0.75rem;
         }
-        .ql-editor { text-align: right; direction: rtl; }
-        .ql-snow .ql-stroke { stroke: #9ca3af !important; }
-        .ql-snow .ql-fill { fill: #9ca3af !important; }
-        .ql-snow .ql-picker { color: #9ca3af !important; }
+        
+        .ProseMirror h2 {
+          font-size: 1.25rem;
+          font-weight: 800;
+          color: #ffffff;
+          margin-top: 1.5rem;
+          margin-bottom: 0.75rem;
+        }
+        
+        .ProseMirror h3 {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #e5e7eb;
+          margin-top: 1.25rem;
+          margin-bottom: 0.5rem;
+        }
+
+        /* ===== استایل لیست‌ها: قفل شدن عدد و نقطه به کلمات ===== */
+        .ProseMirror ol,
+        .ProseMirror ul {
+          list-style-position: inside !important;
+          padding: 0 !important;
+          margin: 0.75rem 0 !important;
+        }
+
+        .ProseMirror li {
+          margin-bottom: 0.5rem;
+        }
+
+        .ProseMirror li > p {
+          display: inline !important;
+          margin-bottom: 0 !important;
+        }
+
+        /* ----- حالت راست‌چین (اعداد فارسی و جهت راست) ----- */
+        .ProseMirror ol:not([dir="ltr"]),
+        .ProseMirror ol[dir="rtl"] {
+          list-style-type: persian !important;
+          direction: rtl;
+        }
+        .ProseMirror ul:not([dir="ltr"]),
+        .ProseMirror ul[dir="rtl"] {
+          list-style-type: disc !important;
+          direction: rtl;
+        }
+
+        /* ----- حالت چپ‌چین (اعداد انگلیسی و جهت چپ) ----- */
+        .ProseMirror ol[dir="ltr"] {
+          list-style-type: decimal !important;
+          direction: ltr;
+        }
+        .ProseMirror ul[dir="ltr"] {
+          list-style-type: disc !important;
+          direction: ltr;
+        }
+
+        /* ===== استایل نقل‌قول (Blockquote) هماهنگ با جهت متن ===== */
+        .ProseMirror blockquote {
+          margin: 1rem 0;
+          color: #9ca3af;
+          font-style: italic;
+          padding: 0.5rem 1rem;
+          background: rgba(6, 182, 212, 0.05);
+          border-radius: 8px;
+        }
+
+        .ProseMirror blockquote:not([dir="ltr"]),
+        .ProseMirror blockquote[dir="rtl"] {
+          border-right: 4px solid #06b6d4;
+          border-left: none;
+          text-align: right;
+        }
+
+        .ProseMirror blockquote[dir="ltr"] {
+          border-left: 4px solid #06b6d4;
+          border-right: none;
+          text-align: left;
+        }
       `}</style>
     </div>
   );

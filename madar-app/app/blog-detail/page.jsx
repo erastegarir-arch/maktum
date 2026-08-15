@@ -1,9 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Breadcrumbs from '../components/Breadcrumbs';
-import Icon from '../components/Icon'; // وارد کردن کامپوننت مرکزی آیکون‌ها
-import ProgressBar from '../components/ProgressBar';
+import Icon from '../components/Icon'; // اتصال به کتابخانه مرکزی آیکون‌ها
+import EmptyState from '../components/EmptyState'; // وارد کردن کامپوننت حالت‌های خالی
 import BlurImage from '../components/BlurImage'; // وارد کردن کامپوننت لودینگ تنبل و بلور تصاویر
+import ProgressBar from '../components/ProgressBar';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // === ۱. هسته محتوایی مقاله (دیتای داینامیک) ===
 const articleData = {
@@ -19,7 +21,8 @@ const articleData = {
   meta: {
     date: "۲۴ بهمن ۱۴۰۲",
     readTime: "۱۲ دقیقه مطالعه",
-    views: "۳.۲k بازدید"
+    views: "۳.۲k بازدید",
+    ageRating: "+۷" // رده‌بندی سنی قابل ویرایش (مثال: +۷ ، +۱۲ ، +۱۶ ، +۱۸)
   },
   // محتوای مقاله به صورت بلاک‌بندی شده برای رندر داینامیک
   contentBlocks: [
@@ -81,44 +84,60 @@ const articleData = {
     { 
       id: 1, 
       title: "کیمیاگران دربار و راز سنگ جادو", 
-      badge: "مقاله ویژه", 
       date: "۱۴۰۲/۱۱/۰۱", 
       views: "۵.۴k بازدید", 
       image: "/images/related-1.jpg", 
       theme: {
         borderTop: "border-t-[#b45309]",
-        badgeBorder: "border-[#b45309]/40",
         hoverText: "group-hover:text-[#b45309]"
       }
     },
     { 
       id: 2, 
       title: "فراماسونری و انقلاب‌های قرن هجدهم", 
-      badge: "یادداشت", 
       date: "۱۴۰۲/۱۰/۲۸", 
       views: "۳.۸k بازدید", 
       image: "/images/related-2.jpg", 
       theme: {
         borderTop: "border-t-[#b45309]",
-        badgeBorder: "border-[#b45309]/40",
         hoverText: "group-hover:text-[#b45309]"
       }
     },
     { 
       id: 3, 
       title: "افشای اسناد جدید از نشست‌های محرمانه سال ۲۰۱۰", 
-      badge: "گزارش خبری", 
       date: "۱۴۰۲/۱۰/۱۵", 
       views: "۷.۱k بازدید", 
       image: "/images/related-3.jpg", 
       theme: {
         borderTop: "border-t-[#b45309]",
-        badgeBorder: "border-[#b45309]/40",
         hoverText: "group-hover:text-[#b45309]"
       }
     }
   ]
 };
+
+// لیست شبکه‌های اجتماعی برای اشتراک‌گذاری (فقط ایتا، بله، تلگرام به ترتیب از راست به چپ)
+const sharePlatforms = [
+  {
+    name: 'ایتا',
+    icon: 'eitaa',
+    hoverColorClass: 'hover:text-[#f97316]',
+    getUrl: (url, title) => `https://eitaa.com/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
+  },
+  {
+    name: 'بله',
+    icon: 'bale',
+    hoverColorClass: 'hover:text-[#10b981]',
+    getUrl: (url, title) => `https://ble.ir/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
+  },
+  {
+    name: 'تلگرام',
+    icon: 'telegram',
+    hoverColorClass: 'hover:text-[#0088cc]',
+    getUrl: (url, title) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
+  }
+];
 
 // === ۲. کامپوننت پایه اسکلتون با افکت Shimmer ===
 const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
@@ -140,7 +159,11 @@ const BlogDetailSkeleton = () => {
           <div className="w-48 h-6 bg-white/5 rounded-lg"></div>
 
           {/* اسکلتون تصویر شاخص */}
-          <BaseSkeleton className="w-full aspect-video" rounded="rounded-3xl" />
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 w-full aspect-video">
+            <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#b45309] to-transparent opacity-90 pointer-events-none z-20" />
+            <BaseSkeleton className="w-full h-full" rounded="rounded-3xl" />
+          </div>
 
           {/* اسکلتون هدر مقاله */}
           <header className="space-y-4 text-center md:text-right">
@@ -154,7 +177,7 @@ const BlogDetailSkeleton = () => {
                   <BaseSkeleton className="w-32 h-4" rounded="rounded" />
                 </div>
               </div>
-              <BaseSkeleton className="w-64 h-10" rounded="rounded-2xl" />
+              <BaseSkeleton className="w-80 h-10" rounded="rounded-2xl" />
             </div>
           </header>
 
@@ -182,8 +205,11 @@ const ArticleRenderer = ({ blocks }) => {
         switch (block.type) {
           case 'lead':
             return (
-              <div key={index} className="glass-card p-6 md:p-8 rounded-3xl mb-10 border-r-4 border-r-[#b45309] relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#b45309]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+              <div key={index} className="relative p-6 md:p-8 rounded-3xl mb-10 overflow-hidden shadow-2xl border border-white/10">
+                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                <div className="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-transparent via-[#b45309] to-transparent opacity-90 pointer-events-none z-20" />
+                
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#b45309]/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none -z-10"></div>
                 <p className="text-xl md:text-2xl font-bold text-white leading-relaxed mb-0 relative z-10 text-justify">
                   {block.text}
                 </p>
@@ -212,8 +238,11 @@ const ArticleRenderer = ({ blocks }) => {
                 <h3 className="text-sm text-gray-500 font-sans mb-3 uppercase tracking-widest flex items-center gap-2">
                   <Icon name="videoCamera" className="w-4 h-4 text-[#b45309]" /> {block.title}
                 </h3>
-                <div className="relative w-full aspect-video glass-card rounded-3xl overflow-hidden p-1 group border-t border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.6)] cursor-pointer">
-                  <div className="absolute inset-0 bg-gray-900 rounded-[22px] overflow-hidden">
+                <div className="relative w-full aspect-video rounded-3xl overflow-hidden p-1 group border border-white/10 shadow-2xl cursor-pointer">
+                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                  <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#b45309] to-transparent opacity-90 pointer-events-none z-20" />
+
+                  <div className="absolute inset-0 bg-gray-900 rounded-[22px] overflow-hidden -z-10">
                     <BlurImage src={block.thumbnail} className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" alt="کاور ویدیو" />
                   </div>
                   <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-[#b45309] hover:border-[#b45309] hover:text-white transition-all duration-300 group-hover:scale-110 shadow-[0_0_15px_rgba(180,83,9,0.5)] z-10">
@@ -236,7 +265,7 @@ const ArticleRenderer = ({ blocks }) => {
             );
           case 'blockquote':
             return (
-              <blockquote key={index} className="relative p-8 my-10 bg-gradient-to-l from-white/5 to-transparent border-l border-white/10 rounded-r-3xl rounded-l-md italic">
+              <blockquote key={index} className="relative p-8 my-10 bg-gradient-to-l from-[#b45309]/5 to-transparent border-l-2 border-[#b45309]/50 rounded-r-3xl rounded-l-md italic overflow-hidden">
                 <Icon name="quotes" className="w-12 h-12 text-[#b45309]/20 absolute right-4 top-4 fill-current" />
                 <p className="relative z-10 text-xl text-white font-medium leading-[2.2] mb-4 pr-6 text-justify">
                   "{block.text}"
@@ -285,12 +314,12 @@ export default function BlogDetailPage() {
   return (
     <div className="relative min-h-screen flex flex-col scroll-smooth">
       {/* پس‌زمینه نئونی شناور */}
-      <div className="fixed inset-0 z-[-1] bg-deep-base overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 z-[-10] bg-[#050810] overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full blur-[80px] opacity-15 bg-[radial-gradient(circle,rgba(180,83,9,0.15)_0%,transparent_70%)] animate-[float_20s_infinite_ease-in-out_alternate]" />
         <div className="absolute bottom-[20%] left-[-10%] w-[60vw] h-[60vw] rounded-full blur-[80px] opacity-10 bg-[radial-gradient(circle,rgba(180,83,9,0.15)_0%,transparent_70%)] animate-[float_40s_infinite_linear_alternate-reverse]" />
       </div>
 
-      {/* ۱. اضافه کردن نوار پیشرفت اینجا */}
+      {/* ۱. نوار پیشرفت مطالعه */}
       <ProgressBar />
 
       {/* محتوای اصلی مقاله */}
@@ -309,12 +338,12 @@ export default function BlogDetailPage() {
           />
 
           {/* تصویر شاخص */}
-          <div className="relative w-full aspect-video rounded-3xl overflow-hidden glass-card mb-8 group border-t-2 border-t-[#b45309] p-1">
-            <BlurImage src={articleData.coverImage} alt="تصویر شاخص مقاله" className="w-full h-full object-cover rounded-[22px] opacity-80 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#080C16] via-transparent to-transparent pointer-events-none rounded-[22px]"></div>
-            <div className="absolute top-6 right-6 bg-[#0b0f19]/70 backdrop-blur-md border border-[#b45309]/40 px-4 py-1.5 rounded-full text-xs font-bold text-[#b45309] shadow-[0_0_15px_rgba(180,83,9,0.5)] z-20">
-              {articleData.category}
-            </div>
+          <div className="relative w-full aspect-video rounded-3xl overflow-hidden mb-8 group border border-white/10 p-1 shadow-2xl">
+            <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#b45309] to-transparent opacity-90 pointer-events-none z-20" />
+
+            <BlurImage src={articleData.coverImage} alt="تصویر شاخص مقاله" className="relative z-10 w-full h-full object-cover rounded-[22px] opacity-80 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#080C16] via-transparent to-transparent pointer-events-none rounded-[22px] z-10"></div>
           </div>
 
           {/* سربرگ مقاله و متادیتا */}
@@ -337,12 +366,26 @@ export default function BlogDetailPage() {
                 </div>
               </div>
               
-              <div className="flex items-center gap-4 text-sm text-gray-400 bg-white/5 px-6 py-3 rounded-2xl border border-white/5 font-sans">
+              {/* باکس متادیتا همراه با رده‌بندی سنی و نوار نوری در هاور (GKS1) */}
+              <div className="relative flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-gray-400 bg-white/5 px-6 py-3 rounded-2xl border border-white/10 font-sans shadow-inner overflow-hidden group/meta transition-all duration-300 hover:border-[#b45309]/40">
+                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#b45309] to-transparent opacity-0 group-hover/meta:opacity-100 transition-opacity duration-300 pointer-events-none z-20" />
+                
                 <span className="flex items-center gap-2"><Icon name="calendarBlank" className="w-4 h-4" /> {articleData.meta.date}</span>
                 <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
                 <span className="flex items-center gap-2"><Icon name="clock" className="w-4 h-4" /> {articleData.meta.readTime}</span>
                 <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
                 <span className="flex items-center gap-2"><Icon name="eye" className="w-4 h-4" /> {articleData.meta.views}</span>
+                {articleData.meta.ageRating && (
+                  <>
+                    <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                    <span className="flex items-center gap-1.5" title="رده‌بندی سنی محتوا">
+                      <Icon name="shieldCheck" className="w-4 h-4 text-[#b45309]" />
+                      <span className="text-gray-400 text-xs">رده‌بندی سنی:</span>
+                      <span className="dir-ltr text-white font-bold">{articleData.meta.ageRating}</span>
+                    </span>
+                  </>
+                )}
               </div>
 
               <div className="flex items-center gap-2 md:mr-auto">
@@ -374,9 +417,12 @@ export default function BlogDetailPage() {
             </div>
           </div>
 
-          {/* تازه‌های مدار (مطالب مرتبط) */}
-          <section className="w-full border-t border-white/5 bg-[#050810] py-16 relative z-10 mt-16 rounded-3xl overflow-hidden shadow-inner">
-            <div className="px-6 md:px-10">
+          {/* تازه‌های مدار (مطالب مرتبط بدون تگ روی پوستر) */}
+          <section className="w-full border border-white/5 py-16 relative z-10 mt-16 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#b45309] to-transparent opacity-90 pointer-events-none z-20" />
+
+            <div className="px-6 md:px-10 relative z-10">
               <div className="flex items-end justify-between mb-10">
                 <div>
                   <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 flex items-center gap-2">
@@ -391,18 +437,19 @@ export default function BlogDetailPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {articleData.relatedNews.map(news => (
-                  <a key={news.id} href="#" className={`glass-card group flex flex-col p-4 rounded-3xl border-t-2 ${news.theme.borderTop} transition-all duration-400 hover:-translate-y-1.5`}>
-                    <div className="relative w-full h-48 rounded-2xl bg-gray-900 overflow-hidden mb-4 flex items-center justify-center">
+                  <a key={news.id} href="#" className="relative group flex flex-col p-4 rounded-3xl border border-white/10 transition-all duration-400 hover:-translate-y-1.5 overflow-hidden">
+                    <div className="absolute inset-0 bg-[#0b0f19]/60 backdrop-blur-xl pointer-events-none -z-10" />
+                    <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#b45309] to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20" />
+                    
+                    {/* پوستر بدون هیچ تگ و نشان اضافه روی آن */}
+                    <div className="relative w-full h-48 rounded-2xl bg-gray-900 overflow-hidden mb-4 flex items-center justify-center border border-white/5 z-10">
                       <BlurImage src={news.image} alt={news.title} className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" />
-                      {/* بج با استایل شیشه‌ای هماهنگ با صفحه اصلی بلاگ */}
-                      <div className={`absolute top-3 right-3 bg-[#0b0f19]/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] text-gray-100 font-bold border ${news.theme.badgeBorder} shadow-lg z-20`}>
-                        {news.badge}
-                      </div>
                     </div>
-                    <div className="flex-grow">
+
+                    <div className="flex-grow z-10">
                       <h3 className={`text-base font-bold text-white mb-2 leading-relaxed ${news.theme.hoverText} transition-colors line-clamp-2`}>{news.title}</h3>
                     </div>
-                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-500 font-sans">
+                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-500 font-sans z-10">
                       <span className="flex items-center gap-1"><Icon name="calendarBlank" className="w-3 h-3" /> {news.date}</span>
                       <span className="flex items-center gap-1"><Icon name="eye" className="w-3 h-3" /> {news.views}</span>
                     </div>
@@ -414,7 +461,7 @@ export default function BlogDetailPage() {
 
           {/* بخش نظرات */}
           <section id="comments" className="mt-16 pt-10 border-t border-white/10 relative">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#b45309]/30 to-transparent"></div>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[2px] bg-gradient-to-r from-transparent via-[#b45309]/50 to-transparent"></div>
             
             <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
               <Icon name="chats" className="w-6 h-6 text-[#b45309] fill-current" /> نظرات کاربران 
@@ -423,7 +470,10 @@ export default function BlogDetailPage() {
               </span>
             </h3>
 
-            <div className="glass-card p-6 rounded-3xl mb-12 relative overflow-hidden border-none shadow-none bg-black/30">
+            <div className="relative p-6 rounded-3xl mb-12 overflow-hidden border border-white/10 shadow-2xl">
+              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#b45309] to-transparent opacity-90 pointer-events-none z-20" />
+
               <form className="relative z-10">
                 <div className="flex gap-4 mb-4">
                   <div className="flex-grow">
@@ -436,7 +486,7 @@ export default function BlogDetailPage() {
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       placeholder="دیدگاه تحلیلی خود را بنویسید..." 
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm focus:border-[#b45309] focus:bg-white/10 outline-none transition-all resize-none shadow-inner"
+                      className="w-full bg-[#080c16] border border-white/10 rounded-2xl p-4 text-white text-sm focus:border-[#b45309] outline-none transition-all resize-none shadow-inner"
                     ></textarea>
                   </div>
                 </div>
@@ -454,8 +504,10 @@ export default function BlogDetailPage() {
 
             <div className="space-y-6">
               {articleData.comments.map(comment => (
-                <div key={comment.id} className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                  <div className="flex justify-between items-start mb-3">
+                <div key={comment.id} className="relative rounded-2xl p-5 border border-white/10 overflow-hidden shadow-lg">
+                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                  
+                  <div className="flex justify-between items-start mb-3 relative z-10">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                         <Icon name="user" className="w-6 h-6 text-[#fbbf24]" />
@@ -468,7 +520,7 @@ export default function BlogDetailPage() {
                       </div>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-300 leading-[2.2] mb-1 font-light text-justify">
+                  <p className="text-sm text-gray-300 leading-[2.2] mb-1 font-light text-justify relative z-10">
                     {comment.text}
                   </p>
                 </div>
@@ -476,7 +528,7 @@ export default function BlogDetailPage() {
             </div>
             
             <div className="flex justify-center mt-8">
-              <button className="text-sm text-[#b45309] hover:text-white transition-colors border border-[#b45309]/30 hover:border-white px-6 py-2 rounded-full cursor-pointer">
+              <button className="text-sm text-[#b45309] hover:text-white transition-colors border border-[#b45309]/30 hover:border-[#b45309] bg-[#b45309]/10 hover:bg-[#b45309] px-6 py-2.5 rounded-full cursor-pointer font-bold">
                 بارگذاری نظرات بیشتر
               </button>
             </div>
@@ -485,51 +537,81 @@ export default function BlogDetailPage() {
       </main>
 
       {/* مودال اشتراک گذاری */}
-      {isShareModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" onClick={() => setIsShareModalOpen(false)}></div>
-          <div className="glass-card relative z-10 w-full max-w-sm p-6 rounded-3xl border border-white/10 bg-[#0c1222]/90 animate-[fadeIn_0.2s_ease-out] shadow-2xl">
-            <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Icon name="shareNetwork" className="w-5 h-5 text-[#b45309]" /> اشتراک‌گذاری
-              </h3>
-              <button onClick={() => setIsShareModalOpen(false)} className="text-gray-400 hover:text-white transition-colors cursor-pointer bg-white/5 hover:bg-white/10 rounded-full p-1.5">
-                <Icon name="close" className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <div className="flex gap-4 justify-center mb-8">
-              <a href="#" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#0088cc] hover:border-[#0088cc] transition-all group shadow-lg" title="تلگرام">
-                <Icon name="telegram" className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </a>
-              <a href="#" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#1DA1F2] hover:border-[#1DA1F2] transition-all group shadow-lg" title="توییتر">
-                <Icon name="twitter" className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </a>
-              <a href="#" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-green-600 hover:border-green-600 transition-all group shadow-lg" title="چت">
-                <Icon name="chat" className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </a>
-            </div>
+      <AnimatePresence>
+        {isShareModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md"
+          >
+            <div className="absolute inset-0 cursor-pointer" onClick={() => setIsShareModalOpen(false)}></div>
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative z-10 w-full max-w-sm p-6 rounded-3xl border border-white/10 overflow-hidden shadow-2xl"
+            >
+              <div className="absolute inset-0 bg-[#0b0f19]/90 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#b45309] to-transparent opacity-90 pointer-events-none z-20" />
 
-            <div className="flex flex-col gap-2">
-              <label className="text-xs text-gray-400">لینک مستقیم صفحه:</label>
-              <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-xl p-1.5">
-                <input 
-                  type="text" 
-                  readOnly 
-                  value={typeof window !== 'undefined' ? window.location.href : 'https://madar.ir'} 
-                  className="bg-transparent text-gray-400 text-[11px] w-full outline-none px-2 dir-ltr text-left font-sans" 
-                />
-                <button 
-                  onClick={handleCopyLink} 
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${isCopied ? 'bg-green-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
-                >
-                  {isCopied ? 'کپی شد' : 'کپی لینک'}
+              <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 relative z-10">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Icon name="shareNetwork" className="w-5 h-5 text-[#b45309]" /> اشتراک‌گذاری
+                </h3>
+                <button onClick={() => setIsShareModalOpen(false)} className="text-gray-400 hover:text-white transition-colors cursor-pointer bg-white/5 hover:bg-white/10 rounded-full p-1.5">
+                  <Icon name="close" className="w-4 h-4" />
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+              
+              {/* دکمه‌های شبکه‌های اجتماعی بدون پس‌زمینه */}
+              <div className="flex gap-6 justify-center items-center mb-8 relative z-10">
+                {sharePlatforms.map((platform) => (
+                  <div key={platform.name} className="relative group/social flex items-center justify-center">
+                    <a 
+                      href={platform.getUrl(typeof window !== 'undefined' ? window.location.href : 'https://madar.ir', articleData.title)} 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`p-2 text-gray-400 flex items-center justify-center transition-all duration-300 transform hover:scale-125 ${platform.hoverColorClass} cursor-pointer`}
+                    >
+                      <Icon name={platform.icon} className="w-7 h-7 transition-colors" />
+                    </a>
+
+                    {/* تول‌تیپ اسم شبکه اجتماعی */}
+                    <div className="absolute bottom-full mb-2 hidden group-hover/social:flex flex-col items-center z-50 pointer-events-none animate-[fadeIn_0.2s_ease-out]">
+                      <div className="bg-[#0b0f19] text-white text-[11px] font-sans py-1 px-2.5 rounded-lg border border-white/10 shadow-2xl whitespace-nowrap">
+                        {platform.name}
+                      </div>
+                      <div className="w-0 h-0 border-x-[4px] border-x-transparent border-t-[5px] border-t-[#0b0f19]"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* بخش کپی لینک مستقیم صفحه */}
+              <div className="flex flex-col gap-2 relative z-10">
+                <label className="text-xs text-gray-400">لینک مستقیم صفحه:</label>
+                <div className="flex items-center gap-2 bg-[#080c16] border border-white/10 rounded-xl p-1.5 shadow-inner">
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value={typeof window !== 'undefined' ? window.location.href : 'https://madar.ir'} 
+                    className="bg-transparent text-gray-400 text-[11px] w-full outline-none px-2 dir-ltr text-left font-sans" 
+                  />
+                  <button 
+                    onClick={handleCopyLink} 
+                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-lg ${isCopied ? 'bg-[#b45309] text-white shadow-[0_0_10px_rgba(180,83,9,0.4)]' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                  >
+                    {isCopied ? 'کپی شد' : 'کپی لینک'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

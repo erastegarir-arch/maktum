@@ -54,20 +54,24 @@ export default function AboutContent({ pageData = {} }) {
       {/* ۱. معرفی */}
       {hero.enabled !== false && (
         <motion.section 
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5 }}
-          className="glass-card transform-gpu relative overflow-hidden p-8 md:p-12 text-center border-t-2 border-t-[#06b6d4] rounded-3xl shadow-2xl"
+          transition={{ duration: 0.4 }}
+          className="relative rounded-3xl border border-white/10 p-8 md:p-12 text-center shadow-2xl overflow-hidden group"
         >
-          <div className="absolute left-1/2 top-0 w-1/2 h-full bg-[#06b6d4]/5 blur-3xl rounded-full transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+          {/* لایه پس‌زمینه شیشه‌ای ثابت */}
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
+
+          {/* نوار نوری گرادینت بالای هدر */}
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90" />
+
           <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
-            
-            <div className="w-16 h-16 rounded-2xl bg-[#06b6d4]/10 border border-[#06b6d4]/30 flex items-center justify-center text-[#06b6d4] mb-6 shadow-[0_0_20px_rgba(6,182,212,0.2)] group hover:border-[#06b6d4]/60 transition-colors">
-              <Icon name="solarsystem" className="w-8 h-8 group-hover:scale-110 transition-transform" />
+            <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#06b6d4] mb-6 shadow-[0_0_20px_rgba(6,182,212,0.2)] group-hover:border-[#06b6d4]/50 transition-colors duration-300">
+              <Icon name="solarsystem" className="w-8 h-8 group-hover:scale-110 transition-transform duration-300" />
             </div>
             
-            <h1 className="text-3xl md:text-5xl font-black mb-6 pt-3 pb-2 leading-relaxed overflow-visible text-transparent bg-clip-text bg-gradient-to-l from-[#06b6d4] to-[#a855f7]">
+            <h1 className="text-3xl md:text-5xl font-black mb-6 pt-3 pb-2 leading-relaxed text-transparent bg-clip-text bg-gradient-to-l from-[#06b6d4] to-[#a855f7]">
               {hero.title}
             </h1>
             <div className="text-gray-300 text-sm md:text-base leading-loose font-light text-justify md:text-center space-y-4">
@@ -80,17 +84,24 @@ export default function AboutContent({ pageData = {} }) {
       {/* ۲. عهد آسمانی */}
       {waqf.enabled !== false && (
         <motion.section 
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5 }}
-          className="transform-gpu relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-br from-black to-[#1a1005] p-8 md:p-14 text-center group shadow-[0_0_40px_rgba(245,158,11,0.05)]"
+          transition={{ duration: 0.4 }}
+          className="relative rounded-3xl border border-amber-500/20 p-8 md:p-14 text-center group shadow-[0_0_40px_rgba(245,158,11,0.05)] overflow-hidden"
         >
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-amber-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+          {/* پس‌زمینه شیشه‌ای ویژه عهد آسمانی */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-[#120b03] to-[#1a1005] backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
+
+          {/* نوار نوری گرادینت بالای بخش عهد آسمانی */}
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-90" />
+
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-amber-500/10 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+
           <div className="relative z-10 flex flex-col items-center">
             <div className="mb-6 text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
-              <Icon name="ya-fatemeh" className="w-20 h-20 md:w-24 md:h-24 stroke-[0.5]" />
+              {/* انیمیشن بزرگ‌نمایی آیکون در حالت هوور */}
+              <Icon name="ya-fatemeh" className="w-20 h-20 md:w-24 md:h-24 stroke-[0.5] group-hover:scale-110 transition-transform duration-300" />
             </div>
             <h2 className="text-3xl md:text-4xl font-black text-amber-50 mb-6 tracking-wide drop-shadow-md">
               {waqf.titlePart1}{waqf.titlePart2}
@@ -105,13 +116,18 @@ export default function AboutContent({ pageData = {} }) {
       {/* ۳. زیست‌بوم رسانه‌ای */}
       {eco.enabled !== false && (
         <motion.section 
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5 }}
-          className="glass-card transform-gpu p-8 md:p-12 relative overflow-hidden group flex flex-col lg:flex-row items-center gap-12 border-t-2 border-t-[#a855f7] rounded-3xl"
+          transition={{ duration: 0.4 }}
+          className="relative rounded-3xl border border-white/10 p-8 md:p-12 overflow-hidden group flex flex-col lg:flex-row items-center gap-12 shadow-2xl"
         >
-          <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-[#a855f7]/10 rounded-full blur-3xl transition-all duration-500 group-hover:bg-[#a855f7]/20 pointer-events-none"></div>
+          {/* پس‌زمینه شیشه‌ای ایزوله */}
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
+
+          {/* نوار نوری گرادینت بالای زیست‌بوم */}
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#a855f7] to-transparent opacity-90" />
+
           <div className="relative z-10 lg:w-1/2">
             {eco.badge && (
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#a855f7]/10 border border-[#a855f7]/30 rounded-full text-xs font-bold text-[#a855f7] mb-4">
@@ -138,26 +154,26 @@ export default function AboutContent({ pageData = {} }) {
               </div>
               
               <div className="relative z-20 w-24 h-24 bg-[#080c16] border-2 border-[#a855f7] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.4)]">
-                <Icon name="treeStructure" className="w-10 h-10 text-[#a855f7]" />
+                <Icon name="cube" className="w-10 h-10 text-[#a855f7]" />
               </div>
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 animate-[float_4s_ease-in-out_infinite]">
                 <div className="w-12 h-12 bg-[#080c16] border border-[#06b6d4] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.3)] text-[#06b6d4]">
-                  <Icon name="videoCamera" className="w-5 h-5" />
+                  <Icon name="footage" className="w-5 h-5" />
                 </div>
               </div>
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-4 animate-[float_5s_ease-in-out_infinite_1s]">
                 <div className="w-12 h-12 bg-[#080c16] border border-[#f59e0b] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.3)] text-[#f59e0b]">
-                  <Icon name="users" className="w-5 h-5" />
+                  <Icon name="portfolio" className="w-5 h-5" />
                 </div>
               </div>
               <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 animate-[float_6s_ease-in-out_infinite_2s]">
                 <div className="w-12 h-12 bg-[#080c16] border border-[#10b981] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.3)] text-[#10b981]">
-                  <Icon name="pen-nib" className="w-5 h-5" />
+                  <Icon name="product" className="w-5 h-5" />
                 </div>
               </div>
               <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 animate-[float_4.5s_ease-in-out_infinite_0.5s]">
                 <div className="w-12 h-12 bg-[#080c16] border border-[#f43f5e] rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(244,63,94,0.3)] text-[#f43f5e]">
-                  <Icon name="shareNetwork" className="w-5 h-5" />
+                  <Icon name="networking" className="w-5 h-5" />
                 </div>
               </div>
             </div>
@@ -168,13 +184,18 @@ export default function AboutContent({ pageData = {} }) {
       {/* ۴. پر کردن خلأها */}
       {conn.enabled !== false && (
         <motion.section 
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5 }}
-          className="glass-card transform-gpu px-8 md:px-12 py-5 md:py-6 relative overflow-hidden group flex flex-col lg:flex-row items-center gap-8 border-t-2 border-t-[#f59e0b] rounded-3xl"
+          transition={{ duration: 0.4 }}
+          className="relative rounded-3xl border border-white/10 px-8 md:px-12 py-5 md:py-6 overflow-hidden group flex flex-col lg:flex-row items-center gap-8 shadow-2xl"
         >
-          <div className="absolute -left-20 -top-20 w-64 h-64 bg-[#f59e0b]/10 rounded-full blur-3xl transition-all duration-500 group-hover:bg-[#f59e0b]/20"></div>
+          {/* پس‌زمینه شیشه‌ای ایزوله */}
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
+
+          {/* نوار نوری گرادینت بالای پر کردن خلأها */}
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#f59e0b] to-transparent opacity-90" />
+
           <div className="relative z-10 lg:w-2/3">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
               <Icon name="target" className="w-7 h-7 text-[#f59e0b]" /> 
@@ -217,28 +238,47 @@ export default function AboutContent({ pageData = {} }) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {feats.items?.map((feature, idx) => {
-              const cardIcons = ["database", "users", "pen-nib", "shareNetwork"];
+              const cardIcons = ["footage", "portfolio", "pen-nib", "networking"];
               const currentIcon = cardIcons[idx] || "database";
+              const cardColor = feature.color || '#06b6d4';
               
               return (
                 <motion.div 
                   key={idx} 
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.4, delay: idx * 0.1 }}
-                  className="glass-card transform-gpu p-8 hover-lift flex flex-col items-center text-center group rounded-3xl" 
-                  style={{ borderTopColor: feature.color, borderTopWidth: '2px' }}
+                  viewport={{ once: true, margin: "-30px" }}
+                  transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  className="relative rounded-3xl border border-white/10 p-8 flex flex-col items-center text-center group cursor-pointer overflow-hidden"
                 >
+                  {/* ۱. پس‌زمینه شیشه‌ای ایزوله ثابت */}
+                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
+
+                  {/* ۲. هاله هوور مجزا بدون درگیر کردن بلور */}
+                  <div 
+                    className="absolute inset-0 rounded-3xl pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100 -z-10"
+                    style={{
+                      boxShadow: `inset 0 0 25px ${cardColor}1a, 0 10px 30px -10px ${cardColor}25`
+                    }}
+                  />
+
+                  {/* ۳. نوار نوری گرادینت بالای کارت (Top Gradient Highlight) */}
+                  <div 
+                    className="absolute top-0 inset-x-6 h-[2px] transition-opacity duration-300 opacity-70 group-hover:opacity-100"
+                    style={{ 
+                      background: `linear-gradient(90deg, transparent 0%, ${cardColor} 50%, transparent 100%)` 
+                    }}
+                  />
+
                   <div 
                     className="w-16 h-16 rounded-full flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110"
-                    style={{ backgroundColor: `${feature.color}1a`, color: feature.color, boxShadow: `0 0 10px ${feature.color}33` }}
+                    style={{ backgroundColor: `${cardColor}1a`, color: cardColor, boxShadow: `0 0 10px ${cardColor}33` }}
                   >
                     <Icon name={currentIcon} className="w-8 h-8" />
                   </div>
                   <h3 
                     className="text-lg font-bold text-white mb-3 transition-colors group-hover:text-[var(--hover-color)]" 
-                    style={{ '--hover-color': feature.color }}
+                    style={{ '--hover-color': cardColor }}
                   >
                     {feature.title}
                   </h3>
@@ -253,17 +293,21 @@ export default function AboutContent({ pageData = {} }) {
       {/* ۶. راه‌های ارتباطی و شبکه‌های اجتماعی */}
       {contact.enabled !== false && (
         <motion.section 
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5 }}
-          className="glass-card transform-gpu p-8 md:p-12 relative overflow-hidden border-t-2 border-t-[#10b981] rounded-3xl"
+          transition={{ duration: 0.4 }}
+          className="relative rounded-3xl border border-white/10 p-8 md:p-12 overflow-hidden shadow-2xl group"
         >
-          <div className="absolute right-0 bottom-0 w-64 h-64 bg-[#10b981]/5 rounded-full blur-3xl pointer-events-none"></div>
+          {/* پس‌زمینه شیشه‌ای ایزوله */}
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
+
+          {/* نوار نوری گرادینت بالای تماس با ما */}
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90" />
           
           <div className="text-center mb-10 relative z-10">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center justify-center gap-2">
-              <Icon name="phoneCall" className="w-7 h-7 text-[#10b981]" />
+              <Icon name="chat" className="w-7 h-7 text-[#10b981]" />
               {contact.title}
             </h2>
             <p className="text-sm md:text-base text-gray-300 font-light leading-loose max-w-3xl mx-auto text-justify md:text-center">
@@ -277,7 +321,7 @@ export default function AboutContent({ pageData = {} }) {
                 <Tooltip content={contactEmail.tooltip} position="top">
                   <div className="bg-black/30 border border-white/5 px-8 py-5 rounded-2xl flex items-center gap-4 hover:border-white/10 transition-colors cursor-pointer">
                     <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-[#10b981]">
-                      <Icon name="envelope" className="w-6 h-6" />
+                      <Icon name="email" className="w-6 h-6" />
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-gray-500 mb-1">پست الکترونیک</p>

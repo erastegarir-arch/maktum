@@ -4,6 +4,7 @@ import Breadcrumbs from '../components/Breadcrumbs';
 import Icon from '../components/Icon'; 
 import ProgressBar from '../components/ProgressBar';
 import BlurImage from '../components/BlurImage'; // وارد کردن کامپوننت لودینگ تنبل و بلور تصاویر
+import { motion, AnimatePresence } from 'framer-motion';
 
 // === ۱. سیستم نگاشت تم پویا (Dynamic Theme Mapping) ===
 const themes = {
@@ -18,7 +19,8 @@ const themes = {
     hoverBg: "hover:bg-[#fbbf24]",
     hoverBorder: "hover:border-[#fbbf24]",
     focusBorder: "focus:border-[#fbbf24]",
-    fillCurrent: "fill-current text-[#fbbf24]"
+    fillCurrent: "fill-current text-[#fbbf24]",
+    gradientVia: "via-[#fbbf24]"
   },
   produced: {
     primaryText: "text-[#f43f5e]",
@@ -31,7 +33,8 @@ const themes = {
     hoverBg: "hover:bg-[#f43f5e]",
     hoverBorder: "hover:border-[#f43f5e]",
     focusBorder: "focus:border-[#f43f5e]",
-    fillCurrent: "fill-current text-[#f43f5e]"
+    fillCurrent: "fill-current text-[#f43f5e]",
+    gradientVia: "via-[#f43f5e]"
   },
   tools: {
     primaryText: "text-[#10b981]",
@@ -44,9 +47,32 @@ const themes = {
     hoverBg: "hover:bg-[#10b981]",
     hoverBorder: "hover:border-[#10b981]",
     focusBorder: "focus:border-[#10b981]",
-    fillCurrent: "fill-current text-[#10b981]"
+    fillCurrent: "fill-current text-[#10b981]",
+    gradientVia: "via-[#10b981]"
   }
 };
+
+// لیست شبکه‌های اجتماعی برای اشتراک‌گذاری (از راست به چپ)
+const sharePlatforms = [
+  {
+    name: 'ایتا',
+    icon: 'eitaa',
+    hoverColorClass: 'hover:text-[#f97316]',
+    getUrl: (url, title) => `https://eitaa.com/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
+  },
+  {
+    name: 'بله',
+    icon: 'bale',
+    hoverColorClass: 'hover:text-[#10b981]',
+    getUrl: (url, title) => `https://ble.ir/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
+  },
+  {
+    name: 'تلگرام',
+    icon: 'telegram',
+    hoverColorClass: 'hover:text-[#0088cc]',
+    getUrl: (url, title) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
+  }
+];
 
 // === ۲. هسته محتوایی صفحه (تغذیه داینامیک) ===
 const productData = {
@@ -55,11 +81,19 @@ const productData = {
   title: "معماری پنهان واشنگتن",
   shortDesc: "مستند تحلیلی بررسی هم‌ترازی بناهای پایتخت آمریکا با صورت‌های فلکی باستانی و ردپای لژهای ماسونی در طراحی شهری.",
   author: "مرکز پژوهش‌های مدار",
+  meta: {
+    date: "۲۴ بهمن ۱۴۰۲",
+    readTime: "۵۲ دقیقه",
+    views: "۱۲.۴k بازدید",
+    ageRating: "+۱۲" // رده‌بندی سنی قابل تنظیم
+  },
   formats: [
-    { type: "ویدیویی", icon: "videoCamera", color: "text-[#06b6d4]", bg: "bg-[#06b6d4]/10" },
-    { type: "تصویری", icon: "image", color: "text-[#10b981]", bg: "bg-[#10b981]/10" },
-    { type: "صوتی", icon: "speakerHigh", color: "text-[#3b82f6]", bg: "bg-[#3b82f6]/10" },
-    { type: "متنی", icon: "fileText", color: "text-[#f59e0b]", bg: "bg-[#f59e0b]/10" }
+    { type: "ویدیویی", icon: "film", color: "text-[#06b6d4]", bg: "bg-[#06b6d4]/10" },
+    { type: "تصویری", icon: "photo", color: "text-[#10b981]", bg: "bg-[#10b981]/10" },
+    { type: "صوتی", icon: "music", color: "text-[#3b82f6]", bg: "bg-[#3b82f6]/10" },
+    { type: "متنی", icon: "text", color: "text-[#f59e0b]", bg: "bg-[#f59e0b]/10" },
+    { type: "پروژه", icon: "project", color: "text-[#a855f7]", bg: "bg-[#a855f7]/10" },
+    { type: "سایر محتوا", icon: "cube", color: "text-[#ec4899]", bg: "bg-[#ec4899]/10" }
   ],
   mainImage: "/images/product-main.jpg",
   description: [
@@ -152,22 +186,30 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
           
           <div className="lg:col-span-7 flex flex-col gap-4 relative animate-[fadeIn_0.5s_ease-out]">
-            <div className={`relative w-full aspect-video rounded-3xl overflow-hidden glass-card border border-white/10 flex items-center justify-center bg-black/50 group border-t-2 ${currentTheme.borderTop}`}>
-              <BlurImage src={productData.mainImage} alt="تصویر اصلی" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+            {/* تصویر اصلی مبتنی بر گرافیک کلی1 */}
+            <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl border border-white/10 p-1 group">
+              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
+              
+              <div className="relative w-full h-full rounded-[22px] overflow-hidden bg-black/50">
+                <BlurImage src={productData.mainImage} alt="تصویر اصلی" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+              </div>
             </div>
           </div>
 
           <div className="lg:col-span-5 flex flex-col justify-center space-y-6 lg:pl-6 animate-[fadeIn_0.6s_ease-out]">
             <div className="flex flex-wrap items-center gap-2">
               {/* بج دسته‌بندی پویا */}
-              <span className={`border text-[10px] font-bold px-3 py-1 rounded-full tracking-widest uppercase ${currentTheme.badgeBg}`}>
+              <span className={`border text-[10px] font-bold px-3 py-1.5 rounded-full tracking-widest uppercase ${currentTheme.badgeBg}`}>
                 {productData.category}
               </span>
-              <div className="flex items-center gap-1.5 ml-2 bg-white/5 border border-white/10 px-2 py-1 rounded-full text-xs text-gray-300">
+              
+              {/* باکس فرمت‌ها (اصلاح‌شده برای Wrap هوشمند و اضافه شدن المان‌های جدید) */}
+              <div className="flex flex-wrap items-center gap-y-2 gap-x-1.5 ml-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-2xl text-xs text-gray-300">
                 {productData.formats.map((fmt, idx) => (
-                  <div key={idx} className="flex items-center gap-1">
-                    {idx > 0 && <span className="w-1 h-1 rounded-full bg-gray-600 mx-1"></span>}
-                    <Icon name={fmt.icon} className={`w-3 h-3 ${fmt.color}`} /> {fmt.type}
+                  <div key={idx} className="flex items-center gap-1.5 shrink-0">
+                    {idx > 0 && <span className="w-1 h-1 rounded-full bg-gray-600"></span>}
+                    <Icon name={fmt.icon} className={`w-3.5 h-3.5 ${fmt.color}`} /> {fmt.type}
                   </div>
                 ))}
               </div>
@@ -190,7 +232,7 @@ export default function ProductDetailPage() {
                 <div>
                   <p className="text-xs text-gray-500 mb-0.5">تهیه‌کننده</p>
                   <a href="#" className={`text-sm font-bold text-white ${currentTheme.hoverText} transition-colors flex items-center gap-1`}>
-                    {productData.author} <Icon name="checkCircle" className={`w-3 h-3 ${currentTheme.fillCurrent}`} />
+                    {productData.author}
                   </a>
                 </div>
               </div>
@@ -211,11 +253,38 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           <div className="lg:col-span-8 space-y-6">
-            <div className="glass-card p-6 md:p-8 rounded-3xl">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            
+            {/* باکس متادیتا (تاریخ، زمان مطالعه، بازدید، رده‌بندی سنی) مبتنی بر GKS1 */}
+            <div className="relative flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-gray-400 bg-white/5 px-6 py-3 rounded-2xl border border-white/10 font-sans shadow-inner mb-6 overflow-hidden group/meta">
+              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-0 group-hover/meta:opacity-90 transition-opacity pointer-events-none z-20`} />
+              
+              <span className="flex items-center gap-2"><Icon name="calendarBlank" className="w-4 h-4" /> {productData.meta.date}</span>
+              <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+              <span className="flex items-center gap-2"><Icon name="clock" className="w-4 h-4" /> {productData.meta.readTime}</span>
+              <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+              <span className="flex items-center gap-2"><Icon name="eye" className="w-4 h-4" /> {productData.meta.views}</span>
+              {productData.meta.ageRating && (
+                <>
+                  <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                  <span className="flex items-center gap-1.5" title="رده‌بندی سنی محتوا">
+                    <Icon name="shieldCheck" className={`w-4 h-4 ${currentTheme.primaryText}`} />
+                    <span className="text-gray-400 text-xs">رده‌بندی سنی:</span>
+                    <span className="dir-ltr text-white font-bold">{productData.meta.ageRating}</span>
+                  </span>
+                </>
+              )}
+            </div>
+
+            {/* بخش معرفی (GKS1) */}
+            <div className="relative p-6 md:p-8 rounded-3xl border border-white/10 overflow-hidden shadow-2xl group">
+              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
+
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10">
                 <Icon name="info" className={`w-6 h-6 ${currentTheme.fillCurrent}`} /> معرفی
               </h2>
-              <div className="rich-text text-gray-300 text-sm leading-loose space-y-4">
+              <div className="rich-text text-gray-300 text-sm leading-loose space-y-4 relative z-10">
                 {productData.description.map((p, idx) => (
                   <p key={idx} className="text-justify font-light">{p}</p>
                 ))}
@@ -229,32 +298,36 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <div className="glass-card p-6 md:p-8 rounded-3xl">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            {/* بخش پیش‌نمایش (GKS1) */}
+            <div className="relative p-6 md:p-8 rounded-3xl border border-white/10 overflow-hidden shadow-2xl group">
+              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
+
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10">
                 <Icon name="playCircle" className={`w-6 h-6 ${currentTheme.fillCurrent}`} /> پیش‌نمایش محتوا
               </h2>
               
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center bg-black/50 group mb-4">
+              <div className="relative z-10 w-full aspect-video rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center bg-black/50 group/vid mb-4">
                 <BlurImage src={`/images/preview-${activeGallery}.jpg`} className="w-full h-full object-cover opacity-50" alt="Preview" />
                 <button className={`absolute w-16 h-16 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center text-white ${currentTheme.hoverBg} hover:text-deep-base transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.1)] z-10 cursor-pointer`}>
                   <Icon name="play" className="w-8 h-8 ml-1 fill-current" />
                 </button>
               </div>
               
-              <p className="text-sm text-gray-400 text-center mb-6 px-4 font-light">متن دلخواه خود را برای توضیحات پیش‌نمایش اینجا بنویسید</p>
+              <p className="text-sm text-gray-400 text-center mb-6 px-4 font-light relative z-10">متن دلخواه خود را برای توضیحات پیش‌نمایش اینجا بنویسید</p>
 
-              <div className="flex gap-3 overflow-x-auto hide-scroll pb-2">
+              <div className="flex gap-3 overflow-x-auto hide-scroll pb-2 relative z-10">
                 <button onClick={() => setActiveGallery('video')} className={`w-24 h-16 shrink-0 rounded-xl overflow-hidden border-2 cursor-pointer ${activeGallery === 'video' ? currentTheme.borderClass.replace('/30', '') : 'border-transparent opacity-60 hover:opacity-80'} relative transition-all`}>
                   <BlurImage src="/images/preview-video.jpg" className="w-full h-full object-cover opacity-60" alt="Video" />
-                  <div className="absolute inset-0 flex items-center justify-center z-10"><Icon name="play" className="w-5 h-5 text-white fill-current" /></div>
+                  <div className="absolute inset-0 flex items-center justify-center z-10"><Icon name="film" className="w-5 h-5 text-white fill-current" /></div>
                 </button>
                 <button onClick={() => setActiveGallery('image')} className={`w-24 h-16 shrink-0 rounded-xl overflow-hidden border-2 cursor-pointer ${activeGallery === 'image' ? currentTheme.borderClass.replace('/30', '') : 'border-transparent opacity-60 hover:opacity-80'} relative transition-all`}>
                   <BlurImage src="/images/preview-image.jpg" className="w-full h-full object-cover opacity-60" alt="Image" />
-                  <div className="absolute inset-0 flex items-center justify-center z-10"><Icon name="image" className="w-5 h-5 text-white" /></div>
+                  <div className="absolute inset-0 flex items-center justify-center z-10"><Icon name="photo" className="w-5 h-5 text-white" /></div>
                 </button>
                 <button onClick={() => setActiveGallery('audio')} className={`w-24 h-16 shrink-0 rounded-xl overflow-hidden border-2 cursor-pointer ${activeGallery === 'audio' ? currentTheme.borderClass.replace('/30', '') : 'border-transparent opacity-60 hover:opacity-80'} relative transition-all`}>
                   <BlurImage src="/images/preview-audio.jpg" className="w-full h-full object-cover opacity-60" alt="Audio" />
-                  <div className="absolute inset-0 flex items-center justify-center z-10"><Icon name="waveform" className="w-5 h-5 text-white" /></div>
+                  <div className="absolute inset-0 flex items-center justify-center z-10"><Icon name="music" className="w-5 h-5 text-white" /></div>
                 </button>
               </div>
             </div>
@@ -276,9 +349,13 @@ export default function ProductDetailPage() {
 
           <div className="lg:col-span-4 space-y-6">
             
-            <div className={`glass-card p-6 rounded-3xl border-t-2 ${currentTheme.borderTop}`}>
-              <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest text-center border-b border-white/5 pb-4">اطلاعات فایل‌ها</h3>
-              <ul className="space-y-4">
+            {/* اطلاعات فایل‌ها (GKS1) */}
+            <div className="relative p-6 rounded-3xl border border-white/10 overflow-hidden shadow-2xl group">
+              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
+
+              <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest text-center border-b border-white/5 pb-4 relative z-10">اطلاعات فایل‌ها</h3>
+              <ul className="space-y-4 relative z-10">
                 {productData.fileSpecs.map((spec, idx) => (
                   <li key={idx} className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-gray-400 text-sm">
@@ -290,9 +367,13 @@ export default function ProductDetailPage() {
               </ul>
             </div>
 
-            <div className="glass-card p-6 rounded-3xl relative overflow-hidden group">
-              <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                <Icon name="history" className={`w-5 h-5 ${currentTheme.fillCurrent}`} /> آخرین به‌روزرسانی‌ها
+            {/* تاریخچه (GKS1) */}
+            <div className="relative p-6 rounded-3xl border border-white/10 overflow-hidden shadow-2xl group">
+              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
+
+              <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2 relative z-10">
+                <Icon name="update" className={`w-5 h-5 ${currentTheme.fillCurrent}`} /> آخرین به‌روزرسانی‌ها
               </h3>
               <div className="relative z-10 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
                 <div className="absolute right-[11px] top-2 bottom-2 w-0.5 bg-white/10 z-0"></div>
@@ -315,7 +396,11 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <div className={`glass-card p-6 rounded-3xl relative overflow-hidden group border-t-2 ${currentTheme.borderTop}`}>
+            {/* دانلود فایل‌ها (GKS1) */}
+            <div className="relative p-6 rounded-3xl border border-white/10 overflow-hidden shadow-2xl group">
+              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
+              
               <div className={`absolute -right-10 -top-10 w-32 h-32 ${currentTheme.primaryBg} opacity-10 rounded-full blur-3xl pointer-events-none`}></div>
               
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10">
@@ -323,7 +408,7 @@ export default function ProductDetailPage() {
               </h3>
 
               {!productData.isUserLoggedIn && (
-                <div className="absolute inset-0 bg-deep-base/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-center p-6 border border-white/5 rounded-3xl animate-[fadeIn_0.3s]">
+                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-center p-6 border border-white/5 rounded-3xl animate-[fadeIn_0.3s]">
                   <Icon name="lockKey" className="w-10 h-10 text-gray-500 mb-4 drop-shadow-md fill-current" />
                   <h4 className="text-white font-bold mb-2">دسترسی محدود</h4>
                   <p className="text-xs text-gray-400 mb-6 leading-relaxed font-light text-justify">برای دانلود و مشاهده لینک‌های این محتوا باید وارد حساب کاربری خود شوید.</p>
@@ -354,7 +439,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* محتوای مرتبط */}
+        {/* محتوای مرتبط (GKS1) */}
         <section className="mt-8 pt-4 border-t border-white/10 relative z-10">
           <div className="flex items-end justify-between mb-6">
             <div>
@@ -364,14 +449,17 @@ export default function ProductDetailPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {productData.relatedContent.map(rel => (
-              <a key={rel.id} href="#" className={`glass-card group flex flex-col p-3 rounded-2xl border-t-2 ${currentTheme.borderTop} hover:-translate-y-1 transition-transform`}>
-                <div className="relative w-full h-40 rounded-xl bg-gray-900 overflow-hidden mb-3 flex items-center justify-center">
+              <a key={rel.id} href="#" className="relative group flex flex-col p-3 rounded-2xl border border-white/10 overflow-hidden transition-all duration-400 hover:-translate-y-1.5 shadow-lg">
+                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-0 group-hover:opacity-90 transition-opacity pointer-events-none z-20`} />
+                
+                <div className="relative w-full h-40 rounded-xl bg-gray-900 overflow-hidden mb-3 flex items-center justify-center z-10">
                   <BlurImage src={rel.image} className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" alt="Related" />
                 </div>
-                <div className="flex-grow">
+                <div className="flex-grow z-10">
                   <h3 className={`text-sm font-bold text-white mb-2 leading-relaxed ${currentTheme.hoverText} transition-colors line-clamp-2`}>{rel.title}</h3>
                 </div>
-                <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-500 font-sans">
+                <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-500 font-sans z-10">
                   <span className="flex items-center gap-1"><Icon name="calendarBlank" className="w-3 h-3" /> {rel.date}</span>
                   <span className="flex items-center gap-1"><Icon name="eye" className="w-3 h-3" /> {rel.views}</span>
                 </div>
@@ -380,7 +468,7 @@ export default function ProductDetailPage() {
           </div>
         </section>
 
-        {/* بخش نظرات */}
+        {/* بخش نظرات (GKS1) */}
         <section id="comments" className="mt-8 pt-4 border-t border-white/10 relative z-10">
           <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
             <Icon name="chats" className={`w-7 h-7 ${currentTheme.fillCurrent}`} /> نظرات کاربران 
@@ -389,7 +477,10 @@ export default function ProductDetailPage() {
             </span>
           </h3>
 
-          <div className="mb-8 bg-black/30 p-6 rounded-3xl border border-white/5 relative overflow-hidden">
+          <div className="relative p-6 rounded-3xl border border-white/10 mb-8 overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+            <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
+
             <form className="relative z-10">
               <div className="flex gap-4 mb-4">
                 <div className="flex-grow">
@@ -402,7 +493,7 @@ export default function ProductDetailPage() {
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder="نظر خود را درباره این محتوا بنویسید..." 
-                    className={`w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm ${currentTheme.focusBorder} focus:bg-white/10 outline-none transition-all resize-none shadow-inner`}
+                    className={`w-full bg-[#080c16] border border-white/10 rounded-2xl p-4 text-white text-sm ${currentTheme.focusBorder} outline-none transition-all resize-none shadow-inner`}
                   ></textarea>
                 </div>
               </div>
@@ -420,8 +511,9 @@ export default function ProductDetailPage() {
 
           <div className="space-y-4">
             {productData.comments.map((comment, idx) => (
-              <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                <div className="flex justify-between items-start mb-3">
+              <div key={idx} className="relative bg-white/5 border border-white/10 rounded-2xl p-5 overflow-hidden">
+                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                <div className="flex justify-between items-start mb-3 relative z-10">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                       <Icon name="user" className={`w-6 h-6 ${currentTheme.primaryText}`} />
@@ -432,7 +524,7 @@ export default function ProductDetailPage() {
                     </div>
                   </div>
                 </div>
-                <p className="text-sm text-gray-300 leading-relaxed mb-1 font-light text-justify">
+                <p className="text-sm text-gray-300 leading-relaxed mb-1 font-light text-justify relative z-10">
                   {comment.text}
                 </p>
               </div>
@@ -442,52 +534,82 @@ export default function ProductDetailPage() {
 
       </main>
 
-      {/* مودال اشتراک گذاری */}
-      {isShareModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" onClick={() => setIsShareModalOpen(false)}></div>
-          <div className="glass-card relative z-10 w-full max-w-sm p-6 rounded-3xl border border-white/10 bg-[#0c1222]/90 animate-[fadeIn_0.2s_ease-out] shadow-2xl">
-            <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-              <h3 className={`text-base font-bold text-white flex items-center gap-2`}>
-                <Icon name="shareNetwork" className={`w-5 h-5 ${currentTheme.primaryText}`} /> اشتراک‌گذاری
-              </h3>
-              <button onClick={() => setIsShareModalOpen(false)} className="text-gray-400 hover:text-white transition-colors cursor-pointer bg-white/5 hover:bg-white/10 rounded-full p-1.5">
-                <Icon name="close" className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <div className="flex gap-4 justify-center mb-8">
-              <a href="#" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#0088cc] hover:border-[#0088cc] transition-all group shadow-lg" title="تلگرام">
-                <Icon name="telegram" className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </a>
-              <a href="#" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#1DA1F2] hover:border-[#1DA1F2] transition-all group shadow-lg" title="توییتر">
-                <Icon name="twitter" className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </a>
-              <a href="#" className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-green-600 hover:border-green-600 transition-all group shadow-lg" title="کپی متن">
-                <Icon name="chat" className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              </a>
-            </div>
+      {/* مودال اشتراک گذاری با ساختار شیشه‌ای GKS1 */}
+      <AnimatePresence>
+        {isShareModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md"
+          >
+            <div className="absolute inset-0 cursor-pointer" onClick={() => setIsShareModalOpen(false)}></div>
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative z-10 w-full max-w-sm p-6 rounded-3xl border border-white/10 overflow-hidden shadow-2xl"
+            >
+              <div className="absolute inset-0 bg-[#0b0f19]/90 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
-            <div className="flex flex-col gap-2">
-              <label className="text-xs text-gray-400">لینک مستقیم صفحه:</label>
-              <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-xl p-1.5">
-                <input 
-                  type="text" 
-                  readOnly 
-                  value={typeof window !== 'undefined' ? window.location.href : 'https://madar.ir'} 
-                  className="bg-transparent text-gray-400 text-[11px] w-full outline-none px-2 dir-ltr text-left font-sans" 
-                />
-                <button 
-                  onClick={handleCopyLink} 
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${isCopied ? 'bg-green-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}
-                >
-                  {isCopied ? 'کپی شد' : 'کپی لینک'}
+              <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 relative z-10">
+                <h3 className={`text-base font-bold text-white flex items-center gap-2`}>
+                  <Icon name="shareNetwork" className={`w-5 h-5 ${currentTheme.primaryText}`} /> اشتراک‌گذاری
+                </h3>
+                <button onClick={() => setIsShareModalOpen(false)} className="text-gray-400 hover:text-white transition-colors cursor-pointer bg-white/5 hover:bg-white/10 rounded-full p-1.5">
+                  <Icon name="close" className="w-4 h-4" />
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+              
+              {/* دکمه‌های شبکه‌های اجتماعی: بدون پس‌زمینه دایره‌ای، همراه با افکت بزرگ‌نمایی و تغییر رنگ اختصاصی */}
+              <div className="flex gap-6 justify-center items-center mb-8 relative z-10">
+                {sharePlatforms.map((platform) => (
+                  <div key={platform.name} className="relative group/social flex items-center justify-center">
+                    <a 
+                      href={platform.getUrl(typeof window !== 'undefined' ? window.location.href : 'https://madar.ir', productData.title)} 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`p-2 text-gray-400 flex items-center justify-center transition-all duration-300 transform hover:scale-125 ${platform.hoverColorClass} cursor-pointer`}
+                    >
+                      <Icon name={platform.icon} className="w-7 h-7 transition-colors" />
+                    </a>
+
+                    {/* تول‌تیپ اسم شبکه اجتماعی */}
+                    <div className="absolute bottom-full mb-2 hidden group-hover/social:flex flex-col items-center z-50 pointer-events-none animate-[fadeIn_0.2s_ease-out]">
+                      <div className="bg-[#0b0f19] text-white text-[11px] font-sans py-1 px-2.5 rounded-lg border border-white/10 shadow-2xl whitespace-nowrap">
+                        {platform.name}
+                      </div>
+                      <div className="w-0 h-0 border-x-[4px] border-x-transparent border-t-[5px] border-t-[#0b0f19]"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-2 relative z-10">
+                <label className="text-xs text-gray-400">لینک مستقیم صفحه:</label>
+                <div className="flex items-center gap-2 bg-[#080c16] border border-white/10 rounded-xl p-1.5 shadow-inner">
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value={typeof window !== 'undefined' ? window.location.href : 'https://madar.ir'} 
+                    className="bg-transparent text-gray-400 text-[11px] w-full outline-none px-2 dir-ltr text-left font-sans" 
+                  />
+                  <button 
+                    onClick={handleCopyLink} 
+                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-lg ${isCopied ? `${currentTheme.primaryBg} text-white` : 'bg-white/10 text-white hover:bg-white/20'}`}
+                  >
+                    {isCopied ? 'کپی شد' : 'کپی لینک'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

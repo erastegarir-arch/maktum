@@ -5,6 +5,13 @@ import Icon from '../components/Icon'; // اتصال به کتابخانه مر�
 import Breadcrumbs from '../components/Breadcrumbs';
 import EmptyState from '../components/EmptyState'; // اضافه شدن کامپوننت حالت‌های خالی
 import BlurImage from '../components/BlurImage'; // اضافه شدن کامپوننت لودینگ تنبل و بلور تصاویر
+import { motion, AnimatePresence } from 'framer-motion';
+
+// تابع تبدیل اعداد به فارسی
+const toPersianDigits = (num) => {
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num?.toString().replace(/\d/g, (x) => persianDigits[x]) || '۰';
+};
 
 // داده‌های تستی همراه با تم رنگی اختصاصی برای هر کارت دانلود
 const mockDownloads = [
@@ -15,9 +22,9 @@ const mockDownloads = [
     image: '/images/doc-1.jpg',
     theme: {
       borderTop: 'border-t-[#fbbf24]',
-      badgeBorder: 'border-[#fbbf24]/40',
       badgeText: 'text-[#fbbf24]',
-      hoverShadow: 'hover:border-[#fbbf24]/40 hover:shadow-[0_10px_30px_-10px_rgba(251,191,36,0.3)]'
+      gradientVia: 'via-[#fbbf24]',
+      hoverShadow: 'hover:border-[#fbbf24]/40 hover:shadow-[0_20px_40px_-15px_rgba(251,191,36,0.3)]'
     }
   },
   { 
@@ -27,9 +34,9 @@ const mockDownloads = [
     image: '/images/doc-2.jpg',
     theme: {
       borderTop: 'border-t-[#06b6d4]',
-      badgeBorder: 'border-[#06b6d4]/40',
       badgeText: 'text-[#06b6d4]',
-      hoverShadow: 'hover:border-[#06b6d4]/40 hover:shadow-[0_10px_30px_-10px_rgba(6,182,212,0.3)]'
+      gradientVia: 'via-[#06b6d4]',
+      hoverShadow: 'hover:border-[#06b6d4]/40 hover:shadow-[0_20px_40px_-15px_rgba(6,182,212,0.3)]'
     }
   },
   { 
@@ -39,9 +46,9 @@ const mockDownloads = [
     image: '/images/doc-3.jpg',
     theme: {
       borderTop: 'border-t-[#a855f7]',
-      badgeBorder: 'border-[#a855f7]/40',
       badgeText: 'text-[#a855f7]',
-      hoverShadow: 'hover:border-[#a855f7]/40 hover:shadow-[0_10px_30px_-10px_rgba(168,85,247,0.3)]'
+      gradientVia: 'via-[#a855f7]',
+      hoverShadow: 'hover:border-[#a855f7]/40 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.3)]'
     }
   },
   { 
@@ -51,9 +58,9 @@ const mockDownloads = [
     image: '/images/doc-4.jpg',
     theme: {
       borderTop: 'border-t-[#10b981]',
-      badgeBorder: 'border-[#10b981]/40',
       badgeText: 'text-[#10b981]',
-      hoverShadow: 'hover:border-[#10b981]/40 hover:shadow-[0_10px_30px_-10px_rgba(16,185,129,0.3)]'
+      gradientVia: 'via-[#10b981]',
+      hoverShadow: 'hover:border-[#10b981]/40 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.3)]'
     }
   },
 ];
@@ -66,9 +73,9 @@ const mockFavorites = [
     image: '/images/fav-1.jpg',
     theme: {
       borderTop: 'border-t-[#f43f5e]',
-      badgeBorder: 'border-[#f43f5e]/40',
       badgeText: 'text-[#f43f5e]',
-      hoverShadow: 'hover:border-[#f43f5e]/40 hover:shadow-[0_10px_30px_-10px_rgba(244,63,94,0.3)]'
+      gradientVia: 'via-[#f43f5e]',
+      hoverShadow: 'hover:border-[#f43f5e]/40 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.3)]'
     }
   },
   { 
@@ -78,9 +85,9 @@ const mockFavorites = [
     image: '/images/fav-2.jpg',
     theme: {
       borderTop: 'border-t-[#fbbf24]',
-      badgeBorder: 'border-[#fbbf24]/40',
       badgeText: 'text-[#fbbf24]',
-      hoverShadow: 'hover:border-[#fbbf24]/40 hover:shadow-[0_10px_30px_-10px_rgba(251,191,36,0.3)]'
+      gradientVia: 'via-[#fbbf24]',
+      hoverShadow: 'hover:border-[#fbbf24]/40 hover:shadow-[0_20px_40px_-15px_rgba(251,191,36,0.3)]'
     }
   },
   { 
@@ -90,9 +97,9 @@ const mockFavorites = [
     image: '/images/fav-3.jpg',
     theme: {
       borderTop: 'border-t-[#b45309]',
-      badgeBorder: 'border-[#b45309]/40',
       badgeText: 'text-[#b45309]',
-      hoverShadow: 'hover:border-[#b45309]/40 hover:shadow-[0_10px_30px_-10px_rgba(180,83,9,0.3)]'
+      gradientVia: 'via-[#b45309]',
+      hoverShadow: 'hover:border-[#b45309]/40 hover:shadow-[0_20px_40px_-15px_rgba(180,83,9,0.3)]'
     }
   },
   { 
@@ -102,9 +109,9 @@ const mockFavorites = [
     image: '/images/fav-4.jpg',
     theme: {
       borderTop: 'border-t-[#10b981]',
-      badgeBorder: 'border-[#10b981]/40',
       badgeText: 'text-[#10b981]',
-      hoverShadow: 'hover:border-[#10b981]/40 hover:shadow-[0_10px_30px_-10px_rgba(16,185,129,0.3)]'
+      gradientVia: 'via-[#10b981]',
+      hoverShadow: 'hover:border-[#10b981]/40 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.3)]'
     }
   },
 ];
@@ -151,7 +158,7 @@ const initialNotifications = [
   },
 ];
 
-// === کامپوننت پایه اسکلتون با افکت Shimmer ===
+// === کامپوننت پایه اسکلتون با افکت Shimmer (گرافیک کلی1) ===
 const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
   return (
     <div className={`relative overflow-hidden bg-white/5 border border-white/5 backdrop-blur-sm ${rounded} ${className}`}>
@@ -165,7 +172,7 @@ export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
-  // === استیت لودینگ برای اسکلتون (هنگام تغییر تب یا لود اولیه) ===
+  // === استیت لودینگ برای اسکلتون ===
   const [isLoading, setIsLoading] = useState(true);
 
   // استیت‌های کنترل اعلان‌ها و فیلتر آن‌ها
@@ -236,12 +243,6 @@ export default function UserDashboard() {
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
-  // توابع تبدیل اعداد به فارسی و اعمال سقف ۹ (۹+)
-  const toPersianDigits = (num) => {
-    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    return num.toString().replace(/\d/g, (x) => persianDigits[x]);
-  };
-
   const getDisplayCount = (count) => {
     if (count > 9) return '۹+';
     return toPersianDigits(count);
@@ -259,9 +260,9 @@ export default function UserDashboard() {
   if (!isLoggedIn) return null;
 
   return (
-    <div className="relative min-h-screen flex flex-col">
+    <div className="relative min-h-screen flex flex-col font-sans select-none text-right">
       {/* پس‌زمینه نئونی */}
-      <div className="fixed inset-0 z-[-1] bg-deep-base overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 z-[-10] bg-[#050810] overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full blur-[80px] opacity-20 bg-[radial-gradient(circle,rgba(217,70,239,0.2)_0%,transparent_70%)] animate-[float_20s_infinite_ease-in-out_alternate]" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[60vw] h-[60vw] rounded-full blur-[80px] opacity-15 bg-[radial-gradient(circle,rgba(6,182,212,0.15)_0%,transparent_70%)] animate-[float_20s_infinite_ease-in-out_alternate-reverse]" />
       </div>
@@ -282,13 +283,15 @@ export default function UserDashboard() {
 
           <div className="flex flex-col lg:flex-row gap-8">
             
-            {/* سایدبار ناوبری */}
+            {/* سایدبار ناوبری (گرافیک کلی1) - اصلاح کلاس تداخلی */}
             <aside className="w-full lg:w-1/4 flex-shrink-0 relative z-10">
-              <div className="glass-card rounded-3xl p-6 sticky top-32">
+              <div className="sticky top-32 rounded-3xl border border-white/10 p-6 shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 pointer-events-none z-20" />
                 
-                <div className="flex items-center gap-4 border-b border-white/10 pb-6 mb-6">
+                <div className="flex items-center gap-4 border-b border-white/10 pb-6 mb-6 relative z-10">
                   <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#06b6d4] to-[#d946ef] p-0.5 shadow-lg">
-                    <div className="w-full h-full bg-deep-base rounded-full flex items-center justify-center overflow-hidden">
+                    <div className="w-full h-full bg-[#0b0f19] rounded-full flex items-center justify-center overflow-hidden">
                       <Icon name="user" className="w-8 h-8 text-gray-400 opacity-80" />
                     </div>
                   </div>
@@ -298,13 +301,13 @@ export default function UserDashboard() {
                   </div>
                 </div>
 
-                <nav className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible hide-scroll pb-2 lg:pb-0">
+                <nav className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible hide-scroll pb-2 lg:pb-0 relative z-10">
                   {tabs.map((tab) => {
                     const isActive = activeTab === tab.id;
-                    const baseStyle = "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium w-full text-right transition-all group cursor-pointer";
+                    const baseStyle = "flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium w-full text-right transition-all group cursor-pointer border";
                     const activeStyle = isActive 
-                      ? "bg-white/10 text-white shadow-[inset_3px_0_0_#06b6d4]" 
-                      : "text-gray-400 hover:text-white hover:bg-white/5";
+                      ? "bg-white/10 text-white border-white/15 shadow-[inset_3px_0_0_#06b6d4]" 
+                      : "text-gray-400 hover:text-white hover:bg-white/5 border-transparent";
 
                     return (
                       <button 
@@ -315,14 +318,12 @@ export default function UserDashboard() {
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-3">
                             <Icon name={tab.icon} className={`w-5 h-5 ${isActive ? 'text-[#06b6d4]' : 'text-gray-400 group-hover:text-white'}`} />
-                            <span className="whitespace-nowrap">{tab.label}</span>
+                            <span className="whitespace-nowrap font-bold">{tab.label}</span>
                           </div>
                           {tab.badge && (
                             <div className="relative flex h-[18px] w-[18px] items-center justify-center">
-                              {/* هاله چشمک‌زن (پالس) مشابه هدر */}
                               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
-                              {/* دایره عدد اعلان با عدد فارسی */}
-                              <span className="relative inline-flex rounded-full h-[18px] w-[18px] bg-rose-600 border-[1.5px] border-[#080c16] text-[9px] font-bold text-white items-center justify-center shadow-md">
+                              <span className="relative inline-flex rounded-full h-[18px] w-[18px] bg-rose-600 border-[1.5px] border-[#080c16] text-[9px] font-bold text-white items-center justify-center shadow-md font-sans">
                                 {tab.badge}
                               </span>
                             </div>
@@ -334,7 +335,7 @@ export default function UserDashboard() {
                   
                   <button 
                     onClick={() => setIsLogoutModalOpen(true)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium w-full text-right text-rose-400 hover:bg-rose-500/10 transition-all lg:mt-auto cursor-pointer"
+                    className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold w-full text-right text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/20 border border-transparent transition-all lg:mt-auto cursor-pointer"
                   >
                     <Icon name="signOut" className="w-5 h-5" />
                     <span className="whitespace-nowrap">خروج از حساب</span>
@@ -343,14 +344,17 @@ export default function UserDashboard() {
               </div>
             </aside>
 
-            {/* بخش محتوای اصلی */}
+            {/* بخش محتوای اصلی (گرافیک کلی1) */}
             <div className="w-full lg:w-3/4 relative z-10">
               <div 
                 ref={cardRef}
                 onMouseMove={handleMouseMove}
-                className="glass-card rounded-3xl p-6 md:p-10 min-h-[600px] relative overflow-hidden flex flex-col border-t-2 border-t-[#06b6d4]"
+                className="relative rounded-3xl border border-white/10 p-6 md:p-10 min-h-[600px] shadow-2xl overflow-hidden flex flex-col group"
               >
-                <div className="absolute inset-0 pointer-events-none rounded-inherit z-0 bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.04),transparent_40%)]" />
+                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 pointer-events-none z-20" />
+                
+                <div className="absolute inset-0 pointer-events-none rounded-inherit bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(6,182,212,0.04),transparent_40%)] -z-10" />
 
                 <div className="relative z-10 animate-[fadeIn_0.4s_ease-out] flex-grow">
                   
@@ -378,30 +382,30 @@ export default function UserDashboard() {
                       {activeTab === 'profile' && (
                         <div>
                           <div className="mb-8 border-b border-white/10 pb-4">
-                            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                            <h2 className="text-2xl font-black text-white flex items-center gap-2">
                               <Icon name="idCard" className="text-[#06b6d4] w-6 h-6" /> مشخصات فردی
                             </h2>
-                            <div className="rich-text text-sm text-gray-400 mt-2 text-justify">
+                            <div className="rich-text text-sm text-gray-400 mt-2 text-justify font-light">
                               <p>اطلاعات حساب کاربری خود را تکمیل کنید تا دسترسی‌های متناسب با تخصص شما تنظیم شود.</p>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 p-4 rounded-2xl bg-black/40 border border-white/5">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 p-4 rounded-2xl bg-[#080c16] border border-white/10 shadow-inner">
                             <div>
                               <label className="block text-[10px] text-gray-500 uppercase mb-1">شناسه سیستمی (ID)</label>
-                              <div className="flex items-center gap-2 text-gray-300 font-sans text-sm bg-white/5 px-3 py-2 rounded-lg cursor-not-allowed">
+                              <div className="flex items-center gap-2 text-gray-300 font-sans text-sm bg-white/5 border border-white/5 px-3 py-2 rounded-xl cursor-not-allowed">
                                 <Icon name="lock" className="w-4 h-4 text-gray-500" /> #MDR-8492
                               </div>
                             </div>
                             <div>
                               <label className="block text-[10px] text-gray-500 uppercase mb-1">تاریخ عضویت</label>
-                              <div className="flex items-center gap-2 text-gray-300 font-sans text-sm bg-white/5 px-3 py-2 rounded-lg cursor-not-allowed">
+                              <div className="flex items-center gap-2 text-gray-300 font-sans text-sm bg-white/5 border border-white/5 px-3 py-2 rounded-xl cursor-not-allowed">
                                 <Icon name="calendarBlank" className="w-4 h-4 text-gray-500" /> ۱۴۰۲/۰۸/۱۵
                               </div>
                             </div>
                             <div>
                               <label className="block text-[10px] text-gray-500 uppercase mb-1">شماره موبایل</label>
-                              <div className="flex items-center justify-end gap-2 text-gray-300 font-sans text-sm bg-white/5 px-3 py-2 rounded-lg cursor-not-allowed" dir="ltr">
+                              <div className="flex items-center justify-end gap-2 text-gray-300 font-sans text-sm bg-white/5 border border-white/5 px-3 py-2 rounded-xl cursor-not-allowed" dir="ltr">
                                 <Icon name="lock" className="w-4 h-4 text-gray-500" /> +98 912 345 6789
                               </div>
                             </div>
@@ -410,38 +414,38 @@ export default function UserDashboard() {
                           <form className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div>
-                                <label className="block text-sm text-gray-300 mb-2">نام</label>
-                                <input type="text" className="w-full bg-white/5 border border-white/10 focus:border-[#06b6d4] focus:bg-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors" placeholder="مثال: علی" />
+                                <label className="block text-sm text-gray-300 mb-2 font-medium">نام</label>
+                                <input type="text" className="w-full bg-[#080c16] border border-white/10 focus:border-[#06b6d4] rounded-2xl px-4 py-3 text-sm text-white outline-none transition-all shadow-inner" placeholder="مثال: علی" />
                               </div>
                               <div>
-                                <label className="block text-sm text-gray-300 mb-2">نام خانوادگی</label>
-                                <input type="text" className="w-full bg-white/5 border border-white/10 focus:border-[#06b6d4] focus:bg-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors" placeholder="مثال: علوی" />
+                                <label className="block text-sm text-gray-300 mb-2 font-medium">نام خانوادگی</label>
+                                <input type="text" className="w-full bg-[#080c16] border border-white/10 focus:border-[#06b6d4] rounded-2xl px-4 py-3 text-sm text-white outline-none transition-all shadow-inner" placeholder="مثال: علوی" />
                               </div>
                               
                               <div>
-                                <label className="block text-sm text-gray-300 mb-2">جنسیت</label>
+                                <label className="block text-sm text-gray-300 mb-2 font-medium">جنسیت</label>
                                 <div className="relative">
-                                  <select defaultValue="" className="w-full bg-white/5 border border-white/10 focus:border-[#06b6d4] focus:bg-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none appearance-none transition-colors cursor-pointer">
-                                    <option value="" disabled className="bg-deep-base text-gray-400">انتخاب کنید...</option>
-                                    <option value="male" className="bg-deep-base text-white">مرد</option>
-                                    <option value="female" className="bg-deep-base text-white">زن</option>
+                                  <select defaultValue="" className="w-full bg-[#080c16] border border-white/10 focus:border-[#06b6d4] rounded-2xl px-4 py-3 text-sm text-white outline-none appearance-none transition-all cursor-pointer shadow-inner">
+                                    <option value="" disabled className="bg-[#0b0f19] text-gray-400">انتخاب کنید...</option>
+                                    <option value="male" className="bg-[#0b0f19] text-white">مرد</option>
+                                    <option value="female" className="bg-[#0b0f19] text-white">زن</option>
                                   </select>
                                   <Icon name="caretDown" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-4 h-4" />
                                 </div>
                               </div>
                               <div>
-                                <label className="block text-sm text-gray-300 mb-2">سال تولد</label>
-                                <input type="number" dir="rtl" className="w-full bg-white/5 border border-white/10 focus:border-[#06b6d4] focus:bg-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors" placeholder="مثال: ۱۳۷۵" />
+                                <label className="block text-sm text-gray-300 mb-2 font-medium">سال تولد</label>
+                                <input type="number" dir="rtl" className="w-full bg-[#080c16] border border-white/10 focus:border-[#06b6d4] rounded-2xl px-4 py-3 text-sm text-white outline-none transition-all shadow-inner" placeholder="مثال: ۱۳۷۵" />
                               </div>
 
                               <div className="col-span-1 md:col-span-2">
-                                <label className="block text-sm text-gray-300 mb-2">زمینه‌های تمایل به همکاری با مدار</label>
-                                <textarea rows="3" className="w-full bg-white/5 border border-white/10 focus:border-[#06b6d4] focus:bg-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none transition-colors resize-none text-justify" placeholder="مثال: حمایت مالی، تدوین محتوا، ارسال اسناد..."></textarea>
+                                <label className="block text-sm text-gray-300 mb-2 font-medium">زمینه‌های تمایل به همکاری با مدار</label>
+                                <textarea rows="3" className="w-full bg-[#080c16] border border-white/10 focus:border-[#06b6d4] rounded-2xl px-4 py-3 text-sm text-white outline-none transition-all resize-none text-justify shadow-inner font-light" placeholder="مثال: حمایت مالی، تدوین محتوا، ارسال اسناد..."></textarea>
                               </div>
                             </div>
 
                             <div className="flex justify-end pt-4">
-                              <button type="button" className="relative group bg-[#06b6d4] text-deep-base px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all duration-300 hover:bg-cyan-300 cursor-pointer">
+                              <button type="button" className="relative group bg-[#06b6d4] hover:bg-[#0891b2] text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all duration-300 cursor-pointer">
                                 <Icon name="save" className="w-5 h-5" />
                                 <span>ذخیره تغییرات</span>
                               </button>
@@ -454,10 +458,10 @@ export default function UserDashboard() {
                       {activeTab === 'downloads' && (
                         <div className="flex flex-col h-full">
                           <div className="mb-8 border-b border-white/10 pb-4">
-                            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                            <h2 className="text-2xl font-black text-white flex items-center gap-2">
                               <Icon name="download" className="text-[#06b6d4] w-6 h-6" /> فایل‌های دانلود شده
                             </h2>
-                            <div className="rich-text text-sm text-gray-400 mt-2 text-justify">
+                            <div className="rich-text text-sm text-gray-400 mt-2 text-justify font-light">
                               <p>تاریخچه دسترسی شما به اسناد راش و محتوای خام شبکه مدار.</p>
                             </div>
                           </div>
@@ -475,34 +479,34 @@ export default function UserDashboard() {
                             <>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                                 {mockDownloads.map(dl => (
-                                  <div key={dl.id} className={`glass-card group flex flex-col p-3 rounded-3xl border-t-2 ${dl.theme.borderTop} relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 ${dl.theme.hoverShadow} cursor-pointer`}>
-                                    <div className="relative w-full h-40 rounded-2xl bg-gray-900 overflow-hidden mb-3 flex items-center justify-center">
+                                  <div key={dl.id} className={`group flex flex-col p-4 rounded-3xl border border-white/10 relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 ${dl.theme.hoverShadow} cursor-pointer shadow-lg`}>
+                                    <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                                    <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${dl.theme.gradientVia} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20`} />
+
+                                    <div className="relative w-full h-44 rounded-2xl bg-gray-900 overflow-hidden mb-3 flex items-center justify-center border border-white/5">
                                       <BlurImage 
                                         src={dl.image} 
                                         alt={dl.title}
                                         className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
                                       />
-                                      
-                                      <div className={`absolute top-3 right-3 bg-[#0b0f19]/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-bold border ${dl.theme.badgeBorder} ${dl.theme.badgeText} shadow-lg z-20`}>
-                                        {dl.category}
-                                      </div>
 
-                                      <button className="absolute bottom-3 left-3 z-20 w-8 h-8 rounded-full bg-black/60 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-[#06b6d4] hover:text-deep-base hover:border-[#06b6d4] transition-colors cursor-pointer shadow-lg">
+                                      <button className="absolute bottom-3 left-3 z-20 w-9 h-9 rounded-full bg-black/60 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-[#06b6d4] hover:border-[#06b6d4] transition-colors cursor-pointer shadow-lg">
                                         <Icon name="downloadSimple" className="w-4 h-4 fill-current" />
                                       </button>
                                     </div>
 
                                     <div className="relative z-10 flex-grow px-1">
                                       <h3 className={`text-sm font-bold text-white mb-2 leading-relaxed line-clamp-1 group-hover:${dl.theme.badgeText} transition-colors`}>{dl.title}</h3>
+                                      <span className={`text-xs ${dl.theme.badgeText} font-bold opacity-90`}>{dl.category}</span>
                                     </div>
                                   </div>
                                 ))}
                               </div>
 
-                              <div className="mt-auto flex justify-center pt-6 border-t border-white/5">
-                                <button className="relative group bg-white/5 border border-white/10 text-white px-8 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-white/10 hover:border-[#06b6d4] hover:text-[#06b6d4] transition-all duration-300 cursor-pointer">
+                              <div className="mt-auto flex justify-center pt-6 border-t border-white/10">
+                                <button className="relative group bg-[#080c16] border border-white/10 text-white px-8 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-white/5 hover:border-[#06b6d4] hover:text-[#06b6d4] transition-all duration-300 cursor-pointer shadow-inner">
                                   <span>مشاهده همه دانلودها</span>
-                                  <Icon name="caretDown" className="w-4 h-4" />
+                                  <Icon name="caretDown" className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
                                 </button>
                               </div>
                             </>
@@ -514,10 +518,10 @@ export default function UserDashboard() {
                       {activeTab === 'favorites' && (
                         <div className="flex flex-col h-full">
                           <div className="mb-8 border-b border-white/10 pb-4">
-                            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                            <h2 className="text-2xl font-black text-white flex items-center gap-2">
                               <Icon name="heart" className="text-rose-500 w-6 h-6" /> نشان‌شده‌ها
                             </h2>
-                            <div className="rich-text text-sm text-gray-400 mt-2 text-justify">
+                            <div className="rich-text text-sm text-gray-400 mt-2 text-justify font-light">
                               <p>مستندات، اخبار و ابزارهایی که برای دسترسی سریع‌تر ذخیره کرده‌اید.</p>
                             </div>
                           </div>
@@ -535,34 +539,34 @@ export default function UserDashboard() {
                             <>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
                                 {mockFavorites.map(fav => (
-                                  <div key={fav.id} className={`glass-card group flex flex-col p-3 rounded-3xl border-t-2 ${fav.theme.borderTop} relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 ${fav.theme.hoverShadow} cursor-pointer`}>
-                                    <div className="relative w-full h-40 rounded-2xl bg-gray-900 overflow-hidden mb-3 flex items-center justify-center">
+                                  <div key={fav.id} className={`group flex flex-col p-4 rounded-3xl border border-white/10 relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 ${fav.theme.hoverShadow} cursor-pointer shadow-lg`}>
+                                    <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                                    <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${fav.theme.gradientVia} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20`} />
+
+                                    <div className="relative w-full h-44 rounded-2xl bg-gray-900 overflow-hidden mb-3 flex items-center justify-center border border-white/5">
                                       <BlurImage 
                                         src={fav.image} 
                                         alt={fav.title}
                                         className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" 
                                       />
-                                      
-                                      <div className={`absolute top-3 right-3 bg-[#0b0f19]/70 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-bold border ${fav.theme.badgeBorder} ${fav.theme.badgeText} shadow-lg z-20`}>
-                                        {fav.category}
-                                      </div>
 
-                                      <button className="absolute bottom-3 left-3 z-20 w-8 h-8 rounded-full bg-rose-500 text-white backdrop-blur border border-rose-500/50 flex items-center justify-center hover:bg-black/70 hover:text-rose-500 hover:border-rose-500 transition-colors cursor-pointer shadow-lg">
+                                      <button className="absolute bottom-3 left-3 z-20 w-9 h-9 rounded-full bg-rose-500 text-white backdrop-blur border border-rose-500/50 flex items-center justify-center hover:bg-rose-600 transition-colors cursor-pointer shadow-lg">
                                         <Icon name="heart" className="w-4 h-4 fill-current" />
                                       </button>
                                     </div>
 
                                     <div className="relative z-10 flex-grow px-1">
                                       <h3 className={`text-sm font-bold text-white mb-2 leading-relaxed line-clamp-1 group-hover:${fav.theme.badgeText} transition-colors`}>{fav.title}</h3>
+                                      <span className={`text-xs ${fav.theme.badgeText} font-bold opacity-90`}>{fav.category}</span>
                                     </div>
                                   </div>
                                 ))}
                               </div>
 
-                              <div className="mt-auto flex justify-center pt-6 border-t border-white/5">
-                                <button className="relative group bg-white/5 border border-white/10 text-white px-8 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-white/10 hover:border-rose-500 hover:text-rose-500 transition-all duration-300 cursor-pointer">
+                              <div className="mt-auto flex justify-center pt-6 border-t border-white/10">
+                                <button className="relative group bg-[#080c16] border border-white/10 text-white px-8 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-white/5 hover:border-rose-500 hover:text-rose-500 transition-all duration-300 cursor-pointer shadow-inner">
                                   <span>مشاهده همه علاقه‌مندی‌ها</span>
-                                  <Icon name="caretDown" className="w-4 h-4" />
+                                  <Icon name="caretDown" className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
                                 </button>
                               </div>
                             </>
@@ -575,16 +579,16 @@ export default function UserDashboard() {
                         <div className="flex flex-col h-full">
                           <div className="mb-8 border-b border-white/10 pb-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                             <div>
-                              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                              <h2 className="text-2xl font-black text-white flex items-center gap-2">
                                 <Icon name="bell" className="text-[#fbbf24] w-6 h-6" /> صندوق پیام‌ها
                               </h2>
-                              <div className="rich-text text-sm text-gray-400 mt-2 text-justify">
+                              <div className="rich-text text-sm text-gray-400 mt-2 text-justify font-light">
                                 <p>اطلاعیه‌های سیستم و پیام‌های ارسالی از مدیریت مدار.</p>
                               </div>
                             </div>
                             
                             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-                              <div className="flex gap-1 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                              <div className="flex gap-1 bg-[#080c16] p-1 rounded-xl border border-white/10 shadow-inner">
                                 {[
                                   { id: 'all', label: 'همه' },
                                   { id: 'unread', label: 'خوانده نشده' },
@@ -593,7 +597,7 @@ export default function UserDashboard() {
                                   <button
                                     key={filter.id}
                                     onClick={() => setNotifFilter(filter.id)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${notifFilter === filter.id ? 'bg-white/10 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
+                                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${notifFilter === filter.id ? 'bg-white/15 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
                                   >
                                     {filter.label}
                                   </button>
@@ -602,7 +606,7 @@ export default function UserDashboard() {
 
                               <button 
                                 onClick={handleMarkAllAsRead}
-                                className="text-xs text-gray-400 hover:text-[#06b6d4] transition-colors whitespace-nowrap cursor-pointer bg-white/5 px-3.5 py-2 rounded-xl border border-white/10 font-bold"
+                                className="text-xs text-gray-400 hover:text-[#06b6d4] transition-colors whitespace-nowrap cursor-pointer bg-white/5 hover:bg-white/10 px-3.5 py-2 rounded-xl border border-white/10 font-bold"
                               >
                                 خواندن همه
                               </button>
@@ -622,10 +626,10 @@ export default function UserDashboard() {
                                 <div 
                                   key={notif.id}
                                   onClick={() => handleOpenNotification(notif)}
-                                  className={`block p-5 rounded-2xl transition-all relative overflow-hidden group cursor-pointer ${
+                                  className={`block p-5 rounded-2xl transition-all relative overflow-hidden group cursor-pointer border ${
                                     notif.isRead 
-                                      ? 'bg-white/5 border border-white/5 hover:bg-white/10 opacity-60 hover:opacity-100' 
-                                      : 'bg-white/10 border border-[#06b6d4]/30 hover:bg-white/15 border-r-4 border-r-[#06b6d4] shadow-[0_5px_20px_-10px_rgba(6,182,212,0.3)]'
+                                      ? 'bg-white/5 border-white/5 hover:bg-white/10 opacity-70 hover:opacity-100' 
+                                      : 'bg-white/10 border-[#06b6d4]/30 hover:bg-white/15 border-r-4 border-r-[#06b6d4] shadow-[0_5px_20px_-10px_rgba(6,182,212,0.3)]'
                                   }`}
                                 >
                                   <div className="flex items-start gap-4 relative z-10">
@@ -643,7 +647,7 @@ export default function UserDashboard() {
                                         <h4 className={`font-bold text-sm ${notif.isRead ? 'text-gray-300' : 'text-white'}`}>{notif.title}</h4>
                                         <span className={`text-[10px] font-sans ${notif.isRead ? 'text-gray-500' : 'text-[#06b6d4]'}`}>{notif.time}</span>
                                       </div>
-                                      <div className="rich-text text-xs leading-relaxed text-justify line-clamp-2 text-gray-300">
+                                      <div className="rich-text text-xs leading-relaxed text-justify line-clamp-2 text-gray-300 font-light">
                                         <p>{notif.text}</p>
                                       </div>
                                     </div>
@@ -654,13 +658,13 @@ export default function UserDashboard() {
                           </div>
 
                           {visibleNotifCount < filteredNotifications.length && (
-                            <div className="mt-auto flex justify-center pt-6 border-t border-white/5">
+                            <div className="mt-auto flex justify-center pt-6 border-t border-white/10">
                               <button 
                                 onClick={() => setVisibleNotifCount(prev => prev + 3)}
-                                className="relative group bg-white/5 border border-white/10 text-white px-8 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-white/10 hover:border-[#fbbf24] hover:text-[#fbbf24] transition-all duration-300 cursor-pointer"
+                                className="relative group bg-[#080c16] border border-white/10 text-white px-8 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-white/5 hover:border-[#fbbf24] hover:text-[#fbbf24] transition-all duration-300 cursor-pointer shadow-inner"
                               >
                                 <span>نمایش اعلان‌های بیشتر</span>
-                                <Icon name="caretDown" className="w-4 h-4" />
+                                <Icon name="caretDown" className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
                               </button>
                             </div>
                           )}
@@ -679,76 +683,84 @@ export default function UserDashboard() {
       </main>
 
       {/* پنجره تأیید خروج از حساب کاربری */}
-      {isLogoutModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer animate-[fadeIn_0.2s_ease-out]" onClick={() => setIsLogoutModalOpen(false)}></div>
-          <div className="relative z-10 bg-[#080c16] border border-white/10 border-t-2 border-t-rose-500 rounded-3xl w-full max-w-sm p-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] animate-[scaleIn_0.3s_ease-out]" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setIsLogoutModalOpen(false)} className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
-              <Icon name="close" className="w-4 h-4" />
-            </button>
-            <div className="flex flex-col items-center text-center mb-6 pt-2">
-              <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-4 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
-                <Icon name="signOut" className="w-8 h-8" />
+      <AnimatePresence>
+        {isLogoutModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-md cursor-pointer animate-[fadeIn_0.2s_ease-out]" onClick={() => setIsLogoutModalOpen(false)}></div>
+            <div className="relative z-10 bg-[#0b0f19]/90 backdrop-blur-xl border border-white/10 rounded-3xl w-full max-w-sm p-6 shadow-2xl overflow-hidden animate-[scaleIn_0.3s_ease-out]" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-90 pointer-events-none z-20" />
+              
+              <button onClick={() => setIsLogoutModalOpen(false)} className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                <Icon name="close" className="w-4 h-4" />
+              </button>
+              <div className="flex flex-col items-center text-center mb-6 pt-2">
+                <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-4 shadow-[0_0_20px_rgba(244,63,94,0.2)]">
+                  <Icon name="signOut" className="w-8 h-8" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">خروج از حساب کاربری</h3>
+                <div className="rich-text text-xs text-gray-300 leading-relaxed text-center font-light">
+                  <p>آیا مطمئن هستید که می‌خواهید از حساب کاربری خود خارج شوید؟</p>
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">خروج از حساب کاربری</h3>
-              <div className="rich-text text-xs text-gray-400 leading-relaxed text-center">
-                <p>آیا مطمئن هستید که می‌خواهید از حساب کاربری خود خارج شوید؟</p>
+              <div className="flex items-center gap-3">
+                <button onClick={() => setIsLogoutModalOpen(false)} className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 py-3 rounded-xl text-sm font-bold transition-colors cursor-pointer">خیر</button>
+                <button onClick={confirmLogout} className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all cursor-pointer">بله، خارج می‌شوم</button>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <button onClick={() => setIsLogoutModalOpen(false)} className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 py-3 rounded-xl text-sm font-bold transition-colors cursor-pointer">خیر</button>
-              <button onClick={confirmLogout} className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all cursor-pointer">بله، خارج می‌شوم</button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* پنجره نمایش جزئیات اعلان */}
-      {selectedNotification && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer animate-[fadeIn_0.2s_ease-out]" onClick={() => setSelectedNotification(null)}></div>
-          
-          <div className="relative z-10 bg-[#080c16] border border-white/10 border-t-2 border-t-[#06b6d4] rounded-3xl w-full max-w-md p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.9)] animate-[scaleIn_0.3s_ease-out]" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setSelectedNotification(null)} className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
-              <Icon name="close" className="w-4 h-4" />
-            </button>
+      <AnimatePresence>
+        {selectedNotification && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-md cursor-pointer animate-[fadeIn_0.2s_ease-out]" onClick={() => setSelectedNotification(null)}></div>
+            
+            <div className="relative z-10 bg-[#0b0f19]/90 backdrop-blur-xl border border-white/10 rounded-3xl w-full max-w-md p-6 md:p-8 shadow-2xl overflow-hidden animate-[scaleIn_0.3s_ease-out]" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 pointer-events-none z-20" />
 
-            <div className="flex items-center gap-4 mb-6 pr-8">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${selectedNotification.isRead ? 'bg-gray-500/20 text-gray-400' : 'bg-[#06b6d4]/20 text-[#06b6d4]'}`}>
-                <Icon name={selectedNotification.isRead ? "checkCircle" : "info"} className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base md:text-lg font-bold text-white leading-tight mb-1">{selectedNotification.title}</h3>
-                <span className="text-xs text-gray-500 font-sans">{selectedNotification.time}</span>
-              </div>
-            </div>
-
-            {selectedNotification.image && (
-              <div className="mb-6 rounded-xl overflow-hidden border border-white/10 bg-black/50 aspect-video relative">
-                <BlurImage src={selectedNotification.image} alt={selectedNotification.title} className="w-full h-full object-cover" />
-              </div>
-            )}
-
-            <div className="rich-text text-sm text-gray-300 leading-relaxed text-justify mb-8 font-light">
-              <p>{selectedNotification.text}</p>
-            </div>
-
-            <div className="flex gap-3 mt-auto pt-4 border-t border-white/10">
-              {selectedNotification.link && (
-                <button onClick={() => {
-                  setSelectedNotification(null);
-                  router.push(selectedNotification.link);
-                }} className="flex-1 bg-[#06b6d4] hover:bg-cyan-300 text-deep-base py-3 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all cursor-pointer flex justify-center items-center gap-2">
-                  <Icon name="link" className="w-4 h-4" /> مشاهده جزئیات بیشتر
-                </button>
-              )}
-              <button onClick={() => setSelectedNotification(null)} className={`bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 py-3 rounded-xl text-sm font-bold transition-colors cursor-pointer ${selectedNotification.link ? 'flex-1' : 'w-full'}`}>
-                بستن پنجره
+              <button onClick={() => setSelectedNotification(null)} className="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
+                <Icon name="close" className="w-4 h-4" />
               </button>
+
+              <div className="flex items-center gap-4 mb-6 pr-8">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${selectedNotification.isRead ? 'bg-gray-500/20 text-gray-400' : 'bg-[#06b6d4]/20 text-[#06b6d4]'}`}>
+                  <Icon name={selectedNotification.isRead ? "checkCircle" : "info"} className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base md:text-lg font-bold text-white leading-tight mb-1">{selectedNotification.title}</h3>
+                  <span className="text-xs text-gray-500 font-sans">{selectedNotification.time}</span>
+                </div>
+              </div>
+
+              {selectedNotification.image && (
+                <div className="mb-6 rounded-xl overflow-hidden border border-white/10 bg-black/50 aspect-video relative">
+                  <BlurImage src={selectedNotification.image} alt={selectedNotification.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              <div className="rich-text text-sm text-gray-300 leading-relaxed text-justify mb-8 font-light">
+                <p>{selectedNotification.text}</p>
+              </div>
+
+              <div className="flex gap-3 mt-auto pt-4 border-t border-white/10">
+                {selectedNotification.link && (
+                  <button onClick={() => {
+                    setSelectedNotification(null);
+                    router.push(selectedNotification.link);
+                  }} className="flex-1 bg-[#06b6d4] hover:bg-[#0891b2] text-white py-3 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all cursor-pointer flex justify-center items-center gap-2">
+                    <Icon name="link" className="w-4 h-4" /> مشاهده جزئیات بیشتر
+                  </button>
+                )}
+                <button onClick={() => setSelectedNotification(null)} className={`bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 py-3 rounded-xl text-sm font-bold transition-colors cursor-pointer ${selectedNotification.link ? 'flex-1' : 'w-full'}`}>
+                  بستن پنجره
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
     </div>
   );

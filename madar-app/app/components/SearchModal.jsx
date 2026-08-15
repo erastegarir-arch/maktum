@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import Icon from './Icon'; // اتصال به کتابخانه مرکزی آیکون‌ها
 import EmptyState from './EmptyState';
@@ -13,10 +14,12 @@ const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
   );
 };
 
-// === اسکلتون کارت نتیجه جستجو ===
+// === اسکلتون کارت نتیجه جستجو (منطبق بر گرافیک کلی1) ===
 const ResultCardSkeleton = () => {
   return (
-    <div className="glass-card p-4 h-48 flex flex-col justify-end relative overflow-hidden">
+    <div className="relative rounded-2xl border border-white/10 p-4 h-48 flex flex-col justify-end overflow-hidden">
+      {/* پس‌زمینه شیشه‌ای ایزوله */}
+      <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
       <BaseSkeleton className="absolute inset-0 w-full h-full" rounded="rounded-none" />
       <div className="relative z-20 space-y-2">
         <BaseSkeleton className="w-20 h-3" rounded="rounded-sm" />
@@ -85,15 +88,21 @@ export default function SearchModal({ isOpen, onClose }) {
         {/* دکمه بستن اصلی (در گوشه بالا) */}
         <button 
           onClick={onClose} 
-          className="absolute -top-12 right-0 md:-right-12 md:top-0 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors z-20 border border-white/5 cursor-pointer"
+          className="absolute -top-12 right-0 md:-right-12 md:top-0 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors z-20 border border-white/10 cursor-pointer"
           title="بستن پنجره"
         >
           <Icon name="close" className="w-5 h-5" />
         </button>
 
-        {/* بخش بالایی: کادر جستجو */}
-        <div className="glass-card p-6 rounded-[2rem] border-t-2 border-t-[#06b6d4] relative overflow-hidden shrink-0 shadow-2xl">
-          <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#06b6d4]/10 rounded-full blur-3xl pointer-events-none"></div>
+        {/* بخش بالایی: کادر جستجو (منطبق بر گرافیک کلی1) */}
+        <div className="relative rounded-[2rem] border border-white/10 p-6 overflow-hidden shrink-0 shadow-2xl group">
+          {/* ۱. لایه پس‌زمینه شیشه‌ای ثابت */}
+          <div className="absolute inset-0 bg-[#0b0f19]/85 backdrop-blur-xl rounded-[2rem] pointer-events-none -z-10" />
+
+          {/* ۲. نوار نوری گرادینت بالای کادر جستجو */}
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 z-20 pointer-events-none" />
+
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#06b6d4]/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
           
           <div className="flex items-center gap-4 relative z-10">
             <div className={`${query ? 'text-white' : 'text-[#06b6d4] animate-pulse'}`}>
@@ -189,14 +198,18 @@ export default function SearchModal({ isOpen, onClose }) {
                 </div>
               </div>
 
-              {/* کشف تصادفی */}
+              {/* کشف تصادفی (منطبق بر گرافیک کلی1) */}
               <div className="md:col-span-2 mt-2">
-                <div className="glass-card p-6 rounded-2xl border-l-2 border-l-[#06b6d4] flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#06b6d4]/10 to-transparent pointer-events-none"></div>
+                <div className="relative rounded-2xl border border-white/10 p-6 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden group">
+                  {/* پس‌زمینه شیشه‌ای ایزوله */}
+                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
+
+                  {/* نوار نوری گرادینت بالای کارت */}
+                  <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90" />
                   
                   <div className="flex items-center gap-4 relative z-10">
-                    <div className="w-12 h-12 rounded-xl bg-[#06b6d4]/20 flex items-center justify-center text-[#06b6d4] flex-shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                      <Icon name="compass" className="w-7 h-7" />
+                    <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#06b6d4] flex-shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.3)] group-hover:border-[#06b6d4]/40 transition-colors duration-300">
+                      <Icon name="compass" className="w-7 h-7 group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div>
                       <h4 className="text-white font-bold mb-1">گشت و گذار در بایگانی</h4>
@@ -234,7 +247,7 @@ export default function SearchModal({ isOpen, onClose }) {
               color="text-[#fbbf24]" 
             />
           ) : (
-            /* حالت دوم: کاربر در حال تایپ است و نتایج داخلی آماده‌اند */
+            /* حالت دوم: کاربر در حال تایپ است و نتایج داخلی آماده‌اند (منطبق بر گرافیک کلی1) */
             <div className="flex flex-col h-full animate-[fadeIn_0.3s_ease-in]">
               <div className="flex justify-between items-center mb-4 shrink-0">
                 <h4 className="text-sm font-bold text-white">نتایج یافت شده: <span className="text-[#06b6d4] font-sans">۳</span> مورد</h4>
@@ -242,8 +255,28 @@ export default function SearchModal({ isOpen, onClose }) {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-10">
-                {/* نتیجه ۱ */}
-                <div className="glass-card group cursor-pointer relative h-48 flex flex-col justify-end p-4 overflow-hidden border-t-2 border-t-[#06b6d4] hover:shadow-[0_15px_30px_-10px_rgba(6,182,212,0.2)] transition-all">
+                
+                {/* نتیجه ۱ (فیروزه‌ای) */}
+                <div className="relative rounded-2xl border border-white/10 group cursor-pointer h-48 flex flex-col justify-end p-4 overflow-hidden shadow-lg transition-all duration-300">
+                  {/* پس‌زمینه شیشه‌ای ایزوله */}
+                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
+
+                  {/* هاله هوور مجزا */}
+                  <div 
+                    className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100 -z-10"
+                    style={{
+                      boxShadow: 'inset 0 0 25px rgba(6, 182, 212, 0.15), 0 10px 30px -10px rgba(6, 182, 212, 0.25)'
+                    }}
+                  />
+
+                  {/* نوار نوری گرادینت بالای کارت */}
+                  <div 
+                    className="absolute top-0 inset-x-6 h-[2px] transition-opacity duration-300 opacity-70 group-hover:opacity-100 z-20 pointer-events-none"
+                    style={{ 
+                      background: 'linear-gradient(90deg, transparent 0%, #06b6d4 50%, transparent 100%)' 
+                    }}
+                  />
+
                   <div className="absolute inset-0 bg-gradient-to-t from-[#080c16] via-[#080c16]/50 to-transparent z-10"></div>
                   <div className="absolute inset-0 w-full h-full bg-gray-900 opacity-50 overflow-hidden">
                     <BlurImage src="/images/content-documentary.jpg" alt="سایه‌های معماری مدرن" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -255,8 +288,27 @@ export default function SearchModal({ isOpen, onClose }) {
                   </div>
                 </div>
 
-                {/* نتیجه ۲ */}
-                <div className="glass-card group cursor-pointer relative h-48 flex flex-col justify-end p-4 overflow-hidden border-t-2 border-t-[#fbbf24] hover:shadow-[0_15px_30px_-10px_rgba(251,191,36,0.2)] transition-all">
+                {/* نتیجه ۲ (کهربایی) */}
+                <div className="relative rounded-2xl border border-white/10 group cursor-pointer h-48 flex flex-col justify-end p-4 overflow-hidden shadow-lg transition-all duration-300">
+                  {/* پس‌زمینه شیشه‌ای ایزوله */}
+                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
+
+                  {/* هاله هوور مجزا */}
+                  <div 
+                    className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100 -z-10"
+                    style={{
+                      boxShadow: 'inset 0 0 25px rgba(251, 191, 36, 0.15), 0 10px 30px -10px rgba(251, 191, 36, 0.25)'
+                    }}
+                  />
+
+                  {/* نوار نوری گرادینت بالای کارت */}
+                  <div 
+                    className="absolute top-0 inset-x-6 h-[2px] transition-opacity duration-300 opacity-70 group-hover:opacity-100 z-20 pointer-events-none"
+                    style={{ 
+                      background: 'linear-gradient(90deg, transparent 0%, #fbbf24 50%, transparent 100%)' 
+                    }}
+                  />
+
                   <div className="absolute inset-0 bg-gradient-to-t from-[#080c16] via-[#080c16]/50 to-transparent z-10"></div>
                   <div className="absolute top-2 left-2 z-20 bg-[#fbbf24]/90 text-black text-[9px] font-bold px-2 py-0.5 rounded-md backdrop-blur-md">سند PDF</div>
                   <div className="absolute inset-0 w-full h-full bg-gray-900 opacity-50 overflow-hidden">
@@ -269,8 +321,27 @@ export default function SearchModal({ isOpen, onClose }) {
                   </div>
                 </div>
 
-                {/* نتیجه ۳ */}
-                <div className="glass-card group cursor-pointer relative h-48 flex flex-col justify-end p-4 overflow-hidden border-t-2 border-t-[#a855f7] hover:shadow-[0_15px_30px_-10px_rgba(168,85,247,0.2)] transition-all">
+                {/* نتیجه ۳ (بنفش) */}
+                <div className="relative rounded-2xl border border-white/10 group cursor-pointer h-48 flex flex-col justify-end p-4 overflow-hidden shadow-lg transition-all duration-300">
+                  {/* پس‌زمینه شیشه‌ای ایزوله */}
+                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
+
+                  {/* هاله هوور مجزا */}
+                  <div 
+                    className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100 -z-10"
+                    style={{
+                      boxShadow: 'inset 0 0 25px rgba(168, 85, 247, 0.15), 0 10px 30px -10px rgba(168, 85, 247, 0.25)'
+                    }}
+                  />
+
+                  {/* نوار نوری گرادینت بالای کارت */}
+                  <div 
+                    className="absolute top-0 inset-x-6 h-[2px] transition-opacity duration-300 opacity-70 group-hover:opacity-100 z-20 pointer-events-none"
+                    style={{ 
+                      background: 'linear-gradient(90deg, transparent 0%, #a855f7 50%, transparent 100%)' 
+                    }}
+                  />
+
                   <div className="absolute inset-0 bg-gradient-to-t from-[#080c16] via-[#080c16]/50 to-transparent z-10"></div>
                   <div className="absolute inset-0 w-full h-full bg-gray-900 opacity-50 overflow-hidden">
                     <BlurImage src="/images/content-article.jpg" alt="ریشه‌های هرمسی در فیزیک کلاسیک" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -281,6 +352,7 @@ export default function SearchModal({ isOpen, onClose }) {
                     <p className="text-[11px] text-gray-400 font-light line-clamp-1 text-justify">زمان مطالعه: ۱۲ دقیقه</p>
                   </div>
                 </div>
+
               </div>
             </div>
           )}

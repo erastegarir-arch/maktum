@@ -141,36 +141,52 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
   if (!isOpen) return null;
 
+  const currentColor = step === 1 ? '#f59e0b' : '#06b6d4';
+
   return (
     <AnimatePresence>
       <motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md p-4"
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4"
         onClick={() => !isLoading && onCloseRef.current?.()}
       >
         <motion.div 
           ref={cardRef}
           onMouseMove={handleMouseMove}
           onClick={(e) => e.stopPropagation()}
-          initial={{ scale: 0.9, opacity: 0 }} 
+          initial={{ scale: 0.95, opacity: 0 }} 
           animate={{ scale: 1, opacity: 1 }} 
-          exit={{ scale: 0.9, opacity: 0 }}
-          className="relative w-full max-w-md glass-card rounded-[32px] overflow-hidden p-8 shadow-[0_30px_60px_rgba(0,0,0,0.8)] border-t-2 border-t-amber-500/50"
+          exit={{ scale: 0.95, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="relative w-full max-w-md rounded-[32px] overflow-hidden p-8 shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/10 group"
         >
-          <div className="absolute inset-0 pointer-events-none rounded-inherit z-0 bg-[radial-gradient(400px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.06),transparent_40%)]" />
+          {/* ۱. لایه پس‌زمینه شیشه‌ای ثابت استاندارد گرافیک کلی1 */}
+          <div className="absolute inset-0 bg-[#0b0f19]/85 backdrop-blur-xl rounded-[32px] pointer-events-none -z-10" />
 
+          {/* ۲. نوار نوری گرادینت بالای کارت (Top Gradient Highlight Bar) */}
+          <div 
+            className="absolute top-0 inset-x-0 h-[2px] transition-all duration-500 opacity-90 z-20 pointer-events-none"
+            style={{ 
+              background: `linear-gradient(90deg, transparent 0%, ${currentColor} 50%, transparent 100%)` 
+            }}
+          />
+
+          {/* ۳. افکت شعاعی حرکت موس در پس‌زمینه */}
+          <div className="absolute inset-0 pointer-events-none rounded-[32px] z-0 bg-[radial-gradient(400px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.06),transparent_40%)]" />
+
+          {/* دکمه بستن */}
           <button 
             onClick={() => onCloseRef.current?.()} 
             disabled={isLoading}
-            className="absolute top-6 left-6 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors z-20 disabled:opacity-50 cursor-pointer"
+            className="absolute top-6 left-6 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/20 transition-all z-20 disabled:opacity-50 cursor-pointer"
           >
             <Icon name="close" className="w-4 h-4" />
           </button>
 
           {isInitializing ? (
-            <div className="py-6 space-y-6 flex flex-col items-center">
+            <div className="py-6 space-y-6 flex flex-col items-center relative z-10">
               <BaseSkeleton className="w-16 h-16 rounded-2xl" />
               <div className="w-full space-y-3">
                 <BaseSkeleton className="w-full h-12" />
@@ -186,10 +202,12 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     initial={{ opacity: 0, x: 20 }} 
                     animate={{ opacity: 1, x: 0 }} 
                     exit={{ opacity: 0, x: -20 }} 
+                    transition={{ duration: 0.3 }}
                     className="w-full text-center"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center mb-6 mx-auto border border-white/10">
-                      <Icon name="fingerprint" className="w-8 h-8 text-amber-500" />
+                    {/* باکس آیکون با انیمیشن استاندارد گرافیک کلی1 */}
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 mx-auto shadow-[0_0_20px_rgba(245,158,11,0.15)] group-hover:border-amber-500/40 transition-colors duration-300">
+                      <Icon name="fingerprint" className="w-8 h-8 text-amber-500 group-hover:scale-110 transition-transform duration-300" />
                     </div>
 
                     <h2 className="text-2xl font-bold text-white mb-2">ورود به شبکه مدار</h2>
@@ -212,7 +230,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     <button 
                       onClick={handleSubmitPhone}
                       disabled={phone.length < 3 || isLoading}
-                      className="w-full bg-amber-500 text-black py-4 rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 cursor-pointer"
+                      className="w-full bg-amber-500 text-black py-4 rounded-xl font-bold text-lg hover:bg-amber-400 hover:shadow-[0_0_25px_rgba(245,158,11,0.3)] transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {isLoading ? <Icon name="loading" className="w-6 h-6 animate-spin mx-auto" /> : 'دریافت کد تایید'}
                     </button>
@@ -223,15 +241,17 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     initial={{ opacity: 0, x: 20 }} 
                     animate={{ opacity: 1, x: 0 }} 
                     exit={{ opacity: 0, x: -20 }} 
+                    transition={{ duration: 0.3 }}
                     className="w-full text-center"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center mb-6 mx-auto border border-white/10">
-                      <Icon name="password" className="w-8 h-8 text-cyan-400" />
+                    {/* باکس آیکون مرحله دوم با انیمیشن بزرگ‌نمایی */}
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 mx-auto shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:border-cyan-400/40 transition-colors duration-300">
+                      <Icon name="password" className="w-8 h-8 text-cyan-400 group-hover:scale-110 transition-transform duration-300" />
                     </div>
 
                     <h2 className="text-2xl font-bold text-white mb-2">تایید هویت</h2>
                     <p className="text-sm text-gray-400 font-light mb-8">
-                      کد ارسال شده به <span dir="ltr" className="text-cyan-400">{phone}</span> را وارد کنید.
+                      کد ارسال شده به <span dir="ltr" className="text-cyan-400 font-mono font-bold">{phone}</span> را وارد کنید.
                     </p>
 
                     <div className="flex items-center justify-center gap-2 w-full mb-6" dir="ltr">
@@ -253,7 +273,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     <button 
                       onClick={handleSubmitOtp}
                       disabled={isLoading}
-                      className="w-full bg-cyan-400 text-black py-4 rounded-xl font-bold text-lg transition-all disabled:opacity-50 cursor-pointer"
+                      className="w-full bg-cyan-400 text-black py-4 rounded-xl font-bold text-lg hover:bg-cyan-300 hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {isLoading ? <Icon name="loading" className="w-6 h-6 animate-spin mx-auto" /> : 'تایید و ورود'}
                     </button>
@@ -262,7 +282,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                       <button onClick={() => setStep(1)} disabled={isLoading} className="hover:text-white transition-colors cursor-pointer">
                         اصلاح شماره
                       </button>
-                      <span>{formatTime(timer)}</span>
+                      <span className="font-mono dir-ltr">{formatTime(timer)}</span>
                     </div>
                   </motion.div>
                 )}
