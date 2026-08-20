@@ -1,6 +1,6 @@
 import Breadcrumbs from '@/app/components/Breadcrumbs';
 import ProgressBar from '@/app/components/ProgressBar';
-import RulesContent from '@/app/components/RulesContent';
+import RulesContent from '@/app/components/frontend/RulesContent';
 import { getSetting } from '@/app/actions/settings';
 
 export const dynamic = 'force-dynamic';

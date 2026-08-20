@@ -47,6 +47,136 @@ model IconLibrary {
 }
 
 // ------------------------------------------------
+// مدیریت کاربران و سطوح دسترسی (User Management & RBAC)
+// ------------------------------------------------
+enum UserStatus {
+  ACTIVE    // فعال
+  BANNED    // مسدود شده توسط ادمین
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+model User {
+  id                   String     @id @default(cuid())
+  phone                String     @unique
+  status               UserStatus @default(ACTIVE)
+
+  // اطلاعات پروفایل (قابل ویرایش توسط کاربر)
+  firstName            String?
+  lastName             String?
+  gender               Gender?
+  birthYear            String?    // به صورت رشته نگه می‌داریم تا تاریخ شمسی مانند "1361" به سادگی ذخیره شود
+  province             String?
+  city                 String?
+  educationDegree      String?    // مدرک تحصیلی
+  major                String?    // رشته تحصیلی
+  artResearchField     String?    // حوزه فعالیت هنری / پژوهشی
+  cooperationInterests String?    // زمینه‌های تمایل به همکاری
+  email                String?
+
+  // سیستم دسترسی مبتنی بر نقش (RBAC)
+  roleId               String?
+  role                 Role?      @relation(fields: [roleId], references: [id])
+
+  // روابط با سایر جداول
+  favorites            Favorite[]
+  downloads            DownloadHistory[]
+  notifications        UserNotification[]
+  comments             Comment[] // <--- اضافه شده برای ارتباط کاربر با نظراتش
+
+  createdAt            DateTime   @default(now()) // همان تاریخ عضویت غیرقابل ویرایش
+  updatedAt            DateTime   @updatedAt
+}
+
+// ------------------------------------------------
+// جدول نقش‌ها (سطوح دسترسی مدیریتی)
+// ------------------------------------------------
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique // مثال: "سردبیر"
+  slug        String   @unique // مثال: "editor"
+  permissions String   // ذخیره آرایه مجوزها به صورت رشته متنی (JSON String)
+  isSystem    Boolean  @default(false) // برای جلوگیری از حذف نقش‌های اصلی
+  
+  users       User[]   // ارتباط با کاربران
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ------------------------------------------------
+// سیستم اعلان‌ها (Notifications)
+// ------------------------------------------------
+enum NotificationType {
+  SYSTEM    // اعلان‌های خودکار سیستم
+  BULK      // ارسال گروهی یا فیلتردار توسط ادمین
+  PRIVATE   // پیام اختصاصی فقط برای یک شخص
+}
+
+// بدنه اصلی پیام (یکپارچه برای پنل و پیامک)
+model Notification {
+  id        String           @id @default(cuid())
+  title     String
+  text      String
+  image     String?
+  link      String?
+  type      NotificationType @default(SYSTEM)
+  sendSms   Boolean          @default(false) // آیا این پیام پیامک هم شده است؟
+
+  userNotifications UserNotification[]
+
+  createdAt DateTime         @default(now())
+}
+
+// وضعیت خوانده شدن پیام به ازای هر کاربر
+model UserNotification {
+  id             String       @id @default(cuid())
+  
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  notificationId String
+
+  isRead         Boolean      @default(false)
+  readAt         DateTime?
+
+  @@unique([userId, notificationId]) // هر کاربر فقط یک نسخه از هر اعلان دارد
+}
+
+// ------------------------------------------------
+// علاقه‌مندی‌ها و دانلودهای کاربر
+// ------------------------------------------------
+model Favorite {
+  id        String   @id @default(cuid())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  contentId String
+  
+  createdAt DateTime @default(now())
+
+  @@unique([userId, contentId]) // جلوگیری از لایک تکراری برای یک محصول
+}
+
+model DownloadHistory {
+  id           String   @id @default(cuid())
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  
+  content      Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  contentId    String
+  
+  downloadedAt DateTime @default(now())
+}
+
+// ------------------------------------------------
 // تعریف انواع سرشاخه‌ها (Taxonomy Types)
 // ------------------------------------------------
 enum TaxonomyType {
@@ -75,6 +205,9 @@ model Taxonomy {
   creatorContents  Content[] @relation("ContentCreators")
   tagContents      Content[] @relation("ContentTags")
 
+  // اتصال سرشاخه‌ها به پرونده‌های ویژه
+  dossiers         Dossier[] @relation("DossierTaxonomies")
+
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -84,7 +217,7 @@ model Taxonomy {
 }
 
 // ------------------------------------------------
-// Enums محتوا
+// Enums محتوا و پرونده‌ها
 // ------------------------------------------------
 enum ContentType {
   RAW         // محتوای خام
@@ -97,6 +230,62 @@ enum ContentStatus {
   DRAFT       // پیش‌نویس
   PUBLISHED   // منتشر شده
   ARCHIVED    // بایگانی
+}
+
+// ================================================
+// مدل: پرونده‌های ویژه (Curated Dossiers / Hubs)
+// ================================================
+model Dossier {
+  id              String        @id @default(cuid())
+  slug            String        @unique // لینک یکتا برای دامنه /c/[slug]
+  
+  // 1. اطلاعات سئو و نمایش در صفحه اصلی (Hub)
+  metaTitle       String?
+  metaDesc        String?
+  hubCoverDesktop String?       // کاور 16:9 برای صفحه اصلی
+  hubCoverMobile  String?       // کاور 1:1 برای صفحه اصلی
+  isVisibleInHub  Boolean       @default(true) // نمایش در صفحه اصلی؟
+  orderIndex      Int           @default(0)    // ترتیب چینش با درگ و دراپ
+
+  // 2. هدر صفحه داخلی (Hero Section)
+  preTitle        String?       // روتیتر (مثلاً: اسناد محرمانه سفارت)
+  title           String        // عنوان اصلی
+  description     String?       // توضیح دو خطی
+  coverDesktop    String?       // کاور واید هدر (16:9)
+  coverMobile     String?       // کاور هدر موبایل (1:1)
+  
+  // تنظیمات گرافیکی
+  themeColor      String?       @default("#06b6d4") // رنگ اصلی نئون
+  gradientFrom    String?       @default("#06b6d4") // رنگ شروع گرادیان عنوان
+  gradientTo      String?       @default("#d946ef") // رنگ پایان گرادیان عنوان
+  
+  // 3. رادار موضوعی
+  showRadar       Boolean       @default(true)
+  radarTitle      String?       @default("رادار موضوعی پرونده")
+  
+  // 4. پدیدآورندگان
+  showCreators    Boolean       @default(true)
+  creatorsTitle   String?       @default("اشخاص و پدیدآورندگان مرتبط")
+
+  // 5. اقدام به عمل (Tip Line / ارتباط امن)
+  showTipLine     Boolean       @default(true)
+  tipPreTitle     String?       @default("پورتال ارتباط امن")
+  tipTitle        String?       @default("سندی در دست دارید؟")
+  tipDesc         String?
+  tipBtnText      String?       @default("ارسال امن سند")
+  tipBtnLink      String?       @default("#")
+  tipBtnIcon      String?       @default("upload")
+
+  status          ContentStatus @default(DRAFT)
+  publishedAt     DateTime?     @default(now())
+  viewCount       Int           @default(0)
+
+  // روابط جادویی (چند به چند): اتصال پرونده به محتواها و سرشاخه‌های دیگر
+  contents        Content[]     @relation("DossierContents")
+  taxonomies      Taxonomy[]    @relation("DossierTaxonomies")
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 // ------------------------------------------------
@@ -147,11 +336,49 @@ model Content {
   changelog       Json?         // تاریخچه به‌روزرسانی‌ها
   downloadLinks   Json?         // لینک‌های دانلود
 
-  // روابط چندگانه با جدول سرشاخه‌ها (Taxonomy)
+  // روابط با سرشاخه‌ها
   categories      Taxonomy[]    @relation("ContentCategories")
   creators        Taxonomy[]    @relation("ContentCreators")
   tags            Taxonomy[]    @relation("ContentTags")
 
+  // اتصال محتوا به پرونده‌های ویژه
+  dossiers        Dossier[]     @relation("DossierContents")
+
+  // روابط با تعاملات کاربر
+  favoritedBy     Favorite[]
+  downloadedBy    DownloadHistory[]
+  comments        Comment[]     // <--- اضافه شده برای ارتباط محتوا با نظرات
+
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+}
+
+
+// ================================================
+// جداول جدید اضافه شده برای سیستم تعاملات (فاز 1)
+// ================================================
+
+enum CommentStatus {
+  PENDING    // در انتظار تایید
+  APPROVED   // تایید شده و قابل نمایش
+  REJECTED   // رد شده
+}
+
+model Comment {
+  id          String        @id @default(cuid())
+  text        String        // متن نظر کاربر
+  status      CommentStatus @default(PENDING) // وضعیت تایید نظر
+  
+  adminReply  String?       // فیلد پاسخ مستقیم ادمین (ساختار تخت و بهینه)
+  
+  // ارتباط با کاربر (نویسنده نظر)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  
+  // ارتباط با محتوای مورد نظر
+  content     Content       @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  contentId   String
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }

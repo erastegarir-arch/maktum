@@ -1,12 +1,29 @@
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
-import Header from '@/app/components/Header';
-import Footer from '@/app/components/Footer';
+import Header from '@/app/components/frontend/Header';
+import Footer from '@/app/components/frontend/Footer';
 import { getSetting } from '@/app/actions/settings';
 import { getIcons } from '@/app/actions/icons';
 
 // ✅ گام جدید و بنیادین: Import سیستم ContextProvider سراسری (تأمین‌کننده تنظیمات تاریخ ضد-Bilid)
 import { DateSettingsProvider } from '@/app/components/providers/DateSettingsContext';
+
+// ==========================================
+// ✅ اضافه شدن این بخش برای حل مشکل ۴ (اعمال سراسری فاوآیکون)
+// ==========================================
+export async function generateMetadata() {
+  const dynamicFavicon = await getSetting('favicon');
+  
+  return {
+    title: {
+      template: 'مدار | %s', // %s با عنوان هر صفحه جایگزین می‌شود
+      default: 'مدار', // عنوان پیش‌فرض برای صفحه اصلی سایت
+    },
+      icons: {
+      icon: dynamicFavicon || '/favicon.ico', // خواندن از دیتابیس یا مقدار پیش‌فرض
+    }
+  };
+}
 
 export default async function RootLayout({ children }) {
   // ۱. دریافت کل آیکون‌ها و تنظیمات روی سرور (بدون هیچ تاخیری برای کاربر)

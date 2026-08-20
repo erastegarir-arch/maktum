@@ -1,29 +1,17 @@
+// app/(admin-panel)/portal-entry-99/products/edit/[id]/page.jsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { getContentById, updateContent, getTaxonomies } from '@/app/actions/content';
 import Icon from '@/app/components/Icon';
 import MediaLibraryPage from '@/app/(admin-panel)/portal-entry-99/media/page';
+import RichTextEditor from '@/app/components/RichTextEditor';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 
-// پکیج‌های تاریخ شمسی
-import DatePicker from "react-multi-date-picker";
-import persian from "react-date-object/calendars/persian";
-import persian_fa from "react-date-object/locales/persian_fa";
-import TimePicker from "react-multi-date-picker/plugins/time_picker";
-
-// پکیج‌های ادیتور Tiptap
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
-import TextAlign from '@tiptap/extension-text-align';
-
-// تابع کمکی Tailwind
-const cn = (...inputs) => twMerge(clsx(inputs));
+import MyDateTimePicker from '@/app/components/MyDateTimePicker';
+import { useDateSettings } from '@/app/components/providers/DateSettingsContext';
 
 // === نگاشت تم پویا بر اساس نوع محتوا ===
 const THEMES = {
@@ -33,100 +21,50 @@ const THEMES = {
   BLOG: { color: 'text-[#b45309]', bg: 'bg-[#b45309]', border: 'border-[#b45309]', gradientVia: 'via-[#b45309]', hoverBg: 'hover:bg-[#b45309]', hoverBorder: 'hover:border-[#b45309]', glow: 'shadow-[0_0_15px_rgba(180,83,9,0.3)]' }
 };
 
-// ================= کامپوننت ادیتور Tiptap با تم اختصاصی مدار =================
-const CustomEditor = ({ content, onChange, activeTheme, onOpenMedia }) => {
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    ],
-    content: content,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
-    editorProps: {
-      attributes: {
-        class: 'min-h-[350px] outline-none text-sm leading-loose font-light text-justify p-5 text-gray-200',
-        dir: 'rtl'
-      }
+// ================= توابع کمکی پارس کاملاً ایمن =================
+const safeParse = (val, fallback = []) => {
+  if (!val) return fallback;
+  if (typeof val === 'object') return val;
+  if (typeof val === 'string') {
+    try {
+      return JSON.parse(val);
+    } catch {
+      return fallback;
     }
-  });
-
-  // رفع مشکل آپدیت نشدن محتوا از سمت والد (برای حالت ویرایش)
-  useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
-    }
-  }, [content, editor]);
-
-  if (!editor) return null;
-
-  const ToolbarButton = ({ onClick, isActive, icon }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`p-2 rounded-lg transition-colors cursor-pointer ${isActive ? `${activeTheme.bg} text-white` : 'text-gray-400 hover:bg-white/10 hover:text-white'}`}
-    >
-      <Icon name={icon} className="w-4 h-4 fill-current" />
-    </button>
-  );
-
-  return (
-    <div className="bg-[#080c16] rounded-2xl overflow-hidden border border-white/10 shadow-inner flex flex-col">
-      <div className="bg-white/5 border-b border-white/10 p-2 flex flex-wrap gap-1 items-center">
-        <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive('bold')} icon="textBolder" />
-        <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive('italic')} icon="textItalic" />
-        <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive('underline')} icon="textUnderline" />
-        <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} isActive={editor.isActive('strike')} icon="textStrikethrough" />
-        <div className="w-px h-6 bg-white/10 mx-2"></div>
-        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive('heading', { level: 2 })} icon="textHTwo" />
-        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} isActive={editor.isActive('heading', { level: 3 })} icon="textHThree" />
-        <div className="w-px h-6 bg-white/10 mx-2"></div>
-        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} isActive={editor.isActive({ textAlign: 'right' })} icon="textAlignRight" />
-        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('center').run()} isActive={editor.isActive({ textAlign: 'center' })} icon="textAlignCenter" />
-        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('left').run()} isActive={editor.isActive({ textAlign: 'left' })} icon="textAlignLeft" />
-        <div className="w-px h-6 bg-white/10 mx-2"></div>
-        <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive('bulletList')} icon="listBullets" />
-        <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive('orderedList')} icon="listNumbers" />
-        <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} isActive={editor.isActive('blockquote')} icon="quotes" />
-        <div className="w-px h-6 bg-white/10 mx-2"></div>
-        <button type="button" onClick={() => onOpenMedia(editor)} className={`p-2 rounded-lg text-gray-400 hover:${activeTheme.bg} hover:text-white transition-colors flex items-center gap-2 cursor-pointer`}>
-          <Icon name="image" className="w-4 h-4" /> <span className="text-xs font-bold font-sans">افزودن رسانه</span>
-        </button>
-      </div>
-      <EditorContent editor={editor} className="font-sans" />
-    </div>
-  );
+  }
+  return fallback;
 };
 
 // ================= کامپوننت جستجوی پویا =================
-const DynamicSelector = ({ options, selectedIds, onChange, placeholder, activeTheme, label }) => {
+const DynamicSelector = ({ options = [], selectedIds = [], onChange, placeholder, activeTheme, label }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  const filteredOptions = options.filter(opt => 
-    opt.name.toLowerCase().includes(query.toLowerCase()) && !selectedIds.includes(opt.id)
+  const safeOptions = Array.isArray(options) ? options : [];
+  const safeSelectedIds = Array.isArray(selectedIds) ? selectedIds : [];
+
+  const filteredOptions = safeOptions.filter(opt => 
+    opt && opt.name && opt.name.toLowerCase().includes(query.toLowerCase()) && !safeSelectedIds.includes(opt.id)
   );
 
   const handleSelect = (id) => {
-    onChange([...selectedIds, id]);
+    onChange([...safeSelectedIds, id]);
     setQuery('');
     setIsOpen(false);
   };
 
   const handleRemove = (id) => {
-    onChange(selectedIds.filter(selId => selId !== id));
+    onChange(safeSelectedIds.filter(selId => selId !== id));
   };
 
   return (
     <div className="space-y-2 relative font-sans">
       <label className="text-xs text-gray-300 font-bold">{label}</label>
       
-      {selectedIds.length > 0 && (
+      {safeSelectedIds.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2 p-2 bg-[#080c16] rounded-xl border border-white/5 shadow-inner">
-          {selectedIds.map(id => {
-            const item = options.find(o => o.id === id);
+          {safeSelectedIds.map(id => {
+            const item = safeOptions.find(o => o.id === id);
             return item ? (
               <span key={id} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-white/5 border border-white/10 text-white ${activeTheme.glow}`}>
                 {item.name}
@@ -147,7 +85,7 @@ const DynamicSelector = ({ options, selectedIds, onChange, placeholder, activeTh
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
-          className={`w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-white text-sm focus:border-white/30 outline-none transition-colors shadow-inner`}
+          className={`w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-white text-sm focus:border-white/30 outline-none transition-colors shadow-inner font-sans`}
         />
         <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
       </div>
@@ -156,7 +94,7 @@ const DynamicSelector = ({ options, selectedIds, onChange, placeholder, activeTh
         {isOpen && query.trim() !== '' && (
           <motion.div 
             initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-            className="absolute z-50 w-full mt-1 bg-[#0b0f19] border border-white/10 rounded-xl shadow-2xl max-h-48 overflow-y-auto custom-scrollbar"
+            className="absolute z-50 w-full mt-1 bg-[#0b0f19] border border-white/10 rounded-xl shadow-2xl max-h-48 overflow-y-auto custom-scrollbar font-sans"
           >
             {filteredOptions.length > 0 ? (
               filteredOptions.map(opt => (
@@ -188,11 +126,12 @@ export default function EditContentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [taxonomies, setTaxonomies] = useState([]);
-  
-  // مودال رسانه و ادیتور
+
+  const { allowCommentsGlobally } = useDateSettings();
+
   const [mediaPickerTarget, setMediaPickerTarget] = useState(null); 
   const [activeGalleryIndex, setActiveGalleryIndex] = useState(null); 
-  const [activeFileIconIndex, setActiveFileIconIndex] = useState(null);
+  const [activeFileIconIndex, setActiveFileIconIndex] = useState(null); 
   const [editorInstance, setEditorInstance] = useState(null);
 
   // ================= استیت‌های مشترک =================
@@ -214,9 +153,9 @@ export default function EditContentPage() {
   const [metaDesc, setMetaDescription] = useState('');
   const [readTime, setReadTime] = useState('');
   const [ageRating, setAgeRating] = useState('');
+  
   const [allowComments, setAllowComments] = useState(true);
   
-  // تنظیمات نمایش
   const [showAgeRating, setShowAgeRating] = useState(true);
   const [showDate, setShowDate] = useState(true);
   const [showReadTime, setShowReadTime] = useState(true);
@@ -235,27 +174,31 @@ export default function EditContentPage() {
   const [downloadLinks, setDownloadLinks] = useState([]); 
   const [previewGallery, setPreviewGallery] = useState([]); 
 
-  // ================= استیت‌های روابط =================
+  // ================= استیت‌های ارتباطات =================
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedCreators, setSelectedCreators] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
 
-  // توابع لیست‌های پویا (prependItem برای افزودن به صدر لیست)
   const addItem = (setter, template) => setter(prev => [...prev, { id: Date.now().toString(), ...template }]);
   const prependItem = (setter, template) => setter(prev => [{ id: Date.now().toString(), ...template }, ...prev]);
   const updateItem = (setter, id, field, value) => setter(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
   const removeItem = (setter, id) => setter(prev => prev.filter(item => item.id !== id));
   const toggleArrayItem = (setter, item) => setter(prev => prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]);
 
-  // دریافت اطلاعات اولیه محتوا و سرشاخه‌ها
+  // دریافت اطلاعات اولیه محتوا و سرشاخه‌ها (کاملاً امن، بدون خطا و بدون ریختن داده‌ها)
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchInitialData() {
+      if (!contentId) return;
       setIsLoading(true);
       try {
         const [taxData, contentData] = await Promise.all([
-          getTaxonomies(),
-          getContentById(contentId)
+          getTaxonomies().catch(() => []),
+          getContentById(contentId).catch(() => null)
         ]);
+
+        if (!isMounted) return;
 
         if (!contentData) {
           toast.error("محتوایی یافت نشد!");
@@ -263,10 +206,10 @@ export default function EditContentPage() {
           return;
         }
 
-        setTaxonomies(taxData || []);
+        setTaxonomies(Array.isArray(taxData) ? taxData : []);
 
-        setType(contentData.type);
-        setStatus(contentData.status);
+        setType(contentData.type || 'PRODUCED');
+        setStatus(contentData.status || 'DRAFT');
         setTitleBase(contentData.titleBase || '');
         setTitleHighlight(contentData.titleHighlight || '');
         setSubtitle(contentData.subtitle || '');
@@ -274,19 +217,26 @@ export default function EditContentPage() {
         setCoverDesktop(contentData.coverDesktop || '');
         setCoverMobile(contentData.coverMobile || '');
         
-        if (contentData.publishedAt) setPublishedAt(new Date(contentData.publishedAt));
-        if (contentData.updatedAt) setUpdatedAt(new Date(contentData.updatedAt));
+        if (contentData.publishedAt) {
+          const d = new Date(contentData.publishedAt);
+          if (!isNaN(d.getTime())) setPublishedAt(d);
+        }
+        if (contentData.updatedAt) {
+          const d = new Date(contentData.updatedAt);
+          if (!isNaN(d.getTime())) setUpdatedAt(d);
+        }
         
         setMetaTitle(contentData.metaTitle || '');
         setMetaDescription(contentData.metaDesc || '');
         setReadTime(contentData.readTime || '');
         setAgeRating(contentData.ageRating || '');
-        setAllowComments(contentData.allowComments);
+        
+        setAllowComments(contentData.allowComments !== undefined ? contentData.allowComments : (allowCommentsGlobally ?? true));
         setBody(contentData.body || '');
         setLead(contentData.lead || '');
 
-        // پارس کردن تنظیمات نمایش
-        const dSettings = contentData.displaySettings ? JSON.parse(contentData.displaySettings) : {};
+        // تنظیمات نمایش
+        const dSettings = safeParse(contentData.displaySettings, {});
         setShowAgeRating(dSettings.showAgeRating ?? true);
         setShowDate(dSettings.showDate ?? true);
         setShowReadTime(dSettings.showReadTime ?? true);
@@ -294,32 +244,52 @@ export default function EditContentPage() {
         setShowAuthor(dSettings.showAuthor ?? true);
         setIsDownloadActive(dSettings.isDownloadActive ?? true);
 
-        // پارس کردن فرمت‌ها
-        const dbFormats = contentData.formats ? JSON.parse(contentData.formats) : [];
+        // فرمت‌ها
+        const dbFormats = safeParse(contentData.formats, []);
         const standardFormats = ['فیلم', 'تصویر', 'صوت', 'متن', 'پروژه'];
-        setFormats(dbFormats.filter(f => standardFormats.includes(f)));
-        const customFmt = dbFormats.find(f => f.startsWith('سایر: '));
-        if (customFmt) setCustomFormat(customFmt.replace('سایر: ', ''));
+        if (Array.isArray(dbFormats)) {
+          setFormats(dbFormats.filter(f => typeof f === 'string' && standardFormats.includes(f)));
+          const customFmt = dbFormats.find(f => typeof f === 'string' && f.startsWith('سایر: '));
+          if (customFmt) setCustomFormat(customFmt.replace('سایر: ', ''));
+        }
 
-        // پارس کردن جیسون‌ها
-        setFileSpecs(contentData.fileSpecs ? JSON.parse(contentData.fileSpecs) : []);
-        setChangelog(contentData.changelog ? JSON.parse(contentData.changelog) : []);
-        setDownloadLinks(contentData.downloadLinks ? JSON.parse(contentData.downloadLinks) : []);
-        setPreviewGallery(contentData.previewGallery ? JSON.parse(contentData.previewGallery) : []);
+        // سایر فیلدهای آرایه‌ای
+        setFileSpecs(safeParse(contentData.fileSpecs, []));
+        setChangelog(safeParse(contentData.changelog, []));
+        setDownloadLinks(safeParse(contentData.downloadLinks, []));
+        setPreviewGallery(safeParse(contentData.previewGallery, []));
 
-        // روابط
-        setSelectedCategories(contentData.categories.map(c => c.id));
-        setSelectedCreators(contentData.creators.map(c => c.id));
-        setSelectedTags(contentData.tags.map(t => t.id));
+        // روابط با تابع محافظت از استخراج شناسه
+        const getIdsSafely = (list) => {
+          if (!list) return [];
+          if (!Array.isArray(list)) return [];
+          return list.map(item => {
+            if (typeof item === 'string') return item;
+            if (item && typeof item === 'object') return item.id || item.taxonomyId || (item.taxonomy && item.taxonomy.id) || null;
+            return null;
+          }).filter(Boolean);
+        };
+
+        setSelectedCategories(getIdsSafely(contentData.categories || contentData.categoryIds));
+        setSelectedCreators(getIdsSafely(contentData.creators || contentData.creatorIds));
+        setSelectedTags(getIdsSafely(contentData.tags || contentData.tagIds));
 
       } catch (error) {
+        console.error("Fetch Data Error:", error);
         toast.error("خطا در بارگذاری اطلاعات.");
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-      setIsLoading(false);
     }
     
-    if (contentId) fetchInitialData();
-  }, [contentId]);
+    fetchInitialData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [contentId, router, allowCommentsGlobally]);
 
   const handleOpenMediaForEditor = (editor) => {
     setEditorInstance(editor);
@@ -356,9 +326,9 @@ export default function EditContentPage() {
     
     if (res.success) {
       toast.success('تغییرات با موفقیت ذخیره شد!');
-      router.push('/portal-entry-99/products');
+      router.push('/portal-entry-99/products'); 
     } else {
-      toast.error(res.error || 'خطا در ثبت تغییرات.');
+      toast.error(res.error || 'خطا در ثبت اطلاعات.');
     }
     setIsSaving(false);
   };
@@ -398,17 +368,17 @@ export default function EditContentPage() {
         </div>
       </div>
 
-      {/* انتخابگر نوع محتوا (گرافیک کلی1) */}
+      {/* انتخابگر نوع محتوا */}
       <div className="relative rounded-2xl border border-white/10 shadow-2xl overflow-hidden animate-[fadeIn_0.4s_ease-out]">
         <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
         <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
         <div className="p-2 flex flex-wrap md:flex-nowrap gap-2 relative z-10">
           {[
-            { id: 'RAW', label: 'محتوای خام', icon: 'fileText', themeObj: THEMES.RAW },
-            { id: 'PRODUCED', label: 'محتوای تولیدی', icon: 'videoCamera', themeObj: THEMES.PRODUCED },
-            { id: 'TOOL', label: 'ابزارها', icon: 'setting', themeObj: THEMES.TOOL },
-            { id: 'BLOG', label: 'مقاله / بلاگ', icon: 'browser', themeObj: THEMES.BLOG }
+            { id: 'RAW', label: 'محتوای خام', icon: 'footage', themeObj: THEMES.RAW },
+            { id: 'PRODUCED', label: 'محتوای تولیدی', icon: 'product', themeObj: THEMES.PRODUCED },
+            { id: 'TOOL', label: 'ابزارها', icon: 'pen-nib', themeObj: THEMES.TOOL },
+            { id: 'BLOG', label: 'بلاگ', icon: 'blog', themeObj: THEMES.BLOG }
           ].map(t => (
             <button
               key={t.id}
@@ -428,7 +398,7 @@ export default function EditContentPage() {
         {/* ================= ستون راست (اصلی) ================= */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* باکس اطلاعات پایه (GKS1) */}
+          {/* باکس اطلاعات پایه */}
           <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
             <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
             <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -441,11 +411,11 @@ export default function EditContentPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs text-gray-300 font-bold">بخش اول عنوان (سفید)</label>
-                  <input type="text" value={titleBase} onChange={e => setTitleBase(e.target.value)} placeholder="مثلاً: معماری پنهان" className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-white text-sm focus:border-white/30 outline-none transition-colors shadow-inner font-sans" />
+                  <input type="text" value={titleBase} onChange={e => setTitleBase(e.target.value)} placeholder="مثلاً: اول بخش" className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-white text-sm focus:border-white/30 outline-none transition-colors shadow-inner font-sans" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs text-gray-300 font-bold">بخش دوم عنوان (رنگی - اختیاری)</label>
-                  <input type="text" value={titleHighlight} onChange={e => setTitleHighlight(e.target.value)} placeholder="مثلاً: واشنگتن دی‌سی" className={`w-full bg-[#080c16] border border-white/10 rounded-xl p-3 ${activeTheme.color} text-sm focus:border-white/30 outline-none transition-colors font-bold shadow-inner font-sans`} />
+                  <input type="text" value={titleHighlight} onChange={e => setTitleHighlight(e.target.value)} placeholder="مثلاً: بخش دوم" className={`w-full bg-[#080c16] border border-white/10 rounded-xl p-3 ${activeTheme.color} text-sm focus:border-white/30 outline-none transition-colors font-bold shadow-inner font-sans`} />
                 </div>
               </div>
 
@@ -464,7 +434,7 @@ export default function EditContentPage() {
             </div>
           </div>
 
-          {/* باکس سئو (SEO) */}
+          {/* باکس سئو */}
           <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
             <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
             <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -486,7 +456,7 @@ export default function EditContentPage() {
             </div>
           </div>
 
-          {/* باکس متن اصلی / لید و بدنه */}
+          {/* باکس متن اصلی / ادیتور */}
           <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
             <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
             <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -505,12 +475,13 @@ export default function EditContentPage() {
               )}
 
               <div className="space-y-2">
-                <label className="text-xs text-gray-300 font-bold">متن اصلی (مبتنی بر Tiptap)</label>
-                <CustomEditor 
-                  content={body} 
+                <label className="text-xs text-gray-300 font-bold">متن اصلی</label>
+                <RichTextEditor 
+                  value={body} 
                   onChange={setBody} 
-                  activeTheme={activeTheme} 
+                  activeTheme={activeTheme}
                   onOpenMedia={handleOpenMediaForEditor} 
+                  placeholder="توضیحات و معرفی محتوا را اینجا بنویسید..."
                 />
               </div>
             </div>
@@ -542,7 +513,7 @@ export default function EditContentPage() {
                           <div className="flex gap-4 items-start pr-6">
                             <div className="space-y-1">
                               <label className="text-[10px] text-gray-500 font-bold">نوع</label>
-                              <select value={item.type} onChange={(e) => updateItem(setPreviewGallery, item.id, 'type', e.target.value)} className="w-24 bg-[#080c16] border border-white/10 rounded-lg p-2 text-xs text-white outline-none cursor-pointer focus:border-white/30">
+                              <select value={item.type} onChange={(e) => updateItem(setPreviewGallery, item.id, 'type', e.target.value)} className="w-24 bg-[#080c16] border border-white/10 rounded-lg p-2 text-xs text-white outline-none cursor-pointer focus:border-white/30 font-sans">
                                 <option value="video" className="bg-[#0b0f19]">ویدیو</option>
                                 <option value="image" className="bg-[#0b0f19]">تصویر</option>
                                 <option value="audio" className="bg-[#0b0f19]">صوت</option>
@@ -580,7 +551,7 @@ export default function EditContentPage() {
                         return (
                           <label key={fmt} className={`flex items-center gap-2 text-sm cursor-pointer transition-colors group/fmt`}>
                             <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 border ${isChecked ? `${activeTheme.bg} border-transparent` : 'bg-white/5 border-white/20 group-hover/fmt:border-white/50'}`}>
-                              {isChecked && <Icon name="check" className="w-3.5 h-3.5 text-deep-base fill-current" />}
+                              {isChecked && <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                             </div>
                             <input type="checkbox" checked={isChecked} onChange={() => toggleArrayItem(setFormats, fmt)} className="hidden" />
                             <span className={isChecked ? 'text-white font-bold' : 'text-gray-400 group-hover/fmt:text-gray-200'}>{fmt}</span>
@@ -654,7 +625,7 @@ export default function EditContentPage() {
                   </div>
                 </div>
 
-                {/* تاریخچه آپدیت‌ها (Timeline) */}
+                {/* تاریخچه آپدیت‌ها */}
                 <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
                   <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
                   <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -662,7 +633,7 @@ export default function EditContentPage() {
                   <div className="p-6 relative z-10">
                     <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                       <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                        <Icon name="history" className={`w-5 h-5 ${activeTheme.color}`} /> تاریخچه به‌روزرسانی‌ها
+                        <Icon name="update" className={`w-5 h-5 ${activeTheme.color}`} /> تاریخچه به‌روزرسانی‌ها
                       </h2>
                       <button type="button" onClick={() => prependItem(setChangelog, { version: '', date: '', title: '', desc: '' })} className={`text-xs bg-white/5 hover:bg-white/10 ${activeTheme.color} px-3 py-1.5 rounded-lg font-bold border border-white/10 transition-colors cursor-pointer`}>+ آپدیت جدید</button>
                     </div>
@@ -696,7 +667,7 @@ export default function EditContentPage() {
         {/* ================= ستون چپ (تنظیمات سایدبار) ================= */}
         <div className="lg:col-span-4 space-y-6">
           
-          {/* انتشار و تنظیمات نمایش (GKS1) */}
+          {/* انتشار و تنظیمات نمایش */}
           <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
             <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
             <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -713,38 +684,23 @@ export default function EditContentPage() {
                 </select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] text-gray-500 uppercase font-bold">تاریخ ایجاد</label>
-                  <div className="relative shadow-inner rounded-xl overflow-hidden border border-white/10">
-                    <DatePicker
-                      value={publishedAt}
-                      onChange={setPublishedAt}
-                      format="YYYY/MM/DD HH:mm"
-                      plugins={[<TimePicker position="bottom" />]}
-                      calendar={persian}
-                      locale={persian_fa}
-                      calendarPosition="bottom-right"
-                      containerClassName="w-full"
-                      inputClass="w-full bg-[#080c16] p-3 text-sm text-white outline-none text-center font-sans font-bold cursor-pointer"
-                    />
-                  </div>
+              {/* بخش تاریخ ایجاد و آخرین ویرایش */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                <div className="space-y-1.5 w-full">
+                  <label className="text-[10px] text-gray-400 font-bold block">تاریخ ایجاد</label>
+                  <MyDateTimePicker
+                    value={publishedAt}
+                    onChange={setPublishedAt}
+                    activeTheme={activeTheme}
+                  />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] text-gray-500 uppercase font-bold">آخرین ویرایش</label>
-                  <div className="relative shadow-inner rounded-xl overflow-hidden border border-white/10">
-                    <DatePicker
-                      value={updatedAt}
-                      onChange={setUpdatedAt}
-                      format="YYYY/MM/DD HH:mm"
-                      plugins={[<TimePicker position="bottom" />]}
-                      calendar={persian}
-                      locale={persian_fa}
-                      calendarPosition="bottom-right"
-                      containerClassName="w-full"
-                      inputClass="w-full bg-[#080c16] p-3 text-sm text-white outline-none text-center font-sans font-bold cursor-pointer"
-                    />
-                  </div>
+                <div className="space-y-1.5 w-full">
+                  <label className="text-[10px] text-gray-400 font-bold block">آخرین ویرایش</label>
+                  <MyDateTimePicker
+                    value={updatedAt}
+                    onChange={setUpdatedAt}
+                    activeTheme={activeTheme}
+                  />
                 </div>
               </div>
 
@@ -757,28 +713,31 @@ export default function EditContentPage() {
                   { label: 'نمایش آمار بازدید', state: showViews, setter: setShowViews },
                   { label: 'نمایش رده‌بندی سنی', state: showAgeRating, setter: setShowAgeRating },
                   { label: `نمایش نام ${type === 'BLOG' ? 'نویسنده' : 'تهیه‌کننده'}`, state: showAuthor, setter: setShowAuthor }
-                ].map(toggle => (
-                  <label key={toggle.label} className="flex items-center justify-between cursor-pointer group/toggle">
+                ].map((toggle, idx) => (
+                  <label key={idx} className="flex items-center justify-between cursor-pointer group/toggle">
                     <span className="text-xs text-gray-300 group-hover/toggle:text-white transition-colors">{toggle.label}</span>
                     <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 border ${toggle.state ? `${activeTheme.bg} border-transparent` : 'bg-white/5 border-white/20 group-hover/toggle:border-white/50'}`}>
-                      {toggle.state && <Icon name="check" className="w-3.5 h-3.5 text-white fill-current" />}
+                      {toggle.state && <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                     </div>
+                    <input type="checkbox" className="hidden" checked={toggle.state} onChange={(e) => toggle.setter(e.target.checked)} />
                   </label>
                 ))}
 
                 <label className="flex items-center justify-between cursor-pointer group/toggle border-t border-white/5 pt-3 mt-3">
                   <span className="text-xs text-[#10b981] font-bold">بخش نظرات فعال باشد؟</span>
                   <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 border ${allowComments ? `bg-[#10b981] border-transparent` : 'bg-white/5 border-white/20 group-hover/toggle:border-white/50'}`}>
-                    {allowComments && <Icon name="check" className="w-3.5 h-3.5 text-white fill-current" />}
+                    {allowComments && <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                   </div>
+                  <input type="checkbox" className="hidden" checked={allowComments} onChange={(e) => setAllowComments(e.target.checked)} />
                 </label>
                 
                 {type !== 'BLOG' && (
                   <label className="flex items-center justify-between cursor-pointer group/toggle">
                     <span className="text-xs text-[#06b6d4] font-bold">لینک‌های دانلود فعال باشند؟</span>
                     <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 border ${isDownloadActive ? `bg-[#06b6d4] border-transparent` : 'bg-white/5 border-white/20 group-hover/toggle:border-white/50'}`}>
-                      {isDownloadActive && <Icon name="check" className="w-3.5 h-3.5 text-white fill-current" />}
+                      {isDownloadActive && <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                     </div>
+                    <input type="checkbox" className="hidden" checked={isDownloadActive} onChange={(e) => setIsDownloadActive(e.target.checked)} />
                   </label>
                 )}
               </div>
@@ -804,7 +763,7 @@ export default function EditContentPage() {
             <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
 
             <div className="p-5 space-y-4 relative z-10">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-white/10 pb-2">تصاویر شاخص</h3>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-white/10 pb-2"> تصاویر شاخص</h3>
               
               <div className="space-y-2">
                 <label className="text-xs text-gray-300 font-bold">کاور دسکتاپ (16:9)</label>
@@ -818,7 +777,7 @@ export default function EditContentPage() {
                   </div>
                 ) : (
                   <button onClick={() => setMediaPickerTarget('desktop')} className="w-full aspect-video rounded-xl border border-dashed border-white/20 hover:border-white/50 bg-[#080c16] flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-white transition-all cursor-pointer shadow-inner">
-                    <Icon name="image" className="w-6 h-6" /> <span className="text-xs font-bold">انتخاب تصویر</span>
+                    <Icon name="device" className="w-6 h-6" /> <span className="text-xs font-bold">انتخاب تصویر</span>
                   </button>
                 )}
               </div>
@@ -920,7 +879,6 @@ export default function EditContentPage() {
                       updateItem(setFileSpecs, activeFileIconIndex, 'iconUrl', media.url);
                     }
                     if (mediaPickerTarget === 'editor' && editorInstance) {
-                      // تزریق مدیای انتخاب شده به داخل ادیتور
                       if(media.type?.includes('video')) {
                          editorInstance.commands.insertContent(`<video controls src="${media.url}" style="max-width:100%; border-radius:12px; margin: 10px 0;"></video>`);
                       } else if(media.type?.includes('audio')) {

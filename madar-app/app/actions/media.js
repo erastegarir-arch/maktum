@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { formatSiteDate } from '@/app/utils/dateFormatter';
+import { formatDisplayDate as formatSiteDate } from '@/app/utils/CalendarUtils';
 import { writeFile, mkdir, rename } from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';

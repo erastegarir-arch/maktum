@@ -1,7 +1,15 @@
-'use client';
 import './admin-globals.css';
 import Sidebar from '../components/admin/Sidebar';
 import AdminHeader from '../components/admin/AdminHeader';
+
+// تنظیم قالب یکپارچه عنوان برای تمامی صفحات پنل مدیریت
+export const metadata = {
+  title: {
+    template: 'پنل مدار | %s',
+    default: 'پنل مدار | پیشخوان',
+  },
+  description: 'پنل مدیریت یکپارچه پایگاه مدار',
+};
 
 export default function AdminLayout({ children }) {
   return (

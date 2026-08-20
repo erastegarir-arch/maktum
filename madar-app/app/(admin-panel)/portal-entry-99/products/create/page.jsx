@@ -1,4 +1,4 @@
-// app/(admin-panel)/portal-entry-99/products/create/page.jsx (یا هر صفحه دیگر)
+// app/(admin-panel)/portal-entry-99/products/create/page.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,9 +11,9 @@ import RichTextEditor from '@/app/components/RichTextEditor';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ✅ پاکسازی بنیادین: تمام اینپورت‌های سنگین قدیمی (react-multi-date-picker و react-date-object) حذف شدند.
+// ✅ پاکسازی بنیادین: تمام اینپورت‌های سنگین قدیمی حذف شدند.
 
-// ✅ گام جدید و استاندارد: فقط اینپورت کامپوننت جمع‌شده و تمیز
+// ✅ گام جدید و استاندارد: استفاده از کامپوننت نهایی تقویم (فقط تاریخ - بدون ساعت)
 import MyDateTimePicker from '@/app/components/MyDateTimePicker';
 
 // ✅ گام جدید: استفاده از هوک کانتکست سراسری (برای صفحه تنظیمات شما)
@@ -118,7 +118,6 @@ export default function CreateContentPage() {
  const [taxonomies, setTaxonomies] = useState([]);
 
  // ✅ گام جدید: دریافت تنظیمات کانتکست سراسری (برای مثال، تاگل نظرات)
- // هیچ تداخلی با Bilid سرور ندارد، چون useDateSettings روی مرورگر اجرا می‌شود.
  const { allowCommentsGlobally, isLoadingSettings } = useDateSettings();
 
  // مودال انتخابگر تصویر/رسانه (بدون تغییر)
@@ -256,8 +255,6 @@ export default function CreateContentPage() {
  const creators = taxonomies.filter(t => t.type === 'CREATOR');
  const tags = taxonomies.filter(t => t.type === 'HASHTAG');
 
- // ✅ پاکسازی بنیادین: تمام متغیرهای قدیمی پیکربندی DatePicker حذف شدند.
-
  return (
    <div className="max-w-[1400px] mx-auto space-y-6 pb-20 font-sans text-right select-none relative">
      
@@ -268,14 +265,14 @@ export default function CreateContentPage() {
            <span className={`w-2.5 h-2.5 rounded-full ${activeTheme.bg} ${activeTheme.glow}`}></span>
            ایجاد محتوای جدید
          </h1>
-         <p className="text-sm text-gray-400 font-light">اطلاعات محتوا، محصولات یا مقاله خود را تکمیل کنید.</p>
+         <p className="text-sm text-gray-400 font-light">اطلاعات محتوا یا مقاله خود را تکمیل کنید.</p>
        </div>
        <div className="flex items-center gap-3">
          <button type="button" onClick={() => router.back()} className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-sm font-bold transition-all cursor-pointer">
            انصراف
          </button>
          <button onClick={handleSave} disabled={isSaving} className={`px-6 py-2.5 rounded-xl ${activeTheme.bg} text-white text-sm font-bold ${activeTheme.glow} transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 hover:brightness-110`}>
-           <Icon name="checkCircle" className="w-4 h-4" /> {isSaving ? 'در حال ثبت...' : 'ذخیره و انتشار'}
+           <Icon name="checkCircle" className="w-4 h-4" /> {isSaving ? 'در حال ثبت...' : 'ذخیره'}
          </button>
        </div>
      </div>
@@ -307,10 +304,10 @@ export default function CreateContentPage() {
 
      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-[fadeIn_0.5s_ease-out]">
        
-       {/* ================= ستون راست (اصلی) (بدون تغییر تا بخش‌های اختصاصی محصولات) ================= */}
+       {/* ================= ستون راست (اصلی) ================= */}
        <div className="lg:col-span-8 space-y-6">
          
-         {/* باکس اطلاعات پایه (بدون تغییر) */}
+         {/* باکس اطلاعات پایه */}
          <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
            <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
            <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -346,7 +343,7 @@ export default function CreateContentPage() {
            </div>
          </div>
 
-         {/* باکس سئو (بدون تغییر) */}
+         {/* باکس سئو */}
          <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
            <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
            <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -368,7 +365,7 @@ export default function CreateContentPage() {
            </div>
          </div>
 
-         {/* باکس متن اصلی / ادیتور (بدون تغییر) */}
+         {/* باکس متن اصلی / ادیتور */}
          <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
            <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
            <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -399,7 +396,7 @@ export default function CreateContentPage() {
            </div>
          </div>
 
-         {/* ================= بخش‌های اختصاصی محصولات (بدون تغییر) ================= */}
+         {/* ================= بخش‌های اختصاصی محصولات ================= */}
          {type !== 'BLOG' && (
            <AnimatePresence>
              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -448,7 +445,7 @@ export default function CreateContentPage() {
                  </div>
                </div>
 
-               {/* اطلاعات فایل‌ها (بدون تغییر) */}
+               {/* اطلاعات فایل‌ها */}
                <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
                  <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -476,7 +473,7 @@ export default function CreateContentPage() {
                  </div>
                </div>
 
-               {/* لینک‌های دانلود (بدون تغییر) */}
+               {/* لینک‌های دانلود */}
                <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
                  <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -507,7 +504,7 @@ export default function CreateContentPage() {
                  </div>
                </div>
 
-               {/* تاریخچه آپدیت‌ها (بدون تغییر) */}
+               {/* تاریخچه آپدیت‌ها */}
                <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
                  <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -549,7 +546,7 @@ export default function CreateContentPage() {
        {/* ================= ستون چپ (تنظیمات سایدبار) ================= */}
        <div className="lg:col-span-4 space-y-6">
          
-         {/* انتشار و تنظیمات نمایش (بدون تغییر تا بخش تاریخ‌ها) */}
+         {/* انتشار و تنظیمات نمایش */}
          <div className="relative rounded-2xl border border-white/10 shadow-2xl group">
            <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
            <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20 rounded-t-2xl`} />
@@ -566,30 +563,26 @@ export default function CreateContentPage() {
                </select>
              </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div className="space-y-2">
-                 <label className="text-[10px] text-gray-500 uppercase font-bold">تاریخ ایجاد</label>
-                 <div className="relative shadow-inner rounded-xl overflow-hidden border border-white/10">
-                   {/* ✅ گام جدید: استفاده فوق تمیز و راحت از کامپوننت هوشمند (فقط شمسی و سراسری) */}
-                   <MyDateTimePicker
-                     value={publishedAt}
-                     onChange={setPublishedAt}
-                     activeTheme={activeTheme}
-                   />
-                 </div>
-               </div>
-               <div className="space-y-2">
-                 <label className="text-[10px] text-gray-500 uppercase font-bold">آخرین ویرایش</label>
-                 <div className="relative shadow-inner rounded-xl overflow-hidden border border-white/10">
-                   {/* ✅ گام جدید: استفاده فوق تمیز و راحت از کامپوننت هوشمند (فقط شمسی و سراسری) */}
-                   <MyDateTimePicker
-                     value={updatedAt}
-                     onChange={setUpdatedAt}
-                     activeTheme={activeTheme}
-                   />
-                 </div>
-               </div>
-             </div>
+             {/* بخش تاریخ ایجاد و آخرین ویرایش (اصلاح شده و بدون بیرون‌زدگی) */}
+             {/* بخش تاریخ ایجاد و آخرین ویرایش */}
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+  <div className="space-y-1.5 w-full">
+    <label className="text-[10px] text-gray-400 font-bold block">تاریخ ایجاد</label>
+    <MyDateTimePicker
+      value={publishedAt}
+      onChange={setPublishedAt}
+      activeTheme={activeTheme}
+    />
+  </div>
+  <div className="space-y-1.5 w-full">
+    <label className="text-[10px] text-gray-400 font-bold block">آخرین ویرایش</label>
+    <MyDateTimePicker
+      value={updatedAt}
+      onChange={setUpdatedAt}
+      activeTheme={activeTheme}
+    />
+  </div>
+</div>
 
              {/* تاگل‌های نمایش (بدون تغییر) */}
              <div className="space-y-3 pt-4 border-t border-white/10">

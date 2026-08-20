@@ -51,6 +51,8 @@ function CustomAudioPlayer({ src, title }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLooping, setIsLooping] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
 
   const waveformBars = useMemo(() => {
     return Array.from({ length: 60 }, (_, i) => 25 + Math.abs(Math.sin(i * 0.5) * 50 + Math.cos(i * 1.2) * 25));
@@ -78,6 +80,27 @@ function CustomAudioPlayer({ src, title }) {
     const seekTo = (e.target.value / 100) * audioRef.current.duration;
     audioRef.current.currentTime = seekTo;
     setProgress(e.target.value);
+  };
+
+  const handleVolumeChange = (e) => {
+    const val = parseFloat(e.target.value);
+    setVolume(val);
+    
+    if (val > 0 && isMuted) {
+      setIsMuted(false);
+      if (audioRef.current) audioRef.current.muted = false;
+    } else if (val === 0 && !isMuted) {
+      setIsMuted(true);
+      if (audioRef.current) audioRef.current.muted = true;
+    }
+    
+    if (audioRef.current) audioRef.current.volume = val;
+  };
+
+  const toggleMute = () => {
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    if (audioRef.current) audioRef.current.muted = newMutedState;
   };
 
   return (
@@ -114,11 +137,11 @@ function CustomAudioPlayer({ src, title }) {
       </div>
 
       <div className="relative flex items-center justify-center w-full mt-2" dir="ltr">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3">
           <Tooltip text="۱۵ ثانیه به عقب">
             <button onClick={() => skip(-15)} className="text-gray-400 hover:text-white transition-colors p-1 cursor-pointer">
-              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.25 15l-3-3m0 0l3-3m-3 3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                <path d="m19.208.367c-1.122-.568-2.398-.464-3.412.28L5.645,9.363c-.246.181-.462.39-.645.621V1c0-.552-.447-1-1-1s-1,.448-1,1v22c0,.552.447,1,1,1s1-.448,1-1v-8.984c.182.231.398.441.645.621l10.152,8.725c.581.427,1.248.643,1.923.643.503,0,1.01-.12,1.489-.363,1.122-.569,1.792-1.659,1.792-2.917V3.284c0-1.258-.67-2.348-1.792-2.917Z"/>
               </svg>
             </button>
           </Tooltip>
@@ -126,25 +149,57 @@ function CustomAudioPlayer({ src, title }) {
           <Tooltip text={isPlaying ? 'توقف' : 'پخش'}>
             <button onClick={togglePlay} className="w-16 h-16 flex items-center justify-center bg-[#06b6d4] hover:bg-[#0891b2] rounded-full text-white shadow-lg shadow-[#06b6d4]/20 hover:scale-105 transition-transform cursor-pointer">
               <svg className={cn("w-7 h-7", !isPlaying ? 'ml-1' : '')} fill="currentColor" viewBox="0 0 24 24">
-                {isPlaying ? <path d="M6 4h4v16H6zm8 0h4v16h-4z" /> : <path d="M8 5v14l11-7z" />}
+                {isPlaying ? (
+                  <>
+                    <path d="M6.5,0A3.5,3.5,0,0,0,3,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,6.5,0Z"/>
+                    <path d="M17.5,0A3.5,3.5,0,0,0,14,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,17.5,0Z"/>
+                  </>
+                ) : (
+                  <path d="M20.492,7.969,10.954.975A5,5,0,0,0,3,5.005V19a4.994,4.994,0,0,0,7.954,4.03l9.538-6.994a5,5,0,0,0,0-8.062Z"/>
+                )}
               </svg>
             </button>
           </Tooltip>
 
           <Tooltip text="۱۵ ثانیه به جلو">
             <button onClick={() => skip(15)} className="text-gray-400 hover:text-white transition-colors p-1 cursor-pointer">
-              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                <path d="m4.766.365c1.122-.568,2.398-.464,3.412.28l10.152,8.716c.246.181.462.39.645.621V.998c0-.552.447-1,1-1s1,.448,1,1v22c0,.552-.447,1-1,1s-1-.448-1-1v-8.984c-.182.231-.398.441-.645.621l-10.152,8.725c-.581.427-1.248.643-1.923.643-.503,0-1.01-.12-1.489-.363-1.122-.569-1.792-1.659-1.792-2.917V3.282c0-1.258.67-2.348,1.792-2.917Z"/>
               </svg>
             </button>
           </Tooltip>
         </div>
 
-        <div className="absolute right-0">
+        <div className="absolute right-0 flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2" dir="ltr">
+            <Tooltip text={isMuted || volume === 0 ? 'صدادار' : 'بی‌صدا'}>
+              <button onClick={toggleMute} className="text-gray-400 hover:text-white transition-colors p-1 cursor-pointer">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  {isMuted || volume === 0 ? (
+                    <path d="m23.707,22.293c.391.391.391,1.023,0,1.414-.195.195-.451.293-.707.293s-.512-.098-.707-.293L.293,1.707C-.098,1.316-.098.684.293.293S1.316-.098,1.707.293l4.628,4.628C8.142,2.461,10.839.757,13.828.207c.288-.056.593.025.82.215.229.19.36.472.36.769v12.404l1.688,1.688c1.806-1.817,1.803-4.763-.01-6.576-.391-.391-.391-1.023,0-1.414.391-.391,1.023-.391,1.414,0,2.592,2.592,2.596,6.808.01,9.404l1.44,1.44c3.316-3.481,3.266-9.011-.152-12.43-.391-.391-.391-1.023,0-1.414s1.023-.391,1.414,0c4.198,4.198,4.249,10.997.152,15.258l2.742,2.742ZM.009,10v4c0,2.757,2.243,5,5,5h1.269c1.807,2.502,4.53,4.237,7.551,4.793.06.011.12.017.181.017.232,0,.459-.081.64-.231.229-.19.36-.472.36-.769v-3.579L1.881,6.103C.74,7.02.009,8.426.009,10Z"/>
+                  ) : volume < 0.5 ? (
+                    <path d="m14.003,23.814c-.06,0-.121-.005-.181-.017-2.999-.551-5.752-2.299-7.554-4.794h-1.271C2.241,19.003-.002,16.76-.002,14.003v-4.005C-.002,7.241,2.241,4.998,4.998,4.998h1.271C8.068,2.506,10.821.758,13.822.204c.294-.053.593.024.821.215.229.19.36.472.36.769v21.627c0,.297-.132.579-.36.769-.181.151-.408.231-.64.231Zm4.02-7.042c2.632-2.632,2.632-6.914,0-9.546-.391-.391-1.023-.391-1.414,0s-.391,1.023,0,1.414c1.852,1.852,1.852,4.866,0,6.718-.391.391-.391,1.023,0,1.414.195.195.451.293.707.293s.512-.098.707-.293Z"/>
+                  ) : (
+                    <>
+                      <path d="M20.8,4.293A1,1,0,0,0,19.39,5.707a8.911,8.911,0,0,1,0,12.586A1,1,0,1,0,20.8,19.707,10.911,10.911,0,0,0,20.8,4.293Z"/>
+                      <path d="M18.093,7.293a1,1,0,1,0-1.414,1.414,4.664,4.664,0,0,1,0,6.586,1,1,0,1,0,1.414,1.414A6.665,6.665,0,0,0,18.093,7.293Z"/>
+                      <path d="M13.819.207A12.055,12.055,0,0,0,6.268,5H5a5.006,5.006,0,0,0-5,5v4a5.006,5.006,0,0,0,5,5H6.269a12.051,12.051,0,0,0,7.55,4.793A1,1,0,0,0,15,22.81V1.19A1,1,0,0,0,13.819.207Z"/>
+                    </>
+                  )}
+                </svg>
+              </button>
+            </Tooltip>
+            <input 
+              type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} 
+              className="w-16 h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" 
+              style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, #4b5563 ${(isMuted ? 0 : volume) * 100}%)` }}
+            />
+          </div>
+
           <Tooltip text={isLooping ? 'تکرار: فعال' : 'تکرار: غیرفعال'}>
             <button onClick={() => setIsLooping(!isLooping)} className={cn("p-2 transition-colors cursor-pointer", isLooping ? 'text-[#06b6d4]' : 'text-gray-500 hover:text-gray-300')}>
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M0,11.5C0,6.813,3.813,3,8.5,3h10.5V1.337C19,.446,20.077,0,20.707,.63l3,3.163c.391,.391,.39,1.024,0,1.414l-3,3.163c-.63,.63-1.707,.184-1.707-.707v-1.663H8.5c-3.033,0-5.5,2.468-5.5,5.5,0,.828-.671,1.5-1.5,1.5s-1.5-.672-1.5-1.5Zm22.5-.5c-.829,0-1.5,.672-1.5,1.5,0,3.032-2.467,5.5-5.5,5.5H5v-1.663c0-.891-1.077-1.337-1.707-.707L.293,18.793c-.391,.391-.391,1.024,0,1.414l3,3.163c.63,.63,1.707,.184,1.707-.707v-1.663H15.5c4.687,0,8.5-3.813,8.5-8.5,0-.828-.671-1.5-1.5-1.5Z"/>
               </svg>
             </button>
           </Tooltip>
@@ -164,6 +219,8 @@ function CustomVideoPlayer({ src, mimeType, title }) {
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
 
   const togglePlay = () => {
     if (isPlaying) videoRef.current.pause();
@@ -187,6 +244,27 @@ function CustomVideoPlayer({ src, mimeType, title }) {
     const seekTo = (e.target.value / 100) * videoRef.current.duration;
     videoRef.current.currentTime = seekTo;
     setProgress(e.target.value);
+  };
+
+  const handleVolumeChange = (e) => {
+    const val = parseFloat(e.target.value);
+    setVolume(val);
+    
+    if (val > 0 && isMuted) {
+      setIsMuted(false);
+      if (videoRef.current) videoRef.current.muted = false;
+    } else if (val === 0 && !isMuted) {
+      setIsMuted(true);
+      if (videoRef.current) videoRef.current.muted = true;
+    }
+    
+    if (videoRef.current) videoRef.current.volume = val;
+  };
+
+  const toggleMute = () => {
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    if (videoRef.current) videoRef.current.muted = newMutedState;
   };
 
   const toggleFullScreen = () => {
@@ -215,7 +293,7 @@ function CustomVideoPlayer({ src, mimeType, title }) {
         <div className="w-full flex items-center gap-3 px-2" dir="ltr">
           <input 
             type="range" min="0" max="100" value={progress} onChange={handleSeek}
-            className="w-full h-1 appearance-none rounded-full cursor-pointer outline-none"
+            className="w-full h-1 appearance-none rounded-full cursor-pointer outline-none transition-all"
             style={{ background: `linear-gradient(to right, #06b6d4 ${progress}%, #4b5563 ${progress}%)` }}
           />
         </div>
@@ -224,22 +302,31 @@ function CustomVideoPlayer({ src, mimeType, title }) {
           <div className="flex items-center gap-4">
             <Tooltip text={isPlaying ? 'توقف' : 'پخش'}>
               <button onClick={togglePlay} className="text-white hover:text-[#06b6d4] transition-colors p-1 cursor-pointer">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">{isPlaying ? <path d="M6 4h4v16H6zm8 0h4v16h-4z" /> : <path d="M8 5v14l11-7z" strokeWidth={0} />}</svg>
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  {isPlaying ? (
+                    <>
+                      <path d="M6.5,0A3.5,3.5,0,0,0,3,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,6.5,0Z"/>
+                      <path d="M17.5,0A3.5,3.5,0,0,0,14,3.5v17a3.5,3.5,0,0,0,7,0V3.5A3.5,3.5,0,0,0,17.5,0Z"/>
+                    </>
+                  ) : (
+                    <path d="M20.492,7.969,10.954.975A5,5,0,0,0,3,5.005V19a4.994,4.994,0,0,0,7.954,4.03l9.538-6.994a5,5,0,0,0,0-8.062Z"/>
+                  )}
+                </svg>
               </button>
             </Tooltip>
 
             <Tooltip text="۱۵ ثانیه به عقب">
               <button onClick={() => skip(-15)} className="text-gray-300 hover:text-white p-1 cursor-pointer">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.25 15l-3-3m0 0l3-3m-3 3h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="m19.208.367c-1.122-.568-2.398-.464-3.412.28L5.645,9.363c-.246.181-.462.39-.645.621V1c0-.552-.447-1-1-1s-1,.448-1,1v22c0,.552.447,1,1,1s1-.448,1-1v-8.984c.182.231.398.441.645.621l10.152,8.725c.581.427,1.248.643,1.923.643.503,0,1.01-.12,1.489-.363,1.122-.569,1.792-1.659,1.792-2.917V3.284c0-1.258-.67-2.348-1.792-2.917Z"/>
                 </svg>
               </button>
             </Tooltip>
 
             <Tooltip text="۱۵ ثانیه به جلو">
               <button onClick={() => skip(15)} className="text-gray-300 hover:text-white p-1 cursor-pointer">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="m4.766.365c1.122-.568,2.398-.464,3.412.28l10.152,8.716c.246.181.462.39.645.621V.998c0-.552.447-1,1-1s1,.448,1,1v22c0,.552-.447,1-1,1s-1-.448-1-1v-8.984c-.182.231-.398.441-.645.621l-10.152,8.725c-.581.427-1.248.643-1.923.643-.503,0-1.01-.12-1.489-.363-1.122-.569-1.792-1.659-1.792-2.917V3.282c0-1.258.67-2.348,1.792-2.917Z"/>
                 </svg>
               </button>
             </Tooltip>
@@ -249,13 +336,43 @@ function CustomVideoPlayer({ src, mimeType, title }) {
             </span>
           </div>
 
-          <Tooltip text="تمام‌صفحه">
-            <button onClick={toggleFullScreen} className="text-gray-300 hover:text-white transition-colors p-1 cursor-pointer">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-              </svg>
-            </button>
-          </Tooltip>
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2" dir="ltr">
+              <Tooltip text={isMuted || volume === 0 ? 'صدادار' : 'بی‌صدا'}>
+                <button onClick={toggleMute} className="text-gray-300 hover:text-white transition-colors p-1 cursor-pointer">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    {isMuted || volume === 0 ? (
+                      <path d="m23.707,22.293c.391.391.391,1.023,0,1.414-.195.195-.451.293-.707.293s-.512-.098-.707-.293L.293,1.707C-.098,1.316-.098.684.293.293S1.316-.098,1.707.293l4.628,4.628C8.142,2.461,10.839.757,13.828.207c.288-.056.593.025.82.215.229.19.36.472.36.769v12.404l1.688,1.688c1.806-1.817,1.803-4.763-.01-6.576-.391-.391-.391-1.023,0-1.414.391-.391,1.023-.391,1.414,0,2.592,2.592,2.596,6.808.01,9.404l1.44,1.44c3.316-3.481,3.266-9.011-.152-12.43-.391-.391-.391-1.023,0-1.414s1.023-.391,1.414,0c4.198,4.198,4.249,10.997.152,15.258l2.742,2.742ZM.009,10v4c0,2.757,2.243,5,5,5h1.269c1.807,2.502,4.53,4.237,7.551,4.793.06.011.12.017.181.017.232,0,.459-.081.64-.231.229-.19.36-.472.36-.769v-3.579L1.881,6.103C.74,7.02.009,8.426.009,10Z"/>
+                    ) : volume < 0.5 ? (
+                      <path d="m14.003,23.814c-.06,0-.121-.005-.181-.017-2.999-.551-5.752-2.299-7.554-4.794h-1.271C2.241,19.003-.002,16.76-.002,14.003v-4.005C-.002,7.241,2.241,4.998,4.998,4.998h1.271C8.068,2.506,10.821.758,13.822.204c.294-.053.593.024.821.215.229.19.36.472.36.769v21.627c0,.297-.132.579-.36.769-.181.151-.408.231-.64.231Zm4.02-7.042c2.632-2.632,2.632-6.914,0-9.546-.391-.391-1.023-.391-1.414,0s-.391,1.023,0,1.414c1.852,1.852,1.852,4.866,0,6.718-.391.391-.391,1.023,0,1.414.195.195.451.293.707.293s.512-.098.707-.293Z"/>
+                    ) : (
+                      <>
+                        <path d="M20.8,4.293A1,1,0,0,0,19.39,5.707a8.911,8.911,0,0,1,0,12.586A1,1,0,1,0,20.8,19.707,10.911,10.911,0,0,0,20.8,4.293Z"/>
+                        <path d="M18.093,7.293a1,1,0,1,0-1.414,1.414,4.664,4.664,0,0,1,0,6.586,1,1,0,1,0,1.414,1.414A6.665,6.665,0,0,0,18.093,7.293Z"/>
+                        <path d="M13.819.207A12.055,12.055,0,0,0,6.268,5H5a5.006,5.006,0,0,0-5,5v4a5.006,5.006,0,0,0,5,5H6.269a12.051,12.051,0,0,0,7.55,4.793A1,1,0,0,0,15,22.81V1.19A1,1,0,0,0,13.819.207Z"/>
+                      </>
+                    )}
+                  </svg>
+                </button>
+              </Tooltip>
+              <input 
+                type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} 
+                className="w-16 h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" 
+                style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, #4b5563 ${(isMuted ? 0 : volume) * 100}%)` }}
+              />
+            </div>
+
+            <Tooltip text="تمام‌صفحه">
+              <button onClick={toggleFullScreen} className="text-gray-300 hover:text-white transition-colors p-1 cursor-pointer">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M22.5,15.5A1.5,1.5,0,0,0,21,17v1.5A2.5,2.5,0,0,1,18.5,21H17a1.5,1.5,0,0,0,0,3h1.5A5.506,5.506,0,0,0,24,18.5V17A1.5,1.5,0,0,0,22.5,15.5Z"/>
+                  <path d="M7,0H5.5A5.506,5.506,0,0,0,0,5.5V7A1.5,1.5,0,0,0,3,7V5.5A2.5,2.5,0,0,1,5.5,3H7A1.5,1.5,0,0,0,7,0Z"/>
+                  <path d="M7,21H5.5A2.5,2.5,0,0,1,3,18.5V17a1.5,1.5,0,0,0-3,0v1.5A5.506,5.506,0,0,0,5.5,24H7a1.5,1.5,0,0,0,0-3Z"/>
+                  <path d="M18.5,0H17a1.5,1.5,0,0,0,0,3h1.5A2.5,2.5,0,0,1,21,5.5V7a1.5,1.5,0,0,0,3,0V5.5A5.506,5.506,0,0,0,18.5,0Z"/>
+                </svg>
+              </button>
+            </Tooltip>
+          </div>
         </div>
       </div>
     </div>
@@ -293,7 +410,19 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
 
   const filteredMedia = useMemo(() => {
     return mediaList.filter(m => {
-      const matchesTab = activeTab === 'ALL' || m.fileType === activeTab;
+      let matchesTab = false;
+      const isSvg = (m.url && m.url.toLowerCase().endsWith('.svg')) || (m.mimeType && m.mimeType.toLowerCase().includes('svg'));
+
+      if (activeTab === 'ALL') {
+        matchesTab = true;
+      } else if (activeTab === 'ICON') {
+        matchesTab = m.fileType === 'IMAGE' && isSvg;
+      } else if (activeTab === 'IMAGE') {
+        matchesTab = m.fileType === 'IMAGE' && !isSvg;
+      } else {
+        matchesTab = m.fileType === activeTab;
+      }
+
       const term = searchTerm.trim().toLowerCase();
       const matchesSearch = !term || 
         (m.title && m.title.toLowerCase().includes(term)) ||
@@ -491,6 +620,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
   const TAB_ITEMS = [
     { label: 'همه', val: 'ALL' },
     { label: 'تصاویر', val: 'IMAGE' },
+    { label: 'آیکون‌ها', val: 'ICON' },
     { label: 'ویدیوها', val: 'VIDEO' },
     { label: 'صوت‌ها', val: 'AUDIO' },
     { label: 'اسناد', val: 'DOCUMENT' },
@@ -549,7 +679,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
         </div>
       </motion.div>
 
-      {/* تب‌ها و باکس سرچ (اصلاح عناوین تب‌ها به فارسی) */}
+      {/* تب‌ها و باکس سرچ */}
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
         <div className="flex flex-wrap gap-2">
           {TAB_ITEMS.map(tab => (

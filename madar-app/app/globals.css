@@ -49,48 +49,128 @@
   }
 
   /* ----------------------------------------- */
-  /* کلاس پایه متون داخلی (مقالات، وبلاگ، توضیحات) */
+  /* کلاس‌های داینامیک برای سیستم متن‌ساز پیشرفته (Rich Text) */
   /* ----------------------------------------- */
+  
+  /* ۱. تعریف رنگ‌های داینامیک بر اساس تم‌های سایت شما */
+  .theme-raw { --editor-color: #fbbf24; }      /* تم زرد محتوای خام */
+  .theme-produced { --editor-color: #f43f5e; } /* تم قرمز محتوای تولیدی */
+  .theme-tool { --editor-color: #10b981; }     /* تم سبز ابزارها */
+  .rich-text { --editor-color: #06b6d4; }      /* رنگ پیش‌فرض مدار (آبی فیروزه‌ای) */
+
+  /* ۲. استایل‌های کلی باکس ادیتور */
   .rich-text {
-    @apply text-gray-200 leading-8 text-justify;
+    @apply text-gray-300 text-sm leading-loose font-light break-words text-justify;
   }
 
-  /* ۱. استایل لینک‌ها */
+  /* ۳. بولد و کج */
+  .rich-text strong, .rich-text b { 
+    @apply font-bold text-white; 
+  }
+  .rich-text em, .rich-text i { 
+    @apply italic text-gray-400; 
+  }
+
+  /* ۴. خط زیر و خط‌خورده */
+  .rich-text u { 
+    @apply underline underline-offset-4 decoration-white/30; 
+  }
+  .rich-text s, .rich-text del { 
+    @apply line-through text-gray-600; 
+  }
+
+  /* ۵. هایلایت (متناسب با تم) */
+  .rich-text mark {
+    background-color: var(--editor-color);
+    @apply text-[#0b0f19] px-1.5 py-0.5 rounded-md font-bold bg-opacity-90;
+  }
+
+  /* ۶. کلمات لینک‌دار شده (متناسب با تم) */
   .rich-text a {
-    @apply text-purple-400 no-underline border-b border-dashed border-purple-500/50 transition-all duration-300;
+    color: var(--editor-color);
+    @apply underline underline-offset-4 decoration-transparent transition-all duration-300 font-bold;
   }
   .rich-text a:hover {
-    @apply text-purple-300 border-solid border-purple-400;
-    text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+    text-decoration-color: var(--editor-color);
+    @apply opacity-80;
   }
 
-  /* ۲. استایل خط زیر متن (گسترش به هایلایت شیشه‌ای) */
-  .rich-text u {
-    text-decoration: none;
-    background-image: linear-gradient(to top, rgba(168, 85, 247, 0.4) 100%, transparent 0%);
-    background-size: 100% 2px;
-    background-position: bottom 0 left 0;
-    background-repeat: no-repeat;
-    transition: background-size 0.3s ease, color 0.3s ease;
-  }
-  .rich-text u:hover {
-    background-size: 100% 100%;
-    @apply text-white;
+/* ۷. نقل‌قول (متناسب با تم - راست‌چین برای فارسی و چپ‌چین برای انگلیسی) */
+  .rich-text blockquote { 
+    border-right-width: 4px;
+    border-right-color: var(--editor-color);
+    border-left-width: 0;
+    @apply bg-white/5 pr-4 pl-4 py-3 my-6 rounded-l-2xl rounded-r-none italic text-gray-300 shadow-inner;
   }
 
-  /* ۳. استایل هایلایت ساده */
-  .rich-text mark {
-    @apply bg-fuchsia-500/20 text-fuchsia-100 px-1.5 py-0.5 mx-0.5 rounded border border-fuchsia-500/40;
+  /* حالت هوشمند نقل‌قول برای متون انگلیسی و چپ‌چین */
+  .rich-text blockquote[dir="ltr"],
+  .rich-text [dir="ltr"] blockquote,
+  .rich-text blockquote[style*="text-align: left"],
+  .rich-text blockquote[style*="text-align:left"],
+  .rich-text [style*="text-align: left"] blockquote,
+  .rich-text [style*="text-align:left"] blockquote,
+  .rich-text blockquote[class*="left"],
+  .rich-text [class*="left"] blockquote {
+    border-right-width: 0 !important;
+    border-left-width: 4px !important;
+    border-left-color: var(--editor-color) !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 1rem !important;
+    border-bottom-right-radius: 1rem !important;
+    direction: ltr;
   }
 
-  /* ۴. استایل نقل‌قول (راست‌چین شده برای زبان فارسی) */
-  .rich-text blockquote {
-    @apply relative pr-5 pl-4 py-4 my-6 border-r-4 border-fuchsia-500 bg-white/5 rounded-l-lg rounded-r-sm italic text-gray-300 shadow-lg shadow-black/20;
-  }
-
-  /* ۵. استایل کلمات تخصصی یا لاتین */
+  /* ۸. کدهای درون‌خطی و بلوک‌های کد (برنامه‌نویسی) */
   .rich-text code {
-    @apply bg-black/40 text-purple-300 px-1.5 py-0.5 mx-0.5 rounded text-sm font-mono border border-white/10;
+    @apply bg-[#080c16] border border-white/10 text-gray-300 px-1.5 py-0.5 rounded-md font-mono text-[13px] mx-0.5 inline-block shadow-inner;
+    direction: ltr !important;
+  }
+  .rich-text pre {
+    @apply bg-[#080c16] border border-white/10 p-5 rounded-2xl my-6 overflow-x-auto shadow-inner;
+    direction: ltr !important;
+  }
+  .rich-text pre code {
+    @apply bg-transparent border-none p-0 mx-0 text-sm text-gray-300 shadow-none block;
+  }
+
+  /* ۹. تیترهای داخل متن */
+  .rich-text h1, .rich-text h2, .rich-text h3, .rich-text h4, .rich-text h5, .rich-text h6 {
+    @apply text-white font-bold mb-4 mt-8 first:mt-0;
+  }
+  .rich-text h1 { @apply text-2xl; }
+  .rich-text h2 { @apply text-xl; }
+  .rich-text h3 { @apply text-lg; }
+  .rich-text h4, .rich-text h5, .rich-text h6 { @apply text-base; }
+
+  /* ۱۰. تصاویر و ویدیوهای تعبیه‌شده */
+  .rich-text img {
+    @apply max-w-full h-auto rounded-2xl mx-auto my-6 border border-white/10 shadow-lg;
+  }
+  .rich-text iframe {
+    @apply w-full rounded-2xl my-6 border border-white/10 shadow-lg aspect-video;
+  }
+
+  /* ۱۱. استایل لیست‌ها (به همراه تنظیم هوشمند راست‌چین/چپ‌چین) */
+  .rich-text ol { 
+    @apply list-[persian] pr-6 my-4; 
+  }
+  .rich-text ul { 
+    @apply list-disc pr-6 my-4 marker:text-gray-500; 
+  }
+  .rich-text li { 
+    @apply mb-2 leading-loose; 
+  }
+  
+  /* حالت هوشمند برای انگلیسی (چپ‌چین شدن لیست‌ها) */
+  .rich-text ol[dir="ltr"], .rich-text [dir="ltr"] ol, .rich-text [style*="text-align: left"] ol, .rich-text [style*="text-align:left"] ol, .rich-text [class*="left"] ol { 
+    @apply list-decimal pl-6 pr-0; 
+    direction: ltr;
+  }
+  .rich-text ul[dir="ltr"], .rich-text [dir="ltr"] ul, .rich-text [style*="text-align: left"] ul, .rich-text [style*="text-align:left"] ul, .rich-text [class*="left"] ul { 
+    @apply pl-6 pr-0; 
+    direction: ltr;
   }
 }
 
@@ -269,3 +349,45 @@
 .svg-inherit-color svg [style*="stroke:"]:not([style*="stroke: none"]):not([style*="stroke:none"]) {
   stroke: currentColor !important;
 }
+
+/* ========================================= */
+/* ۱. رنگ پیش‌فرض انتخاب متن در کل سایت (فیروزه‌ای مدار) */
+/* ========================================= */
+::selection {
+  background-color: rgba(6, 182, 212, 0.35); /* فیروزه‌ای (Cyan) */
+  color: #ffffff;
+}
+
+/* ========================================= */
+/* ۲. رنگ انتخاب متن برای صفحات و بخش‌های اختصاصی */
+/* ========================================= */
+
+/* تم زرد (محتوای خام) */
+.theme-raw ::selection,
+.theme-raw::selection {
+  background-color: rgba(251, 191, 36, 0.35) !important;
+  color: #ffffff !important;
+}
+
+/* تم قرمز / صورتی (محتوای تولیدی) */
+.theme-produced ::selection,
+.theme-produced::selection {
+  background-color: rgba(244, 63, 94, 0.35) !important;
+  color: #ffffff !important;
+}
+
+/* تم سبز (ابزارها) */
+.theme-tool ::selection,
+.theme-tool::selection {
+  background-color: rgba(16, 185, 129, 0.35) !important;
+  color: #ffffff !important;
+}
+
+/* تم بنفش (اگر برای بخش بلاگ یا اخبار استفاده می‌کنید) */
+.theme-blog ::selection,
+.theme-blog::selection {
+  background-color: rgba(168, 85, 247, 0.35) !important;
+  color: #ffffff !important;
+}
+
+

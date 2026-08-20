@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSetting, saveSetting } from '@/app/actions/settings';
 import Icon from '@/app/components/Icon';
-import IconPicker from '@/app/components/IconPicker';
+// import IconPicker از اینجا حذف شد چون کتابخانه آیکون‌ها جایگزین شد
 import MediaLibraryPage from '@/app/(admin-panel)/portal-entry-99/media/page';
 import toast from 'react-hot-toast';
 import { clsx } from 'clsx';
@@ -16,7 +16,7 @@ export default function IdentitySettingsPage() {
   const router = useRouter();
 
   // ۱. استیت‌های هدر و لوگو
-  const [headerIcon, setHeaderIcon] = useState('allah');
+  const [headerIcon, setHeaderIcon] = useState('');
   const [logoColor, setLogoColor] = useState('#10b981');
   const [logoHoverColor, setLogoHoverColor] = useState('#059669');
   const [headerText, setHeaderText] = useState('مدار');
@@ -75,7 +75,7 @@ export default function IdentitySettingsPage() {
         if (hSettings) {
           try {
             const parsedH = JSON.parse(hSettings);
-            setHeaderIcon(parsedH.logoIcon || parsedH.headerIcon || parsedH.icon || parsedH.logo || 'allah');
+            setHeaderIcon(parsedH.logoIcon || parsedH.headerIcon || parsedH.icon || parsedH.logo || '');
             setLogoColor(parsedH.logoColor || '#10b981');
             setLogoHoverColor(parsedH.logoHoverColor || '#059669');
             setHeaderText(parsedH.siteTitle || 'مدار');
@@ -87,7 +87,7 @@ export default function IdentitySettingsPage() {
             setActiveColor(parsedH.activeColor || '#10b981');
           } catch (e) {}
         } else {
-          setHeaderIcon(await getSetting('header_icon') || 'allah');
+          setHeaderIcon(await getSetting('header_icon') || '');
           setHeaderText(await getSetting('header_text') || 'مدار');
         }
 
@@ -243,27 +243,21 @@ export default function IdentitySettingsPage() {
                   لوگو و عنوان هدر
                 </h3>
                 
-                {/* انتخاب آیکون از کتابخانه آیکون‌ها */}
+                {/* جایگزین شده با کتابخانه رسانه */}
                 <div className="space-y-2">
-                  <label className="block text-xs text-gray-400">آیکون لوگو (انتخاب از کتابخانه آیکون‌ها)</label>
-                  <IconPicker value={headerIcon} onChange={setHeaderIcon} />
-                </div>
-
-                {/* امکان انتخاب تصویر لوگو از کتابخانه رسانه */}
-                <div className="space-y-2 pt-2 border-t border-white/5">
-                  <label className="block text-xs text-gray-400">یا انتخاب تصویر لوگو (فایل PNG / SVG)</label>
-                  {headerIcon && (headerIcon.startsWith('http') || headerIcon.startsWith('/')) ? (
+                  <label className="block text-xs text-gray-400">نماد / لوگوی هدر (SVG, PNG, JPG)</label>
+                  {headerIcon ? (
                     <div className="flex items-center gap-3 p-2 bg-[#0b0f19] border border-white/10 rounded-lg">
                       <img src={headerIcon} alt="لوگوی هدر" className="w-10 h-10 object-contain bg-black/40 rounded p-1 border border-white/10" />
                       <div className="flex-1 min-w-0">
                         <p className="text-[11px] text-emerald-400 font-bold truncate">تصویر لوگو انتخاب شد</p>
                       </div>
                       <button type="button" onClick={() => setMediaPickerTarget('headerLogo')} className="px-2.5 py-1 bg-white/10 hover:bg-[#10b981] text-white text-[11px] rounded transition-colors cursor-pointer shrink-0">تغییر</button>
-                      <button type="button" onClick={() => setHeaderIcon('allah')} className="p-1 text-rose-400 hover:bg-rose-500/10 rounded transition-colors cursor-pointer shrink-0" title="بازگشت به آیکون پیش‌فرض"><Icon name="close" className="w-3.5 h-3.5" /></button>
+                      <button type="button" onClick={() => setHeaderIcon('')} className="p-1 text-rose-400 hover:bg-rose-500/10 rounded transition-colors cursor-pointer shrink-0" title="حذف"><Icon name="close" className="w-3.5 h-3.5" /></button>
                     </div>
                   ) : (
                     <button type="button" onClick={() => setMediaPickerTarget('headerLogo')} className="w-full py-2 bg-[#0b0f19] border border-dashed border-white/20 hover:border-[#10b981] text-gray-300 hover:text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer">
-                      <Icon name="image" className="w-4 h-4 text-[#10b981]" /> انتخاب عکس لوگو از کتابخانه
+                      <Icon name="image" className="w-4 h-4 text-[#10b981]" /> انتخاب تصویر از کتابخانه رسانه
                     </button>
                   )}
                 </div>
@@ -352,7 +346,21 @@ export default function IdentitySettingsPage() {
                 <div className="space-y-3 pt-3 border-t border-white/5">
                   <div className="space-y-1">
                     <label className="block text-xs text-gray-400">فایوآیکون (Favicon - زبانه مرورگر)</label>
-                    <input type="text" value={favicon} onChange={(e) => setFavicon(e.target.value)} placeholder="آدرس URL یا مسیر فایل..." className="w-full bg-[#0b0f19] border border-white/10 rounded-lg p-2.5 text-gray-200 text-xs focus:border-[#10b981] dir-ltr text-right outline-none" />
+                    {/* فایوآیکون با کتابخانه رسانه جایگزین شد */}
+                    {favicon ? (
+                      <div className="flex items-center gap-3 p-2 bg-[#0b0f19] border border-white/10 rounded-lg">
+                        <img src={favicon} alt="Favicon" className="w-8 h-8 object-contain bg-black/40 rounded p-1 border border-white/10" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] text-emerald-400 font-bold truncate">فایوآیکون انتخاب شد</p>
+                        </div>
+                        <button type="button" onClick={() => setMediaPickerTarget('favicon')} className="px-2 py-1 bg-white/10 hover:bg-[#10b981] text-white text-[11px] rounded transition-colors cursor-pointer shrink-0">تغییر</button>
+                        <button type="button" onClick={() => setFavicon('')} className="p-1 text-rose-400 hover:bg-rose-500/10 rounded transition-colors cursor-pointer shrink-0"><Icon name="close" className="w-3.5 h-3.5" /></button>
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => setMediaPickerTarget('favicon')} className="w-full py-2 bg-[#0b0f19] border border-dashed border-white/20 hover:border-[#10b981] text-gray-300 hover:text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <Icon name="image" className="w-4 h-4 text-[#10b981]" /> انتخاب فایل (.ico, .png, .svg)
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -381,10 +389,26 @@ export default function IdentitySettingsPage() {
           <div className="space-y-4 p-5 bg-black/20 rounded-xl border border-white/5">
             <h2 className="text-lg font-bold text-[#10b981] border-b border-white/10 pb-2">۳. نماد و عنوان فوتر (پایین سایت)</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              {/* جایگزین شده با کتابخانه رسانه */}
               <div className="space-y-2">
-                <label className="block text-xs text-gray-400">آیکون فوتر</label>
-                <IconPicker value={footerIcon} onChange={setFooterIcon} />
+                <label className="block text-xs text-gray-400">آیکون / لوگوی فوتر</label>
+                {footerIcon ? (
+                  <div className="flex items-center gap-3 p-2 bg-[#0b0f19] border border-white/10 rounded-lg">
+                    <img src={footerIcon} alt="لوگوی فوتر" className="w-10 h-10 object-contain bg-black/40 rounded p-1 border border-white/10" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-emerald-400 font-bold truncate">نماد انتخاب شد</p>
+                    </div>
+                    <button type="button" onClick={() => setMediaPickerTarget('footerIcon')} className="px-2.5 py-1 bg-white/10 hover:bg-[#10b981] text-white text-[11px] rounded transition-colors cursor-pointer shrink-0">تغییر</button>
+                    <button type="button" onClick={() => setFooterIcon('')} className="p-1 text-rose-400 hover:bg-rose-500/10 rounded transition-colors cursor-pointer shrink-0" title="حذف"><Icon name="close" className="w-3.5 h-3.5" /></button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => setMediaPickerTarget('footerIcon')} className="w-full py-2 bg-[#0b0f19] border border-dashed border-white/20 hover:border-[#10b981] text-gray-300 hover:text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <Icon name="image" className="w-4 h-4 text-[#10b981]" /> انتخاب نماد از کتابخانه رسانه
+                  </button>
+                )}
               </div>
+
               <div className="space-y-2">
                 <label className="block text-xs text-gray-400">نوشته کنار آیکون فوتر</label>
                 <input type="text" value={footerText} onChange={(e) => setFooterText(e.target.value)} placeholder="مثال: مدار" className="w-full bg-[#0b0f19] border border-white/10 rounded-lg p-3 text-white text-sm focus:border-[#10b981] outline-none" />
@@ -435,9 +459,23 @@ export default function IdentitySettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {socialLinks.map((social) => (
                 <div key={social.id} className="flex flex-col gap-3 p-4 bg-white/5 rounded-xl border border-white/5 relative">
+                  
+                  {/* جایگزین شده با کتابخانه رسانه */}
                   <div className="space-y-2">
-                    <label className="text-xs text-gray-400">آیکون شبکه</label>
-                    <IconPicker value={social.iconName} onChange={(val) => updateItem(setSocialLinks, social.id, 'iconName', val)} />
+                    <label className="text-xs text-gray-400">آیکون شبکه اجتماعی (فایل SVG / PNG)</label>
+                    {social.iconName ? (
+                      <div className="flex items-center gap-3 p-2 bg-[#0b0f19] border border-white/10 rounded-lg">
+                        <img src={social.iconName} alt="آیکون شبکه" className="w-8 h-8 object-contain bg-black/40 rounded p-1 border border-white/10" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] text-emerald-400 font-bold truncate">تصویر تنظیم شد</p>
+                        </div>
+                        <button type="button" onClick={() => setMediaPickerTarget(`socialIcon_${social.id}`)} className="px-2 py-1 bg-white/10 hover:bg-[#10b981] text-white text-[10px] rounded transition-colors cursor-pointer shrink-0">تغییر</button>
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => setMediaPickerTarget(`socialIcon_${social.id}`)} className="w-full py-2 bg-[#0b0f19] border border-dashed border-white/20 hover:border-[#10b981] text-gray-300 hover:text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <Icon name="image" className="w-4 h-4 text-[#10b981]" /> انتخاب تصویر از کتابخانه
+                      </button>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2 bg-black/20 p-2 rounded-lg border border-white/5">
@@ -585,14 +623,14 @@ export default function IdentitySettingsPage() {
 
           <div className="flex justify-end pt-4 border-t border-white/10">
             <button type="submit" disabled={saving} className="px-8 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 cursor-pointer hover:scale-105 active:scale-95 transition-all">
-              {saving ? 'در حال ذخیره‌سازی...' : 'ذخیره تمام تغییرات هویت'}
+              {saving ? 'در حال ذخیره‌سازی...' : 'ذخیره'}
             </button>
           </div>
 
         </form>
       </div>
 
-      {/* پاپ آپ مودال کتابخانه رسانه برای انتخاب عکس */}
+      {/* پاپ آپ یکپارچه مودال کتابخانه رسانه برای انتخاب تمامی تصاویر و آیکون‌ها */}
       {mediaPickerTarget && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[#080c16]/80 backdrop-blur-md">
           <div className="bg-[#0b0f19] border border-white/10 rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto p-6 relative shadow-2xl">
@@ -607,9 +645,15 @@ export default function IdentitySettingsPage() {
               isPickerMode={true}
               onSelectMedia={(media) => {
                 if (mediaPickerTarget === 'headerLogo') setHeaderIcon(media.url);
-                if (mediaPickerTarget === 'enamad') setEnamadImg(media.url);
-                if (mediaPickerTarget === 'samandehi') setSamandehiImg(media.url);
-                if (mediaPickerTarget === 'satra') setSatraImg(media.url);
+                else if (mediaPickerTarget === 'favicon') setFavicon(media.url);
+                else if (mediaPickerTarget === 'footerIcon') setFooterIcon(media.url);
+                else if (mediaPickerTarget === 'enamad') setEnamadImg(media.url);
+                else if (mediaPickerTarget === 'samandehi') setSamandehiImg(media.url);
+                else if (mediaPickerTarget === 'satra') setSatraImg(media.url);
+                else if (mediaPickerTarget.startsWith('socialIcon_')) {
+                  const sId = parseInt(mediaPickerTarget.split('_')[1]);
+                  updateItem(setSocialLinks, sId, 'iconName', media.url);
+                }
                 setMediaPickerTarget(null);
               }}
             />

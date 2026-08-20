@@ -25,16 +25,14 @@ export default function Sidebar() {
       icon: 'layout',
       subItems: [
         { name: 'مدار', href: '/portal-entry-99/pages/home' },
-        { name: 'محتوای خام', href: '/portal-entry-99/pages/raw' },
-        { name: 'محتوای تولیدی', href: '/portal-entry-99/pages/produced' },
-        { name: 'ابزارها', href: '/portal-entry-99/pages/tools' },
-        { name: 'بلاگ', href: '/portal-entry-99/pages/blog' },
-        { name: 'درباره', href: '/portal-entry-99/pages/about-settings' },
-        { name: 'همکاری', href: '/portal-entry-99/pages/collaboration-settings' },
+        { name: 'مدیریت صفحات اصلی', href: '/portal-entry-99/pages/main-page' },
+        { name: 'درباره ما', href: '/portal-entry-99/pages/about-settings' },
+        { name: 'همکاری با ما', href: '/portal-entry-99/pages/collaboration-settings' },
         { name: 'قوانین', href: '/portal-entry-99/pages/rules-settings' },
       ]
     },
     { name: 'محتوا', href: '/portal-entry-99/products', icon: 'browser' },
+    { name: 'منظومه', href: '/portal-entry-99/dossiers', icon: 'dossiers' },
     { name: 'طبقه‌بندی', href: '/portal-entry-99/taxonomies', icon: 'foldertree' },
     { name: 'کتابخانه رسانه', href: '/portal-entry-99/media', icon: 'image' },
     { name: 'کتابخانه آیکون', href: '/portal-entry-99/icons', icon: 'star' },
@@ -48,7 +46,6 @@ export default function Sidebar() {
         { name: 'اتصال', href: '/portal-entry-99/settings/connection' },
         { name: 'تعمیر و نگهداری', href: '/portal-entry-99/settings/maintenance' },
         { name: 'هویت', href: '/portal-entry-99/settings/identity' },
-        { name: 'تاریخ و زمان', href: '/portal-entry-99/settings/datetime' },
       ]
     },
   ];

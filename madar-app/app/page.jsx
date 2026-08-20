@@ -302,10 +302,10 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[
-                  { img: '/images/blog-1.jpg', title: 'نقش انجمن سلطنتی در شکل‌گیری علم مدرن', cat: 'تحلیل تاریخی', views: '۲.۴k' },
-                  { img: '/images/blog-2.jpg', title: 'بررسی هندسه پنهان در معماری پایتخت‌ها', cat: 'نمادشناسی', views: '۳.۱k' },
-                  { img: '/images/blog-3.jpg', title: 'پشت پرده تأمین مالی شبکه‌های رسانه‌ای', cat: 'گزارش', views: '۱.۸k' },
-                  { img: '/images/blog-4.jpg', title: 'ریشه‌های هرمسی در فیزیک و مکانیک کلاسیک', cat: 'مقاله', views: '۴.۵k' }
+                  { img: '/images/blog-1.jpg', title: 'نقش انجمن سلطنتی در شکل‌گیری علم مدرن', views: '۲.۴k' },
+                  { img: '/images/blog-2.jpg', title: 'بررسی هندسه پنهان در معماری پایتخت‌ها', views: '۳.۱k' },
+                  { img: '/images/blog-3.jpg', title: 'پشت پرده تأمین مالی شبکه‌های رسانه‌ای', views: '۱.۸k' },
+                  { img: '/images/blog-4.jpg', title: 'ریشه‌های هرمسی در فیزیک و مکانیک کلاسیک', views: '۴.۵k' }
                 ].map((item, i) => (
                   <SpotlightCard key={i} themeGlow="rgba(245,158,11,0.08)" borderGlow="via-[#f59e0b]">
                     <div className="w-full h-44 rounded-xl overflow-hidden relative flex items-center justify-center mb-5 bg-[#080c16] border border-white/5">
@@ -340,10 +340,10 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                  { img: '/images/raw-1.jpg', title: 'اسناد افشا شده پروژه‌های فضایی دهه ۶۰', cat: 'سند PDF', views: '۳.۲k' },
-                  { img: '/images/raw-2.jpg', title: 'ویدیوی خام سخنرانی محرمانه در نیویورک', cat: 'راش ویدیویی MP4', views: '۶.۵k' },
-                  { img: '/images/raw-3.jpg', title: 'تلگراف‌های رمزنگاری شده جنگ سرد', cat: 'متن TXT', views: '۴.۱k' },
-                  { img: '/images/raw-4.jpg', title: 'شنود مکالمات افشا شده اعضای فراماسونری', cat: 'فایل صوتی MP3', views: '۸.۹k' }
+                  { img: '/images/raw-1.jpg', title: 'اسناد افشا شده پروژه‌های فضایی دهه ۶۰', views: '۳.۲k' },
+                  { img: '/images/raw-2.jpg', title: 'ویدیوی خام سخنرانی محرمانه در نیویورک', views: '۶.۵k' },
+                  { img: '/images/raw-3.jpg', title: 'تلگراف‌های رمزنگاری شده جنگ سرد', views: '۴.۱k' },
+                  { img: '/images/raw-4.jpg', title: 'شنود مکالمات افشا شده اعضای فراماسونری', views: '۸.۹k' }
                 ].map((item, i) => (
                   <SpotlightCard key={i} themeGlow="rgba(251,191,36,0.08)" borderGlow="via-[#fbbf24]">
                     <div className="relative h-40 w-full rounded-xl overflow-hidden flex items-center justify-center mb-5 bg-[#080c16] border border-white/5">
@@ -400,10 +400,10 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                  { img: '/images/prod-1.jpg', title: 'سایه‌های معماری مدرن: واکاوی نمادها', cat: 'مستند بلند', views: '۱۲.۵k' },
-                  { img: '/images/prod-2.jpg', title: 'پادکست تصویری: راز انجمن‌ها (اپیزود ۴)', cat: 'پادکست تصویری', views: '۸.۲k' },
-                  { img: '/images/prod-3.jpg', title: 'تحلیل شبکه مالی رسانه‌های نوظهور', cat: 'گزارش ویدیویی', views: '۵.۰k' },
-                  { img: '/images/prod-4.jpg', title: 'تاریخچه مخفی نماد چشم جهان‌بین', cat: 'گزارش کوتاه', views: '۲۲.۰k' }
+                  { img: '/images/prod-1.jpg', title: 'سایه‌های معماری مدرن: واکاوی نمادها', views: '۱۲.۵k' },
+                  { img: '/images/prod-2.jpg', title: 'پادکست تصویری: راز انجمن‌ها (اپیزود ۴)', views: '۸.۲k' },
+                  { img: '/images/prod-3.jpg', title: 'تحلیل شبکه مالی رسانه‌های نوظهور', views: '۵.۰k' },
+                  { img: '/images/prod-4.jpg', title: 'تاریخچه مخفی نماد چشم جهان‌بین', views: '۲۲.۰k' }
                 ].map((item, i) => (
                   <SpotlightCard key={i} themeGlow="rgba(244,63,94,0.08)" borderGlow="via-[#f43f5e]">
                     <div className="relative h-40 w-full rounded-xl overflow-hidden flex items-center justify-center mb-5 bg-[#080c16] border border-white/5">
@@ -472,10 +472,10 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
-                  { img: '/images/tool-1.jpg', title: 'مترجم هوشمند متون کهن', cat: 'ابزار هوش مصنوعی', views: '۱۲.۵k' },
-                  { img: '/images/tool-2.jpg', title: 'گاه‌شمار تطبیقی و شبکه‌ای', cat: 'تحلیل داده', views: '۸.۲k' },
-                  { img: '/images/tool-3.jpg', title: 'تحلیل‌گر تصاویر و نمادها', cat: 'ابزار هوش مصنوعی', views: '۵.۰k' },
-                  { img: '/images/tool-4.jpg', title: 'تحلیل‌گر فرکانس کلمات در اسناد', cat: 'تحلیل داده', views: '۲۲.۰k' }
+                  { img: '/images/tool-1.jpg', title: 'مترجم هوشمند متون کهن', views: '۱۲.۵k' },
+                  { img: '/images/tool-2.jpg', title: 'گاه‌شمار تطبیقی و شبکه‌ای', views: '۸.۲k' },
+                  { img: '/images/tool-3.jpg', title: 'تحلیل‌گر تصاویر و نمادها', views: '۵.۰k' },
+                  { img: '/images/tool-4.jpg', title: 'تحلیل‌گر فرکانس کلمات در اسناد', views: '۲۲.۰k' }
                 ].map((item, i) => (
                   <SpotlightCard key={i} themeGlow="rgba(16,185,129,0.08)" borderGlow="via-[#10b981]">
                     <div className="relative h-40 w-full rounded-xl overflow-hidden flex items-center justify-center mb-5 bg-[#080c16] border border-white/5">

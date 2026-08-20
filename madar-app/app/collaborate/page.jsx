@@ -1,5 +1,5 @@
 import { getSetting } from '@/app/actions/settings';
-import CollaborationContent from '../components/CollaborationContent';
+import CollaborationContent from '../components/frontend/CollaborationContent';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';

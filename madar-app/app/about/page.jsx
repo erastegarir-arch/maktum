@@ -1,5 +1,5 @@
 import { getSetting } from '@/app/actions/settings';
-import AboutContent from '@/app/components/AboutContent';
+import AboutContent from '@/app/components/frontend/AboutContent';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';

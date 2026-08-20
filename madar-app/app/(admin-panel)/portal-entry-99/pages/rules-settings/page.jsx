@@ -61,11 +61,11 @@ export default function RulesSettingsPage() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        
+
         // تبدیل فرمت قدیمی (پاراگراف + لیست) به content یکپارچه ادیتور در صورت وجود کدهای قدیمی
         const convertedRules = (parsed.rules || []).map(rule => {
           if (rule.content !== undefined) return rule;
-          
+
           let combinedHtml = "";
           if (rule.paragraphs && rule.paragraphs.length > 0) {
             combinedHtml += rule.paragraphs.map(p => `<p>${p}</p>`).join("");
@@ -194,7 +194,7 @@ export default function RulesSettingsPage() {
 
   return (
     <div className="max-w-5xl space-y-6 pb-12 font-sans text-right select-none">
-      
+
       {/* هدر صفحه */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-[fadeIn_0.3s_ease-out]">
         <div>
@@ -207,10 +207,10 @@ export default function RulesSettingsPage() {
       </div>
 
       <form onSubmit={handleSave} className="space-y-8 animate-[fadeIn_0.4s_ease-out]">
-        
-        {/* ۱. هدر اصلی و تاریخ به‌روزرسانی (GKS1) */}
-        <div className="relative rounded-3xl border border-white/10 shadow-2xl overflow-hidden group">
-          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+
+        {/* ۱. هدر اصلی و تاریخ به‌روزرسانی (اصلاح overflow و z-index) */}
+        <div className="relative rounded-3xl border border-white/10 shadow-2xl group z-30">
+          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10 rounded-3xl" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 pointer-events-none z-20" />
 
           <div className="p-6 md:p-8 space-y-6 relative z-10">
@@ -224,7 +224,7 @@ export default function RulesSettingsPage() {
                 colorClass="bg-[#06b6d4]" 
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs text-gray-300 font-bold">عنوان اصلی صفحه</label>
@@ -237,8 +237,8 @@ export default function RulesSettingsPage() {
                 />
               </div>
 
-              {/* تاریخ آخرین به‌روزرسانی */}
-              <div className="space-y-2 p-4 bg-[#080c16] border border-white/10 rounded-2xl relative shadow-inner">
+              {/* تاریخ آخرین به‌روزرسانی (اصلاح z-index برای باز شدن صحیح پاپ‌آپ) */}
+              <div className="space-y-2 p-4 bg-[#080c16] border border-white/10 rounded-2xl relative shadow-inner z-40">
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-xs text-amber-400 font-bold flex items-center gap-1.5">
                     <Icon name="calendar" className="w-4 h-4" /> تاریخ آخرین به‌روزرسانی
@@ -253,7 +253,7 @@ export default function RulesSettingsPage() {
                     />
                   </label>
                 </div>
-                
+
                 <div className="relative w-full">
                   <PersianDatePicker 
                     value={data.hero.updateDate} 
@@ -303,8 +303,8 @@ export default function RulesSettingsPage() {
           </div>
         </div>
 
-        {/* ۲. بخش مدیریت ماده‌ها (قوانین) با ادیتور متنی Tiptap (GKS1) */}
-        <div className="relative rounded-3xl border border-white/10 shadow-2xl overflow-hidden group">
+        {/* ۲. بخش مدیریت ماده‌ها (قوانین) با ادیتور متنی Tiptap */}
+        <div className="relative rounded-3xl border border-white/10 shadow-2xl overflow-hidden group z-10">
           <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 

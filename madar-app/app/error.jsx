@@ -2,18 +2,19 @@
 
 import { useRef, useEffect } from 'react';
 import Link from 'next/link';
-import Icon from './components/Icon'; // اتصال به فایل مرکزی آیکون‌ها
+import Icon from './components/Icon'; 
 
-// دریافت دو ویژگی اصلی ارور در Next.js
 export default function ServerError({ error, reset }) {
   const cardRef = useRef(null);
 
+  // تنظیم عنوان تب مرورگر و ثبت لاگ خطا
   useEffect(() => {
-    // لاگ کردن ارور برای برنامه‌نویس در کنسول مرورگر
-    console.error("سیستم با خطای داخلی مواجه شد:", error);
+    document.title = 'مدار | خطای داخلی سرور';
+    // لاگ کردن ارور برای تیم فنی
+    console.error("خطای داخلی سرور رخ داد:", error);
   }, [error]);
 
-  // افکت نوری ماوس (Spotlight) پیشرفته برای کارت
+  // افکت نوری ماوس (Spotlight) بر اساس گرافیک کلی ۱
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
@@ -24,105 +25,114 @@ export default function ServerError({ error, reset }) {
   };
 
   return (
-    // استفاده از min-h-screen و overflow-x-clip برای حذف اسکرول مزاحم
-    <div className="relative min-h-screen bg-transparent text-gray-100 font-sans flex flex-col overflow-x-clip selection:bg-amber-500/30 selection:text-white">
+    // تأکید بر فونت وزیرمتن با کلاس font-sans
+    <div className="relative min-h-screen bg-[#050810] text-gray-100 font-sans flex flex-col justify-center items-center overflow-hidden selection:bg-rose-500/30 selection:text-white dir-rtl">
 
-      {/* استایل‌های انیمیشن‌های اختصاصی مدرن و بحرانی */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes flicker {
-          0%, 100% { opacity: 0.15; }
-          50% { opacity: 0.25; }
-        }
-        /* انیمیشن شناور تشدید شده و قوی‌تر برای عدد 500 */
-        @keyframes floatIntense {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-25px) scale(1.03); }
-        }
-      `}} />
-
-      {/* پس‌زمینه نئونی شناور با رنگ‌های گرم (بحرانی) و خطوط شبکه‌ای */}
+      {/* ================== پس‌زمینه نئونی محیطی (Ambient) ================== */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] right-[15%] w-[45vw] h-[45vw] rounded-full blur-[110px] bg-[radial-gradient(circle,rgba(251,191,36,0.18)_0%,transparent_70%)] animate-[flicker_10s_infinite_ease-in-out]" />
-        <div className="absolute bottom-[-10%] left-[15%] w-[55vw] h-[55vw] rounded-full blur-[110px] bg-[radial-gradient(circle,rgba(244,63,94,0.15)_0%,transparent_70%)] animate-[flicker_14s_infinite_ease-in-out_reverse]" />
-        {/* پترن نقطه‌ای ماتریس داده */}
-        <div className="absolute inset-0 bg-[radial-gradient(rgba(251,191,36,0.02)_1px,transparent_1px)] [background-size:28px_28px] pointer-events-none" />
+        <div className="absolute top-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full blur-[130px] bg-[radial-gradient(circle,rgba(244,63,94,0.15)_0%,transparent_60%)] animate-[float_15s_infinite_ease-in-out_alternate]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(168,85,247,0.1)_0%,transparent_60%)] animate-[float_20s_infinite_ease-in-out_alternate-reverse]" />
+
+        {/* پترن نقطه‌ای ظریف مهندسی */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:32px_32px]" />
       </div>
 
-      {/* محتوای اصلی */}
-      <main className="flex-grow flex items-center justify-center relative z-10 w-full px-4 pt-52 pb-20">
-        <div className="max-w-2xl w-full text-center relative flex flex-col items-center">
-          
-          {/* عنصر گرافیکی: آیکون جدید هشدار و عدد ۵۰۰ با انیمیشن شناور قوی */}
-          <div className="relative mb-12 flex flex-row items-center justify-center gap-4 md:gap-6 animate-[floatIntense_4s_ease-in-out_infinite]">
-            
-            {/* هاله نورانی پشت آیکون و عدد */}
-            <div className="absolute inset-0 rounded-full bg-amber-600/10 blur-3xl pointer-events-none" />
+      {/* ================== کارت شیشه‌ای اصلی (GKS1) ================== */}
+      <main className="relative z-10 w-full max-w-2xl px-4 py-12">
+        <div 
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          className="relative w-full rounded-3xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-2xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden group animate-[scaleIn_0.6s_ease-out]"
+        >
+          {/* خط نئونی بالای کارت در هاور */}
+          <div className="absolute top-0 inset-x-0 h-[2px] opacity-70 pointer-events-none z-20 bg-gradient-to-r from-transparent via-rose-500 to-transparent group-hover:via-rose-400 transition-colors duration-700" />
 
-            {/* آیکون هشدار جدید در کنار عدد با سایه نئونی ملایم */}
-            <div className="relative z-10 flex-shrink-0">
-                <Icon name="shieldWarning" className="w-16 h-16 md:w-24 md:h-24 text-amber-400 drop-shadow-[0_0_25px_rgba(251,191,36,0.5)]" />
-            </div>
-            
-            {/* عدد ۵۰۰ */}
-            <h1 className="relative z-10 text-[120px] md:text-[170px] font-black leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-amber-300 to-rose-500 drop-shadow-[0_0_40px_rgba(251,191,36,0.3)]" dir="rtl">
-              ۵۰۰
-            </h1>
-            
-          </div>
+          {/* لایه Spotlight تعاملی ماوس */}
+          <div className="absolute inset-0 pointer-events-none rounded-inherit z-0 bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(244,63,94,0.06),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-          {/* کارت شیشه‌ای سینمایی (Glassmorphism) متناسب با تم گرم */}
-          <div 
-            ref={cardRef}
-            onMouseMove={handleMouseMove}
-            className="group bg-[#160d0a]/85 backdrop-blur-2xl border border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-3xl p-8 md:p-12 border-t-2 border-t-amber-500 relative overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_40px_70px_-15px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_30px_rgba(251,191,36,0.35)] hover:border-amber-500/50 w-full"
-          >
-            {/* لایه اسلات‌لایت تعاملی ماوس */}
-            <div className="absolute inset-0 pointer-events-none rounded-inherit z-0 bg-[radial-gradient(500px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(251,191,36,0.08),transparent_50%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative z-10 flex flex-col items-center">
 
-            <div className="relative z-10 flex flex-col items-center space-y-6">
-              
-              {/* بج وضعیت: با کادر کامل و نقطه چشمک‌زن */}
-              <div className="inline-flex items-center gap-3 px-5 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full text-sm font-bold text-amber-400 tracking-wider">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500 shadow-[0_0_10px_#f59e0b]"></span>
+            {/* ================== گرافیک مهندسی: مدارِ شکسته ================== */}
+            <div className="relative w-40 h-40 mb-10 flex items-center justify-center">
+              {/* هاله نور پس‌زمینه */}
+              <div className="absolute inset-0 bg-rose-500/20 blur-[40px] rounded-full animate-pulse" />
+
+              {/* مدار بیرونی */}
+              <div className="absolute inset-0 border border-rose-500/20 rounded-full animate-[spin_10s_linear_infinite]" />
+
+              {/* مدار میانی (نقطه‌چین) */}
+              <div className="absolute inset-3 border-[2px] border-dashed border-rose-500/40 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
+
+              {/* هسته مرکزی مدار */}
+              <div className="absolute inset-8 bg-gradient-to-tr from-[#0b0f19] to-rose-900/40 border border-rose-500/30 rounded-full backdrop-blur-md flex items-center justify-center shadow-[0_0_30px_rgba(244,63,94,0.3)] z-10">
+                <span className="text-4xl md:text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.6)] font-sans tracking-tighter" dir="ltr">
+                  500
                 </span>
-                خطای بحرانی در هسته مدار
               </div>
-              
-              <h2 className="text-2xl md:text-3xl font-black text-white tracking-wide">
-                ارتباط عصبی هسته پردازش داده بحرانی است!
-              </h2>
-              
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light max-w-lg mx-auto mb-4 text-justify md:text-center">
-                یک تداخل الکترومغناطیسی شدید، لایه‌های پردازشی اصلی را دچار اختلال کرده است. مدارهای داده در حال بازسازی هستند اما در حال حاضر پاسخگویی ممکن نیست.
-              </p>
-              
-              {/* دکمه‌های عملیاتی جذاب */}
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                
-                <button 
-                  onClick={() => reset()} 
-                  className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-crimson-600 text-white px-8 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2.5 hover:from-amber-400 hover:to-crimson-500 shadow-[0_0_25px_rgba(251,191,36,0.4)] transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer"
-                >
-                  <i className="ph-bold ph-arrows-clockwise text-xl"></i>
-                  تلاش مجدد برای تعمیر اتصال
-                </button>
-                
-                <Link 
-                  href="/" 
-                  className="group/link w-full sm:w-auto bg-white/5 border border-white/10 text-gray-300 px-8 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2.5 hover:bg-white/10 hover:text-white hover:border-amber-400/50 transition-all duration-300 transform hover:-translate-y-0.5 text-sm"
-                >
-                  <i className="ph-fill ph-house text-xl text-gray-400 group-hover/link:text-amber-400 transition-colors"></i>
-                  بازگشت به لایه امن (خانه)
-                </Link>
-                
-              </div>
-            </div>
-          </div>
 
+              {/* نودهای (گره‌های) اطلاعاتی متوقف شده */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-rose-500 rounded-full shadow-[0_0_15px_#f43f5e] animate-ping" />
+              <div className="absolute bottom-4 right-2 w-2 h-2 bg-rose-400 rounded-full shadow-[0_0_10px_#f43f5e]" />
+            </div>
+
+            {/* ================== محتوای متنی کاربرپسند ================== */}
+            <div className="text-center space-y-4 mb-8">
+              <h1 className="text-2xl md:text-3xl font-black text-white leading-tight">
+                ارتباط با هسته پردازش قطع شد
+              </h1>
+
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light max-w-md mx-auto text-justify md:text-center">
+                مشکلی در مسیر دریافت اطلاعات از سرورهای مدار رخ داده است. مهندسین ما در حال بررسی و رفع این تداخل هستند. لطفاً چند لحظه دیگر مجدداً تلاش کنید.
+              </p>
+            </div>
+
+            {/* ================== پنل تشخیص وضعیت (Diagnostic UI) ================== */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 border-t border-b border-white/5 py-5">
+
+              <div className="flex items-center justify-center gap-2.5 w-full sm:w-1/2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                </span>
+                <span className="text-xs text-gray-500">وضعیت سرور:</span>
+                <span className="text-xs font-bold text-rose-400 tracking-wider font-sans" dir="ltr">OFFLINE</span>
+              </div>
+
+              <div className="hidden sm:block w-[1px] h-8 bg-white/10"></div>
+
+              <div className="flex items-center justify-center gap-2.5 w-full sm:w-1/2">
+                <Icon name="hash" className="w-4 h-4 text-gray-600" />
+                <span className="text-xs text-gray-500">شناسه خطا:</span>
+                <span className="text-xs font-bold text-gray-300 tracking-wider font-sans" dir="ltr">ERR_500</span>
+              </div>
+
+            </div>
+
+            {/* ================== دکمه‌های عملیاتی ================== */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+
+              <button 
+                onClick={() => reset()} 
+                className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(244,63,94,0.3)] hover:shadow-[0_0_30px_rgba(244,63,94,0.5)] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Icon name="update" className="w-5 h-5" />
+                تلاش مجدد
+              </button>
+
+              <Link 
+                href="/" 
+                className="w-full sm:w-auto bg-white/5 border border-white/10 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white transition-all duration-300 cursor-pointer"
+              >
+                <Icon name="arrowLeft" className="w-5 h-5" />
+                بازگشت به خانه
+              </Link>
+
+            </div>
+
+          </div>
         </div>
       </main>
+
     </div>
   );
 }
