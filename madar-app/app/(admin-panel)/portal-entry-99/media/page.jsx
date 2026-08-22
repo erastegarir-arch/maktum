@@ -32,10 +32,9 @@ function Tooltip({ text, children }) {
     <div className="relative group/tooltip inline-flex items-center justify-center">
       {children}
       <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover/tooltip:flex flex-col items-center z-30 pointer-events-none">
-        <div className="bg-[#0b0f19] text-white text-[11px] py-1 px-2.5 rounded-lg border border-white/10 shadow-xl whitespace-nowrap font-sans">
+        <div className="bg-white/10 backdrop-blur-md border border-white/10 text-white text-[11px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-sans">
           {text}
         </div>
-        <div className="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-[#0b0f19] -mt-[1px]"></div>
       </div>
     </div>
   );
@@ -104,7 +103,7 @@ function CustomAudioPlayer({ src, title }) {
   };
 
   return (
-    <div className="w-full max-w-lg p-6 rounded-3xl bg-[#0b0f19] border border-white/10 shadow-2xl flex flex-col gap-6 font-sans relative overflow-hidden">
+    <div className="w-full max-w-lg p-6 rounded-3xl bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_8px_30px_rgba(0,0,0,0.5)] flex flex-col gap-6 font-sans relative overflow-hidden border border-transparent">
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent" />
       <audio ref={audioRef} src={src} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleTimeUpdate} onEnded={() => setIsPlaying(false)} loop={isLooping} className="hidden" />
 
@@ -147,7 +146,7 @@ function CustomAudioPlayer({ src, title }) {
           </Tooltip>
 
           <Tooltip text={isPlaying ? 'توقف' : 'پخش'}>
-            <button onClick={togglePlay} className="w-16 h-16 flex items-center justify-center bg-[#06b6d4] hover:bg-[#0891b2] rounded-full text-white shadow-lg shadow-[#06b6d4]/20 hover:scale-105 transition-transform cursor-pointer">
+            <button onClick={togglePlay} className="w-16 h-16 flex items-center justify-center bg-[#06b6d4] hover:bg-[#0891b2] rounded-full text-white shadow-lg shadow-[#06b6d4]/20 hover:scale-105 transition-transform cursor-pointer border border-transparent">
               <svg className={cn("w-7 h-7", !isPlaying ? 'ml-1' : '')} fill="currentColor" viewBox="0 0 24 24">
                 {isPlaying ? (
                   <>
@@ -273,8 +272,8 @@ function CustomVideoPlayer({ src, mimeType, title }) {
   };
 
   return (
-    <div ref={containerRef} className="relative group w-full h-full flex items-center justify-center bg-black rounded-xl overflow-hidden shadow-[0_0_40px_rgba(6,182,212,0.15)] max-h-[75vh] font-sans">
-      <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-20">
+    <div ref={containerRef} className="relative group w-full h-full flex items-center justify-center bg-black rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(6,182,212,0.15)] max-h-[75vh] font-sans border border-transparent">
+      <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-20 pointer-events-none">
         <span className="relative flex h-2.5 w-2.5 shrink-0">
           {isPlaying && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#06b6d4] opacity-75"></span>}
           <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", isPlaying ? 'bg-[#06b6d4]' : 'bg-gray-500')}></span>
@@ -607,14 +606,24 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
     return toPersianDigits(parseFloat((bytes / Math.pow(k, i)).toFixed(2))) + ' ' + sizes[i];
   };
 
-  const getFileBadge = (type) => {
+  // اصلاح دریافت لیبل نوع فایل برای تفکیک تصویر و آیکون
+  const getFileBadge = (media) => {
+    const isSvg = (media.url && media.url.toLowerCase().endsWith('.svg')) || (media.mimeType && media.mimeType.toLowerCase().includes('svg'));
+
+    if (media.fileType === 'IMAGE' && isSvg) {
+      return { 
+        label: 'آیکون', 
+        icon: <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg> 
+      };
+    }
+
     const badges = {
       'IMAGE': { label: 'تصویر', icon: <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg> },
       'VIDEO': { label: 'ویدیو', icon: <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> },
       'AUDIO': { label: 'صوت', icon: <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg> },
       'DOCUMENT':{ label: 'سند', icon: <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> },
     };
-    return badges[type] || badges['DOCUMENT'];
+    return badges[media.fileType] || badges['DOCUMENT'];
   };
 
   const TAB_ITEMS = [
@@ -636,23 +645,23 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
       
       {/* اورلی رها کردن فایل (Drag & Drop Zone) */}
       {isDragging && (
-        <div className="fixed inset-0 z-[300] bg-[#06b6d4]/20 backdrop-blur-md border-4 border-dashed border-[#06b6d4] rounded-3xl flex flex-col items-center justify-center gap-4 m-4 pointer-events-none animate-pulse">
+        <div className="fixed inset-0 z-25 bg-[#06b6d4]/20 backdrop-blur-md border-4 border-dashed border-[#06b6d4] rounded-3xl flex flex-col items-center justify-center gap-4 m-4 pointer-events-none animate-pulse">
           <Icon name="upload" className="w-16 h-16 text-[#06b6d4]" />
           <p className="text-xl font-bold text-white">فایل‌ها را برای آپلود سریع رها کنید</p>
         </div>
       )}
 
-      {/* هدر صفحه (منطبق بر گرافیک کلی1) */}
+      {/* هدر صفحه */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="relative rounded-2xl border border-white/10 p-6 shadow-2xl overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group"
+        className="relative rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group"
       >
-        <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none" />
 
-        <div>
+        <div className="relative z-10">
           <h1 className="text-2xl font-black text-white mb-2 flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] shadow-[0_0_10px_#10b981]"></span>
             کتابخانه رسانه
@@ -660,7 +669,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
           <p className="text-sm text-gray-400 font-light">مدیریت فایل‌ها، تصاویر و ویدیوهای سایت با استانداردهای سئو</p>
         </div>
         
-        <div>
+        <div className="relative z-10">
           <input 
             type="file" 
             ref={fileInputRef} 
@@ -671,10 +680,10 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
           <button 
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 cursor-pointer border border-transparent"
           >
             <Icon name="upload" className="w-5 h-5" />
-            {uploading ? 'در حال آپلود فایل‌ها...' : 'افزودن رسانه جدید'}
+            {uploading ? 'در حال آپلود...' : 'افزودن رسانه جدید'}
           </button>
         </div>
       </motion.div>
@@ -687,10 +696,10 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
               key={tab.val}
               onClick={() => setActiveTab(tab.val)}
               className={cn(
-                "px-5 py-2 rounded-full text-sm font-bold transition-all cursor-pointer border",
+                "px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent",
                 activeTab === tab.val 
-                  ? "bg-[#06b6d4] text-white border-transparent shadow-[0_0_15px_rgba(6,182,212,0.4)]" 
-                  : "bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 hover:text-white"
+                  ? "bg-[#06b6d4]/20 text-[#06b6d4] shadow-[inset_0_0_15px_rgba(6,182,212,0.1)]" 
+                  : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white shadow-inner"
               )}
             >
               {tab.label}
@@ -699,32 +708,32 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
         </div>
 
         {/* اینپوت سرچ */}
-        <div className="relative w-full sm:w-72">
-          <Icon name="search" className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
+        <div className="relative w-full sm:w-80">
+          <Icon name="search" className="w-4 h-4 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2" />
           <input 
             type="text" 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="جستجوی نام یا آدرس..." 
-            className="w-full bg-[#080c16] border border-white/10 rounded-full py-2.5 pr-10 pl-4 text-sm text-white outline-none focus:border-[#06b6d4] transition-all font-medium"
+            className="w-full bg-[#080c16] rounded-xl py-3.5 pr-12 pl-4 text-sm text-white outline-none focus:border focus:border-[#06b6d4] border border-transparent transition-all shadow-inner font-medium"
           />
         </div>
       </div>
 
-      {/* گرید نمایش فایل‌ها (منطبق بر گرافیک کلی1) */}
+      {/* گرید نمایش فایل‌ها */}
       {loading ? (
         <div className="text-center py-20 text-gray-400">در حال دریافت فایل‌ها از سرور...</div>
       ) : filteredMedia.length === 0 ? (
-        <div className="relative rounded-2xl border border-white/10 p-20 text-center shadow-xl overflow-hidden">
-          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
-          <Icon name="image" className="w-16 h-16 mx-auto text-gray-600 mb-4" />
-          <p className="text-gray-400">هیچ رسانه‌ای یافت نشد.</p>
+        <div className="relative rounded-3xl p-20 text-center shadow-[0_8px_30px_rgba(0,0,0,0.4)] overflow-hidden border border-transparent">
+          <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
+          <Icon name="image" className="w-16 h-16 mx-auto text-gray-500 mb-4 opacity-50" />
+          <p className="text-gray-400 font-bold">هیچ رسانه‌ای یافت نشد.</p>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {paginatedMedia.map((media, idx) => {
-              const badge = getFileBadge(media.fileType);
+              const badge = getFileBadge(media);
               return (
                 <motion.div 
                   key={media.id} 
@@ -732,7 +741,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.2, delay: idx * 0.02 }}
                   onClick={() => openEditModal(media)}
-                  className="group cursor-pointer relative rounded-2xl border border-white/10 bg-[#080c16] overflow-hidden hover:border-[#06b6d4] transition-all duration-300 aspect-square flex flex-col shadow-lg"
+                  className="group cursor-pointer relative rounded-2xl bg-[#080c16] overflow-hidden hover:border-[#06b6d4]/50 border border-transparent transition-all duration-300 aspect-square flex flex-col shadow-lg"
                 >
                   <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
                   
@@ -746,7 +755,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                     style={{ background: 'linear-gradient(90deg, transparent 0%, #06b6d4 50%, transparent 100%)' }}
                   />
 
-                  <div className="flex-1 bg-black/50 flex items-center justify-center overflow-hidden relative">
+                  <div className="flex-1 bg-black/30 flex items-center justify-center overflow-hidden relative">
                     {media.fileType === 'IMAGE' ? (
                       <img src={media.url} alt={media.altText || media.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     ) : media.fileType === 'VIDEO' ? (
@@ -760,13 +769,13 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                     )}
                     
                     {/* بدج نوع فایل روی کارت */}
-                    <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md text-[10px] px-2 py-1 rounded-md text-gray-200 shadow-md flex items-center gap-1 z-10 border border-white/10 font-bold">
+                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-[10px] px-2 py-1 rounded-lg text-gray-200 shadow-md flex items-center gap-1 z-10 font-bold border border-white/5">
                       {badge.icon}
                       <span>{badge.label}</span>
                     </div>
                   </div>
                   
-                  <div className="p-2.5 bg-[#0b0f19] border-t border-white/5 relative z-10">
+                  <div className="p-3 bg-[#0b0f19]/90 relative z-10">
                     <p className="text-xs text-white truncate font-medium dir-ltr text-right font-sans">{toPersianDigits(media.title) || 'بدون نام'}</p>
                     <p className="text-[10px] text-gray-500 mt-1 font-sans">{formatBytes(media.size)}</p>
                   </div>
@@ -779,7 +788,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
             <div className="flex justify-center mt-8 pb-4">
               <button 
                 onClick={() => setVisibleCount(prev => prev + 24)}
-                className="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-bold text-white transition-all hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] cursor-pointer"
+                className="px-8 py-3 bg-white/5 hover:bg-white/10 rounded-xl border border-transparent shadow-inner text-sm font-bold text-white transition-all hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] cursor-pointer"
               >
                 نمایش بیشتر ({toPersianDigits(filteredMedia.length - visibleCount)} فایل دیگر)
               </button>
@@ -795,7 +804,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" 
+            className="fixed inset-0 z-20 flex items-center justify-center p-4 bg-[#050810]/60 backdrop-blur-xl" 
             onClick={() => setSelectedMedia(null)}
           >
             <motion.div 
@@ -804,12 +813,12 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.25 }}
               onClick={(e) => e.stopPropagation()} 
-              className="relative w-full max-w-5xl rounded-3xl border border-white/10 flex flex-col md:flex-row overflow-hidden max-h-[90vh] shadow-2xl"
+              className="relative w-full max-w-5xl rounded-3xl flex flex-col md:flex-row overflow-hidden max-h-[90vh] shadow-[inset_0_0_20px_rgba(255,255,255,0.02),0_10px_40px_rgba(0,0,0,0.5)] border border-transparent"
             >
-              <div className="absolute inset-0 bg-[#0b0f19]/90 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
+              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-2xl pointer-events-none -z-10" />
               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90" />
               
-              <div className="w-full md:w-3/5 bg-black/50 flex flex-col items-center justify-center p-6 border-b md:border-b-0 md:border-l border-white/10 relative overflow-hidden">
+              <div className="w-full md:w-3/5 bg-black/30 flex flex-col items-center justify-center p-6 md:border-l border-white/5 relative overflow-hidden">
                 {selectedMedia.fileType === 'IMAGE' && (
                   <img src={selectedMedia.url} alt={selectedMedia.altText} className="max-w-full max-h-[75vh] object-contain rounded-xl drop-shadow-2xl" />
                 )}
@@ -825,11 +834,11 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                 {selectedMedia.fileType === 'DOCUMENT' && (
                   <div className="w-full h-full flex flex-col items-center justify-center gap-4 max-h-[75vh]">
                     {selectedMedia.mimeType === 'application/pdf' ? (
-                      <iframe src={selectedMedia.url} className="w-full h-[70vh] rounded-xl bg-white shadow-xl" title="PDF Viewer" />
+                      <iframe src={selectedMedia.url} className="w-full h-[70vh] rounded-xl bg-white shadow-xl border-none" title="PDF Viewer" />
                     ) : (
                       <>
                         <Icon name="file" className="w-24 h-24 text-gray-500 drop-shadow-lg" />
-                        <a href={selectedMedia.url} target="_blank" download className="bg-white/10 hover:bg-white/20 text-white px-6 py-2.5 rounded-xl text-sm transition-colors border border-white/10 font-bold">
+                        <a href={selectedMedia.url} target="_blank" download className="bg-white/10 hover:bg-white/20 text-white px-6 py-2.5 rounded-xl text-sm transition-colors font-bold border border-transparent shadow-inner">
                           دانلود فایل سند
                         </a>
                       </>
@@ -839,7 +848,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
               </div>
 
               <div className="w-full md:w-2/5 flex flex-col bg-transparent">
-                <div className="p-6 flex-1 overflow-y-auto space-y-6 font-sans">
+                <div className="p-6 flex-1 overflow-y-auto space-y-6 font-sans custom-scrollbar">
                   <div className="flex justify-between items-start border-b border-white/10 pb-4">
                     <div>
                       <h3 className="text-lg font-bold text-white">جزئیات رسانه</h3>
@@ -847,17 +856,17 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                         آپلود: {toPersianDigits(selectedMedia.formattedDate)} - ساعت {toPersianDigits(new Date(selectedMedia.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }))}
                       </p>
                     </div>
-                    <button onClick={() => setSelectedMedia(null)} className="p-2 bg-white/5 rounded-full hover:bg-white/10 hover:text-white transition-colors text-gray-400 cursor-pointer">
+                    <button onClick={() => setSelectedMedia(null)} className="p-2 bg-white/5 rounded-xl hover:bg-rose-500/20 hover:text-rose-400 transition-colors text-gray-400 cursor-pointer border border-transparent">
                       <Icon name="close" className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="space-y-2 bg-black/30 p-4 rounded-xl border border-white/5 dir-ltr text-left">
+                  <div className="space-y-2 bg-[#080c16]/50 p-4 rounded-xl dir-ltr text-left border border-white/5 shadow-inner">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs text-gray-300 truncate"><strong className="text-gray-500">URL:</strong> {selectedMedia.url}</p>
                       <button 
                         onClick={handleCopyUrl}
-                        className="px-3 py-1 bg-white/10 hover:bg-[#06b6d4] text-white rounded-lg transition-colors font-sans text-xs cursor-pointer shrink-0 font-bold"
+                        className="px-3 py-1 bg-white/10 hover:bg-[#06b6d4] text-white rounded-lg transition-colors font-sans text-xs cursor-pointer shrink-0 font-bold border border-transparent"
                       >
                         {copied ? 'کپی شد!' : 'کپی لینک'}
                       </button>
@@ -866,29 +875,29 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                     <p className="text-xs text-gray-300"><strong className="text-gray-500">Size:</strong> {formatBytes(selectedMedia.size)}</p>
                   </div>
 
-                  <div className="space-y-2 p-4 bg-[#06b6d4]/5 rounded-xl border border-[#06b6d4]/20">
+                  <div className="space-y-2 p-4 bg-white/5 rounded-xl border border-[#06b6d4]/20 shadow-inner">
                     <label className="block text-sm font-bold text-[#06b6d4]">تغییر نام اصلی فایل</label>
                     <p className="text-[10px] text-gray-400 leading-tight">توجه: تغییر نام باعث تغییر لینک می‌شود.</p>
                     <div className="flex gap-2 mt-2">
-                      <input type="text" value={editFileName} onChange={(e) => setEditFileName(e.target.value)} className="flex-1 bg-white/5 border border-[#06b6d4]/30 rounded-lg p-2.5 text-sm text-white focus:border-[#06b6d4] dir-ltr font-sans outline-none" />
-                      <button onClick={requestRename} className="px-3 bg-[#06b6d4]/20 hover:bg-[#06b6d4]/40 text-[#06b6d4] rounded-lg text-xs font-bold transition-colors cursor-pointer">اعمال نام</button>
+                      <input type="text" value={editFileName} onChange={(e) => setEditFileName(e.target.value)} className="flex-1 bg-[#080c16] border border-transparent rounded-lg p-2.5 text-sm text-white focus:border-[#06b6d4] dir-ltr font-sans outline-none shadow-inner" />
+                      <button onClick={requestRename} className="px-3 bg-[#06b6d4]/20 hover:bg-[#06b6d4] hover:text-white text-[#06b6d4] rounded-lg text-xs font-bold transition-colors cursor-pointer border border-transparent">اعمال نام</button>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-300">عنوان فایل</label>
-                    <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:border-[#06b6d4] font-sans outline-none" placeholder="عنوان دلخواه..." />
+                    <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full bg-[#080c16] rounded-xl p-3 text-sm text-white focus:border focus:border-[#06b6d4] border border-transparent font-sans outline-none shadow-inner" placeholder="عنوان دلخواه..." />
                   </div>
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-300">
                       متن جایگزین (Alt Text) <span className="text-xs text-rose-400">*سئو</span>
                     </label>
-                    <textarea rows="3" value={editAlt} onChange={(e) => setEditAlt(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:border-[#06b6d4] font-sans outline-none" placeholder="توضیح تصویر/فایل..."></textarea>
+                    <textarea rows="3" value={editAlt} onChange={(e) => setEditAlt(e.target.value)} className="w-full bg-[#080c16] rounded-xl p-3 text-sm text-white focus:border focus:border-[#06b6d4] border border-transparent font-sans outline-none shadow-inner resize-none" placeholder="توضیح تصویر/فایل..."></textarea>
                   </div>
                 </div>
 
-                <div className="p-6 bg-black/20 border-t border-white/10 flex items-center justify-between font-sans">
+                <div className="p-6 bg-black/20 border-t border-white/5 flex items-center justify-between font-sans">
                   <button onClick={() => requestDelete(selectedMedia.id)} className="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors cursor-pointer">
                     حذف دائم
                   </button>
@@ -901,13 +910,13 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                           onSelectMedia(selectedMedia);
                           setSelectedMedia(null);
                         }} 
-                        className="px-6 py-2.5 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] cursor-pointer"
+                        className="px-6 py-2.5 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] cursor-pointer border border-transparent"
                       >
                         انتخاب این رسانه
                       </button>
                     )}
 
-                    <button onClick={handleUpdateMedia} className="px-8 py-2.5 bg-gradient-to-r from-[#06b6d4] to-[#3b82f6] hover:scale-105 text-white rounded-xl text-sm font-bold transition-transform shadow-[0_0_20px_rgba(6,182,212,0.3)] cursor-pointer">
+                    <button onClick={handleUpdateMedia} className="px-8 py-2.5 bg-[#06b6d4] hover:bg-[#0891b2] hover:scale-105 text-white rounded-xl text-sm font-bold transition-transform shadow-[0_0_20px_rgba(6,182,212,0.3)] cursor-pointer border border-transparent">
                       ذخیره
                     </button>
                   </div>
@@ -919,44 +928,56 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
       </AnimatePresence>
 
       {/* مودال تأیید حذف یا تغییر نام */}
-      {confirmDialog.isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 font-sans bg-black/75 backdrop-blur-md">
-          <div className="absolute inset-0" onClick={() => setConfirmDialog({ isOpen: false, type: null, payload: null })}></div>
-          
-          <div className="relative bg-[#0b0f19] border border-white/10 rounded-3xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4 text-right overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-90" />
+      <AnimatePresence>
+        {confirmDialog.isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-30 flex items-center justify-center p-4 font-sans bg-[#050810]/40 backdrop-blur-xl"
+          >
+            <div className="absolute inset-0" onClick={() => setConfirmDialog({ isOpen: false, type: null, payload: null })}></div>
             
-            <div className="flex items-center gap-3">
-              <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center border", confirmDialog.type === 'DELETE' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20')}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative bg-[#0b0f19]/90 backdrop-blur-2xl rounded-3xl shadow-[inset_0_0_20px_rgba(255,255,255,0.02),0_10px_40px_rgba(0,0,0,0.5)] w-full max-w-sm p-6 flex flex-col gap-4 text-right overflow-hidden border border-transparent"
+            >
+              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-90" />
+              
+              <div className="flex items-center gap-3">
+                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center border border-transparent", confirmDialog.type === 'DELETE' ? 'bg-rose-500/10 text-rose-500' : 'bg-amber-500/10 text-amber-500')}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <h3 className="text-white font-bold text-lg">
+                  {confirmDialog.type === 'DELETE' ? 'حذف دائم رسانه' : 'تغییر نام فایل'}
+                </h3>
               </div>
-              <h3 className="text-white font-bold text-lg">
-                {confirmDialog.type === 'DELETE' ? 'حذف دائم رسانه' : 'تغییر نام فایل'}
-              </h3>
-            </div>
-            
-            <p className="text-sm text-gray-300 leading-relaxed font-light">
-              {confirmDialog.type === 'DELETE' 
-                ? 'آیا از حذف دائم این رسانه مطمئن هستید؟ این عملیات غیرقابل بازگشت است و از روی سرور پاک می‌شود.' 
-                : 'هشدار: تغییر نام باعث تغییر لینک فایل می‌شود. در صورتی که این فایل را قبلاً در مقاله‌ای استفاده کرده‌اید، نمایش آن دچار مشکل خواهد شد. مایل به ادامه هستید؟'}
-            </p>
-            
-            <div className="flex gap-3 pt-2">
-              <button 
-                onClick={confirmDialog.type === 'DELETE' ? executeDelete : executeRename} 
-                className={cn("flex-1 py-3 rounded-xl text-sm font-bold text-white transition-all shadow-lg cursor-pointer", confirmDialog.type === 'DELETE' ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/20' : 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20')}
-              >
-                بله، مطمئنم
-              </button>
-              <button onClick={() => setConfirmDialog({ isOpen: false, type: null, payload: null })} className="flex-1 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-colors cursor-pointer">
-                لغو
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              
+              <p className="text-sm text-gray-300 leading-relaxed font-light">
+                {confirmDialog.type === 'DELETE' 
+                  ? 'آیا از حذف دائم این رسانه مطمئن هستید؟ این عملیات غیرقابل بازگشت است و از روی سرور پاک می‌شود.' 
+                  : 'هشدار: تغییر نام باعث تغییر لینک فایل می‌شود. در صورتی که این فایل را قبلاً در مقاله‌ای استفاده کرده‌اید، نمایش آن دچار مشکل خواهد شد. مایل به ادامه هستید؟'}
+              </p>
+              
+              <div className="flex gap-3 pt-2">
+                <button 
+                  onClick={confirmDialog.type === 'DELETE' ? executeDelete : executeRename} 
+                  className={cn("flex-1 py-3 rounded-xl text-sm font-bold text-white transition-all shadow-lg cursor-pointer border border-transparent", confirmDialog.type === 'DELETE' ? 'bg-rose-500 hover:bg-rose-600 shadow-[0_0_15px_rgba(244,63,94,0.4)]' : 'bg-amber-500 hover:bg-amber-600 shadow-[0_0_15px_rgba(245,158,11,0.4)]')}
+                >
+                  بله، مطمئنم
+                </button>
+                <button onClick={() => setConfirmDialog({ isOpen: false, type: null, payload: null })} className="flex-1 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-transparent shadow-inner">
+                  لغو
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

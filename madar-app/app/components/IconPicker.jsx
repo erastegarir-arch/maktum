@@ -24,7 +24,7 @@ export default function IconPicker({ value, onChange }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full p-3 bg-[#080c16] border border-white/10 rounded-xl text-white hover:border-[#06b6d4] transition-colors"
+        className="flex items-center justify-between w-full p-3 bg-[#080c16] rounded-xl text-white hover:border-[#06b6d4] transition-colors"
       >
         <span className="text-sm text-gray-300">
           {selectedIcon ? (selectedIcon.label || selectedIcon.name) : 'انتخاب آیکون...'}
@@ -38,13 +38,13 @@ export default function IconPicker({ value, onChange }) {
 
       {/* مدال / پاپ‌آپ لیست آیکون‌ها */}
       {isOpen && (
-        <div className="absolute z-50 top-full mt-2 w-full bg-[#0b0f19] border border-white/10 rounded-xl p-4 shadow-2xl max-h-60 overflow-y-auto">
+        <div className="absolute z-50 top-full mt-2 w-full bg-[#0b0f19] rounded-xl p-4 shadow-2xl max-h-60 overflow-y-auto">
           <input
             type="text"
             placeholder="جستجوی آیکون..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full mb-3 bg-[#080c16] border border-white/10 rounded-lg p-2 text-xs text-white outline-none focus:border-[#06b6d4]"
+            className="w-full mb-3 bg-[#080c16] rounded-lg p-2 text-xs text-white outline-none focus:border-[#06b6d4]"
           />
           <div className="grid grid-cols-5 gap-2">
             {filtered.map((icon) => (
@@ -57,7 +57,7 @@ export default function IconPicker({ value, onChange }) {
                 }}
                 title={icon.label || icon.name}
                 className={`p-2 rounded-lg border flex items-center justify-center transition-all ${
-                  value === icon.name ? 'border-[#06b6d4] bg-[#06b6d4]/10 text-[#06b6d4]' : 'border-white/5 hover:bg-white/5 text-gray-400 hover:text-white'
+                  value === icon.name ? 'border-[#06b6d4] bg-[#06b6d4]/10 text-[#06b6d4]' : 'hover:bg-white/5 text-gray-400 hover:text-white'
                 }`}
               >
                 <div className="w-6 h-6 [&>svg]:w-full [&>svg]:h-full" dangerouslySetInnerHTML={{ __html: icon.svgCode }} />

@@ -14,7 +14,7 @@ export default function Breadcrumbs({ items }) {
             )}
 
             {isLast ? (
-              <span className="text-white font-medium px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 backdrop-blur-sm shadow-sm">
+              <span className="text-white font-medium px-2.5 py-1 rounded-lg bg-white/5 backdrop-blur-sm shadow-sm">
                 {item.label}
               </span>
             ) : (

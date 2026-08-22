@@ -12,8 +12,32 @@ export async function getUserProfile() {
     if (!session) return null; // اگر توکن نداشت یا منقضی بود
 
     const user = await prisma.user.findUnique({
-      where: { id: session.userId }
+      where: { id: session.userId },
+      include: {
+        // واکشی علاقه‌مندی‌ها بدون فیلتر تاریخ (برای جلوگیری از ارور Prisma)
+        favorites: {
+          include: {
+            content: {
+              select: { id: true, titleBase: true, titleHighlight: true, slug: true, type: true, coverDesktop: true, coverMobile: true, publishedAt: true }
+            }
+          }
+        },
+        // استفاده از نام صحیح جدول (downloads) به جای downloadHistory
+        downloads: { 
+          include: {
+            content: {
+              select: { id: true, titleBase: true, titleHighlight: true, slug: true, type: true, coverDesktop: true, coverMobile: true, publishedAt: true }
+            }
+          }
+        }
+      }
     });
+
+    if (user) {
+      // یک ترفند عالی: 
+      // نام متغیر را تغییر می‌دهیم تا کدهای UserDashboard شما بدون حتی یک کلمه تغییر، کار کنند!
+      user.downloadHistory = user.downloads;
+    }
 
     return user;
   } catch (error) {
@@ -35,8 +59,13 @@ export async function updateUserProfileAction(data) {
         lastName: data.lastName,
         gender: data.gender,
         birthYear: data.birthYear,
+        province: data.province,
+        city: data.city,
+        educationDegree: data.educationDegree,
+        major: data.major,
+        email: data.email,
+        artResearchField: data.artResearchField,
         cooperationInterests: data.cooperationInterests,
-        // سایر فیلدهایی که بعداً اضافه کردید را می‌توانید اینجا بگذارید
       }
     });
 

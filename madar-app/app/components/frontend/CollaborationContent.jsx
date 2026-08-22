@@ -34,7 +34,7 @@ export default function CollaborationContent({ pageData }) {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="relative rounded-3xl border border-white/10 p-8 md:p-12 text-center shadow-2xl overflow-hidden group"
+            className="relative rounded-3xl p-8 md:p-12 text-center shadow-2xl overflow-hidden group"
           >
             {/* لایه پس‌زمینه شیشه‌ای کاملاً ثابت (بدون تغییر در هوور جهت متوقف کردن پرش) */}
             <div className="absolute inset-0 bg-white/[0.03] backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
@@ -44,7 +44,7 @@ export default function CollaborationContent({ pageData }) {
             
             <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
               {/* آیکون هدر با انیمیشن بزرگ‌نمایی ساده و بدون چرخش (مشابه درباره ما) */}
-              <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#06b6d4] mb-6 shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:border-[#06b6d4]/40 transition-colors duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-[#06b6d4] mb-6 shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:border-[#06b6d4]/40 transition-colors duration-300">
                 <Icon name={HERO_ICON} className="w-8 h-8 group-hover:scale-110 transition-transform duration-300" />
               </div>
               
@@ -74,7 +74,7 @@ export default function CollaborationContent({ pageData }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-30px" }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="relative rounded-3xl border border-white/10 p-8 flex flex-col items-center text-center group cursor-pointer overflow-hidden"
+                  className="relative rounded-3xl p-8 flex flex-col items-center text-center group cursor-pointer overflow-hidden"
                 >
                   {/* ۱. لایه پس‌زمینه شیشه‌ای ثابت (جلوگیری ۱۰۰٪ از پرش رندر مرورگر) */}
                   <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
@@ -96,7 +96,7 @@ export default function CollaborationContent({ pageData }) {
                   />
                   
                   <div 
-                    className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 transition-all duration-300 group-hover:bg-white/10 group-hover:border-white/20"
+                    className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-6 transition-all duration-300 group-hover:bg-white/10 group-hover:border-white/20"
                     style={{ color: cardColor }}
                   >
                     <Icon name={currentIcon} className="w-7 h-7 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" />
@@ -122,7 +122,7 @@ export default function CollaborationContent({ pageData }) {
             transition={{ duration: 0.4 }}
             className="w-full"
           >
-            <div className="relative rounded-3xl border border-white/10 p-8 md:p-16 flex flex-col items-center justify-center text-center group cursor-pointer overflow-hidden">
+            <div className="relative rounded-3xl p-8 md:p-16 flex flex-col items-center justify-center text-center group cursor-pointer overflow-hidden">
               
               {/* پس‌زمینه شیشه‌ای ثابت */}
               <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />

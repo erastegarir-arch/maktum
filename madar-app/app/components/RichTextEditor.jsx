@@ -15,7 +15,7 @@ import Superscript from '@tiptap/extension-superscript';
 import Subscript from '@tiptap/extension-subscript';
 import Color from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
-import Image from '@tiptap/extension-image'; // افزونه تصویر
+import Image from '@tiptap/extension-image'; 
 
 // ================= کامپوننت داخلی برای آیکون‌های ادیتور =================
 const EditorIcon = ({ name, className = "w-4 h-4" }) => {
@@ -205,7 +205,7 @@ export default function RichTextEditor({
         inline: true,
         allowBase64: true,
         HTMLAttributes: {
-          class: 'editor-image rounded-2xl max-w-full h-auto my-4 border border-white/10 shadow-lg',
+          class: 'editor-image rounded-2xl max-w-full h-auto my-4 shadow-lg',
         },
       }),
     ],
@@ -215,7 +215,7 @@ export default function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: 'min-h-[300px] outline-none text-sm leading-loose font-light p-5 text-gray-200 font-sans focus:outline-none',
+        class: 'min-h-[300px] outline-none text-sm leading-loose font-light p-6 text-gray-200 font-sans focus:outline-none focus-within:bg-[#0b0f19] focus-within:shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] transition-all rounded-b-2xl',
         dir: 'rtl' 
       }
     }
@@ -238,10 +238,10 @@ export default function RichTextEditor({
       type="button"
       onClick={onClick}
       title={title}
-      className={`relative min-w-[34px] h-[34px] px-2 rounded-xl transition-all duration-200 flex items-center justify-center font-sans text-xs cursor-pointer border ${className} ${
+      className={`relative min-w-[34px] h-[34px] px-2 rounded-xl transition-all duration-200 flex items-center justify-center font-sans text-xs cursor-pointer border border-transparent ${className} ${
         isActive 
-          ? `${activeTheme.bg} text-white border-white/20 shadow-md scale-105 font-bold` 
-          : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:text-white hover:border-white/10'
+          ? `${activeTheme.bg} text-white shadow-md scale-105 font-bold` 
+          : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
       }`}
     >
       {children}
@@ -260,10 +260,10 @@ export default function RichTextEditor({
   };
 
   return (
-    <div className="w-full bg-[#080c16] border border-white/10 rounded-2xl focus-within:border-white/30 transition-all shadow-2xl flex flex-col font-sans relative GKEditorWrp">
+    <div className="w-full bg-[#080c16] rounded-2xl transition-all shadow-2xl flex flex-col font-sans relative GKEditorWrp">
       
       {/* نوار ابزار چسبان */}
-      <div className="sticky -top-8 z-40 bg-[#0b0f19]/95 backdrop-blur-xl border-b border-white/10 p-2.5 flex flex-wrap gap-1.5 items-center shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] rounded-t-2xl GKEditorToolbar">
+      <div className="sticky -top-8 z-40 bg-[#0b0f19]/95 backdrop-blur-xl border-b border-white/5 p-2.5 flex flex-wrap gap-1.5 items-center shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] rounded-t-2xl GKEditorToolbar">
         
         {/* ۱. فرمت‌های پایه متن */}
         <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive('bold')} title="بولد (ضخیم)">
@@ -389,7 +389,7 @@ export default function RichTextEditor({
             <button 
               type="button" 
               onClick={() => onOpenMedia(editor)} 
-              className={`h-[34px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 hover:${activeTheme.bg} hover:text-white hover:border-transparent transition-all flex items-center gap-2 cursor-pointer mr-auto shadow-inner GKEditorMediaBtn`}
+              className={`h-[34px] px-3.5 rounded-xl bg-white/5 text-gray-300 hover:${activeTheme.bg} hover:text-white border border-transparent transition-all flex items-center gap-2 cursor-pointer mr-auto shadow-inner GKEditorMediaBtn`}
               title="انتخاب و درج تصویر، ویدیو یا صوت از کتابخانه رسانه"
             >
               <EditorIcon name="media"/>
@@ -415,7 +415,7 @@ export default function RichTextEditor({
         .is-editor-empty:first-child::before {
           content: attr(data-placeholder);
           float: right;
-          color: #6b7280;
+          color: #4b5563; /* رنگ مات‌تر برای Placeholder درون ادیتور */
           pointer-events: none;
           height: 0;
           font-style: normal;
@@ -439,7 +439,7 @@ export default function RichTextEditor({
           border-radius: 12px;
           margin: 1rem 0;
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-          border: 1px solid rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.05);
         }
 
         .ProseMirror ol,

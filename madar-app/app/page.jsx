@@ -18,7 +18,7 @@ const pageContent = {
     { name: '#الگوریتم_هوش_مصنوعی', size: 'text-sm', color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', delay: '1s' },
     { name: '#معماری_پنهان', size: 'text-3xl', color: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20', delay: '0.5s' },
     { name: '#فراماسونری', size: 'text-xl', color: 'text-rose-400', bg: 'bg-rose-400/10', border: 'border-rose-400/20', delay: '1.5s' },
-    { name: '#شبکه_مالی', size: 'text-base', color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', delay: '0.2s' },
+    { name: '#شبکه_مالی', size: 'text-base', color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-b border-white/5lue-400/20', delay: '0.2s' },
     { name: '#نمادشناسی', size: 'text-lg', color: 'text-fuchsia-400', bg: 'bg-fuchsia-400/10', border: 'border-fuchsia-400/20', delay: '0.8s' },
     { name: '#عملیات_روانی', size: 'text-2xl', color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', delay: '1.2s' },
   ],
@@ -34,7 +34,7 @@ const pageContent = {
 // === کامپوننت پایه اسکلتون ===
 const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
   return (
-    <div className={`relative overflow-hidden bg-white/5 border border-white/5 backdrop-blur-sm ${rounded} ${className}`}>
+    <div className={`relative overflow-hidden bg-white/5 backdrop-blur-sm ${rounded} ${className}`}>
       <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
     </div>
   );
@@ -76,7 +76,7 @@ const SpotlightCard = ({ children, themeGlow, borderGlow, link = "#" }) => {
       href={link} 
       ref={cardRef} 
       onMouseMove={handleMouseMove} 
-      className="relative flex flex-col p-4 sm:p-5 rounded-2xl border border-white/10 group overflow-hidden transition-all duration-500 hover:-translate-y-2 h-full shadow-lg"
+      className="relative flex flex-col p-4 sm:p-5 rounded-2xl group overflow-hidden transition-all duration-500 hover:-translate-y-2 h-full shadow-lg"
     >
       <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
       <div className={`absolute top-0 inset-x-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-20 bg-gradient-to-r from-transparent ${borderGlow} to-transparent`} />
@@ -141,7 +141,7 @@ export default function HomePage() {
                         چگونه نمادهای مصر باستان و علوم غریبه در طراحی پایتخت‌های مدرن و نهادهای مالی کدگذاری شدند؟ بررسی اسناد محرمانه و جریان‌های باطنی.
                     </p>
                     {/* دکمه اختصاصی مینیمال و متحرک بدون آیکون */}
-                    <a href="#" className="text-[#06b6d4] font-black text-lg border-b-[3px] border-[#06b6d4] pb-1 hover:scale-110 hover:text-cyan-300 transition-all duration-300 inline-block w-max shadow-[0_10px_20px_-10px_rgba(6,182,212,0.5)]">
+                    <a href="#" className="text-[#06b6d4] font-black text-lg border-b border-white/5-[3px] border-[#06b6d4] pb-1 hover:scale-110 hover:text-cyan-300 transition-all duration-300 inline-block w-max shadow-[0_10px_20px_-10px_rgba(6,182,212,0.5)]">
                         مشاهده مستند
                     </a>
                 </div>
@@ -170,7 +170,7 @@ export default function HomePage() {
                         آیا پروژه‌های فضایی صرفاً دستاوردهای علمی بودند یا ریشه در آیین‌های باستانی داشتند؟ افشای ارتباط میان پایه‌گذاران ناسا و انجمن‌های مخفی.
                     </p>
                     {/* دکمه اختصاصی مینیمال و متحرک بدون آیکون */}
-                    <a href="#" className="text-[#d946ef] font-black text-lg border-b-[3px] border-[#d946ef] pb-1 hover:scale-110 hover:text-fuchsia-300 transition-all duration-300 inline-block w-max shadow-[0_10px_20px_-10px_rgba(217,70,239,0.5)]">
+                    <a href="#" className="text-[#d946ef] font-black text-lg border-b border-white/5-[3px] border-[#d946ef] pb-1 hover:scale-110 hover:text-fuchsia-300 transition-all duration-300 inline-block w-max shadow-[0_10px_20px_-10px_rgba(217,70,239,0.5)]">
                         جزئیات بیشتر
                     </a>
                 </div>
@@ -188,7 +188,7 @@ export default function HomePage() {
         </section>
 
         {/* ================== Section 2: Cyber Marquee Ticker (اصلاح بک‌گراند تیره) ================== */}
-        <section className="relative overflow-hidden bg-[#080c16]/50 border border-white/10 py-1.5 rounded-2xl backdrop-blur-xl flex items-stretch shadow-[0_10px_30px_rgba(0,0,0,0.5)] -mx-4 sm:mx-0">
+        <section className="relative overflow-hidden bg-[#080c16]/50 py-1.5 rounded-2xl backdrop-blur-xl flex items-stretch shadow-[0_10px_30px_rgba(0,0,0,0.5)] -mx-4 sm:mx-0">
             {/* لایه محافظ تیره و سالید برای رفتن متن به زیر آن */}
             <div className="absolute right-0 top-0 bottom-0 z-40 flex items-center px-5 bg-[#0a0d14] border-r-2 border-[#06b6d4] shadow-[-20px_0_30px_#0a0d14]">
                 <span className="text-white font-bold text-sm flex items-center gap-2 whitespace-nowrap drop-shadow-md">
@@ -239,9 +239,9 @@ export default function HomePage() {
                   { icon: 'pen-nib', title: 'ابزارهای تحلیلی', desc: 'گراف و موتور جستجو', color: '#10b981' },
                   { icon: 'videoCamera', title: 'محتوای تولیدی', desc: 'مستندهای اختصاصی', color: '#f43f5e' }
                 ].map((stat, i) => (
-                  <div key={i} className="relative rounded-2xl border border-white/10 overflow-hidden group p-6 flex flex-col items-center text-center transition-transform hover:-translate-y-1 bg-[#0b0f19]/60 backdrop-blur-lg hover:border-white/20 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+                  <div key={i} className="relative rounded-2xl overflow-hidden group p-6 flex flex-col items-center text-center transition-transform hover:-translate-y-1 bg-[#0b0f19]/60 backdrop-blur-lg hover:border-white/20 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                       <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-10 transition-opacity duration-500" style={{ background: `radial-gradient(circle at center, ${stat.color}, transparent)` }}></div>
-                      <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-5 transition-all duration-500 group-hover:scale-110 group-hover:bg-white/10" style={{ color: stat.color, boxShadow: `0 0 20px ${stat.color}20` }}>
+                      <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-5 transition-all duration-500 group-hover:scale-110 group-hover:bg-white/10" style={{ color: stat.color, boxShadow: `0 0 20px ${stat.color}20` }}>
                           <Icon name={stat.icon} className="w-8 h-8 drop-shadow-md" />
                       </div>
                       <h3 className="font-bold text-white mb-2 text-lg">{stat.title}</h3>
@@ -253,7 +253,7 @@ export default function HomePage() {
 
         {/* ================== بخش جدید ۱: پرونده‌های ویژه و چندوجهی (Investigation Dossiers) ================== */}
         <section className="space-y-8 relative pt-6">
-            <div className="flex items-end justify-between border-b border-white/10 pb-4">
+            <div className="flex items-end justify-between border-b border-white/5 pb-4">
                 <div>
                     <h2 className="text-2xl md:text-3xl font-black text-white mb-2 flex items-center gap-3">
                       <Icon name="folderOpen" className="w-8 h-8 text-indigo-400" /> پرونده‌های باز
@@ -264,14 +264,14 @@ export default function HomePage() {
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {pageContent.dossiers.map((dossier, i) => (
-                    <a key={i} href="#" className="relative p-6 rounded-2xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl group overflow-hidden hover:-translate-y-2 transition-all duration-500 shadow-lg">
+                    <a key={i} href="#" className="relative p-6 rounded-2xl bg-[#0b0f19]/80 backdrop-blur-xl group overflow-hidden hover:-translate-y-2 transition-all duration-500 shadow-lg">
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ background: `radial-gradient(circle at top right, ${dossier.glow}, transparent 60%)` }}></div>
                         <div className="absolute -left-6 -bottom-6 opacity-10 group-hover:opacity-20 transition-opacity duration-500 transform group-hover:scale-110 group-hover:rotate-12">
                            <Icon name="folder" className="w-40 h-40" />
                         </div>
                         
                         <div className="relative z-10 flex justify-between items-start mb-12">
-                            <span className="px-3 py-1 rounded-md text-[10px] font-bold border border-white/10 bg-white/5 text-gray-300">
+                            <span className="px-3 py-1 rounded-md text-[10px] font-bold bg-white/5 text-gray-300">
                                 {dossier.items} آیتم مرتبط
                             </span>
                             <span className="w-3 h-3 rounded-full shadow-lg" style={{ backgroundColor: dossier.color, boxShadow: `0 0 10px ${dossier.color}` }}></span>
@@ -288,7 +288,7 @@ export default function HomePage() {
 
         {/* ================== Section 4: Blog (Amber Theme) ================== */}
         <section className="space-y-8 relative">
-            <div className="flex items-end justify-between border-b border-white/10 pb-4">
+            <div className="flex items-end justify-between border-b border-white/5 pb-4">
                 <div>
                     <h2 className="text-2xl md:text-3xl font-black text-white mb-2 flex items-center gap-3">
                       <span className="w-2 h-8 rounded-full bg-[#f59e0b] shadow-[0_0_15px_#f59e0b]"></span> آخرین مطالب بلاگ
@@ -308,7 +308,7 @@ export default function HomePage() {
                   { img: '/images/blog-4.jpg', title: 'ریشه‌های هرمسی در فیزیک و مکانیک کلاسیک', views: '۴.۵k' }
                 ].map((item, i) => (
                   <SpotlightCard key={i} themeGlow="rgba(245,158,11,0.08)" borderGlow="via-[#f59e0b]">
-                    <div className="w-full h-44 rounded-xl overflow-hidden relative flex items-center justify-center mb-5 bg-[#080c16] border border-white/5">
+                    <div className="w-full h-44 rounded-xl overflow-hidden relative flex items-center justify-center mb-5 bg-[#080c16]">
                         <BlurImage src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-85 group-hover:opacity-100" />
                     </div>
                     <div className="flex-grow flex flex-col justify-between relative z-10">
@@ -326,7 +326,7 @@ export default function HomePage() {
 
         {/* ================== Section 5: Raw Content (Yellow Theme) ================== */}
         <section className="space-y-8 relative">
-            <div className="flex items-end justify-between border-b border-white/10 pb-4">
+            <div className="flex items-end justify-between border-b border-white/5 pb-4">
                 <div>
                     <h2 className="text-2xl md:text-3xl font-black text-white mb-2 flex items-center gap-3">
                       <span className="w-2 h-8 rounded-full bg-[#fbbf24] shadow-[0_0_15px_#fbbf24]"></span> محتوای راش و خام
@@ -346,7 +346,7 @@ export default function HomePage() {
                   { img: '/images/raw-4.jpg', title: 'شنود مکالمات افشا شده اعضای فراماسونری', views: '۸.۹k' }
                 ].map((item, i) => (
                   <SpotlightCard key={i} themeGlow="rgba(251,191,36,0.08)" borderGlow="via-[#fbbf24]">
-                    <div className="relative h-40 w-full rounded-xl overflow-hidden flex items-center justify-center mb-5 bg-[#080c16] border border-white/5">
+                    <div className="relative h-40 w-full rounded-xl overflow-hidden flex items-center justify-center mb-5 bg-[#080c16]">
                         <BlurImage src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 group-hover:opacity-100" />
                     </div>
                     <div className="flex-grow flex flex-col justify-between relative z-10">
@@ -363,10 +363,10 @@ export default function HomePage() {
         </section>
 
         {/* ================== بخش جدید ۲: رادار موضوعی و ابر تگ‌ها ================== */}
-        <section className="relative p-8 md:p-12 rounded-3xl border border-white/10 bg-[#0b0f19]/60 backdrop-blur-xl overflow-hidden">
+        <section className="relative p-8 md:p-12 rounded-3xl bg-[#0b0f19]/60 backdrop-blur-xl overflow-hidden">
             <div className="absolute inset-0 bg-[url('/images/grid.png')] opacity-[0.03] pointer-events-none" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white/5 rounded-full animate-[spin_60s_linear_infinite] pointer-events-none" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] border border-white/5 rounded-full animate-[spin_40s_linear_infinite_reverse] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full animate-[spin_60s_linear_infinite] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full animate-[spin_40s_linear_infinite_reverse] pointer-events-none" />
             
             <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
                <div className="w-full md:w-1/3 space-y-4">
@@ -386,7 +386,7 @@ export default function HomePage() {
 
         {/* ================== Section 6: Produced Content (Rose Theme) ================== */}
         <section className="space-y-8 relative">
-            <div className="flex items-end justify-between border-b border-white/10 pb-4">
+            <div className="flex items-end justify-between border-b border-white/5 pb-4">
                 <div>
                     <h2 className="text-2xl md:text-3xl font-black text-white mb-2 flex items-center gap-3">
                       <span className="w-2 h-8 rounded-full bg-[#f43f5e] shadow-[0_0_15px_#f43f5e]"></span> محتوای تولیدی
@@ -406,7 +406,7 @@ export default function HomePage() {
                   { img: '/images/prod-4.jpg', title: 'تاریخچه مخفی نماد چشم جهان‌بین', views: '۲۲.۰k' }
                 ].map((item, i) => (
                   <SpotlightCard key={i} themeGlow="rgba(244,63,94,0.08)" borderGlow="via-[#f43f5e]">
-                    <div className="relative h-40 w-full rounded-xl overflow-hidden flex items-center justify-center mb-5 bg-[#080c16] border border-white/5">
+                    <div className="relative h-40 w-full rounded-xl overflow-hidden flex items-center justify-center mb-5 bg-[#080c16]">
                         <BlurImage src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 group-hover:opacity-100" />
                     </div>
                     <div className="flex-grow flex flex-col justify-between relative z-10">
@@ -424,7 +424,7 @@ export default function HomePage() {
 
         {/* ================== بخش جدید ۳: تالار پژوهشگران و پدیدآورندگان شاخص ================== */}
         <section className="space-y-8 relative pt-6">
-            <div className="flex items-end justify-between border-b border-white/10 pb-4">
+            <div className="flex items-end justify-between border-b border-white/5 pb-4">
                 <div>
                     <h2 className="text-2xl md:text-3xl font-black text-white mb-2 flex items-center gap-3">
                       <Icon name="users" className="w-8 h-8 text-purple-400" /> پدیدآورندگان شاخص
@@ -435,7 +435,7 @@ export default function HomePage() {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {pageContent.investigators.map((user) => (
-                    <a key={user.id} href="#" className="relative p-6 rounded-2xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-xl group overflow-hidden flex flex-col items-center text-center transition-all duration-500 hover:border-purple-500/40 hover:-translate-y-2 shadow-lg">
+                    <a key={user.id} href="#" className="relative p-6 rounded-2xl bg-[#0b0f19]/80 backdrop-blur-xl group overflow-hidden flex flex-col items-center text-center transition-all duration-500 hover:border-purple-500/40 hover:-translate-y-2 shadow-lg">
                         <div className="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <div className="absolute inset-0 pointer-events-none rounded-inherit bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.1),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         
@@ -448,7 +448,7 @@ export default function HomePage() {
                         <h3 className="text-lg font-bold text-white mb-1 group-hover:text-purple-400 transition-colors">{user.name}</h3>
                         <p className="text-xs text-purple-300 font-light mb-4">{user.role}</p>
                         
-                        <span className="mt-auto px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[11px] text-gray-400 group-hover:border-purple-500/30 group-hover:text-gray-200 transition-colors">
+                        <span className="mt-auto px-3 py-1 bg-white/5 rounded-full text-[11px] text-gray-400 group-hover:border-purple-500/30 group-hover:text-gray-200 transition-colors">
                            {user.docs} اثر منتشر شده
                         </span>
                     </a>
@@ -458,7 +458,7 @@ export default function HomePage() {
 
         {/* ================== Section 7: Tools (Emerald Theme) ================== */}
         <section className="space-y-8 relative">
-            <div className="flex items-end justify-between border-b border-white/10 pb-4">
+            <div className="flex items-end justify-between border-b border-white/5 pb-4">
                 <div>
                     <h2 className="text-2xl md:text-3xl font-black text-white mb-2 flex items-center gap-3">
                       <span className="w-2 h-8 rounded-full bg-[#10b981] shadow-[0_0_15px_#10b981]"></span> ابزارهای کاربردی
@@ -478,7 +478,7 @@ export default function HomePage() {
                   { img: '/images/tool-4.jpg', title: 'تحلیل‌گر فرکانس کلمات در اسناد', views: '۲۲.۰k' }
                 ].map((item, i) => (
                   <SpotlightCard key={i} themeGlow="rgba(16,185,129,0.08)" borderGlow="via-[#10b981]">
-                    <div className="relative h-40 w-full rounded-xl overflow-hidden flex items-center justify-center mb-5 bg-[#080c16] border border-white/5">
+                    <div className="relative h-40 w-full rounded-xl overflow-hidden flex items-center justify-center mb-5 bg-[#080c16]">
                         <BlurImage src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 group-hover:opacity-100" />
                     </div>
                     <div className="flex-grow flex flex-col justify-between relative z-10">
@@ -495,7 +495,7 @@ export default function HomePage() {
         </section>
 
         {/* ================== بخش جدید ۴: اقدام به عمل و ارسال سند (Tip Line) ================== */}
-        <section className="relative mt-20 p-10 md:p-16 rounded-3xl border border-white/10 overflow-hidden group shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        <section className="relative mt-20 p-10 md:p-16 rounded-3xl overflow-hidden group shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
             <div className="absolute inset-0 bg-gradient-to-br from-[#0b0f19] to-[#050810] -z-20" />
             <div className="absolute inset-0 opacity-10 bg-[url('/images/noise.png')] mix-blend-overlay -z-10" />
             

@@ -30,7 +30,7 @@ const defaultPageData = {
   ]
 };
 
-// کامپوننت سوئیچ وضعیت مدرن (GKS1)
+// کامپوننت سوئیچ وضعیت گلس‌مورفی
 const SectionToggle = ({ checked, onChange, colorClass = "bg-[#06b6d4]" }) => (
   <label className="flex items-center cursor-pointer gap-2 select-none group/toggle">
     <span className={`text-xs font-bold transition-colors ${checked !== false ? 'text-white' : 'text-gray-500'}`}>
@@ -43,8 +43,8 @@ const SectionToggle = ({ checked, onChange, colorClass = "bg-[#06b6d4]" }) => (
         checked={checked !== false} 
         onChange={e => onChange(e.target.checked)} 
       />
-      <div className={`block w-11 h-6 rounded-full transition-colors border border-white/10 ${checked !== false ? colorClass : 'bg-white/5'}`}></div>
-      <div className={`absolute right-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${checked !== false ? '-translate-x-5' : ''}`}></div>
+      <div className={`block w-11 h-6 rounded-full transition-colors border border-transparent shadow-inner ${checked !== false ? colorClass : 'bg-black/30'}`}></div>
+      <div className={`absolute right-1 top-1 bg-white w-4 h-4 rounded-full transition-transform shadow-md ${checked !== false ? '-translate-x-5' : ''}`}></div>
     </div>
   </label>
 );
@@ -62,7 +62,7 @@ export default function RulesSettingsPage() {
       try {
         const parsed = JSON.parse(stored);
 
-        // تبدیل فرمت قدیمی (پاراگراف + لیست) به content یکپارچه ادیتور در صورت وجود کدهای قدیمی
+        // تبدیل فرمت قدیمی به content یکپارچه ادیتور در صورت وجود کدهای قدیمی
         const convertedRules = (parsed.rules || []).map(rule => {
           if (rule.content !== undefined) return rule;
 
@@ -120,7 +120,6 @@ export default function RulesSettingsPage() {
     );
   };
 
-  // --- مدیریت پاراگراف‌های بخش هدر ---
   const handleHeroParagraphChange = (index, value) => {
     setData(prev => ({
       ...prev,
@@ -151,7 +150,6 @@ export default function RulesSettingsPage() {
     }));
   };
 
-  // --- مدیریت باکس‌های قوانین (Rules) ---
   const addRule = () => {
     const newId = `section-${Date.now()}`;
     setData(prev => ({
@@ -208,9 +206,9 @@ export default function RulesSettingsPage() {
 
       <form onSubmit={handleSave} className="space-y-8 animate-[fadeIn_0.4s_ease-out]">
 
-        {/* ۱. هدر اصلی و تاریخ به‌روزرسانی (اصلاح overflow و z-index) */}
-        <div className="relative rounded-3xl border border-white/10 shadow-2xl group z-30">
-          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10 rounded-3xl" />
+        {/* ۱. هدر اصلی و تاریخ به‌روزرسانی */}
+        <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] group border border-transparent z-30">
+          <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl pointer-events-none -z-10 rounded-3xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 pointer-events-none z-20" />
 
           <div className="p-6 md:p-8 space-y-6 relative z-10">
@@ -227,24 +225,24 @@ export default function RulesSettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-xs text-gray-300 font-bold">عنوان اصلی صفحه</label>
+                <label className="text-xs text-gray-300 font-bold pl-1">عنوان اصلی صفحه</label>
                 <input 
                   type="text" 
                   value={data.hero.title || ''} 
                   onChange={e => setData(prev => ({ ...prev, hero: { ...prev.hero, title: e.target.value } }))} 
-                  className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white focus:border-white/30 outline-none transition-colors shadow-inner font-sans" 
+                  className="w-full bg-white/10 border border-white/10 rounded-xl p-3.5 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#06b6d4] focus:bg-white/20 outline-none transition-all shadow-inner font-sans" 
                   placeholder="عنوان صفحه قوانین..."
                 />
               </div>
 
-              {/* تاریخ آخرین به‌روزرسانی (اصلاح z-index برای باز شدن صحیح پاپ‌آپ) */}
-              <div className="space-y-2 p-4 bg-[#080c16] border border-white/10 rounded-2xl relative shadow-inner z-40">
+              {/* تاریخ آخرین به‌روزرسانی */}
+              <div className="space-y-2 p-4 bg-white/5 border border-transparent rounded-2xl relative shadow-inner z-40">
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-xs text-amber-400 font-bold flex items-center gap-1.5">
+                  <label className="text-xs text-amber-400 font-bold flex items-center gap-1.5 pl-1">
                     <Icon name="calendar" className="w-4 h-4" /> تاریخ آخرین به‌روزرسانی
                   </label>
                   <label className="flex items-center cursor-pointer gap-2">
-                    <span className="text-[10px] text-gray-400">نمایش تاریخ</span>
+                    <span className="text-[10px] text-gray-400 font-bold">نمایش تاریخ</span>
                     <input 
                       type="checkbox" 
                       checked={data.hero.showUpdateDate !== false} 
@@ -268,11 +266,11 @@ export default function RulesSettingsPage() {
             {/* پاراگراف‌های توضیحات */}
             <div className="space-y-3 pt-4 border-t border-white/10">
               <div className="flex justify-between items-center">
-                <label className="text-xs text-gray-300 font-bold">پاراگراف‌های مقدمه</label>
+                <label className="text-xs text-gray-300 font-bold pl-1">پاراگراف‌های مقدمه</label>
                 <button 
                   type="button" 
                   onClick={addHeroParagraph} 
-                  className="text-xs bg-[#06b6d4]/10 text-[#06b6d4] hover:bg-[#06b6d4]/20 border border-[#06b6d4]/30 px-3.5 py-1.5 rounded-xl font-bold transition-colors cursor-pointer"
+                  className="text-xs bg-white/5 border border-transparent shadow-inner text-[#06b6d4] hover:bg-[#06b6d4]/10 hover:text-white px-3.5 py-1.5 rounded-xl font-bold transition-colors cursor-pointer"
                 >
                   + افزودن پاراگراف
                 </button>
@@ -286,12 +284,12 @@ export default function RulesSettingsPage() {
                       value={p} 
                       onChange={e => handleHeroParagraphChange(i, e.target.value)} 
                       placeholder="متن مقدمه را اینجا وارد کنید..."
-                      className="flex-1 bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white focus:border-white/30 outline-none resize-none transition-colors shadow-inner font-light leading-relaxed text-justify" 
+                      className="flex-1 w-full bg-white/10 border border-white/10 shadow-inner rounded-xl p-3.5 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#06b6d4] focus:bg-white/20 transition-all outline-none resize-none font-light leading-relaxed text-justify" 
                     />
                     <button 
                       type="button" 
                       onClick={() => removeHeroParagraph(i)} 
-                      className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 rounded-xl text-xs shrink-0 transition-colors cursor-pointer"
+                      className="p-3.5 bg-rose-500/10 border border-transparent text-rose-400 hover:bg-rose-500 hover:text-white rounded-xl text-xs shrink-0 transition-colors cursor-pointer shadow-inner"
                       title="حذف این پاراگراف"
                     >
                       <Icon name="trash" className="w-4 h-4" />
@@ -303,9 +301,9 @@ export default function RulesSettingsPage() {
           </div>
         </div>
 
-        {/* ۲. بخش مدیریت ماده‌ها (قوانین) با ادیتور متنی Tiptap */}
-        <div className="relative rounded-3xl border border-white/10 shadow-2xl overflow-hidden group z-10">
-          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+        {/* ۲. بخش مدیریت ماده‌ها (قوانین) */}
+        <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent z-10">
+          <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
           <div className="p-6 md:p-8 space-y-6 relative z-10">
@@ -314,12 +312,12 @@ export default function RulesSettingsPage() {
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <Icon name="browser" className="w-5 h-5 text-[#10b981]" /> ۲. مدیریت مواد و تبصره‌های قانونی
                 </h2>
-                <p className="text-xs text-gray-400 font-light mt-1">عناوین این باکس‌ها به صورت خودکار در «فهرست مندرجات» صفحه قرار می‌گیرند.</p>
+                <p className="text-xs text-gray-400 font-light mt-1 pl-1">عناوین این باکس‌ها به صورت خودکار در «فهرست مندرجات» صفحه قرار می‌گیرند.</p>
               </div>
               <button 
                 type="button" 
                 onClick={addRule} 
-                className="text-xs bg-[#10b981] hover:bg-[#059669] text-white px-4 py-2.5 rounded-xl font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
+                className="text-xs bg-[#10b981] hover:bg-[#059669] text-white px-4 py-2.5 rounded-xl font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all cursor-pointer flex items-center gap-1.5 self-start sm:self-auto border border-transparent"
               >
                 <Icon name="plus" className="w-4 h-4" /> افزودن ماده جدید
               </button>
@@ -333,11 +331,11 @@ export default function RulesSettingsPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className={`p-6 bg-[#080c16] border rounded-2xl relative transition-all shadow-inner space-y-5 ${rule.enabled !== false ? 'border-white/10' : 'border-rose-500/30 opacity-60'}`}
+                    className={`p-6 bg-white/5 border border-transparent rounded-2xl relative transition-all shadow-inner space-y-5 ${rule.enabled !== false ? '' : 'border-rose-500/30 opacity-60'}`}
                   >
                     {/* هدر باکس قانون */}
-                    <div className="flex justify-between items-center pb-3 border-b border-white/5">
-                      <span className="text-sm font-bold text-[#06b6d4]">باکس قانونی شماره {idx + 1}</span>
+                    <div className="flex justify-between items-center pb-3 border-b border-white/10">
+                      <span className="text-sm font-bold text-[#06b6d4] pl-1">باکس قانونی شماره {idx + 1}</span>
                       <div className="flex items-center gap-4">
                         <SectionToggle 
                           checked={rule.enabled} 
@@ -347,9 +345,9 @@ export default function RulesSettingsPage() {
                         <button 
                           type="button" 
                           onClick={() => removeRule(idx)} 
-                          className="text-xs text-rose-400 hover:text-rose-300 transition-colors cursor-pointer flex items-center gap-1 font-bold mr-2"
+                          className="text-xs bg-white/5 border border-transparent shadow-inner text-rose-400 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer flex items-center gap-1 font-bold mr-2 px-2 py-1 rounded"
                         >
-                          <Icon name="trash" className="w-3.5 h-3.5" /> حذف این ماده
+                          <Icon name="trash" className="w-3.5 h-3.5" /> حذف
                         </button>
                       </div>
                     </div>
@@ -357,22 +355,22 @@ export default function RulesSettingsPage() {
                     {/* عنوان دو قسمتی */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="sm:col-span-1 space-y-1.5">
-                        <label className="text-xs text-[#06b6d4] font-bold block">بخش اول عنوان (فیروزه‌ای)</label>
+                        <label className="text-xs text-[#06b6d4] font-bold block pl-1">بخش اول عنوان (فیروزه‌ای)</label>
                         <input 
                           type="text" 
                           value={rule.number || ''} 
                           onChange={e => handleRuleChange(idx, 'number', e.target.value)} 
-                          className="w-full bg-[#0b0f19] border border-[#06b6d4]/40 rounded-xl p-3 text-sm text-[#06b6d4] font-bold focus:border-[#06b6d4] outline-none transition-colors shadow-inner font-sans" 
+                          className="w-full bg-white/10 border border-[#06b6d4]/40 rounded-xl p-3.5 text-sm text-[#06b6d4] font-bold focus:border focus:border-[#06b6d4] focus:bg-white/20 outline-none transition-all shadow-inner font-sans" 
                           placeholder="مثلاً: ماده ۱." 
                         />
                       </div>
                       <div className="sm:col-span-2 space-y-1.5">
-                        <label className="text-xs text-white font-bold block">بخش دوم عنوان (سفید)</label>
+                        <label className="text-xs text-white font-bold block pl-1">بخش دوم عنوان (سفید)</label>
                         <input 
                           type="text" 
                           value={rule.title || ''} 
                           onChange={e => handleRuleChange(idx, 'title', e.target.value)} 
-                          className="w-full bg-[#0b0f19] border border-white/10 rounded-xl p-3 text-sm text-white font-bold focus:border-white/30 outline-none transition-colors shadow-inner font-sans" 
+                          className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl p-3.5 text-sm text-white placeholder:text-white/40 font-bold focus:border focus:border-white/40 focus:bg-white/20 outline-none transition-all font-sans" 
                           placeholder="مثلاً: تعاریف و کلیات" 
                         />
                       </div>
@@ -380,7 +378,7 @@ export default function RulesSettingsPage() {
 
                     {/* ادیتور متنی یکپارچه Tiptap برای محتوای ماده قانون */}
                     <div className="space-y-2">
-                      <label className="text-xs text-gray-300 font-bold block">متن و بندهای این ماده</label>
+                      <label className="text-xs text-gray-300 font-bold block pl-1">متن و بندهای این ماده</label>
                       <RichTextEditor 
                         value={rule.content || ''} 
                         onChange={(newContent) => handleRuleChange(idx, 'content', newContent)} 
@@ -401,7 +399,7 @@ export default function RulesSettingsPage() {
           <button 
             type="submit" 
             disabled={saving} 
-            className="px-10 py-3.5 rounded-2xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all disabled:opacity-50 cursor-pointer hover:scale-105 active:scale-95 flex items-center gap-2"
+            className="px-10 py-4 rounded-2xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all disabled:opacity-50 cursor-pointer hover:scale-105 active:scale-95 flex items-center gap-2 border border-transparent"
           >
             <Icon name="checkCircle" className="w-5 h-5" />
             {saving ? 'در حال ذخیره‌سازی...' : 'ذخیره تمام تغییرات قوانین'}

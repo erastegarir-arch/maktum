@@ -168,7 +168,7 @@ export async function getTaxonomies() {
 }
 
 // ======================================================================
-// اصلاح طلایی: اضافه شدن آمار لایک‌ها و بررسی لایک کاربر برای فرانت‌اند
+// دریافت محتوا با آمار لایک‌ها و نظرات تایید شده برای نمایش به کاربر
 // ======================================================================
 export async function getContentBySlug(slug, type = null) {
   try {
@@ -183,27 +183,41 @@ export async function getContentBySlug(slug, type = null) {
         categories: true,
         creators: true,
         tags: true,
-        // گرفتن تعداد کل کاربرانی که این محتوا را لایک کرده‌اند
         _count: {
           select: { favoritedBy: true }
         },
-        // اگر کاربری لاگین است، بررسی کن آیا آیدی این محتوا در لیست لایک‌هایش هست؟
         favoritedBy: session ? {
           where: { userId: session.userId },
           select: { id: true }
         } : false,
-        // نظرات تایید شده هم می‌توانند اینجا واکشی شوند که بعداً اضافه می‌کنیم
+        // واکشی نظرات تایید شده از دیتابیس به همراه مشخصات نویسنده
+        comments: {
+          where: { status: 'APPROVED' },
+          orderBy: { createdAt: 'desc' },
+          include: {
+            user: { select: { firstName: true, lastName: true } }
+          }
+        }
       },
     });
 
     if (!content) return null;
 
-    // متغیر ساده برای بازگشت به فرانت‌اند: آیا من لایک کرده‌ام؟
     const isFavoritedByMe = session && content.favoritedBy && content.favoritedBy.length > 0;
+
+    // مپ کردن نظرات دیتابیس به فرمتی که قالب فرانت‌اِند شما نیاز دارد
+    const formattedComments = content.comments ? content.comments.map(c => ({
+      id: c.id,
+      user: c.user?.firstName || c.user?.lastName ? `${c.user.firstName || ''} ${c.user.lastName || ''}`.trim() : 'کاربر مدار',
+      date: new Date(c.createdAt).toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' }),
+      text: c.text,
+      adminReply: c.adminReply
+    })) : [];
 
     return {
       ...content,
-      isFavoritedByMe
+      isFavoritedByMe,
+      comments: formattedComments // جایگزین شدن نظرات واقعی به جای حالت متنی قدیمی
     };
   } catch (error) {
     console.error("خطا در دریافت محتوا با اسلاگ:", error);

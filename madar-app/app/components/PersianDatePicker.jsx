@@ -12,7 +12,8 @@ export default function PersianDatePicker({
   onChange, 
   disabled = false, 
   placeholder = "انتخاب تاریخ...",
-  hasTime = false
+  hasTime = false,
+  inputClass
 }) {
   return (
     <div className="w-full relative custom-datepicker">
@@ -33,7 +34,12 @@ export default function PersianDatePicker({
         className="bg-dark"
         placeholder={placeholder}
         containerClassName="w-full"
-        inputClass={`w-full bg-[#0b0f19] border ${disabled ? 'border-white/5 opacity-50 cursor-not-allowed' : 'border-white/10 hover:border-white/20 focus:border-amber-500'} rounded-lg p-2 text-sm text-white dir-ltr text-right outline-none transition-colors`}
+        inputClass={
+          inputClass ||
+          `w-full bg-white/10 border border-white/10 shadow-inner ${
+            disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/15 focus:border focus:border-amber-500 focus:bg-white/20'
+          } rounded-xl p-3.5 text-sm text-white placeholder:text-white/40 dir-ltr text-right outline-none transition-all font-sans`
+        }
       />
     </div>
   );

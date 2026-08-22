@@ -20,7 +20,7 @@ const toPersianDigits = (num) => {
 // === کامپوننت پایه اسکلتون با افکت Shimmer ===
 const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
   return (
-    <div className={`relative overflow-hidden bg-white/5 border border-white/5 backdrop-blur-sm ${rounded} ${className}`}>
+    <div className={`relative overflow-hidden bg-white/5 backdrop-blur-sm ${rounded} ${className}`}>
       <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
     </div>
   );
@@ -105,7 +105,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
         />
 
         {/* هدر صفحه (داینامیک شده از دیتابیس/سرور) */}
-        <section className="relative rounded-3xl border border-white/10 p-8 md:p-12 overflow-hidden flex flex-col justify-center items-center text-center shadow-2xl animate-[fadeIn_0.5s_ease-out] group">
+        <section className="relative rounded-3xl p-8 md:p-12 overflow-hidden flex flex-col justify-center items-center text-center shadow-2xl animate-[fadeIn_0.5s_ease-out] group">
           <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#3b82f6] to-transparent opacity-90 pointer-events-none z-20" />
           
@@ -130,26 +130,26 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
         </section>
 
         {/* نوار تب‌ها و جستجو */}
-        <div className="relative rounded-2xl border border-white/10 p-4 flex flex-col md:flex-row gap-6 justify-between items-center z-20 shadow-2xl overflow-hidden">
+        <div className="relative rounded-2xl p-4 flex flex-col md:flex-row gap-6 justify-between items-center z-20 shadow-2xl overflow-hidden">
           <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50 pointer-events-none z-20" />
           
-          <div className="flex bg-[#080c16] p-1.5 rounded-full border border-white/5 overflow-x-auto w-full md:w-auto hide-scroll relative z-10 shadow-inner">
+          <div className="flex bg-[#080c16] p-1.5 rounded-full overflow-x-auto w-full md:w-auto hide-scroll relative z-10 shadow-inner">
             <button 
               onClick={() => handleTabSwitch('hashtags')} 
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer border ${activeTab === 'hashtags' ? 'bg-[#a855f7]/15 text-[#a855f7] border-[#a855f7]/30 shadow-[0_0_15px_rgba(168,85,247,0.15)]' : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'}`}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer border ${activeTab === 'hashtags' ? 'bg-[#a855f7]/15 text-[#a855f7] border-[#a855f7]/30 shadow-[0_0_15px_rgba(168,85,247,0.15)]' : 'border-t border-white/5ransparent text-gray-400 hover:text-white hover:bg-white/5'}`}
             >
               <Icon name="hash" className="w-4 h-4" /> هشتگ‌ها
             </button>
             <button 
               onClick={() => handleTabSwitch('categories')} 
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer border ${activeTab === 'categories' ? 'bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/30 shadow-[0_0_15px_rgba(245,158,11,0.15)]' : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'}`}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer border ${activeTab === 'categories' ? 'bg-[#f59e0b]/15 text-[#f59e0b] border-[#f59e0b]/30 shadow-[0_0_15px_rgba(245,158,11,0.15)]' : 'border-t border-white/5ransparent text-gray-400 hover:text-white hover:bg-white/5'}`}
             >
               <Icon name="folder" className="w-4 h-4" /> دسته‌بندی‌ها
             </button>
             <button 
               onClick={() => handleTabSwitch('creators')} 
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer border ${activeTab === 'creators' ? 'bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'}`}
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer border ${activeTab === 'creators' ? 'bg-[#10b981]/15 text-[#10b981] border-[#10b981]/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'border-t border-white/5ransparent text-gray-400 hover:text-white hover:bg-white/5'}`}
             >
               <Icon name="users" className="w-4 h-4" /> پدیدآورندگان
             </button>
@@ -161,7 +161,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={getSearchPlaceholder()}
-              className="w-full bg-[#080c16] border border-white/10 rounded-full py-3 px-12 text-sm outline-none focus:border-white/30 focus:bg-white/5 transition-all text-white placeholder-gray-500 shadow-inner"
+              className="w-full bg-[#080c16] rounded-full py-3 px-12 text-sm outline-none focus:border-white/30 focus:bg-white/5 transition-all text-white placeholder-gray-500 shadow-inner"
             />
             <Icon name="search" className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
@@ -170,16 +170,16 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
         {/* پنل ۱: هشتگ‌ها */}
         {activeTab === 'hashtags' && (
           <div className="animate-[slideUpFade_0.4s_ease-out]">
-            <div className="relative rounded-3xl border border-white/10 p-8 overflow-hidden shadow-2xl group">
+            <div className="relative rounded-3xl p-8 overflow-hidden shadow-2xl group">
               <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#a855f7] to-transparent opacity-70 pointer-events-none z-20" />
               
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b border-white/10 pb-4 gap-4 relative z-10">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b border-white/5 pb-4 gap-4 relative z-10">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <Icon name="trend" className="w-6 h-6 text-[#a855f7]" /> ابر کلیدواژه‌ها
                 </h2>
                 {!isLoading && (
-                  <span className="text-xs text-gray-400 font-sans bg-[#080c16] border border-white/10 px-4 py-2 rounded-full shadow-inner">
+                  <span className="text-xs text-gray-400 font-sans bg-[#080c16] px-4 py-2 rounded-full shadow-inner">
                     <span className="text-[#a855f7] font-bold">{toPersianDigits(filteredHashtags.length)}</span> هشتگ یافت شد
                   </span>
                 )}
@@ -206,7 +206,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
                       ? "border-[#a855f7]/50 bg-[#a855f7]/15 text-white hover:border-[#a855f7] hover:bg-[#a855f7]/25"
                       : isMedium
                         ? "border-white/20 bg-white/5 text-gray-200 hover:border-white/40 hover:bg-white/10"
-                        : "border-white/10 bg-[#080c16]/50 text-gray-400 hover:text-gray-200 hover:border-white/30 hover:bg-[#080c16]";
+                        : "bg-[#080c16]/50 text-gray-400 hover:text-gray-200 hover:border-white/30 hover:bg-[#080c16]";
 
                     return (
                       // تغییر لینک به /t/[slug]
@@ -216,7 +216,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
                         <span className="font-bold whitespace-nowrap">{hashtag.text}</span>
                         <span className={cn(
                           "font-sans rounded-lg px-2 py-0.5 flex items-center justify-center border transition-colors",
-                          isHigh ? "bg-[#a855f7]/20 border-[#a855f7]/30 text-[#e9d5ff]" : "bg-black/50 border-white/10 text-gray-400 group-hover/tag:text-white"
+                          isHigh ? "bg-[#a855f7]/20 border-[#a855f7]/30 text-[#e9d5ff]" : "bg-black/50 text-gray-400 group-hover/tag:text-white"
                         )}>
                           {/* نمایش فارسی تعداد آثار مرتبط */}
                           {toPersianDigits(hashtag.count)}
@@ -238,7 +238,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
                 <Icon name="folder" className="w-6 h-6 text-[#f59e0b]" /> فهرست دسته‌بندی‌ها
               </h2>
               
-              <div className="flex gap-2 bg-[#080c16] p-1 rounded-xl border border-white/10 shadow-inner">
+              <div className="flex gap-2 bg-[#080c16] p-1 rounded-xl shadow-inner">
                 <button 
                   onClick={() => setCatSort('alpha')} 
                   className={`text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer ${catSort === 'alpha' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
@@ -253,7 +253,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="relative p-6 flex flex-col justify-between h-32 rounded-3xl border border-white/10 overflow-hidden shadow-lg">
+                  <div key={i} className="relative p-6 flex flex-col justify-between h-32 rounded-3xl overflow-hidden shadow-lg">
                     <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
                     <BaseSkeleton className="h-5 w-1/2" rounded="rounded-md" />
                     <div className="flex justify-between items-end mt-4">
@@ -264,7 +264,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
                 ))}
               </div>
             ) : filteredCategories.length === 0 ? (
-               <div className="relative rounded-3xl border border-white/10 p-10 overflow-hidden shadow-2xl">
+               <div className="relative rounded-3xl p-10 overflow-hidden shadow-2xl">
                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
                  <p className="text-gray-500 text-sm text-center relative z-10">موردی یافت نشد.</p>
                </div>
@@ -272,7 +272,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {filteredCategories.map(cat => (
                   // تغییر لینک به /t/[slug]
-                  <a key={cat.id} href={`/t/${cat.slug}`} className="relative group flex flex-col justify-between h-32 p-6 rounded-3xl border border-white/10 hover:border-[#f59e0b]/50 hover:-translate-y-1.5 transition-all duration-400 overflow-hidden shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(245,158,11,0.3)] cursor-pointer">
+                  <a key={cat.id} href={`/t/${cat.slug}`} className="relative group flex flex-col justify-between h-32 p-6 rounded-3xl hover:border-[#f59e0b]/50 hover:-translate-y-1.5 transition-all duration-400 overflow-hidden shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(245,158,11,0.3)] cursor-pointer">
                     <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
                     <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#f59e0b] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20" />
                     <div className="absolute -right-10 -top-10 w-24 h-24 bg-[#f59e0b]/5 rounded-full blur-2xl group-hover:bg-[#f59e0b]/15 transition-colors -z-10"></div>
@@ -283,7 +283,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
                     <div className="relative z-10 flex justify-between items-end mt-4">
                       <Icon name="folder" className="w-6 h-6 text-gray-500 group-hover:text-[#f59e0b] transition-colors" />
                       {/* نمایش فارسی تعداد آثار مرتبط */}
-                      <span className="text-xs text-gray-300 font-sans bg-[#080c16] border border-white/10 px-3 py-1.5 rounded-xl shadow-inner">{toPersianDigits(cat.count)} محتوا</span>
+                      <span className="text-xs text-gray-300 font-sans bg-[#080c16] px-3 py-1.5 rounded-xl shadow-inner">{toPersianDigits(cat.count)} محتوا</span>
                     </div>
                   </a>
                 ))}
@@ -300,7 +300,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
                 <Icon name="users" className="w-6 h-6 text-[#10b981]" /> نمایه پدیدآورندگان
               </h2>
               
-              <div className="flex gap-2 bg-[#080c16] p-1 rounded-xl border border-white/10 shadow-inner">
+              <div className="flex gap-2 bg-[#080c16] p-1 rounded-xl shadow-inner">
                 <button 
                   onClick={() => setCreatorSort('alpha')} 
                   className={`text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer ${creatorSort === 'alpha' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
@@ -315,7 +315,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
             {isLoading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className="relative p-6 flex flex-col items-center text-center gap-3 h-[140px] rounded-3xl border border-white/10 overflow-hidden shadow-lg justify-center">
+                  <div key={i} className="relative p-6 flex flex-col items-center text-center gap-3 h-[140px] rounded-3xl overflow-hidden shadow-lg justify-center">
                     <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
                     <BaseSkeleton className="w-16 h-16 shadow-lg" rounded="rounded-full" />
                     <BaseSkeleton className="h-4 w-3/4 mt-2" rounded="rounded-md" />
@@ -323,7 +323,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
                 ))}
               </div>
             ) : filteredCreators.length === 0 ? (
-               <div className="relative rounded-3xl border border-white/10 p-10 overflow-hidden shadow-2xl">
+               <div className="relative rounded-3xl p-10 overflow-hidden shadow-2xl">
                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
                  <p className="text-gray-500 text-sm text-center relative z-10">موردی یافت نشد.</p>
                </div>
@@ -331,12 +331,12 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                 {filteredCreators.map(creator => (
                   // تغییر لینک به /t/[slug]
-                  <a key={creator.id} href={`/t/${creator.slug}`} className="relative group flex flex-col items-center text-center gap-3 p-6 rounded-3xl border border-white/10 hover:border-[#10b981]/50 hover:-translate-y-1.5 transition-all duration-400 overflow-hidden shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.3)] cursor-pointer">
+                  <a key={creator.id} href={`/t/${creator.slug}`} className="relative group flex flex-col items-center text-center gap-3 p-6 rounded-3xl hover:border-[#10b981]/50 hover:-translate-y-1.5 transition-all duration-400 overflow-hidden shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.3)] cursor-pointer">
                     <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
                     <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20" />
                     <div className="absolute -left-10 -bottom-10 w-24 h-24 bg-[#10b981]/5 rounded-full blur-2xl group-hover:bg-[#10b981]/15 transition-colors -z-10"></div>
                     
-                    <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#10b981] transition-colors shadow-lg flex items-center justify-center bg-gray-900">
+                    <div className="relative z-10 w-16 h-16 rounded-full overflow-hidden border-2 group-hover:border-[#10b981] transition-colors shadow-lg flex items-center justify-center bg-gray-900">
                       {creator.avatar ? (
                         <BlurImage src={creator.avatar} alt={creator.name} className="w-full h-full object-cover" />
                       ) : (
@@ -346,7 +346,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
                     <div className="relative z-10 mt-2 w-full flex flex-col items-center gap-1.5">
                       <h3 className="text-sm font-bold text-white group-hover:text-[#10b981] transition-colors line-clamp-1 w-full">{creator.name}</h3>
                       {/* نمایش فارسی تعداد آثار مرتبط */}
-                      <span className="text-[10px] text-gray-400 font-sans bg-[#080c16] border border-white/10 px-2 py-0.5 rounded-lg shadow-inner">{toPersianDigits(creator.count)} اثر</span>
+                      <span className="text-[10px] text-gray-400 font-sans bg-[#080c16] px-2 py-0.5 rounded-lg shadow-inner">{toPersianDigits(creator.count)} اثر</span>
                     </div>
                   </a>
                 ))}

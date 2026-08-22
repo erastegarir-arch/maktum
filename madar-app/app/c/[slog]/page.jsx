@@ -41,7 +41,7 @@ const tagColors = [
   'text-cyan-400 border-cyan-500/30 bg-cyan-500/10',
   'text-amber-400 border-amber-500/30 bg-amber-500/10',
   'text-fuchsia-400 border-fuchsia-500/30 bg-fuchsia-500/10',
-  'text-blue-400 border-blue-500/30 bg-blue-500/10',
+  'text-blue-400 border-b border-white/5lue-500/30 bg-blue-500/10',
 ];
 
 // ==========================================
@@ -49,12 +49,12 @@ const tagColors = [
 // ==========================================
 const DossierSkeleton = () => (
   <div className="min-h-screen bg-[#050810] animate-pulse pb-20">
-    <div className="h-[50vh] md:h-[60vh] bg-white/5 border-b border-white/10 w-full" />
+    <div className="h-[50vh] md:h-[60vh] bg-white/5 border-b border-white/5 w-full" />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 space-y-12">
-      <div className="h-64 bg-white/5 rounded-3xl border border-white/10" />
-      <div className="h-40 bg-white/5 rounded-3xl border border-white/10" />
+      <div className="h-64 bg-white/5 rounded-3xl" />
+      <div className="h-40 bg-white/5 rounded-3xl" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[1, 2, 3, 4].map(i => <div key={i} className="h-72 bg-white/5 rounded-3xl border border-white/10" />)}
+        {[1, 2, 3, 4].map(i => <div key={i} className="h-72 bg-white/5 rounded-3xl" />)}
       </div>
     </div>
   </div>
@@ -99,7 +99,7 @@ const ContentCard = ({ content }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       // اصلاح 16:9 دسکتاپ و 1:1 موبایل
-      className="group relative rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer aspect-square md:aspect-video w-full border border-white/10 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_-10px_rgba(0,0,0,0.7)] hover:border-white/20" 
+      className="group relative rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer aspect-square md:aspect-video w-full transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_15px_30px_-10px_rgba(0,0,0,0.7)] hover:border-white/20" 
       style={{ '--card-color': cardColor }}
     >
       {/* لینک شدن کل کادر محتوا */}
@@ -190,8 +190,8 @@ export default function DossierPage({ params }) {
         </div>
 
         <div className="absolute inset-0 z-0 flex items-center justify-end pointer-events-none opacity-20 overflow-hidden">
-          <motion.div animate={{ rotate: 360 }} transition={{ duration: 100, repeat: Infinity, ease: "linear" }} className="w-[800px] h-[800px] rounded-full border border-white/10 border-dashed absolute -right-[200px]" />
-          <motion.div animate={{ rotate: -360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} className="w-[600px] h-[600px] rounded-full border border-white/20 border-dashed absolute -right-[100px]" />
+          <motion.div animate={{ rotate: 360 }} transition={{ duration: 100, repeat: Infinity, ease: "linear" }} className="w-[800px] h-[800px] rounded-full border-dashed absolute -right-[200px]" />
+          <motion.div animate={{ rotate: -360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} className="w-[600px] h-[600px] rounded-full hover:bg-white/20 border-dashed absolute -right-[100px]" />
         </div>
         
         <div className="absolute top-0 right-0 w-full md:w-2/3 h-full mix-blend-screen opacity-20 pointer-events-none -z-10" 
@@ -210,7 +210,7 @@ export default function DossierPage({ params }) {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             {dossier?.preTitle && (
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-xs font-bold text-white mb-5 tracking-widest" style={{ color: dossier?.themeColor || '#fff', borderColor: `${dossier?.themeColor || '#fff'}50` }}>
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md text-xs font-bold text-white mb-5 tracking-widest" style={{ color: dossier?.themeColor || '#fff', borderColor: `${dossier?.themeColor || '#fff'}50` }}>
                 <span className="w-2 h-2 rounded-full animate-pulse shadow-[0_0_10px_currentcolor]" style={{ backgroundColor: dossier?.themeColor || '#fff' }}></span>
                 {dossier?.preTitle}
               </span>
@@ -234,8 +234,8 @@ export default function DossierPage({ params }) {
           <section className="relative p-8 rounded-3xl bg-[#0b0f19]/60 backdrop-blur-xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
               <div className="absolute inset-0 opacity-[0.03] pointer-events-none" />
               
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-white/5 rounded-full animate-[spin_60s_linear_infinite] pointer-events-none" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] border border-white/5 rounded-full animate-[spin_40s_linear_infinite_reverse] pointer-events-none" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full animate-[spin_60s_linear_infinite] pointer-events-none" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full animate-[spin_40s_linear_infinite_reverse] pointer-events-none" />
               
               <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                  <div className="w-full md:w-1/3 text-center md:text-right">
@@ -264,7 +264,7 @@ export default function DossierPage({ params }) {
 
         {dossier?.showCreators !== false && dossier?.creators?.length > 0 && (
           <section>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-2">
+            <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-2">
               <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-3">
                 <span className="w-2 h-6 rounded-full" style={{ backgroundColor: dossier?.themeColor || '#fff', boxShadow: `0 0 10px ${dossier?.themeColor || '#fff'}` }}></span> 
                 {dossier?.creatorsTitle || 'اشخاص و پدیدآورندگان'}
@@ -291,7 +291,7 @@ export default function DossierPage({ params }) {
 
         {dossier?.contents?.length > 0 && (
           <section>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-8">
+            <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-8">
               <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-3">
                 <span className="w-2 h-6 rounded-full" style={{ backgroundColor: dossier?.themeColor || '#fff', boxShadow: `0 0 10px ${dossier?.themeColor || '#fff'}` }}></span> محتوای پرونده
               </h2>
@@ -309,7 +309,7 @@ export default function DossierPage({ params }) {
               <div className="mt-10 flex justify-center">
                 <button 
                   onClick={() => setVisibleCount(prev => prev + 4)}
-                  className="px-8 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-sm font-bold text-white transition-all hover:-translate-y-1 active:scale-95 shadow-lg cursor-pointer"
+                  className="px-8 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-bold text-white transition-all hover:-translate-y-1 active:scale-95 shadow-lg cursor-pointer"
                 >
                   نمایش محتوای بیشتر
                 </button>
@@ -319,7 +319,7 @@ export default function DossierPage({ params }) {
         )}
 
         {dossier?.showTipLine !== false && (
-          <section className="relative p-8 md:p-12 rounded-3xl border border-white/10 overflow-hidden group shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+          <section className="relative p-8 md:p-12 rounded-3xl overflow-hidden group shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
               <div className="absolute inset-0 bg-gradient-to-br from-[#0b0f19] to-[#050810] -z-20" />
               <div className="absolute inset-0 opacity-10 mix-blend-overlay -z-10" />
               <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-cyan-500/10 to-transparent pointer-events-none z-0" />

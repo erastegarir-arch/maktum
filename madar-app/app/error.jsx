@@ -42,7 +42,7 @@ export default function ServerError({ error, reset }) {
         <div 
           ref={cardRef}
           onMouseMove={handleMouseMove}
-          className="relative w-full rounded-3xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-2xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden group animate-[scaleIn_0.6s_ease-out]"
+          className="relative w-full rounded-3xl bg-[#0b0f19]/80 backdrop-blur-2xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden group animate-[scaleIn_0.6s_ease-out]"
         >
           {/* خط نئونی بالای کارت در هاور */}
           <div className="absolute top-0 inset-x-0 h-[2px] opacity-70 pointer-events-none z-20 bg-gradient-to-r from-transparent via-rose-500 to-transparent group-hover:via-rose-400 transition-colors duration-700" />
@@ -87,8 +87,7 @@ export default function ServerError({ error, reset }) {
             </div>
 
             {/* ================== پنل تشخیص وضعیت (Diagnostic UI) ================== */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 border-t border-b border-white/5 py-5">
-
+            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 border-y border-white/5 py-5">
               <div className="flex items-center justify-center gap-2.5 w-full sm:w-1/2">
                 <span className="relative flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
@@ -105,7 +104,6 @@ export default function ServerError({ error, reset }) {
                 <span className="text-xs text-gray-500">شناسه خطا:</span>
                 <span className="text-xs font-bold text-gray-300 tracking-wider font-sans" dir="ltr">ERR_500</span>
               </div>
-
             </div>
 
             {/* ================== دکمه‌های عملیاتی ================== */}
@@ -121,7 +119,7 @@ export default function ServerError({ error, reset }) {
 
               <Link 
                 href="/" 
-                className="w-full sm:w-auto bg-white/5 border border-white/10 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white transition-all duration-300 cursor-pointer"
+                className="w-full sm:w-auto bg-white/5 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white transition-all duration-300 cursor-pointer"
               >
                 <Icon name="arrowLeft" className="w-5 h-5" />
                 بازگشت به خانه

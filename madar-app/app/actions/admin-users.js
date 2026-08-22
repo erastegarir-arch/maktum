@@ -7,16 +7,22 @@ import { revalidatePath } from 'next/cache';
 export async function getAllUsersAction() {
   try {
     const users = await prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
       include: {
+        role: true,
+        // گرفتن آمار دقیق کاربر برای نمایش در داشبورد
         _count: {
-          select: { downloads: true, favorites: true }
+          select: {
+            downloads: true,
+            favorites: true,
+            comments: true 
+          }
         }
-      },
-      orderBy: { createdAt: 'desc' }
+      }
     });
     return { success: true, data: users };
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error("Error fetching users:", error);
     return { success: false, error: 'خطا در دریافت لیست کاربران.' };
   }
 }
@@ -85,5 +91,29 @@ export async function adminToggleUserStatusAction(id, currentStatus) {
     };
   } catch (error) {
     return { success: false, error: 'خطا در تغییر وضعیت کاربر.' };
+  }
+}
+
+// ۵. دریافت جزئیات و تاریخچه فعالیت‌های یک کاربر خاص (لود هوشمند)
+export async function getAdminUserDetailsAction(id) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: {
+        comments: {
+          include: { content: { select: { id: true, titleBase: true, titleHighlight: true, slug: true, type: true } } }
+        },
+        favorites: {
+          include: { content: { select: { id: true, titleBase: true, titleHighlight: true, slug: true, type: true } } }
+        },
+        downloads: { 
+          include: { content: { select: { id: true, titleBase: true, titleHighlight: true, slug: true, type: true } } }
+        }
+      }
+    });
+    return { success: true, data: user };
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    return { success: false, error: 'خطا در دریافت جزئیات فعالیت کاربر.' };
   }
 }

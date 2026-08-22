@@ -11,33 +11,28 @@
 @tailwind utilities;
 
 /* ========================================= */
-/* تنظیمات پایه (Body) - اصلاح شده برای رفع خط دو رنگ */
+/* تنظیمات پایه (Body) */
 /* ========================================= */
 @layer base {
   html, body {
-    /* کلاس bg-[#0b0f19] که باعث دو رنگ شدن پایین صفحه میشد حذف شد */
     @apply text-gray-100 overflow-x-hidden scroll-smooth;
-    
-    /* رنگ پس‌زمینه یکپارچه و دقیقاً هم‌رنگ با layout.js تنظیم شد */
     background-color: #030712; 
     direction: rtl;
     min-height: 100vh;
   }
 
-  /* این خطوط محافظتی (Safeguard) اضافه شدند تا اگر افزونه یا کامپوننتی 
-     هاله‌ی کاذب به پایین body چسباند، به زور آن را پاک کند */
   body::after, body::before {
     display: none !important;
   }
 }
 
 /* ========================================= */
-/* کامپوننت‌ها و استایل‌های سفارشی سایت */
+/* کامپوننت‌ها و استایل‌های گلس‌مورفیسم خالص */
 /* ========================================= */
 @layer components {
-  /* افکت گلس برای کارت‌ها */
+  /* افکت گلس برای کارت‌ها (بدون هیچ border جامد) */
   .glass-card {
-    @apply backdrop-blur-md border border-gray-800/50 rounded-3xl transition-all duration-300;
+    @apply bg-white/[0.03] backdrop-blur-2xl rounded-3xl transition-all duration-300 shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_8px_30px_rgba(0,0,0,0.4)];
   }
 
   .hover-lift {
@@ -49,14 +44,14 @@
   }
 
   /* ----------------------------------------- */
-  /* کلاس‌های داینامیک برای سیستم متن‌ساز پیشرفته (Rich Text) */
+  /* کلاس‌های داینامیک برای سیستم متن‌ساز (Rich Text) */
   /* ----------------------------------------- */
   
-  /* ۱. تعریف رنگ‌های داینامیک بر اساس تم‌های سایت شما */
-  .theme-raw { --editor-color: #fbbf24; }      /* تم زرد محتوای خام */
-  .theme-produced { --editor-color: #f43f5e; } /* تم قرمز محتوای تولیدی */
-  .theme-tool { --editor-color: #10b981; }     /* تم سبز ابزارها */
-  .rich-text { --editor-color: #06b6d4; }      /* رنگ پیش‌فرض مدار (آبی فیروزه‌ای) */
+  /* ۱. تعریف رنگ‌های داینامیک */
+  .theme-raw { --editor-color: #fbbf24; }      /* تم زرد */
+  .theme-produced { --editor-color: #f43f5e; } /* تم قرمز */
+  .theme-tool { --editor-color: #10b981; }     /* تم سبز */
+  .rich-text { --editor-color: #06b6d4; }      /* رنگ پیش‌فرض */
 
   /* ۲. استایل‌های کلی باکس ادیتور */
   .rich-text {
@@ -79,13 +74,13 @@
     @apply line-through text-gray-600; 
   }
 
-  /* ۵. هایلایت (متناسب با تم) */
+  /* ۵. هایلایت شیشه‌ای */
   .rich-text mark {
     background-color: var(--editor-color);
-    @apply text-[#0b0f19] px-1.5 py-0.5 rounded-md font-bold bg-opacity-90;
+    @apply text-[#0b0f19] px-1.5 py-0.5 rounded-md font-bold bg-opacity-80 backdrop-blur-sm;
   }
 
-  /* ۶. کلمات لینک‌دار شده (متناسب با تم) */
+  /* ۶. کلمات لینک‌دار شده */
   .rich-text a {
     color: var(--editor-color);
     @apply underline underline-offset-4 decoration-transparent transition-all duration-300 font-bold;
@@ -95,15 +90,15 @@
     @apply opacity-80;
   }
 
-/* ۷. نقل‌قول (متناسب با تم - راست‌چین برای فارسی و چپ‌چین برای انگلیسی) */
+  /* ۷. نقل‌قول گلس‌مورفی (بدون باگ و بدون ارور) */
   .rich-text blockquote { 
     border-right-width: 4px;
     border-right-color: var(--editor-color);
     border-left-width: 0;
-    @apply bg-white/5 pr-4 pl-4 py-3 my-6 rounded-l-2xl rounded-r-none italic text-gray-300 shadow-inner;
+    @apply bg-white/5 pr-4 pl-4 py-3 my-6 rounded-l-2xl rounded-r-none italic text-gray-300 shadow-inner backdrop-blur-sm;
   }
 
-  /* حالت هوشمند نقل‌قول برای متون انگلیسی و چپ‌چین */
+  /* حالت هوشمند نقل‌قول برای متون انگلیسی (رفع باگ ارور CSS) */
   .rich-text blockquote[dir="ltr"],
   .rich-text [dir="ltr"] blockquote,
   .rich-text blockquote[style*="text-align: left"],
@@ -122,17 +117,17 @@
     direction: ltr;
   }
 
-  /* ۸. کدهای درون‌خطی و بلوک‌های کد (برنامه‌نویسی) */
+  /* ۸. کدهای درون‌خطی و بلوک‌های کد (برنامه‌نویسی) شیشه‌ای */
   .rich-text code {
-    @apply bg-[#080c16] border border-white/10 text-gray-300 px-1.5 py-0.5 rounded-md font-mono text-[13px] mx-0.5 inline-block shadow-inner;
+    @apply bg-white/5 backdrop-blur-md text-gray-300 px-1.5 py-0.5 rounded-md font-sans text-[13px] mx-0.5 inline-block shadow-inner;
     direction: ltr !important;
   }
   .rich-text pre {
-    @apply bg-[#080c16] border border-white/10 p-5 rounded-2xl my-6 overflow-x-auto shadow-inner;
+    @apply bg-white/5 backdrop-blur-xl p-5 rounded-2xl my-6 overflow-x-auto shadow-inner;
     direction: ltr !important;
   }
   .rich-text pre code {
-    @apply bg-transparent border-none p-0 mx-0 text-sm text-gray-300 shadow-none block;
+    @apply bg-transparent p-0 mx-0 text-sm text-gray-300 shadow-none block;
   }
 
   /* ۹. تیترهای داخل متن */
@@ -146,13 +141,13 @@
 
   /* ۱۰. تصاویر و ویدیوهای تعبیه‌شده */
   .rich-text img {
-    @apply max-w-full h-auto rounded-2xl mx-auto my-6 border border-white/10 shadow-lg;
+    @apply max-w-full h-auto rounded-2xl mx-auto my-6 shadow-[0_10px_30px_rgba(0,0,0,0.5)];
   }
   .rich-text iframe {
-    @apply w-full rounded-2xl my-6 border border-white/10 shadow-lg aspect-video;
+    @apply w-full rounded-2xl my-6 shadow-[0_10px_30px_rgba(0,0,0,0.5)] aspect-video;
   }
 
-  /* ۱۱. استایل لیست‌ها (به همراه تنظیم هوشمند راست‌چین/چپ‌چین) */
+  /* ۱۱. استایل لیست‌ها */
   .rich-text ol { 
     @apply list-[persian] pr-6 my-4; 
   }
@@ -163,7 +158,6 @@
     @apply mb-2 leading-loose; 
   }
   
-  /* حالت هوشمند برای انگلیسی (چپ‌چین شدن لیست‌ها) */
   .rich-text ol[dir="ltr"], .rich-text [dir="ltr"] ol, .rich-text [style*="text-align: left"] ol, .rich-text [style*="text-align:left"] ol, .rich-text [class*="left"] ol { 
     @apply list-decimal pl-6 pr-0; 
     direction: ltr;
@@ -175,7 +169,7 @@
 }
 
 /* ========================================= */
-/* سیستم نوتیفیکیشن لحظه‌ای (Madar Toast System) */
+/* سیستم نوتیفیکیشن شیشه‌ای (Madar Toast) */
 /* ========================================= */
 .madar-toast-container {
     position: fixed;
@@ -185,17 +179,16 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    pointer-events: none; /* اجازه کلیک روی فضای خالی بین توست‌ها */
+    pointer-events: none;
 }
 
 .madar-toast {
     position: relative;
     min-width: 300px;
     max-width: 400px;
-    background: rgba(18, 18, 24, 0.65); /* پس‌زمینه تیره و نیمه‌شفاف */
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(18, 18, 24, 0.4); /* شفاف‌تر برای حس شیشه‌ای بهتر */
+    backdrop-filter: blur(24px); /* بلور بیشتر */
+    -webkit-backdrop-filter: blur(24px);
     border-radius: 12px;
     padding: 16px 20px;
     color: #ffffff;
@@ -203,9 +196,9 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 0 20px rgba(255,255,255,0.02), 0 8px 32px rgba(0, 0, 0, 0.4);
     overflow: hidden;
-    pointer-events: auto; /* فعال کردن کلیک روی خود توست */
+    pointer-events: auto;
     transform: translateX(120%);
     animation: toastSlideIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
@@ -214,68 +207,32 @@
     animation: toastSlideOut 0.3s ease-in forwards;
 }
 
-/* افکت‌های نئونی بر اساس نوع پیام */
-.madar-toast.success {
-    border-right: 4px solid #00ff88;
-    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.15), inset 0 0 10px rgba(0, 255, 136, 0.05);
+/* رنگ‌بندی داینامیک توست‌ها با خط نوری به جای بوردر */
+.madar-toast::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 3px;
 }
 
-.madar-toast.error {
-    border-right: 4px solid #ff0055;
-    box-shadow: 0 4px 20px rgba(255, 0, 85, 0.15), inset 0 0 10px rgba(255, 0, 85, 0.05);
-}
+.madar-toast.success::before { background: #00ff88; box-shadow: 0 0 10px #00ff88; }
+.madar-toast.error::before { background: #ff0055; box-shadow: 0 0 10px #ff0055; }
+.madar-toast.warning::before { background: #ffcc00; box-shadow: 0 0 10px #ffcc00; }
+.madar-toast.info::before { background: #00d4ff; box-shadow: 0 0 10px #00d4ff; }
 
-.madar-toast.warning {
-    border-right: 4px solid #ffcc00;
-    box-shadow: 0 4px 20px rgba(255, 204, 0, 0.15), inset 0 0 10px rgba(255, 204, 0, 0.05);
-}
+.madar-toast-content { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.madar-toast-title { font-weight: 700; font-size: 0.95rem; letter-spacing: 0.5px; }
+.madar-toast-message { font-size: 0.85rem; opacity: 0.85; line-height: 1.5; }
+.madar-toast-close { background: transparent; border: none; color: rgba(255, 255, 255, 0.6); font-size: 1.2rem; cursor: pointer; padding: 0 0 0 12px; transition: color 0.2s; }
+.madar-toast-close:hover { color: #ffffff; }
 
-.madar-toast.info {
-    border-right: 4px solid #00d4ff;
-    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.15), inset 0 0 10px rgba(0, 212, 255, 0.05);
-}
-
-/* محتوای پیام */
-.madar-toast-content {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
-}
-
-.madar-toast-title {
-    font-weight: 700;
-    font-size: 0.95rem;
-    letter-spacing: 0.5px;
-}
-
-.madar-toast-message {
-    font-size: 0.85rem;
-    opacity: 0.85;
-    line-height: 1.5;
-}
-
-/* دکمه بستن */
-.madar-toast-close {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 0 0 0 12px;
-    transition: color 0.2s;
-}
-
-.madar-toast-close:hover {
-    color: #ffffff;
-}
-
-/* نوار پیشرفت (Progress Bar) */
 .madar-toast-progress {
     position: absolute;
     bottom: 0;
     left: 0;
-    height: 3px;
+    height: 2px;
     background: rgba(255, 255, 255, 0.5);
     animation: toastProgress linear forwards;
 }
@@ -285,7 +242,6 @@
 .madar-toast.warning .madar-toast-progress { background: #ffcc00; }
 .madar-toast.info .madar-toast-progress { background: #00d4ff; }
 
-/* انیمیشن‌ها */
 @keyframes toastSlideIn {
     from { transform: translateX(120%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
@@ -302,7 +258,7 @@
 }
 
 /* ========================================= */
-/* اسکرول‌بار اختصاصی و باریک (CSS استاندارد) */
+/* اسکرول‌بار اختصاصی و باریک */
 /* ========================================= */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -310,84 +266,19 @@
 ::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.5); }
 
 /* ========================================= */
-/* سیستم سرکوب و یکپارچه‌سازی قطعی رنگ‌های SVG */
+/* سیستم رنگ‌های SVG */
 /* ========================================= */
-
-/* مجبور کردن کادر اصلی به دریافت رنگ */
-.svg-inherit-color svg {
-  color: inherit !important;
-}
-
-/* ۱. شلیک مستقیم به تمام خطوط و اشکال داخلی با قدرت !important */
-/* این بخش تمام رنگ‌های کلاس‌دارِ مخفی (خروجی ایلوستریتور) را باطل می‌کند */
-.svg-inherit-color svg path,
-.svg-inherit-color svg rect,
-.svg-inherit-color svg circle,
-.svg-inherit-color svg polygon,
-.svg-inherit-color svg ellipse,
-.svg-inherit-color svg polyline,
-.svg-inherit-color svg line {
-  fill: currentColor !important;
-}
-
-/* ۲. سپر محافظتی برای آیکون‌های توخالی (که طراح عمداً نامرئی کرده) */
-.svg-inherit-color svg [fill="none"],
-.svg-inherit-color svg [fill="transparent"],
-.svg-inherit-color svg [style*="fill: none"],
-.svg-inherit-color svg [style*="fill:none"],
-.svg-inherit-color svg [style*="fill: transparent"] {
-  fill: none !important;
-}
-
-/* محافظت مضاعف: اگر خطی فقط حاشیه دارد، داخل آن را پُر نکن */
-.svg-inherit-color svg [stroke]:not([fill]) {
-  fill: none !important;
-}
-
-/* ۳. همگام‌سازی رنگ حاشیه‌ها (تنها در صورتی که آیکون حاشیه داشته باشد) */
-.svg-inherit-color svg [stroke]:not([stroke="none"]):not([stroke="transparent"]),
-.svg-inherit-color svg [style*="stroke:"]:not([style*="stroke: none"]):not([style*="stroke:none"]) {
-  stroke: currentColor !important;
-}
+.svg-inherit-color svg { color: inherit !important; }
+.svg-inherit-color svg path, .svg-inherit-color svg rect, .svg-inherit-color svg circle, .svg-inherit-color svg polygon, .svg-inherit-color svg ellipse, .svg-inherit-color svg polyline, .svg-inherit-color svg line { fill: currentColor !important; }
+.svg-inherit-color svg [fill="none"], .svg-inherit-color svg [fill="transparent"], .svg-inherit-color svg [style*="fill: none"], .svg-inherit-color svg [style*="fill:none"], .svg-inherit-color svg [style*="fill: transparent"] { fill: none !important; }
+.svg-inherit-color svg [stroke]:not([fill]) { fill: none !important; }
+.svg-inherit-color svg [stroke]:not([stroke="none"]):not([stroke="transparent"]), .svg-inherit-color svg [style*="stroke:"]:not([style*="stroke: none"]):not([style*="stroke:none"]) { stroke: currentColor !important; }
 
 /* ========================================= */
-/* ۱. رنگ پیش‌فرض انتخاب متن در کل سایت (فیروزه‌ای مدار) */
+/* رنگ انتخاب متن */
 /* ========================================= */
-::selection {
-  background-color: rgba(6, 182, 212, 0.35); /* فیروزه‌ای (Cyan) */
-  color: #ffffff;
-}
-
-/* ========================================= */
-/* ۲. رنگ انتخاب متن برای صفحات و بخش‌های اختصاصی */
-/* ========================================= */
-
-/* تم زرد (محتوای خام) */
-.theme-raw ::selection,
-.theme-raw::selection {
-  background-color: rgba(251, 191, 36, 0.35) !important;
-  color: #ffffff !important;
-}
-
-/* تم قرمز / صورتی (محتوای تولیدی) */
-.theme-produced ::selection,
-.theme-produced::selection {
-  background-color: rgba(244, 63, 94, 0.35) !important;
-  color: #ffffff !important;
-}
-
-/* تم سبز (ابزارها) */
-.theme-tool ::selection,
-.theme-tool::selection {
-  background-color: rgba(16, 185, 129, 0.35) !important;
-  color: #ffffff !important;
-}
-
-/* تم بنفش (اگر برای بخش بلاگ یا اخبار استفاده می‌کنید) */
-.theme-blog ::selection,
-.theme-blog::selection {
-  background-color: rgba(168, 85, 247, 0.35) !important;
-  color: #ffffff !important;
-}
-
-
+::selection { background-color: rgba(6, 182, 212, 0.35); color: #ffffff; }
+.theme-raw ::selection, .theme-raw::selection { background-color: rgba(251, 191, 36, 0.35) !important; color: #ffffff !important; }
+.theme-produced ::selection, .theme-produced::selection { background-color: rgba(244, 63, 94, 0.35) !important; color: #ffffff !important; }
+.theme-tool ::selection, .theme-tool::selection { background-color: rgba(16, 185, 129, 0.35) !important; color: #ffffff !important; }
+.theme-blog ::selection, .theme-blog::selection { background-color: rgba(168, 85, 247, 0.35) !important; color: #ffffff !important; }

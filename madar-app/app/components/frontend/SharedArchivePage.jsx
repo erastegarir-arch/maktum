@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // === کامپوننت اسکلتون پایه ===
 const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => (
-  <div className={`relative overflow-hidden bg-white/5 border border-white/5 backdrop-blur-sm ${rounded} ${className}`}>
+  <div className={`relative overflow-hidden bg-white/5 backdrop-blur-sm ${rounded} ${className}`}>
     <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
   </div>
 );
@@ -19,7 +19,7 @@ const PageSkeleton = ({ activeTheme }) => (
   <div className="relative min-h-screen flex flex-col">
     <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pb-20 w-full relative z-10 pt-0">
       <div className="w-32 h-6 bg-white/5 rounded-lg"></div>
-      <section className="relative rounded-3xl border border-white/10 p-8 md:p-12 flex flex-col items-center overflow-hidden">
+      <section className="relative rounded-3xl p-8 md:p-12 flex flex-col items-center overflow-hidden">
         <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl -z-10" />
         <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.via} to-transparent opacity-90`} />
         <BaseSkeleton className="w-36 h-6 mb-5" rounded="rounded-full" />
@@ -28,7 +28,7 @@ const PageSkeleton = ({ activeTheme }) => (
       </section>
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-64 rounded-2xl border border-white/10 p-5 flex flex-col relative overflow-hidden">
+          <div key={i} className="h-64 rounded-2xl p-5 flex flex-col relative overflow-hidden">
             <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl -z-10" />
             <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.via} to-transparent opacity-90`} />
             <BaseSkeleton className="w-full h-32 mb-4" rounded="rounded-xl" />
@@ -63,7 +63,7 @@ const ArchiveItemCard = ({ item, theme }) => {
       href={item.url || '#'}
       ref={cardRef} 
       onMouseMove={handleMouseMove} 
-      className={`group flex flex-col p-5 rounded-2xl relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 border border-white/10 ${theme.borderHover} h-full shadow-lg hover:${theme.shadow}`}
+      className={`group flex flex-col p-5 rounded-2xl relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 ${theme.borderHover} h-full shadow-lg hover:${theme.shadow}`}
       style={{ '--theme-glow': `rgba(${theme.glowRGB}, 0.06)` }}
     >
       <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
@@ -71,7 +71,7 @@ const ArchiveItemCard = ({ item, theme }) => {
       <div className="absolute inset-0 pointer-events-none rounded-inherit bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),var(--theme-glow),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
       
       {/* بخش تصویر */}
-      <div className="relative z-10 w-full h-40 rounded-xl bg-black/60 overflow-hidden mb-5 flex items-center justify-center border border-white/5">
+      <div className="relative z-10 w-full h-40 rounded-xl bg-black/60 overflow-hidden mb-5 flex items-center justify-center">
         {item.image ? (
           <img 
             src={item.image} 
@@ -91,7 +91,7 @@ const ArchiveItemCard = ({ item, theme }) => {
       </div>
       
       {/* بخش فوتر کارت: اعمال تابع مبدل فقط برای تاریخ و بازدید */}
-      <div className="relative z-10 mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-gray-400 font-sans">
+      <div className="relative z-10 mt-5 pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 font-sans">
         <span className="flex items-center gap-1.5">
           <Icon name="calendarBlank" className="w-3.5 h-3.5" /> 
           {toPersianDigits(item.date)}
@@ -151,7 +151,7 @@ export default function SharedArchivePage({
 
         {/* ================= ۱. بنر معرفی (Hero) ================= */}
         {(hero.titlePart1 || hero.titlePart2) && (
-          <section className="relative rounded-3xl border border-white/10 p-8 md:p-12 overflow-hidden flex flex-col justify-center items-center text-center shadow-2xl animate-[fadeIn_0.5s_ease-out] group">
+          <section className="relative rounded-3xl p-8 md:p-12 overflow-hidden flex flex-col justify-center items-center text-center shadow-2xl animate-[fadeIn_0.5s_ease-out] group">
             <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
             <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.via} to-transparent opacity-90 pointer-events-none z-20`} />
             
@@ -160,7 +160,7 @@ export default function SharedArchivePage({
             
             <div className="relative z-10 space-y-5">
               {hero.badge && (
-                <div className={`inline-flex items-center gap-2 px-4 py-1.5 ${activeTheme.bg}/10 border border-white/10 rounded-full text-xs font-bold ${activeTheme.text} tracking-widest shadow-inner`}>
+                <div className={`inline-flex items-center gap-2 px-4 py-1.5 ${activeTheme.bg}/10 rounded-full text-xs font-bold ${activeTheme.text} tracking-widest shadow-inner`}>
                   <span className="relative flex h-3 w-3 items-center justify-center">
                     <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${activeTheme.bg} opacity-75`}></span>
                     <span className={`relative inline-flex rounded-full h-2 w-2 ${activeTheme.bg} shadow-[0_0_10px_${activeTheme.hex}]`}></span>
@@ -189,7 +189,7 @@ export default function SharedArchivePage({
             onMouseMove={handleFeaturedMouseMove}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            className={`relative rounded-3xl border border-white/10 p-8 md:p-12 overflow-hidden shadow-2xl transition-all duration-400 ${activeTheme.borderHover} group`}
+            className={`relative rounded-3xl p-8 md:p-12 overflow-hidden shadow-2xl transition-all duration-400 ${activeTheme.borderHover} group`}
             style={{ '--theme-glow': `rgba(${activeTheme.glowRGB}, 0.06)` }}
           >
             <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
@@ -208,7 +208,7 @@ export default function SharedArchivePage({
                 >
                   <div className="flex-1 space-y-6">
                     {slide.badge && (
-                      <div className={`inline-flex items-center gap-2 px-3 py-1.5 ${activeTheme.bg}/10 border border-white/10 rounded-lg text-xs font-bold ${activeTheme.text}`}>
+                      <div className={`inline-flex items-center gap-2 px-3 py-1.5 ${activeTheme.bg}/10 rounded-lg text-xs font-bold ${activeTheme.text}`}>
                         <Icon name="star" className="w-4 h-4 fill-current" /> {slide.badge}
                       </div>
                     )}
@@ -271,7 +271,7 @@ export default function SharedArchivePage({
 
         {/* ================= ۳. آرشیو محتوا ================= */}
         <section className="space-y-8">
-          <div className="flex items-end justify-between border-b border-white/10 pb-4">
+          <div className="flex items-end justify-between border-b border-white/5 pb-4">
             <div>
               <h2 className="text-2xl font-black text-white mb-1">آرشیو محتوا</h2>
               <p className="text-sm text-gray-400 font-light">تمامی محتوای بارگذاری شده در این بخش</p>
@@ -279,7 +279,7 @@ export default function SharedArchivePage({
           </div>
 
           {archiveItems.length === 0 ? (
-            <div className="relative rounded-2xl border border-white/10 p-10 overflow-hidden shadow-2xl">
+            <div className="relative rounded-2xl p-10 overflow-hidden shadow-2xl">
                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
                <EmptyState 
                 icon="folder" 
@@ -300,7 +300,7 @@ export default function SharedArchivePage({
             <div className="flex justify-center pt-6">
               <button 
                 onClick={onLoadMore}
-                className={`relative group bg-[#080c16] border border-white/10 text-white px-10 py-3.5 rounded-full font-bold flex items-center gap-3 hover:bg-white/5 ${activeTheme.borderHover} ${activeTheme.hoverText} transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] cursor-pointer`}
+                className={`relative group bg-[#080c16] text-white px-10 py-3.5 rounded-full font-bold flex items-center gap-3 hover:bg-white/5 ${activeTheme.borderHover} ${activeTheme.hoverText} transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] cursor-pointer`}
               >
                 <span>نمایش موارد بیشتر</span>
                 <Icon name="caretDown" className="w-5 h-5 group-hover:translate-y-1 transition-transform" />

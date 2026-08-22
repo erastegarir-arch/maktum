@@ -17,11 +17,11 @@ const toPersianDigits = (num) => {
 
 const HubSkeleton = () => (
   <div className="min-h-screen bg-[#050810] animate-pulse pb-20">
-    <div className="h-[60vh] bg-white/5 border-b border-white/10 w-full" />
+    <div className="h-[60vh] bg-white/5 border-b border-white/5 w-full" />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 space-y-6">
-      <div className="h-96 md:col-span-2 md:row-span-2 bg-white/5 rounded-[2rem] border border-white/10 w-full" />
+      <div className="h-96 md:col-span-2 md:row-span-2 bg-white/5 rounded-[2rem] w-full" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[1, 2, 3].map(i => <div key={i} className="h-72 bg-white/5 rounded-[2rem] border border-white/10" />)}
+        {[1, 2, 3].map(i => <div key={i} className="h-72 bg-white/5 rounded-[2rem] border" />)}
       </div>
     </div>
   </div>
@@ -75,7 +75,7 @@ const DossierCard = ({ dossier, index }) => {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`group relative rounded-[2rem] border border-white/10 overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 z-10
+      className={`group relative rounded-[2rem] overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-2 z-10
         ${isLarge ? 'md:col-span-2 md:row-span-2 min-h-[450px] lg:min-h-[550px]' : isMedium ? 'md:col-span-2 lg:col-span-1 min-h-[350px]' : 'col-span-1 min-h-[350px]'}`}
       style={{ '--theme-glow': themeColor, boxShadow: isHovered ? `0 20px 40px -15px ${themeColor}40` : '0 10px 30px -20px rgba(0,0,0,0.5)' }}
     >
@@ -97,7 +97,7 @@ const DossierCard = ({ dossier, index }) => {
 
       <div className="relative z-10 p-6 md:p-8 h-full flex flex-col justify-end">
         <div className="absolute top-6 right-6 flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-xs font-bold text-white shadow-lg">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md text-xs font-bold text-white shadow-lg">
             <Icon name="folder" className="w-3.5 h-3.5" style={{ color: themeColor }} />
             <span>{toPersianDigits(dossier._count?.contents || 0)} فایل</span>
           </div>
@@ -164,7 +164,7 @@ export default function DossiersHubPage() {
           <div className="mb-10 flex justify-center"><Breadcrumbs items={[{ label: 'مدار', href: '/' }, { label: 'منظومه‌ها' }]} /></div>
 
           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: "easeOut" }}>
-            <div className="w-20 h-20 mx-auto bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-md shadow-[0_0_40px_rgba(6,182,212,0.2)]">
+            <div className="w-20 h-20 mx-auto bg-white/5 rounded-3xl flex items-center justify-center mb-6 backdrop-blur-md shadow-[0_0_40px_rgba(6,182,212,0.2)]">
               <Icon name="folder" className="w-10 h-10 text-[#06b6d4]" />
             </div>
           </motion.div>
@@ -180,7 +180,7 @@ export default function DossiersHubPage() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 md:-mt-24">
         {dossiers.length === 0 ? (
-           <div className="text-center text-gray-400 py-20 bg-[#080c16] rounded-3xl border border-white/10">هنوز پرونده‌ای منتشر نشده است.</div>
+           <div className="text-center text-gray-400 py-20 bg-[#080c16] rounded-3xl border">هنوز پرونده‌ای منتشر نشده است.</div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
@@ -192,7 +192,7 @@ export default function DossiersHubPage() {
             </div>
             {dossiers.length > visibleCount && (
               <div className="mt-16 flex justify-center">
-                <button onClick={() => setVisibleCount(prev => prev + 3)} className="px-8 py-3.5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-sm font-bold text-white transition-all hover:-translate-y-1 active:scale-95 shadow-xl cursor-pointer">نمایش منظومه‌های بیشتر</button>
+                <button onClick={() => setVisibleCount(prev => prev + 3)} className="px-8 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 text-sm font-bold text-white transition-all hover:-translate-y-1 active:scale-95 shadow-xl cursor-pointer">نمایش منظومه‌های بیشتر</button>
               </div>
             )}
           </>

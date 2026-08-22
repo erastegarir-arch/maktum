@@ -5,15 +5,17 @@
 
 @layer base {
   body {
-    @apply bg-[#0b0f19] text-gray-200; /* رنگ پس‌زمینه اختصاصی برای پنل */
+    @apply bg-[#0b0f19] text-gray-200;
   }
 }
 
-/* استایل‌های اختصاصی پنل مدیریت (مثلا برای اسکرول‌بار یا جدول‌ها) */
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #374151;
+  background: rgba(255, 255, 255, 0.1); /* اسکرول‌بار مات و شیشه‌ای جایگزین رنگ سالید شد */
   border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5); /* رنگ سبز زمردی هماهنگ با پنل هنگام هاور */
 }

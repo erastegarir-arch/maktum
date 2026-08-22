@@ -7,6 +7,13 @@ export const metadata = {
   title: 'حساب کاربری | مدار',
 };
 
+// ==========================================
+// جلوگیری از کش شدن صفحه برای نمایش در لحظه اعلان‌ها و آپدیت‌ها
+// ==========================================
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
+
 export default async function ProfilePage() {
   // گرفتن اطلاعات کاربر از دیتابیس با استفاده از کوکی امن
   const user = await getUserProfile();

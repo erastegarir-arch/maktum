@@ -60,7 +60,7 @@ export default function ForbiddenAccess() {
         <div 
           ref={cardRef}
           onMouseMove={handleMouseMove}
-          className="relative w-full rounded-3xl border border-white/10 bg-[#0b0f19]/85 backdrop-blur-2xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden group animate-[scaleIn_0.5s_ease-out]"
+          className="relative w-full rounded-3xl bg-[#0b0f19]/85 backdrop-blur-2xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden group animate-[scaleIn_0.5s_ease-out]"
         >
           {/* خط نئونی بالای کارت در هاور (بنفش به قرمز) */}
           <div className="absolute top-0 inset-x-0 h-[2px] opacity-70 pointer-events-none z-20 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent group-hover:via-rose-500 transition-colors duration-700" />
@@ -108,7 +108,7 @@ export default function ForbiddenAccess() {
             </div>
 
             {/* ================== پنل تشخیص وضعیت (Clearance Diagnostic UI) ================== */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 border-t border-b border-white/5 py-5">
+            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 border-t border-white/5 border-b border-white/5 py-5">
               
               <div className="flex items-center justify-center gap-2.5 w-full sm:w-1/2">
                 <Icon name="fingerprint" className="w-4 h-4 text-fuchsia-500" />
@@ -139,7 +139,7 @@ export default function ForbiddenAccess() {
               
               <Link 
                 href="/archive" 
-                className="w-full sm:w-auto bg-white/5 border border-white/10 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-300 cursor-pointer"
+                className="w-full sm:w-auto bg-white/5 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-300 cursor-pointer"
               >
                 <Icon name="files" className="w-5 h-5 text-gray-400 group-hover:text-white" />
                 بازگشت به آرشیو عمومی

@@ -8,7 +8,7 @@ import BlurImage from '@/app/components/BlurImage'; // وارد کردن کام�
 // === کامپوننت پایه اسکلتون با افکت Shimmer ===
 const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
   return (
-    <div className={`relative overflow-hidden bg-white/5 border border-white/5 backdrop-blur-sm ${rounded} ${className}`}>
+    <div className={`relative overflow-hidden bg-white/5 backdrop-blur-sm ${rounded} ${className}`}>
       <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
     </div>
   );
@@ -17,7 +17,7 @@ const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
 // === اسکلتون کارت نتیجه جستجو (منطبق بر گرافیک کلی1) ===
 const ResultCardSkeleton = () => {
   return (
-    <div className="relative rounded-2xl border border-white/10 p-4 h-48 flex flex-col justify-end overflow-hidden">
+    <div className="relative rounded-2xl p-4 h-48 flex flex-col justify-end overflow-hidden">
       {/* پس‌زمینه شیشه‌ای ایزوله */}
       <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
       <BaseSkeleton className="absolute inset-0 w-full h-full" rounded="rounded-none" />
@@ -88,14 +88,14 @@ export default function SearchModal({ isOpen, onClose }) {
         {/* دکمه بستن اصلی (در گوشه بالا) */}
         <button 
           onClick={onClose} 
-          className="absolute -top-12 right-0 md:-right-12 md:top-0 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors z-20 border border-white/10 cursor-pointer"
+          className="absolute -top-12 right-0 md:-right-12 md:top-0 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors z-20 cursor-pointer"
           title="بستن پنجره"
         >
           <Icon name="close" className="w-5 h-5" />
         </button>
 
         {/* بخش بالایی: کادر جستجو (منطبق بر گرافیک کلی1) */}
-        <div className="relative rounded-[2rem] border border-white/10 p-6 overflow-hidden shrink-0 shadow-2xl group">
+        <div className="relative rounded-[2rem] p-6 overflow-hidden shrink-0 shadow-2xl group">
           {/* ۱. لایه پس‌زمینه شیشه‌ای ثابت */}
           <div className="absolute inset-0 bg-[#0b0f19]/85 backdrop-blur-xl rounded-[2rem] pointer-events-none -z-10" />
 
@@ -147,7 +147,7 @@ export default function SearchModal({ isOpen, onClose }) {
                   className={`px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold flex items-center gap-2 border transition-all duration-300 cursor-pointer ${
                     isActive 
                       ? 'bg-white/10 border-white/30 shadow-[0_0_10px_rgba(255,255,255,0.05)] text-white' 
-                      : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20'
+                      : 'bg-white/5 text-gray-300 hover:bg-white/10 hover:border-white/20'
                   }`}
                 >
                   <Icon name={filter.icon} className={`w-4 h-4 ${filter.color}`} /> 
@@ -172,7 +172,7 @@ export default function SearchModal({ isOpen, onClose }) {
                 </h4>
                 <div className="space-y-2">
                   {['مستند کاهنان فضا', 'گراف ارتباطات'].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors cursor-pointer">
+                    <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-white/5 group hover:bg-white/10 transition-colors cursor-pointer">
                       <div className="flex items-center gap-3 text-sm text-gray-300">
                         <Icon name="clock" className="w-4 h-4 text-gray-500" /> {item}
                       </div>
@@ -191,7 +191,7 @@ export default function SearchModal({ isOpen, onClose }) {
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {['هندسه_مقدس', 'لژ_لندن', 'اسناد_ناسا', 'مترجم_هوشمند'].map((tag, idx) => (
-                    <button key={idx} className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-sm text-gray-300 hover:text-[#06b6d4] hover:border-[#06b6d4]/50 transition-colors flex items-center gap-1 cursor-pointer">
+                    <button key={idx} className="px-3 py-1.5 rounded-lg bg-black/40 text-sm text-gray-300 hover:text-[#06b6d4] hover:border-[#06b6d4]/50 transition-colors flex items-center gap-1 cursor-pointer">
                       <Icon name="hash" className="w-4 h-4 text-[#06b6d4]/50" /> {tag}
                     </button>
                   ))}
@@ -200,7 +200,7 @@ export default function SearchModal({ isOpen, onClose }) {
 
               {/* کشف تصادفی (منطبق بر گرافیک کلی1) */}
               <div className="md:col-span-2 mt-2">
-                <div className="relative rounded-2xl border border-white/10 p-6 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden group">
+                <div className="relative rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden group">
                   {/* پس‌زمینه شیشه‌ای ایزوله */}
                   <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
 
@@ -208,7 +208,7 @@ export default function SearchModal({ isOpen, onClose }) {
                   <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90" />
                   
                   <div className="flex items-center gap-4 relative z-10">
-                    <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#06b6d4] flex-shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.3)] group-hover:border-[#06b6d4]/40 transition-colors duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-[#06b6d4] flex-shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.3)] group-hover:border-[#06b6d4]/40 transition-colors duration-300">
                       <Icon name="compass" className="w-7 h-7 group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div>
@@ -257,7 +257,7 @@ export default function SearchModal({ isOpen, onClose }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-10">
                 
                 {/* نتیجه ۱ (فیروزه‌ای) */}
-                <div className="relative rounded-2xl border border-white/10 group cursor-pointer h-48 flex flex-col justify-end p-4 overflow-hidden shadow-lg transition-all duration-300">
+                <div className="relative rounded-2xl group cursor-pointer h-48 flex flex-col justify-end p-4 overflow-hidden shadow-lg transition-all duration-300">
                   {/* پس‌زمینه شیشه‌ای ایزوله */}
                   <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
 
@@ -289,7 +289,7 @@ export default function SearchModal({ isOpen, onClose }) {
                 </div>
 
                 {/* نتیجه ۲ (کهربایی) */}
-                <div className="relative rounded-2xl border border-white/10 group cursor-pointer h-48 flex flex-col justify-end p-4 overflow-hidden shadow-lg transition-all duration-300">
+                <div className="relative rounded-2xl group cursor-pointer h-48 flex flex-col justify-end p-4 overflow-hidden shadow-lg transition-all duration-300">
                   {/* پس‌زمینه شیشه‌ای ایزوله */}
                   <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
 
@@ -322,7 +322,7 @@ export default function SearchModal({ isOpen, onClose }) {
                 </div>
 
                 {/* نتیجه ۳ (بنفش) */}
-                <div className="relative rounded-2xl border border-white/10 group cursor-pointer h-48 flex flex-col justify-end p-4 overflow-hidden shadow-lg transition-all duration-300">
+                <div className="relative rounded-2xl group cursor-pointer h-48 flex flex-col justify-end p-4 overflow-hidden shadow-lg transition-all duration-300">
                   {/* پس‌زمینه شیشه‌ای ایزوله */}
                   <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
 

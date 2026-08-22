@@ -11,7 +11,7 @@ import { sendOtpAction, verifyOtpAction } from '@/app/actions/auth';
 const cn = (...inputs) => twMerge(clsx(inputs));
 
 const BaseSkeleton = ({ className = "" }) => (
-  <div className={cn("relative overflow-hidden bg-white/5 border border-white/5 backdrop-blur-sm rounded-xl", className)}>
+  <div className={cn("relative overflow-hidden bg-white/5 backdrop-blur-sm rounded-xl", className)}>
     <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
   </div>
 );
@@ -203,7 +203,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
           animate={{ scale: 1, opacity: 1 }} 
           exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="relative w-full max-w-md rounded-[32px] overflow-hidden p-8 shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/10 group"
+          className="relative w-full max-w-md rounded-[32px] overflow-hidden p-8 shadow-[0_30px_60px_rgba(0,0,0,0.8)] group"
         >
           <div className="absolute inset-0 bg-[#0b0f19]/85 backdrop-blur-xl rounded-[32px] pointer-events-none -z-10" />
 
@@ -219,7 +219,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
           <button 
             onClick={() => onCloseRef.current?.()} 
             disabled={isLoading}
-            className="absolute top-6 left-6 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/20 transition-all z-20 disabled:opacity-50 cursor-pointer"
+            className="absolute top-6 left-6 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/20 transition-all z-20 disabled:opacity-50 cursor-pointer"
           >
             <Icon name="close" className="w-4 h-4" />
           </button>
@@ -244,7 +244,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     transition={{ duration: 0.3 }}
                     className="w-full text-center"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 mx-auto shadow-[0_0_20px_rgba(245,158,11,0.15)] group-hover:border-amber-500/40 transition-colors duration-300">
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 mx-auto shadow-[0_0_20px_rgba(245,158,11,0.15)] group-hover:border-amber-500/40 transition-colors duration-300">
                       <Icon name="fingerprint" className="w-8 h-8 text-amber-500 group-hover:scale-110 transition-transform duration-300" />
                     </div>
 
@@ -261,7 +261,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                         onChange={handlePhoneChange}
                         onKeyDown={handlePhoneKeyDown}
                         disabled={isLoading}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-left text-lg text-white outline-none focus:border-amber-500 transition-all disabled:opacity-50"
+                        className="w-full bg-white/5 rounded-xl py-4 px-4 text-left text-lg text-white outline-none focus:border-amber-500 transition-all disabled:opacity-50"
                       />
                     </div>
 
@@ -282,13 +282,13 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     transition={{ duration: 0.3 }}
                     className="w-full text-center"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 mx-auto shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:border-cyan-400/40 transition-colors duration-300">
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 mx-auto shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:border-cyan-400/40 transition-colors duration-300">
                       <Icon name="password" className="w-8 h-8 text-cyan-400 group-hover:scale-110 transition-transform duration-300" />
                     </div>
 
                     <h2 className="text-2xl font-bold text-white mb-2">تایید هویت</h2>
                     <p className="text-sm text-gray-400 font-light mb-8">
-                      کد ارسال شده به <span dir="ltr" className="text-cyan-400 font-mono font-bold">{phone}</span> را وارد کنید.
+                      کد ارسال شده به <span dir="ltr" className="text-cyan-400 font-sans font-bold">{phone}</span> را وارد کنید.
                     </p>
 
                     <div className="flex items-center justify-center gap-2 w-full mb-6" dir="ltr">
@@ -302,7 +302,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                           onChange={(e) => handleOtpChange(idx, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                           disabled={isLoading}
-                          className="w-12 h-14 bg-white/5 border border-white/10 rounded-xl text-center text-xl font-bold text-white outline-none focus:border-cyan-400 transition-all disabled:opacity-50"
+                          className="w-12 h-14 bg-white/5 rounded-xl text-center text-xl font-bold text-white outline-none focus:border-cyan-400 transition-all disabled:opacity-50"
                         />
                       ))}
                     </div>
@@ -319,7 +319,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                       <button onClick={() => setStep(1)} disabled={isLoading} className="hover:text-white transition-colors cursor-pointer">
                         اصلاح شماره
                       </button>
-                      <span className="font-mono dir-ltr">{formatTime(timer)}</span>
+                      <span className="font-sans dir-ltr">{formatTime(timer)}</span>
                     </div>
                   </motion.div>
                 )}

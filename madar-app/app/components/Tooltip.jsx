@@ -37,10 +37,10 @@ export default function Tooltip({
   };
 
   const arrowClasses = {
-    top: 'bottom-[-4px] left-1/2 -translate-x-1/2 border-b border-r',
-    bottom: 'top-[-4px] left-1/2 -translate-x-1/2 border-t border-l',
-    left: 'right-[-4px] top-1/2 -translate-y-1/2 border-t border-r',
-    right: 'left-[-4px] top-1/2 -translate-y-1/2 border-b border-l',
+    top: 'bottom-[-4px] left-1/2 -translate-x-1/2 border-b border-white/5 border-r',
+    bottom: 'top-[-4px] left-1/2 -translate-x-1/2 border-t border-white/5 border-l',
+    left: 'right-[-4px] top-1/2 -translate-y-1/2 border-t border-white/5 border-r',
+    right: 'left-[-4px] top-1/2 -translate-y-1/2 border-b border-white/5 border-l',
   };
 
   return (
@@ -63,11 +63,11 @@ export default function Tooltip({
             ${position === 'right' && !isVisible ? '-translate-x-1' : ''}
           `}
         >
-          <span className={`block bg-[#080c16]/95 backdrop-blur-xl border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.8)] text-white text-xs font-medium px-3 py-2 rounded-xl whitespace-nowrap ${className}`}>
+          <span className={`block bg-[#080c16]/95 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] text-white text-xs font-medium px-3 py-2 rounded-xl whitespace-nowrap ${className}`}>
             {content}
           </span>
 
-          <span className={`absolute w-2 h-2 bg-[#080c16] border-white/10 rotate-45 transform ${arrowClasses[position]}`}></span>
+          <span className={`absolute w-2 h-2 bg-[#080c16] rotate-45 transform ${arrowClasses[position]}`}></span>
         </span>
       )}
     </span>

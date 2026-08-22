@@ -35,10 +35,10 @@ const TAXONOMY_THEMES = {
 };
 
 const CONTENT_THEMES = {
-  PRODUCED: { category: 'محتوای تولیدی', borderTop: 'border-t-[#f43f5e]', badgeText: 'text-[#f43f5e]', hoverTitle: 'group-hover:text-[#f43f5e]', gradientVia: 'via-[#f43f5e]', hoverShadow: 'hover:border-[#f43f5e]/40 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.3)]', filterId: 'produced', metaIcon: 'video' },
-  BLOG: { category: 'بلاگ', borderTop: 'border-t-[#b45309]', badgeText: 'text-[#b45309]', hoverTitle: 'group-hover:text-[#b45309]', gradientVia: 'via-[#b45309]', hoverShadow: 'hover:border-[#b45309]/40 hover:shadow-[0_20px_40px_-15px_rgba(180,83,9,0.3)]', filterId: 'article', metaIcon: 'article' },
-  RAW: { category: 'محتوای خام', borderTop: 'border-t-[#fbbf24]', badgeText: 'text-[#fbbf24]', hoverTitle: 'group-hover:text-[#fbbf24]', gradientVia: 'via-[#fbbf24]', hoverShadow: 'hover:border-[#fbbf24]/40 hover:shadow-[0_20px_40px_-15px_rgba(251,191,36,0.3)]', filterId: 'raw', metaIcon: 'folder' },
-  TOOL: { category: 'ابزارها', borderTop: 'border-t-[#10b981]', badgeText: 'text-[#10b981]', hoverTitle: 'group-hover:text-[#10b981]', gradientVia: 'via-[#10b981]', hoverShadow: 'hover:border-[#10b981]/40 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.3)]', filterId: 'tools', metaIcon: 'pen-nib' },
+  PRODUCED: { category: 'محتوای تولیدی', borderTop: 'border-t border-white/5-[#f43f5e]', badgeText: 'text-[#f43f5e]', hoverTitle: 'group-hover:text-[#f43f5e]', gradientVia: 'via-[#f43f5e]', hoverShadow: 'hover:border-[#f43f5e]/40 hover:shadow-[0_20px_40px_-15px_rgba(244,63,94,0.3)]', filterId: 'produced', metaIcon: 'video' },
+  BLOG: { category: 'بلاگ', borderTop: 'border-t border-white/5-[#b45309]', badgeText: 'text-[#b45309]', hoverTitle: 'group-hover:text-[#b45309]', gradientVia: 'via-[#b45309]', hoverShadow: 'hover:border-[#b45309]/40 hover:shadow-[0_20px_40px_-15px_rgba(180,83,9,0.3)]', filterId: 'article', metaIcon: 'article' },
+  RAW: { category: 'محتوای خام', borderTop: 'border-t border-white/5-[#fbbf24]', badgeText: 'text-[#fbbf24]', hoverTitle: 'group-hover:text-[#fbbf24]', gradientVia: 'via-[#fbbf24]', hoverShadow: 'hover:border-[#fbbf24]/40 hover:shadow-[0_20px_40px_-15px_rgba(251,191,36,0.3)]', filterId: 'raw', metaIcon: 'folder' },
+  TOOL: { category: 'ابزارها', borderTop: 'border-t border-white/5-[#10b981]', badgeText: 'text-[#10b981]', hoverTitle: 'group-hover:text-[#10b981]', gradientVia: 'via-[#10b981]', hoverShadow: 'hover:border-[#10b981]/40 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.3)]', filterId: 'tools', metaIcon: 'pen-nib' },
 };
 
 // ==========================================
@@ -61,13 +61,13 @@ const ContentCard = ({ item }) => {
       href={item.url || '#'} 
       ref={cardRef} 
       onMouseMove={handleMouseMove} 
-      className={`group flex flex-col p-5 rounded-3xl border border-white/10 relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 shadow-lg ${theme.hoverShadow}`}
+      className={`group flex flex-col p-5 rounded-3xl relative overflow-hidden transition-all duration-400 ease-out transform hover:-translate-y-1.5 shadow-lg ${theme.hoverShadow}`}
     >
       <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
       <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${theme.gradientVia} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20`} />
       <div className="absolute inset-0 pointer-events-none rounded-inherit bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.05),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
       
-      <div className="relative w-full h-48 rounded-2xl bg-gray-900 overflow-hidden mb-5 z-10 flex items-center justify-center border border-white/5">
+      <div className="relative w-full h-48 rounded-2xl bg-gray-900 overflow-hidden mb-5 z-10 flex items-center justify-center">
         {item.image ? (
           <BlurImage src={item.image} alt={item.title} className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" />
         ) : (
@@ -82,7 +82,7 @@ const ContentCard = ({ item }) => {
         </h3>
       </div>
       
-      <div className="relative z-10 mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-gray-400 font-sans">
+      <div className="relative z-10 mt-4 pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 font-sans">
         <span className="flex items-center gap-1.5">
          <Icon name="calendarBlank" className="w-3.5 h-3.5" /> 
          {/* تبدیل تاریخ به شمسی و سپس فارسی‌سازی اعداد */}
@@ -151,7 +151,7 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
           /> 
            
         {/* ================= هدر معرفی (باکس پروفایل) ================= */}
-        <section className="relative overflow-hidden p-8 md:p-12 group rounded-3xl border border-white/10 shadow-2xl animate-[fadeIn_0.5s_ease-out]">
+        <section className="relative overflow-hidden p-8 md:p-12 group rounded-3xl shadow-2xl animate-[fadeIn_0.5s_ease-out]">
           <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
           <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.via} to-transparent opacity-90 pointer-events-none z-20`} />
           <div className={`absolute left-0 top-0 w-1/2 h-full ${activeTheme.bgSoft} blur-3xl rounded-full transform -translate-x-1/2 -translate-y-1/4 pointer-events-none -z-10`}></div>
@@ -160,7 +160,7 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
             
             {/* دایره آیکون / عکس */}
             <div className="flex-shrink-0 relative group/icon cursor-pointer">
-              <div className={`w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/10 ${activeTheme.shadow} bg-black/50 flex items-center justify-center relative transition-colors duration-500 ${activeTheme.borderSoft}`}>
+              <div className={`w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 ${activeTheme.shadow} bg-black/50 flex items-center justify-center relative transition-colors duration-500 ${activeTheme.borderSoft}`}>
                 {renderAvatar()}
               </div>
             </div>
@@ -188,7 +188,7 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
               </div>
 
               {/* آمار اتوماتیک و فارسی شده */}
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-8 mt-8 border-t border-white/10 pt-6">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-8 mt-8 border-t border-white/5 pt-6">
                 <div className="flex flex-col items-center md:items-start">
                   <span className="text-2xl font-black text-white font-sans">{toPersianDigits(totalContentsCount)}</span>
                   <span className="text-xs text-gray-400 font-sans mt-0.5">محتوای مرتبط</span>
@@ -207,13 +207,13 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
 
         {/* ================= گرید محتوا با فیلتر ================= */}
         <section className="space-y-6">
-          <div className="flex flex-col md:flex-row items-center justify-between border-b border-white/10 pb-4 gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between border-b border-white/5 pb-4 gap-4">
             <div>
               <h2 className="text-2xl font-black text-white mb-1 text-center md:text-right">محتوای بایگانی شده</h2>
               <p className="text-sm text-gray-400 font-light text-center md:text-right">تمام مستندات و مقالاتی که شامل این برچسب هستند.</p>
             </div>
             
-            <div className="flex gap-2 bg-[#080c16] p-1.5 rounded-2xl border border-white/10 overflow-x-auto max-w-full hide-scroll shadow-inner">
+            <div className="flex gap-2 bg-[#080c16] p-1.5 rounded-2xl overflow-x-auto max-w-full hide-scroll shadow-inner">
               {[
                 { id: 'all', label: 'همه موارد' },
                 { id: 'raw', label: 'محتوای راش و فوتیج' },
@@ -224,7 +224,7 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
                 <button 
                   key={filter.id}
                   onClick={() => { setActiveFilter(filter.id); setVisibleCount(12); }}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${activeFilter === filter.id ? 'bg-white/15 text-white shadow-md border border-white/15' : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'}`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${activeFilter === filter.id ? 'bg-white/15 text-white shadow-md hover:bg-white/15' : 'text-gray-400 hover:text-white hover:bg-white/5 border border-t border-white/5ransparent'}`}
                 >
                   {filter.label}
                 </button>
@@ -233,7 +233,7 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
           </div>
 
           {filteredItems.length === 0 ? (
-            <div className="relative rounded-3xl border border-white/10 p-10 overflow-hidden shadow-2xl">
+            <div className="relative rounded-3xl p-10 overflow-hidden shadow-2xl">
               <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
               <EmptyState 
                 icon={activeFilter === 'all' ? 'search' : 'folder'}
@@ -257,7 +257,7 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
             <div className="flex justify-center pt-8">
               <button 
                 onClick={() => setVisibleCount(prev => prev + 12)}
-                className={`relative group bg-[#080c16] border border-white/10 text-white px-10 py-3.5 rounded-full font-bold flex items-center gap-3 hover:bg-white/5 ${activeTheme.borderSoft} ${activeTheme.text} transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] cursor-pointer`}
+                className={`relative group bg-[#080c16] text-white px-10 py-3.5 rounded-full font-bold flex items-center gap-3 hover:bg-white/5 ${activeTheme.borderSoft} ${activeTheme.text} transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] cursor-pointer`}
               >
                 <span>بارگذاری موارد بیشتر</span>
                 <Icon name="caretDown" className="w-5 h-5 group-hover:translate-y-1 transition-transform" />

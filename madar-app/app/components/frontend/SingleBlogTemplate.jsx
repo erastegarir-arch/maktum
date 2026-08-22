@@ -30,10 +30,10 @@ function Tooltip({ text, children }) {
     <div className="relative z-30 group/tooltip inline-flex items-center justify-center">
       {children}
       <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover/tooltip:flex flex-col items-center z-50 pointer-events-none">
-        <div className="bg-[#0b0f19] text-white text-[11px] py-1 px-2.5 rounded-lg border border-white/10 shadow-xl whitespace-nowrap font-sans">
+        <div className="bg-[#0b0f19] text-white text-[11px] py-1 px-2.5 rounded-lg shadow-xl whitespace-nowrap font-sans">
           {text}
         </div>
-        <div className="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-[#0b0f19] -mt-[1px]"></div>
+        <div className="w-0 h-0 border-x-4 border-x-transparent border-t border-white/5-[#0b0f19] -mt-[1px]"></div>
       </div>
     </div>
   );
@@ -216,7 +216,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
 
         <article className="max-w-4xl mx-auto mt-6 animate-[fadeIn_0.5s_ease-out]">
           
-          <div className="relative w-full aspect-square md:aspect-video rounded-3xl overflow-hidden shadow-2xl border border-white/10 group mb-10 cursor-pointer">
+          <div className="relative w-full aspect-square md:aspect-video rounded-3xl overflow-hidden shadow-2xl group mb-10 cursor-pointer">
             <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
             <div className="relative w-full h-full bg-black/50">
               <picture className="w-full h-full">
@@ -237,11 +237,11 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
             )}
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 py-5 border-y border-white/10 mb-10">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 py-5 border-y mb-10">
             
             {displaySettings.showAuthor !== false && (
               <div className="flex items-center gap-3 shrink-0 group cursor-pointer">
-                <div className="w-11 h-11 rounded-full overflow-hidden border border-white/10 relative bg-gray-900 flex items-center justify-center">
+                <div className="w-11 h-11 rounded-full overflow-hidden relative bg-gray-900 flex items-center justify-center">
                   {authorImage ? (
                     <BlurImage src={authorImage} alt={author.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   ) : (
@@ -259,7 +259,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
 
             <div className="flex flex-wrap items-center gap-4 lg:justify-end w-full lg:w-auto">
               {hasAnyMetaInfo && (
-                <div className="flex items-center gap-3 text-[11px] sm:text-xs text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/10 font-sans shadow-inner overflow-x-auto hide-scroll">
+                <div className="flex items-center gap-3 text-[11px] sm:text-xs text-gray-400 bg-white/5 px-4 py-2 rounded-full font-sans shadow-inner overflow-x-auto hide-scroll">
                   {showDateFlag && (
                     <Tooltip text="تاریخ انتشار">
                       <span className="flex items-center gap-1.5 whitespace-nowrap cursor-default hover:text-gray-300 transition-colors">
@@ -319,7 +319,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
           </div>
 
           {data?.lead && (
-            <div className="relative p-6 md:p-8 rounded-3xl border border-white/10 bg-white/5 mb-10 shadow-inner overflow-hidden">
+            <div className="relative p-6 md:p-8 rounded-3xl bg-white/5 mb-10 shadow-inner overflow-hidden">
               <p className="text-white text-base md:text-lg leading-loose font-bold text-justify relative z-10">
                 {data.lead}
               </p>
@@ -331,13 +331,13 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
           </div>
 
           {combinedTaxonomies.length > 0 && (
-            <div className="pt-6 border-t border-white/10 mb-12">
+            <div className="pt-6 border-t border-white/5 mb-12">
               <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span> دسته‌بندی‌ها و برچسب‌ها:
               </h3>
               <div className="flex flex-wrap gap-2 relative z-10">
                 {combinedTaxonomies.map((tax, idx) => (
-                  <a key={idx} href={tax.link} className={`px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-300 ${currentTheme.hoverText} ${currentTheme.hoverBorder}/50 transition-all flex items-center gap-1.5 shadow-inner`}>
+                  <a key={idx} href={tax.link} className={`px-4 py-2 rounded-lg bg-white/5 text-xs text-gray-300 ${currentTheme.hoverText} ${currentTheme.hoverBorder}/50 transition-all flex items-center gap-1.5 shadow-inner`}>
                     {tax.isTag && <Icon name="hash" className="w-3.5 h-3.5 opacity-60 shrink-0" />}
                     {tax.name}
                   </a>
@@ -351,7 +351,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
         <div className="max-w-4xl mx-auto space-y-12">
           
           {relatedContent && relatedContent.length > 0 && (
-            <div className="relative p-6 md:p-8 rounded-3xl border border-white/10 overflow-hidden shadow-2xl group">
+            <div className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-2xl group">
               <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
               <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
@@ -361,7 +361,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                 {relatedContent.map(rel => (
-                  <a key={rel.id} href={rel.link || '#'} className="group/rel flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl bg-[#080c16] border border-white/10 hover:border-white/20 transition-all shadow-inner">
+                  <a key={rel.id} href={rel.link || '#'} className="group/rel flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl bg-[#080c16] hover:border-white/20 transition-all shadow-inner">
                     <div className="w-full sm:w-24 h-40 sm:h-20 rounded-xl bg-gray-900 overflow-hidden shrink-0">
                       <BlurImage src={rel.image || '/images/placeholder-cover.jpg'} className="w-full h-full object-cover group-hover/rel:scale-105 transition-transform duration-500" alt={rel.title || "Related"} />
                     </div>
@@ -379,13 +379,13 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
           )}
 
           {isCommentsEnabled && (
-            <section id="comments" className="relative p-6 md:p-8 rounded-3xl border border-white/10 overflow-hidden shadow-2xl group">
+            <section id="comments" className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-2xl group">
               <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
               <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3 border-b border-white/5 pb-4 relative z-10">
                 <Icon name="chat" className={`w-6 h-6 ${currentTheme.fillCurrent}`} /> نظرات کاربران 
-                <span className="text-xs font-sans text-gray-400 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10">
+                <span className="text-xs font-sans text-gray-400 bg-white/5 px-2.5 py-0.5 rounded-full">
                   {toPersianDigits(commentsList.length)} نظر
                 </span>
               </h3>
@@ -399,7 +399,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
                       ) : (
                         <span className="text-xs font-bold text-rose-400">ابتدا وارد سایت شوید</span>
                       )}
-                      <span className="text-[10px] text-gray-500 border border-white/10 px-2 py-0.5 rounded">پس از تأیید نمایش داده می‌شود</span>
+                      <span className="text-[10px] text-gray-500 px-2 py-0.5 rounded">پس از تأیید نمایش داده می‌شود</span>
                     </div>
                     <textarea 
                       rows="3" 
@@ -407,14 +407,14 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
                       onChange={(e) => setCommentText(e.target.value)}
                       onFocus={handleCommentFocus}
                       placeholder={currentUser ? "نظر خود را درباره این مقاله بنویسید..." : "برای ثبت دیدگاه کلیک کنید..."} 
-                      className={`w-full bg-[#080c16] border border-white/10 rounded-2xl p-4 text-white text-sm leading-relaxed ${currentTheme.focusBorder} outline-none transition-all resize-none shadow-inner`}
+                      className={`w-full bg-[#080c16] rounded-2xl p-4 text-white text-sm leading-relaxed ${currentTheme.focusBorder} outline-none transition-all resize-none shadow-inner`}
                     />
                   </div>
                   <div className="flex justify-end">
                     <button 
                       type="submit" 
                       disabled={!commentText.trim() || !currentUser} 
-                      className={`bg-white/10 text-white border border-white/20 px-6 py-2.5 rounded-xl text-sm font-bold ${currentTheme.hoverBg} hover:text-deep-base ${currentTheme.hoverBorder} transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
+                      className={`bg-white/10 text-white hover:bg-white/20 px-6 py-2.5 rounded-xl text-sm font-bold ${currentTheme.hoverBg} hover:text-deep-base ${currentTheme.hoverBorder} transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
                     >
                       ارسال دیدگاه
                     </button>
@@ -424,10 +424,10 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
 
               <div className="space-y-4 relative z-10">
                 {commentsList.map((comment, idx) => (
-                  <div key={idx} className="bg-[#080c16] border border-white/10 rounded-2xl p-5 shadow-inner">
+                  <div key={idx} className="bg-[#080c16] rounded-2xl p-5 shadow-inner">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0">
                           <Icon name="user" className={`w-5 h-5 ${currentTheme.primaryText}`} />
                         </div>                    
                         <div>
@@ -439,6 +439,15 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
                     <p className="text-sm text-gray-300 leading-relaxed font-light text-justify">
                       {comment.text}
                     </p>
+                    {comment.adminReply && (
+                      <div className={`mt-4 bg-white/5 border-r-2 ${currentTheme.borderClass.replace('/30', '')} p-4 rounded-xl`}>
+                        <span className={`text-[10px] ${currentTheme.primaryText} font-bold mb-2 flex items-center gap-1.5`}>
+                          <Icon name="shield" className="w-3.5 h-3.5" /> پاسخ مدار:
+                        </span>
+                        <p className="text-xs text-gray-300 leading-relaxed">{comment.adminReply}</p>
+                      </div>
+                    )}
+                    {/* ================================================= */}
                   </div>
                 ))}
               </div>
@@ -453,11 +462,11 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
         {isShareModalOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
             <div className="absolute inset-0 cursor-pointer" onClick={() => setIsShareModalOpen(false)}></div>
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.25 }} className="relative z-10 w-full max-w-sm p-6 rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.25 }} className="relative z-10 w-full max-w-sm p-6 rounded-3xl overflow-hidden shadow-2xl">
               <div className="absolute inset-0 bg-[#0b0f19]/90 backdrop-blur-xl pointer-events-none -z-10" />
               <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
-              <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 relative z-10">
+              <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4 relative z-10">
                 <h3 className={`text-base font-bold text-white flex items-center gap-2`}><Icon name="shareNetwork" className={`w-5 h-5 ${currentTheme.primaryText}`} /> اشتراک‌گذاری</h3>
                 <button onClick={() => setIsShareModalOpen(false)} className="text-gray-400 hover:text-white transition-colors cursor-pointer bg-white/5 hover:bg-white/10 rounded-full p-1.5">
                   <Icon name="close" className="w-4 h-4" />
@@ -480,7 +489,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
 
               <div className="flex flex-col gap-2 relative z-10">
                 <label className="text-xs text-gray-400">لینک مستقیم صفحه:</label>
-                <div className="flex items-center gap-2 bg-[#080c16] border border-white/10 rounded-xl p-1.5 shadow-inner">
+                <div className="flex items-center gap-2 bg-[#080c16] rounded-xl p-1.5 shadow-inner">
                   <input type="text" readOnly value={typeof window !== 'undefined' ? window.location.href : 'https://madar.ir'} className="bg-transparent text-gray-400 text-[11px] w-full outline-none px-2 dir-ltr text-left font-sans" />
                   <button onClick={handleCopyLink} className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-lg ${isCopied ? `${currentTheme.primaryBg} text-white` : 'bg-white/10 text-white hover:bg-white/20'}`}>
                     {isCopied ? 'کپی شد' : 'کپی لینک'}

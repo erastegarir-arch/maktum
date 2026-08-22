@@ -46,7 +46,7 @@ export default function NotFound() {
         <div 
           ref={cardRef}
           onMouseMove={handleMouseMove}
-          className="relative w-full rounded-3xl border border-white/10 bg-[#0b0f19]/80 backdrop-blur-2xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden group animate-[fadeIn_0.5s_ease-out]"
+          className="relative w-full rounded-3x bg-[#0b0f19]/80 backdrop-blur-2xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden group animate-[fadeIn_0.5s_ease-out]"
         >
           {/* خط نئونی بالای کارت در هاور (تم فیروزه‌ای و آبی) */}
           <div className="absolute top-0 inset-x-0 h-[2px] opacity-70 pointer-events-none z-20 bg-gradient-to-r from-transparent via-cyan-500 to-transparent group-hover:via-blue-400 transition-colors duration-700" />
@@ -63,7 +63,7 @@ export default function NotFound() {
               
               {/* حلقه‌های بیرونی رادار */}
               <div className="absolute inset-0 border border-cyan-500/20 rounded-full" />
-              <div className="absolute inset-4 border-[3px] border-dotted border-white/10 rounded-full animate-[spin_30s_linear_infinite]" />
+              <div className="absolute inset-4 border-[3px] border-dotted rounded-full animate-[spin_30s_linear_infinite]" />
               
               {/* لنز اسکنر رادار (نور چرخشی) */}
               <div className="absolute inset-4 rounded-full overflow-hidden">
@@ -100,7 +100,7 @@ export default function NotFound() {
             </div>
 
             {/* ================== پنل تشخیص وضعیت (Radar Diagnostic UI) ================== */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 border-t border-b border-white/5 py-5">
+            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 border-t border-white/5 border-b border-white/5 py-5">
               
               <div className="flex items-center justify-center gap-2.5 w-full sm:w-1/2">
                 <Icon name="radar" className="w-4 h-4 text-cyan-500 animate-pulse" />
@@ -131,7 +131,7 @@ export default function NotFound() {
               
               <Link 
                 href="/archive" 
-                className="w-full sm:w-auto bg-white/5 border border-white/10 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:bg-white/10 hover:text-white transition-all duration-300 cursor-pointer"
+                className="w-full sm:w-auto bg-white/5 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:bg-white/10 hover:text-white transition-all duration-300 cursor-pointer"
               >
                 <Icon name="search" className="w-5 h-5 text-gray-400 group-hover:text-white" />
                 جستجو در آرشیو

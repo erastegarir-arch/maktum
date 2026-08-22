@@ -76,10 +76,10 @@ export default function AdminHeader() {
 
   return (
     <header className="sticky top-0 z-40 h-20 px-8 flex items-center justify-between shadow-2xl select-none overflow-hidden font-sans">
-      {/* ۱. لایه پس‌زمینه شیشه‌ای ایزوله و ثابت طبق گرافیک کلی1 */}
-      <div className="absolute inset-0 bg-[#0b0f19]/85 backdrop-blur-xl border-b border-white/10 pointer-events-none -z-10" />
+      {/* ۱. لایه پس‌زمینه شیشه‌ای خالص بدون خط سفید */}
+      <div className="absolute inset-0 bg-[#0b0f19]/60 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] pointer-events-none -z-10" />
 
-      {/* ۲. نوار نوری گرادینت بالای هدر (Top Gradient Highlight Bar) */}
+      {/* ۲. نوار نوری گرادینت بالای هدر */}
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 z-20 pointer-events-none" />
 
       {/* بخش راست: عبارت «بسم الله الرحمن الرحیم» و عنوان مرکز مدیریت */}
@@ -88,7 +88,6 @@ export default function AdminHeader() {
           بسم الله الرحمن الرحیم
         </h2>
         
-        {/* عنوان به همراه نقطه چشمک‌زن راداری بسیار واضح */}
         <p className="text-xs text-[#10b981] font-medium mt-1 flex items-center gap-2 font-sans">
           <span className="relative flex h-2.5 w-2.5 items-center justify-center shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10b981] opacity-75"></span>
@@ -98,11 +97,10 @@ export default function AdminHeader() {
         </p>
       </div>
 
-      {/* بخش چپ: ابزارک زنده تاریخ و ساعت بر اساس فونت وزیر متن (font-sans) */}
+      {/* بخش چپ: ابزارک زنده تاریخ و ساعت */}
       <div className="relative z-10 flex items-center gap-4">
-        <div className="flex items-center gap-3.5 bg-white/5 border border-white/10 px-4 py-2 rounded-xl shadow-inner backdrop-blur-md group hover:border-[#10b981]/40 transition-colors duration-300">
+        <div className="flex items-center gap-3.5 bg-white/5 px-4 py-2 rounded-xl shadow-inner backdrop-blur-md transition-colors duration-300">
           
-          {/* نمایش ساعت زنده با فونت وزیر متن */}
           <div className="flex items-center gap-2">
             <Icon name="clock" className="w-4 h-4 text-[#10b981] group-hover:scale-110 transition-transform duration-300" />
             <span className="text-sm font-bold text-[#10b981] font-sans tracking-wide dir-rtl" suppressHydrationWarning>
@@ -110,9 +108,8 @@ export default function AdminHeader() {
             </span>
           </div>
 
-          <div className="w-px h-4 bg-white/15"></div>
+          <div className="w-px h-4 bg-white/10"></div>
 
-          {/* نمایش تاریخ تقویم فارسی به صورت مرتب و خوانا */}
           <div className="flex items-center gap-2">
             <Icon name="calendar" className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors duration-300" />
             <span className="text-xs text-gray-300 font-sans font-medium" suppressHydrationWarning>

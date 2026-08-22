@@ -10,8 +10,10 @@ import Icon from '@/app/components/Icon';
 import SearchModal from '@/app/components/frontend/SearchModal';
 import AuthModal from '@/app/components/frontend/AuthModal';
 import { getSetting } from '@/app/actions/settings';
-// 👇 اتصال هدر به سیستم احراز هویت سرور
 import { getSessionUser } from '@/app/actions/auth'; 
+
+// فقط اکشن دریافت تعداد اعلان‌های خوانده نشده برای نمایش روی پروفایل
+import { getUserUnreadNotificationCountAction } from '@/app/actions/notifications';
 
 const cn = (...inputs) => twMerge(clsx(inputs));
 
@@ -27,7 +29,7 @@ function HeaderTooltip({ text, children }) {
       {children}
       <div className="absolute top-full mt-3 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out]">
         <div className="w-0 h-0 border-x-[5px] border-x-transparent border-b-[6px] border-b-[#0b0f19]"></div>
-        <div className="bg-[#0b0f19]/95 backdrop-blur-xl text-white text-[11px] py-1.5 px-3 rounded-lg border border-white/10 shadow-2xl whitespace-nowrap font-sans font-medium">
+        <div className="bg-[#0b0f19]/95 backdrop-blur-xl text-white text-[11px] py-1.5 px-3 rounded-lg shadow-2xl whitespace-nowrap font-sans font-medium">
           {text}
         </div>
       </div>
@@ -43,7 +45,6 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-  // 👇 استیت‌های واقعی برای چک کردن لاگین بودن کاربر از سمت سرور
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
@@ -58,19 +59,19 @@ export default function Header() {
     navItems: []
   });
 
-  // دریافت تنظیمات هدر و وضعیت لاگین به صورت همزمان
+  // دریافت تنظیمات هدر، وضعیت لاگین و تعداد اعلان‌های جدید به صورت همزمان
   useEffect(() => {
     setIsMounted(true);
     async function loadInitialData() {
       try {
-        // ۱. بررسی وضعیت لاگین از سرور
         const session = await getSessionUser();
         if (session) {
           setIsLoggedIn(true);
-          // در آینده می‌توانیم تعداد اعلانات واقعی کاربر را هم از سرور بگیریم و اینجا ست کنیم
+          // واکشی تعداد زنده اعلان‌های خوانده نشده برای نمایش روی دکمه پروفایل
+          const count = await getUserUnreadNotificationCountAction();
+          setUnreadNotifications(count);
         }
 
-        // ۲. دریافت تنظیمات هدر
         const stored = await getSetting('header_settings');
         if (stored) {
           const parsed = JSON.parse(stored);
@@ -124,23 +125,16 @@ export default function Header() {
     }
     
     if (icon.startsWith('http') || icon.startsWith('/') || icon.startsWith('.')) {
-      return (
-        <img src={icon} alt="Logo" className="w-7 h-7 object-contain" />
-      );
+      return <img src={icon} alt="Logo" className="w-7 h-7 object-contain" />;
     }
 
-    return (
-      <Icon 
-        name={icon} 
-        className="w-7 h-7 text-[var(--logo-color)] group-hover:text-[var(--logo-hover-color)] transition-colors duration-300" 
-      />
-    );
+    return <Icon name={icon} className="w-7 h-7 text-[var(--logo-color)] group-hover:text-[var(--logo-hover-color)] transition-colors duration-300" />;
   };
 
   return (
     <>
       <header className="fixed top-4 inset-x-0 z-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 font-sans select-none">
-        <div className="relative rounded-full border border-white/10 shadow-2xl overflow-hidden group">
+        <div className="relative rounded-full shadow-2xl overflow-hidden group">
           
           <div 
             style={{ backgroundColor: `rgba(11, 15, 25, ${opacityValue})` }}
@@ -164,7 +158,7 @@ export default function Header() {
                 </div>
 
                 {headerSettings.showSiteTitle !== false && headerSettings.siteTitle && (
-                  <span className="font-black text-xl text-white group-hover:text-gray-200 transition-colors">
+                  <span className="font-black text-xl text-white group-hover:text-gray-200 transition-colors font-sans">
                     {headerSettings.siteTitle}
                   </span>
                 )}
@@ -180,10 +174,8 @@ export default function Header() {
                       href={item.href || '#'}
                       style={{ '--active-color': activeColor }}
                       className={cn(
-                        "relative text-sm font-bold transition-all duration-300 py-2 px-4 cursor-pointer flex items-center",
-                        isActive
-                          ? "text-[var(--active-color)]"
-                          : "text-gray-300 hover:text-[#06b6d4]"
+                        "relative text-sm font-bold transition-all duration-300 py-2 px-4 cursor-pointer flex items-center font-sans",
+                        isActive ? "text-[var(--active-color)]" : "text-gray-300 hover:text-[#06b6d4]"
                       )}
                     >
                       <span>{item.label}</span>
@@ -206,23 +198,25 @@ export default function Header() {
                 <button 
                   type="button" 
                   onClick={() => setIsSearchOpen(true)}
-                  className="w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:border-[#06b6d4]/50 hover:bg-[#06b6d4]/10 flex items-center justify-center text-gray-300 hover:text-[#06b6d4] transition-all cursor-pointer shadow-inner"
+                  className="w-10 h-10 rounded-full bg-white/5 hover:border-[#06b6d4]/50 hover:bg-[#06b6d4]/10 flex items-center justify-center text-gray-300 hover:text-[#06b6d4] transition-all cursor-pointer shadow-inner"
                 >
                   <Icon name="search" className="w-5 h-5" />
                 </button>
               </HeaderTooltip>
 
               {isLoggedIn ? (
-                <HeaderTooltip text="ورود به داشبورد کاربری">
+                <HeaderTooltip text="ورود به داشبورد و مدیریت اعلان‌ها">
+                  {/* دکمه حساب کاربری همراه با دایره چشمک‌زن اعلان‌ها */}
                   <Link 
                     href="/profile" 
-                    className="relative w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:border-[#06b6d4]/50 hover:bg-[#06b6d4]/10 flex items-center justify-center text-gray-300 hover:text-[#06b6d4] transition-all cursor-pointer shadow-inner"
+                    className="relative w-10 h-10 rounded-full bg-white/5 hover:border-[#06b6d4]/50 hover:bg-[#06b6d4]/10 flex items-center justify-center text-gray-300 hover:text-[#06b6d4] transition-all cursor-pointer shadow-inner"
                   >
                     <Icon name="user" className="w-5 h-5" />
+                    
                     {unreadNotifications > 0 && (
                       <span className="absolute -top-1 -right-1 flex h-4 w-4">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-500 text-white text-[10px] font-bold items-center justify-center border border-[#0b0f19]">
+                        <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-500 text-white text-[10px] font-bold items-center justify-center border border-[#0b0f19] font-sans pt-0.5 shadow-md">
                           {unreadNotifications > 9 ? '+۹' : toPersianDigits(unreadNotifications)}
                         </span>
                       </span>
@@ -234,7 +228,7 @@ export default function Header() {
                   <button 
                     type="button"
                     onClick={() => setIsAuthOpen(true)}
-                    className="px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-[#06b6d4] hover:bg-[#06b6d4]/10 text-gray-200 hover:text-[#06b6d4] text-xs font-bold transition-all cursor-pointer flex items-center gap-2"
+                    className="px-4 py-2 rounded-full bg-white/5 hover:border-[#06b6d4] hover:bg-[#06b6d4]/10 text-gray-200 hover:text-[#06b6d4] text-xs font-bold transition-all cursor-pointer flex items-center gap-2 font-sans"
                   >
                     <Icon name="user" className="w-4 h-4 text-[#06b6d4]" />
                     <span>ورود / عضویت</span>

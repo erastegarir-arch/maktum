@@ -18,10 +18,9 @@ function Tooltip({ text, children }) {
     <div className="relative z-30 group/tooltip inline-flex items-center justify-center">
       {children}
       <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover/tooltip:flex flex-col items-center z-50 pointer-events-none">
-        <div className="bg-[#0b0f19] text-white text-[11px] py-1 px-2.5 rounded-lg border border-white/10 shadow-xl whitespace-nowrap font-sans">
+        <div className="bg-white/10 backdrop-blur-md border border-white/5 text-white text-[11px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-sans">
           {text}
         </div>
-        <div className="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-[#0b0f19] -mt-[1px]"></div>
       </div>
     </div>
   );
@@ -29,11 +28,10 @@ function Tooltip({ text, children }) {
 
 export default function TaxonomiesPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('CATEGORY'); // CATEGORY, HASHTAG, CREATOR, SETTINGS
+  const [activeTab, setActiveTab] = useState('CATEGORY'); 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // استیت‌های فرم طبقه‌بندی‌ها
   const [editingId, setEditingId] = useState(null);
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
@@ -41,7 +39,6 @@ export default function TaxonomiesPage() {
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   
-  // استیت‌های فرم تنظیمات صفحه بایگانی
   const [pageBadge, setPageBadge] = useState('بایگانی مرجع مدار');
   const [pageTitle, setPageTitle] = useState('کاوش در بایگانی مدار');
   const [pageDesc, setPageDesc] = useState('جستجو و فیلتر در میان هزاران دسته‌بندی، کلیدواژه، و نمایه پدیدآورندگان.');
@@ -49,16 +46,13 @@ export default function TaxonomiesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // استیت‌های جستجو و صفحه‌بندی
   const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(10);
   
-  // استیت مودال‌ها
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [deletingItem, setDeletingItem] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // تولید خودکار اسلاگ
   const handleNameChange = (e) => {
     const val = e.target.value;
     setName(val);
@@ -72,7 +66,6 @@ export default function TaxonomiesPage() {
   };
 
   const loadData = async () => {
-    // اگر در تب تنظیمات هستیم، نیازی به لود تاکسونومی‌ها نیست
     if(activeTab === 'SETTINGS') return; 
 
     setLoading(true);
@@ -156,12 +149,10 @@ export default function TaxonomiesPage() {
     );
   };
 
-  // تابع ذخیره تنظیمات صفحه بایگانی (باید به بک‌اند متصل شود)
   const handleSaveSettings = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     
-    // شبیه‌سازی اتصال به دیتابیس (شما باید اینجا اکشن ذخیره در جدول Settings را فراخوانی کنید)
     setTimeout(() => {
       setSubmitting(false);
       toast.success('تنظیمات صفحه بایگانی با موفقیت ذخیره شد.');
@@ -231,19 +222,19 @@ export default function TaxonomiesPage() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="relative rounded-2xl border border-white/10 p-6 shadow-2xl overflow-hidden group"
+        className="relative rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent"
       >
-        <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
-        <h1 className="text-2xl font-black text-white mb-2 flex items-center gap-3">
+        <h1 className="text-2xl font-black text-white mb-2 flex items-center gap-3 relative z-10">
           <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] shadow-[0_0_10px_#10b981]"></span>
           مدیریت طبقه‌بندی‌ها (Taxonomy)
         </h1>
-        <p className="text-sm text-gray-400 font-light">مدیریت مستقل دسته‌بندی‌ها، هشتگ‌ها، پدیدآورندگان و ظاهر صفحه بایگانی</p>
+        <p className="text-sm text-gray-400 font-light relative z-10">مدیریت مستقل دسته‌بندی‌ها، هشتگ‌ها، پدیدآورندگان و ظاهر صفحه بایگانی</p>
         
-        {/* تب‌ها با اضافه شدن تب تنظیمات */}
-        <div className="flex flex-wrap gap-3 mt-6 border-b border-white/10 pb-4">
+        {/* تب‌ها */}
+        <div className="flex flex-wrap gap-3 mt-6 border-b border-white/10 pb-4 relative z-10">
           {[
             { key: 'CATEGORY', label: 'دسته‌بندی‌ها', icon: 'folder' },
             { key: 'HASHTAG', label: 'هشتگ‌ها', icon: 'hash' },
@@ -254,10 +245,10 @@ export default function TaxonomiesPage() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                "px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer flex items-center gap-2",
+                "px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer flex items-center gap-2 border border-transparent",
                 activeTab === tab.key 
-                  ? 'bg-[#10b981] text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] border border-[#10b981]' 
-                  : 'bg-white/5 border border-transparent text-gray-400 hover:bg-white/10 hover:text-white'
+                  ? 'bg-[#10b981]/20 text-[#10b981] shadow-[inset_0_0_15px_rgba(16,185,129,0.2)]' 
+                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white shadow-inner'
               )}
             >
               {tab.key === 'SETTINGS' && <Icon name="gear" className="w-4 h-4" />}
@@ -275,8 +266,8 @@ export default function TaxonomiesPage() {
         {activeTab !== 'SETTINGS' ? (
           <>
             {/* فرم افزودن / ویرایش */}
-            <div className="lg:col-span-1 sticky top-6 rounded-2xl border border-white/10 shadow-2xl overflow-hidden h-fit group">
-              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+            <div className="lg:col-span-1 sticky top-6 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden h-fit group border border-transparent">
+              <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
               <div className="p-6 space-y-4 relative z-10">
@@ -293,7 +284,7 @@ export default function TaxonomiesPage() {
                       value={name} 
                       onChange={handleNameChange} 
                       placeholder={`مثال: ${activeTab === 'CREATOR' ? 'آنتونی گیدنز' : 'فلسفه'}`} 
-                      className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#10b981] transition-colors" 
+                      className="w-full bg-white/5 hover:bg-white/10 focus:bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-white/30 outline-none focus:border focus:border-[#10b981] border border-white/10 transition-colors shadow-inner" 
                     />
                   </div>
 
@@ -304,7 +295,7 @@ export default function TaxonomiesPage() {
                       value={slug} 
                       onChange={(e) => setSlug(e.target.value)} 
                       placeholder="تولید خودکار یا دستی..." 
-                      className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#10b981] dir-ltr text-left transition-colors font-mono" 
+                      className="w-full bg-white/5 hover:bg-white/10 focus:bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-white/30 outline-none focus:border focus:border-[#10b981] border border-white/10 dir-ltr text-left transition-colors font-sans shadow-inner" 
                     />
                   </div>
 
@@ -315,7 +306,7 @@ export default function TaxonomiesPage() {
                       value={preTitle} 
                       onChange={(e) => setPreTitle(e.target.value)} 
                       placeholder="مثال: پرونده ویژه / استاد برجسته" 
-                      className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#10b981] transition-colors" 
+                      className="w-full bg-white/5 hover:bg-white/10 focus:bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-white/30 outline-none focus:border focus:border-[#10b981] border border-white/10 transition-colors shadow-inner" 
                     />
                   </div>
 
@@ -323,16 +314,16 @@ export default function TaxonomiesPage() {
                     <div className="space-y-2">
                       <label className="text-xs text-gray-300">تصویر پروفایل پدیدآورنده</label>
                       {imageUrl ? (
-                        <div className="flex items-center gap-3 p-3 bg-[#080c16] border border-white/10 rounded-xl">
-                          <img src={imageUrl} alt="تصویر پروفایل" className="w-12 h-12 object-cover rounded-lg border border-white/10 shrink-0" />
+                        <div className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl shadow-inner">
+                          <img src={imageUrl} alt="تصویر پروفایل" className="w-12 h-12 object-cover rounded-lg shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs text-emerald-400 font-bold truncate">تصویر با موفقیت انتخاب شد</p>
-                            <p className="text-[10px] text-gray-400 truncate dir-ltr text-right font-mono">{imageUrl}</p>
+                            <p className="text-xs text-emerald-400 font-bold truncate">تصویر انتخاب شد</p>
+                            <p className="text-[10px] text-gray-400 truncate dir-ltr text-right font-sans">{imageUrl}</p>
                           </div>
                           <button 
                             type="button"
                             onClick={() => setIsMediaModalOpen(true)}
-                            className="px-3 py-1.5 bg-white/10 hover:bg-[#10b981] text-white text-xs rounded-lg transition-colors cursor-pointer shrink-0 font-bold"
+                            className="px-3 py-1.5 bg-white/10 hover:bg-[#10b981] text-white text-xs rounded-lg transition-colors cursor-pointer shrink-0 font-bold border border-transparent"
                           >
                             تغییر
                           </button>
@@ -349,10 +340,10 @@ export default function TaxonomiesPage() {
                         <button 
                           type="button"
                           onClick={() => setIsMediaModalOpen(true)}
-                          className="w-full py-4 bg-[#080c16] border border-dashed border-white/20 hover:border-[#10b981] text-gray-300 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+                          className="w-full py-4 bg-white/5 hover:bg-white/10 border border-dashed border-white/20 hover:border-[#10b981] text-gray-300 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-inner"
                         >
                           <Icon name="image" className="w-5 h-5 text-[#10b981]" />
-                          انتخاب تصویر از کتابخانه رسانه
+                          انتخاب تصویر از رسانه
                         </button>
                       )}
                     </div>
@@ -365,17 +356,17 @@ export default function TaxonomiesPage() {
                       value={description} 
                       onChange={(e) => setDescription(e.target.value)} 
                       placeholder="توضیحات تکمیلی..." 
-                      className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-[#10b981] transition-colors" 
+                      className="w-full bg-white/5 hover:bg-white/10 focus:bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-white/30 outline-none focus:border focus:border-[#10b981] border border-white/10 transition-colors shadow-inner resize-none" 
                     />
                   </div>
 
-                  {errorMsg && <p className="text-xs text-rose-500 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">{errorMsg}</p>}
+                  {errorMsg && <p className="text-xs text-rose-500 bg-rose-500/10 p-2.5 rounded-lg border border-transparent shadow-inner">{errorMsg}</p>}
 
                   <div className="flex gap-2 mt-2 border-t border-white/10 pt-3">
                     <button 
                       type="submit" 
                       disabled={submitting} 
-                      className="flex-1 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer disabled:opacity-50 hover:scale-105 active:scale-95"
+                      className="flex-1 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer disabled:opacity-50 hover:scale-105 active:scale-95 border border-transparent"
                     >
                       {submitting ? 'در حال ثبت...' : 'ذخیره'}
                     </button>
@@ -384,7 +375,7 @@ export default function TaxonomiesPage() {
                       <button 
                         type="button"
                         onClick={resetForm}
-                        className="py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm transition-all cursor-pointer"
+                        className="py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm transition-all cursor-pointer border border-transparent shadow-inner"
                       >
                         انصراف
                       </button>
@@ -395,8 +386,8 @@ export default function TaxonomiesPage() {
             </div>
 
             {/* لیست موجودیت‌ها */}
-            <div className="lg:col-span-2 relative rounded-2xl border border-white/10 shadow-2xl overflow-hidden group">
-              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+            <div className="lg:col-span-2 relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent">
+              <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
               <div className="p-6 space-y-4 relative z-10">
@@ -416,7 +407,7 @@ export default function TaxonomiesPage() {
                         setVisibleCount(10);
                       }}
                       placeholder="جستجو..." 
-                      className="bg-[#080c16] border border-white/10 rounded-full py-2 pr-9 pl-4 text-sm text-white outline-none focus:border-[#10b981] w-full sm:w-64 transition-all"
+                      className="bg-white/5 hover:bg-white/10 focus:bg-black/40 rounded-full py-2 pr-9 pl-4 text-sm text-white placeholder:text-white/30 outline-none focus:border focus:border-[#10b981] border border-white/10 w-full sm:w-64 transition-all shadow-inner"
                     />
                   </div>
                 </div>
@@ -424,16 +415,16 @@ export default function TaxonomiesPage() {
                 {loading ? (
                   <div className="text-center py-20 text-gray-400 text-sm font-sans">در حال دریافت اطلاعات...</div>
                 ) : filteredItems.length === 0 ? (
-                  <div className="text-center py-20 bg-white/5 border border-white/5 rounded-xl text-gray-500 text-sm font-sans">
+                  <div className="text-center py-20 bg-white/5 rounded-xl border border-transparent shadow-inner text-gray-500 text-sm font-sans">
                     موردی یافت نشد.
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {displayedItems.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-4 bg-[#080c16] border border-white/10 rounded-xl hover:border-[#10b981]/40 transition-all duration-300 group/item">
+                      <div key={item.id} className="flex items-center justify-between p-4 bg-white/5 border border-transparent shadow-inner rounded-xl hover:bg-white/10 transition-all duration-300 group/item">
                         <div className="flex items-center gap-4">
                           {activeTab === 'CREATOR' && (
-                            <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 shrink-0 border border-white/10 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full overflow-hidden bg-black/30 shrink-0 flex items-center justify-center border border-white/5">
                               {item.imageUrl ? (
                                 <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
                               ) : (
@@ -445,12 +436,12 @@ export default function TaxonomiesPage() {
                             <div className="flex items-center gap-2">
                               <h3 className="font-bold text-white text-sm">{item.name}</h3>
                               {item.preTitle && (
-                                <span className="text-[10px] bg-[#10b981]/10 text-[#10b981] px-2 py-0.5 rounded-md border border-[#10b981]/20 font-bold">
+                                <span className="text-[10px] bg-[#10b981]/10 text-[#10b981] px-2 py-0.5 rounded-md font-bold">
                                   {item.preTitle}
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-gray-400 dir-ltr text-right font-mono">/{item.slug}</p>
+                            <p className="text-xs text-gray-400 dir-ltr text-right font-sans">/{item.slug}</p>
                           </div>
                         </div>
 
@@ -460,7 +451,7 @@ export default function TaxonomiesPage() {
                               href={`/t/${item.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-2.5 text-[#06b6d4] hover:bg-[#06b6d4]/10 border border-transparent hover:border-[#06b6d4]/30 rounded-xl transition-all cursor-pointer flex items-center justify-center text-xs"
+                              className="p-2.5 text-[#06b6d4] hover:bg-[#06b6d4]/10 rounded-xl transition-all cursor-pointer flex items-center justify-center text-xs border border-transparent shadow-inner"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -470,7 +461,7 @@ export default function TaxonomiesPage() {
                           <Tooltip text="ویرایش">
                             <button 
                               onClick={() => handleEdit(item)}
-                              className="p-2.5 text-[#10b981] hover:bg-[#10b981]/10 border border-transparent hover:border-[#10b981]/30 rounded-xl transition-all cursor-pointer flex items-center justify-center text-xs"
+                              className="p-2.5 text-[#10b981] hover:bg-[#10b981]/10 rounded-xl transition-all cursor-pointer flex items-center justify-center text-xs border border-transparent shadow-inner"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -480,7 +471,7 @@ export default function TaxonomiesPage() {
                           <Tooltip text="حذف">
                             <button 
                               onClick={() => setDeletingItem(item)}
-                              className="p-2.5 text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/30 rounded-xl transition-all cursor-pointer flex items-center justify-center text-xs"
+                              className="p-2.5 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer flex items-center justify-center text-xs border border-transparent shadow-inner"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -494,7 +485,7 @@ export default function TaxonomiesPage() {
                     {visibleCount < filteredItems.length && (
                       <button 
                         onClick={() => setVisibleCount(prev => prev + 10)}
-                        className="w-full py-3 mt-4 border border-white/10 hover:bg-white/5 rounded-xl text-sm text-gray-300 font-bold transition-all cursor-pointer"
+                        className="w-full py-3 mt-4 hover:bg-white/5 rounded-xl text-sm text-gray-300 font-bold transition-all cursor-pointer border border-transparent shadow-inner"
                       >
                         نمایش بیشتر ({filteredItems.length - visibleCount} مورد دیگر)
                       </button>
@@ -508,8 +499,8 @@ export default function TaxonomiesPage() {
           /* ======================================================== */
           /* حالت دوم: فرم تنظیمات صفحه اصلی بایگانی (/t) */
           /* ======================================================== */
-          <div className="lg:col-span-3 relative rounded-2xl border border-white/10 shadow-2xl overflow-hidden group">
-            <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+          <div className="lg:col-span-3 relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent">
+            <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
             <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#3b82f6] to-transparent opacity-90 pointer-events-none z-20" />
 
             <div className="p-8 space-y-6 relative z-10">
@@ -527,7 +518,7 @@ export default function TaxonomiesPage() {
                       value={pageBadge} 
                       onChange={(e) => setPageBadge(e.target.value)} 
                       placeholder="مثال: بایگانی مرجع مدار" 
-                      className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3.5 text-sm text-white outline-none focus:border-[#3b82f6] transition-colors" 
+                      className="w-full bg-white/5 hover:bg-white/10 focus:bg-black/40 rounded-xl p-3.5 text-sm text-white placeholder:text-white/30 outline-none focus:border focus:border-[#3b82f6] transition-colors border border-white/10 shadow-inner" 
                     />
                   </div>
 
@@ -538,7 +529,7 @@ export default function TaxonomiesPage() {
                       value={pageTitle} 
                       onChange={(e) => setPageTitle(e.target.value)} 
                       placeholder="مثال: کاوش در بایگانی مدار" 
-                      className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3.5 text-sm text-white outline-none focus:border-[#3b82f6] transition-colors font-black" 
+                      className="w-full bg-white/5 hover:bg-white/10 focus:bg-black/40 rounded-xl p-3.5 text-sm text-white placeholder:text-white/30 outline-none focus:border focus:border-[#3b82f6] transition-colors font-black border border-white/10 shadow-inner" 
                     />
                   </div>
 
@@ -549,7 +540,7 @@ export default function TaxonomiesPage() {
                       value={pageDesc} 
                       onChange={(e) => setPageDesc(e.target.value)} 
                       placeholder="متنی برای معرفی این صفحه بنویسید..." 
-                      className="w-full bg-[#080c16] border border-white/10 rounded-xl p-3.5 text-sm text-white outline-none focus:border-[#3b82f6] transition-colors leading-relaxed" 
+                      className="w-full bg-white/5 hover:bg-white/10 focus:bg-black/40 rounded-xl p-3.5 text-sm text-white placeholder:text-white/30 outline-none focus:border focus:border-[#3b82f6] transition-colors leading-relaxed border border-white/10 shadow-inner" 
                     />
                     <p className="text-xs text-gray-500 pt-1">این متن هم در ظاهر صفحه و هم در توضیحات سئو (Meta Description) گوگل نمایش داده می‌شود.</p>
                   </div>
@@ -558,7 +549,7 @@ export default function TaxonomiesPage() {
                     <button 
                       type="submit" 
                       disabled={submitting} 
-                      className="w-full py-4 rounded-xl bg-[#3b82f6] hover:bg-blue-600 text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] cursor-pointer disabled:opacity-50 hover:scale-[1.02] active:scale-95"
+                      className="w-full py-4 rounded-xl bg-[#3b82f6] hover:bg-blue-600 text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] cursor-pointer disabled:opacity-50 hover:scale-[1.02] active:scale-95 border border-transparent"
                     >
                       {submitting ? 'در حال ذخیره...' : 'ذخیره تنظیمات صفحه'}
                     </button>
@@ -566,13 +557,13 @@ export default function TaxonomiesPage() {
                 </form>
 
                 {/* پیش‌نمایش زنده */}
-                <div className="hidden lg:flex flex-col justify-center items-center p-8 rounded-3xl border border-white/10 bg-[#080c16] relative overflow-hidden">
+                <div className="hidden lg:flex flex-col justify-center items-center p-8 rounded-3xl bg-white/5 relative overflow-hidden border border-transparent shadow-inner">
                   <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#3b82f6]/20 rounded-full blur-3xl pointer-events-none"></div>
                   
                   <div className="relative z-10 flex flex-col items-center text-center space-y-4">
-                    <span className="text-[10px] text-gray-500 border border-white/10 px-3 py-1 rounded-full mb-2">پیش‌نمایش ظاهر هدر</span>
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#3b82f6]/10 border border-[#3b82f6]/30 rounded-full text-xs font-bold text-[#3b82f6] tracking-widest shadow-inner">
+                    <span className="text-[10px] text-gray-500 px-3 py-1 rounded-full mb-2">پیش‌نمایش ظاهر هدر</span>
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#3b82f6]/10 rounded-full text-xs font-bold text-[#3b82f6] tracking-widest shadow-inner border border-transparent">
                       {pageBadge || 'روتیتر'}
                     </div>
                     <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 drop-shadow-lg">
@@ -589,14 +580,14 @@ export default function TaxonomiesPage() {
         )}
       </div>
 
-      {/* مودال تأیید حذف و کتابخانه رسانه (بدون تغییر) */}
+      {/* مودال تأیید حذف */}
       <AnimatePresence>
         {deletingItem && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 backdrop-blur-md p-4"
+            className="fixed inset-0 z-30 flex items-center justify-center bg-[#050810]/40 backdrop-blur-xl p-4"
             onClick={() => setDeletingItem(null)}
           >
             <motion.div 
@@ -605,12 +596,12 @@ export default function TaxonomiesPage() {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.25 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-sm rounded-3xl border border-white/10 p-6 text-center shadow-2xl overflow-hidden"
+              className="relative w-full max-w-sm rounded-3xl p-6 text-center shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden border border-transparent"
             >
-              <div className="absolute inset-0 bg-[#0b0f19]/90 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
+              <div className="absolute inset-0 bg-[#0b0f19]/90 backdrop-blur-2xl shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-90" />
 
-              <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto mb-4 shadow-[0_0_20px_rgba(244,63,94,0.2)]">
+              <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-400 mx-auto mb-4 shadow-inner border border-transparent">
                 <Icon name="close" className="w-7 h-7" />
               </div>
 
@@ -623,14 +614,14 @@ export default function TaxonomiesPage() {
                 <button 
                   onClick={confirmDelete}
                   disabled={isDeleting}
-                  className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm rounded-xl transition-all shadow-[0_0_15px_rgba(244,63,94,0.3)] cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm rounded-xl transition-all shadow-[0_0_15px_rgba(244,63,94,0.3)] cursor-pointer disabled:opacity-50 border border-transparent"
                 >
                   {isDeleting ? 'در حال حذف...' : 'حذف قطعی'}
                 </button>
                 <button 
                   onClick={() => setDeletingItem(null)}
                   disabled={isDeleting}
-                  className="flex-1 py-3 bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 hover:text-white font-medium text-sm rounded-xl transition-all cursor-pointer"
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white font-medium text-sm rounded-xl transition-all cursor-pointer border border-transparent shadow-inner"
                 >
                   انصراف
                 </button>
@@ -646,7 +637,7 @@ export default function TaxonomiesPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md"
+            className="fixed inset-0 z-30 flex items-center justify-center p-4 bg-[#050810]/40 backdrop-blur-xl"
             onClick={() => setIsMediaModalOpen(false)}
           >
             <motion.div 
@@ -655,23 +646,31 @@ export default function TaxonomiesPage() {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.25 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-6xl max-h-[90vh] bg-[#0b0f19] border border-white/10 rounded-3xl overflow-y-auto p-6 shadow-2xl"
+              className="relative w-full max-w-6xl max-h-[90vh] bg-[#0b0f19]/90 backdrop-blur-2xl rounded-3xl overflow-hidden flex flex-col shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-transparent"
             >
+              <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none" />
-              <button 
-                type="button"
-                onClick={() => setIsMediaModalOpen(false)}
-                className="absolute top-4 left-4 p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full z-10 transition-colors cursor-pointer"
-              >
-                <Icon name="close" className="w-4 h-4" />
-              </button>
-              <MediaLibraryPage
-                isPickerMode={true}
-                onSelectMedia={(media) => {
-                  setImageUrl(media.url);
-                  setIsMediaModalOpen(false);
-                }}
-              />
+              
+              <div className="p-4 border-b border-white/10 flex justify-between items-center bg-transparent shrink-0">
+                <h3 className="text-white font-bold flex items-center gap-2 font-sans"><Icon name="image" className="w-5 h-5 text-[#10b981]" /> انتخاب تصویر پدیدآورنده</h3>
+                <button 
+                  type="button"
+                  onClick={() => setIsMediaModalOpen(false)}
+                  className="p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full z-10 transition-colors cursor-pointer border border-transparent shadow-inner"
+                >
+                  <Icon name="close" className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-grow overflow-y-auto p-4 custom-scrollbar">
+                <MediaLibraryPage
+                  isPickerMode={true}
+                  onSelectMedia={(media) => {
+                    setImageUrl(media.url);
+                    setIsMediaModalOpen(false);
+                  }}
+                />
+              </div>
             </motion.div>
           </motion.div>
         )}

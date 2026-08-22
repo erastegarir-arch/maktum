@@ -1,20 +1,20 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Icon from '@/app/components/Icon'; // مسیر مطلق بدون ارور
+import Icon from '@/app/components/Icon'; 
 
-// === کامپوننت داخلی کارت‌های آماری بر اساس گرافیک کلی1 ===
+// کامپوننت داخلی کارت‌های آماری با گلس‌مورفیسم خالص
 const StatCard = ({ title, value, trend, isPositive, iconName = "chart", accentColor = "#10b981", delay = 0 }) => (
   <motion.div 
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.35, delay }}
-    className="relative rounded-2xl border border-white/10 p-6 shadow-xl overflow-hidden group cursor-pointer"
+    className="relative rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,0,0,0.4)] overflow-hidden group cursor-pointer"
   >
-    {/* ۱. لایه پس‌زمینه شیشه‌ای ایزوله و ثابت طبق گرافیک کلی1 */}
-    <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
+    {/* لایه پس‌زمینه شیشه‌ای ۳ بعدی (حذف بردرها) */}
+    <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl rounded-2xl pointer-events-none -z-10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]" />
 
-    {/* ۲. هاله هوور مجزا بدون درگیر کردن بلور پس‌زمینه */}
+    {/* هاله هوور */}
     <div 
       className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100 -z-10"
       style={{
@@ -22,7 +22,7 @@ const StatCard = ({ title, value, trend, isPositive, iconName = "chart", accentC
       }}
     />
 
-    {/* ۳. نوار نوری گرادینت بالای کارت (Top Gradient Highlight Bar) */}
+    {/* نوار نوری گرادینت بالا */}
     <div 
       className="absolute top-0 inset-x-6 h-[2px] transition-opacity duration-300 opacity-70 group-hover:opacity-100 pointer-events-none"
       style={{ 
@@ -37,7 +37,6 @@ const StatCard = ({ title, value, trend, isPositive, iconName = "chart", accentC
         style={{ 
           color: accentColor, 
           backgroundColor: `${accentColor}15`, 
-          border: `1px solid ${accentColor}30` 
         }}
       >
         <Icon name={iconName} className="w-5 h-5" />
@@ -46,10 +45,10 @@ const StatCard = ({ title, value, trend, isPositive, iconName = "chart", accentC
 
     <div className="flex items-end justify-between gap-3 relative z-10">
       <span className="text-3xl font-black text-white font-sans tracking-tight">{value}</span>
-      <span className={`text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 font-sans ${
+      <span className={`text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 font-sans shadow-inner ${
         isPositive 
-          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+          ? 'bg-emerald-500/10 text-emerald-400' 
+          : 'bg-rose-500/10 text-rose-400'
       }`}>
         {trend}
       </span>
@@ -117,17 +116,17 @@ export default function DashboardPage() {
       {/* بخش پایینی پیشخوان */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* باکس لاگ فعالیت‌ها / نمودار آمار */}
+        {/* باکس لاگ فعالیت‌ها */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.25 }}
-          className="lg:col-span-2 relative rounded-3xl border border-white/10 p-6 min-h-[320px] flex flex-col items-center justify-center shadow-2xl overflow-hidden group"
+          className="lg:col-span-2 relative rounded-3xl p-6 min-h-[320px] flex flex-col items-center justify-center shadow-2xl overflow-hidden group"
         >
-          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
+          <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl rounded-3xl pointer-events-none -z-10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 pointer-events-none" />
 
-          <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#06b6d4] mb-4 shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:border-[#06b6d4]/40 transition-colors duration-300">
+          <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-[#06b6d4] mb-4 shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:bg-white/10 transition-colors duration-300">
             <Icon name="chart" className="w-8 h-8 group-hover:scale-110 transition-transform duration-300" />
           </div>
 
@@ -140,19 +139,19 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="relative rounded-3xl border border-white/10 p-6 shadow-2xl overflow-hidden group"
+          className="relative rounded-3xl p-6 shadow-2xl overflow-hidden group"
         >
-          <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
+          <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl rounded-3xl pointer-events-none -z-10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none" />
 
-          <h3 className="text-lg font-bold text-white mb-4 border-b border-white/10 pb-3 flex items-center gap-2 relative z-10 font-sans">
+          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2 relative z-10 font-sans">
             <Icon name="star" className="w-5 h-5 text-[#10b981]" />
             دسترسی سریع
           </h3>
 
           <ul className="space-y-3 relative z-10">
             <li>
-              <button className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/5 border border-white/5 hover:border-[#10b981]/30 hover:bg-[#10b981]/10 hover:text-[#10b981] transition-all text-sm text-gray-300 font-medium group/btn cursor-pointer font-sans">
+              <button className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/5 hover:bg-[#10b981]/10 hover:text-[#10b981] transition-all text-sm text-gray-300 font-medium group/btn cursor-pointer font-sans shadow-inner border border-transparent">
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[#10b981] group-hover/btn:scale-110 transition-transform">
                   <Icon name="plus" className="w-4 h-4" />
                 </div>
@@ -160,7 +159,7 @@ export default function DashboardPage() {
               </button>
             </li>
             <li>
-              <button className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/5 border border-white/5 hover:border-[#10b981]/30 hover:bg-[#10b981]/10 hover:text-[#10b981] transition-all text-sm text-gray-300 font-medium group/btn cursor-pointer font-sans">
+              <button className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/5 hover:bg-[#10b981]/10 hover:text-[#10b981] transition-all text-sm text-gray-300 font-medium group/btn cursor-pointer font-sans shadow-inner border border-transparent">
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[#10b981] group-hover/btn:scale-110 transition-transform">
                   <Icon name="comment" className="w-4 h-4" />
                 </div>
@@ -168,7 +167,7 @@ export default function DashboardPage() {
               </button>
             </li>
             <li>
-              <button className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/5 border border-white/5 hover:border-[#10b981]/30 hover:bg-[#10b981]/10 hover:text-[#10b981] transition-all text-sm text-gray-300 font-medium group/btn cursor-pointer font-sans">
+              <button className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/5 hover:bg-[#10b981]/10 hover:text-[#10b981] transition-all text-sm text-gray-300 font-medium group/btn cursor-pointer font-sans shadow-inner border border-transparent">
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[#10b981] group-hover/btn:scale-110 transition-transform">
                   <Icon name="bell" className="w-4 h-4" />
                 </div>

@@ -41,7 +41,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="relative rounded-3xl border border-white/10 p-8 md:p-12 text-center shadow-2xl overflow-hidden group"
+          className="relative rounded-3xl p-8 md:p-12 text-center shadow-2xl overflow-hidden group"
         >
           {/* ۱. لایه پس‌زمینه شیشه‌ای ثابت */}
           <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
@@ -51,7 +51,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
           
           <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
             {/* آیکون هدر */}
-            <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#06b6d4] mb-6 shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:border-[#06b6d4]/40 transition-colors duration-300">
+            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-[#06b6d4] mb-6 shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:border-[#06b6d4]/40 transition-colors duration-300">
               <Icon name="law" className="w-8 h-8 group-hover:scale-110 transition-transform duration-300" />
             </div>
             
@@ -67,7 +67,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
           </div>
 
           {hero?.showUpdateDate !== false && hero?.updateDate && (
-            <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/40 border border-white/10 px-4 py-2 rounded-xl backdrop-blur-sm z-20">
+            <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl backdrop-blur-sm z-20">
               <Icon name="calendar" className="w-4 h-4 text-[#06b6d4]" />
               <span className="text-[11px] text-gray-400 font-light">آخرین به‌روزرسانی:</span>
               <span className="text-xs text-white font-bold tracking-widest dir-ltr">{hero.updateDate}</span>
@@ -82,7 +82,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
-          className="lg:col-span-3 sticky top-32 rounded-2xl border border-white/10 p-6 hidden lg:block shadow-xl overflow-hidden group"
+          className="lg:col-span-3 sticky top-32 rounded-2xl p-6 hidden lg:block shadow-xl overflow-hidden group"
         >
           {/* پس‌زمینه شیشه‌ای ایزوله */}
           <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
@@ -90,7 +90,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
           {/* نوار نوری گرادینت بالای فهرست */}
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-70" />
 
-          <h2 className="text-white font-bold mb-6 flex items-center gap-2 border-b border-white/10 pb-4 text-sm relative z-10">
+          <h2 className="text-white font-bold mb-6 flex items-center gap-2 border-b border-white/5 pb-4 text-sm relative z-10">
             <Icon name="listBullets" className="text-[#06b6d4] w-5 h-5" /> فهرست مندرجات
           </h2>
           <ul className="space-y-3 text-sm relative z-10">
@@ -119,7 +119,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.35, delay: idx * 0.05 }}
-              className="relative rounded-3xl border border-white/10 p-6 md:p-8 shadow-lg overflow-hidden group"
+              className="relative rounded-3xl p-6 md:p-8 shadow-lg overflow-hidden group"
             >
               {/* ۱. پس‌زمینه شیشه‌ای ثابت */}
               <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-3xl pointer-events-none -z-10" />
@@ -140,7 +140,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
                 }}
               />
 
-              <h3 className="text-white text-xl font-bold border-b border-white/10 pb-4 mb-6 flex items-center gap-2 relative z-10">
+              <h3 className="text-white text-xl font-bold border-b border-white/5 pb-4 mb-6 flex items-center gap-2 relative z-10">
                 <span className="text-[#06b6d4] font-sans">{rule.number}</span> {rule.title}
               </h3>
               

@@ -1,4 +1,3 @@
-// app/(admin-panel)/portal-entry-99/products/page.jsx
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -14,20 +13,20 @@ const TYPE_MAP = {
   PRODUCED: { label: 'تولیدی', icon: 'videoCamera', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
   RAW: { label: 'خام', icon: 'fileText', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
   TOOL: { label: 'ابزار', icon: 'setting', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-  BLOG: { label: 'بلاگ', icon: 'browser', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' }
+  BLOG: { label: 'بلاگ', icon: 'browser', color: 'text-blue-400 bg-blue-500/10 border border-blue-500/20' }
 };
 
 // نگاشت وضعیت محتوا (حذف وضعیت بایگانی)
 const STATUS_MAP = {
   PUBLISHED: { label: 'منتشر شده', dot: 'bg-emerald-500', color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' },
-  DRAFT: { label: 'پیش‌نویس', dot: 'bg-gray-400', color: 'text-gray-400 border-white/10 bg-white/5' }
+  DRAFT: { label: 'پیش‌نویس', dot: 'bg-gray-400', color: 'text-gray-400 bg-white/5 border-transparent' }
 };
 
 export default function ProductsListPage() {
   const [contents, setContents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteModalItem, setDeleteModalItem] = useState(null); // استیت پاپ‌آپ اختصاصی حذف
+  const [deleteModalItem, setDeleteModalItem] = useState(null);
 
   // استیت‌های فیلتر و جستجو
   const [searchQuery, setSearchQuery] = useState('');
@@ -114,7 +113,7 @@ export default function ProductsListPage() {
         </div>
         <Link 
           href="/portal-entry-99/products/create"
-          className="px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 hover:scale-105 active:scale-95 shrink-0"
+          className="px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 hover:scale-105 active:scale-95 shrink-0 border border-transparent"
         >
           <Icon name="plus" className="w-4 h-4" />افزودن محتوا
         </Link>
@@ -123,46 +122,46 @@ export default function ProductsListPage() {
       {/* ۱. کارت‌های آمار سریع */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-[fadeIn_0.4s_ease-out]">
         
-        <div className="relative rounded-2xl border border-white/10 p-4 bg-[#0b0f19]/80 backdrop-blur-xl shadow-xl flex items-center justify-between overflow-hidden">
+        <div className="relative rounded-3xl p-4 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] border border-transparent flex items-center justify-between overflow-hidden">
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-80" />
-          <div className="space-y-1">
+          <div className="space-y-1 relative z-10">
             <span className="text-xs text-gray-400 font-light">کل محتواها</span>
             <p className="text-xl font-black text-white font-sans">{stats.total.toLocaleString('fa-IR')}</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 shadow-inner border border-transparent relative z-10">
             <Icon name="fileText" className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="relative rounded-2xl border border-white/10 p-4 bg-[#0b0f19]/80 backdrop-blur-xl shadow-xl flex items-center justify-between overflow-hidden">
+        <div className="relative rounded-3xl p-4 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] border border-transparent flex items-center justify-between overflow-hidden">
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-80" />
-          <div className="space-y-1">
+          <div className="space-y-1 relative z-10">
             <span className="text-xs text-gray-400 font-light">منتشر شده</span>
             <p className="text-xl font-black text-emerald-400 font-sans">{stats.published.toLocaleString('fa-IR')}</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 shadow-inner border border-transparent relative z-10">
             <Icon name="checkCircle" className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="relative rounded-2xl border border-white/10 p-4 bg-[#0b0f19]/80 backdrop-blur-xl shadow-xl flex items-center justify-between overflow-hidden">
+        <div className="relative rounded-3xl p-4 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] border border-transparent flex items-center justify-between overflow-hidden">
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-80" />
-          <div className="space-y-1">
+          <div className="space-y-1 relative z-10">
             <span className="text-xs text-gray-400 font-light">پیش‌نویس</span>
             <p className="text-xl font-black text-amber-400 font-sans">{stats.draft.toLocaleString('fa-IR')}</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 shadow-inner border border-transparent relative z-10">
             <Icon name="pencil" className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="relative rounded-2xl border border-white/10 p-4 bg-[#0b0f19]/80 backdrop-blur-xl shadow-xl flex items-center justify-between overflow-hidden">
+        <div className="relative rounded-3xl p-4 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] border border-transparent flex items-center justify-between overflow-hidden">
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-80" />
-          <div className="space-y-1">
+          <div className="space-y-1 relative z-10">
             <span className="text-xs text-gray-400 font-light">مجموع بازدیدها</span>
             <p className="text-xl font-black text-rose-400 font-sans">{stats.totalViews.toLocaleString('fa-IR')}</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+          <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400 shadow-inner border border-transparent relative z-10">
             <Icon name="eye" className="w-5 h-5" />
           </div>
         </div>
@@ -170,26 +169,26 @@ export default function ProductsListPage() {
       </div>
 
       {/* ۲. نوار فیلتر و جستجو */}
-      <div className="relative rounded-2xl border border-white/10 shadow-2xl overflow-hidden group animate-[fadeIn_0.5s_ease-out]">
-        <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+      <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent animate-[fadeIn_0.5s_ease-out]">
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
-        <div className="p-4 flex flex-col md:flex-row items-center gap-4 relative z-10">
+        <div className="p-5 flex flex-col md:flex-row items-center gap-4 relative z-10">
           
           {/* باکس جستجو */}
           <div className="relative flex-1 w-full">
-            <Icon name="search" className="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+            <Icon name="search" className="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input 
               type="text" 
               placeholder="جستجو در عنوان یا پیوند یکتا (Slug)..." 
               value={searchQuery} 
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#080c16] border border-white/10 rounded-xl pr-12 pl-4 py-3 text-sm text-white focus:border-[#10b981] outline-none transition-all font-sans shadow-inner"
+              className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl pr-12 pl-4 py-3.5 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#10b981] focus:bg-white/20 outline-none transition-all font-sans"
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white p-1"
               >
                 <Icon name="close" className="w-4 h-4" />
               </button>
@@ -201,7 +200,7 @@ export default function ProductsListPage() {
             <select 
               value={filterType} 
               onChange={(e) => setFilterType(e.target.value)}
-              className="w-full bg-[#080c16] border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-300 focus:border-[#10b981] outline-none cursor-pointer transition-all font-sans shadow-inner"
+              className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border focus:border-[#10b981] focus:bg-white/20 outline-none cursor-pointer transition-all font-sans"
             >
               <option value="ALL" className="bg-[#0b0f19]">همه انواع محتوا</option>
               <option value="PRODUCED" className="bg-[#0b0f19]">محتوای تولیدی</option>
@@ -211,12 +210,12 @@ export default function ProductsListPage() {
             </select>
           </div>
 
-          {/* فیلتر وضعیت (حذف بایگانی) */}
+          {/* فیلتر وضعیت */}
           <div className="w-full md:w-48 shrink-0">
             <select 
               value={filterStatus} 
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full bg-[#080c16] border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-300 focus:border-[#10b981] outline-none cursor-pointer transition-all font-sans shadow-inner"
+              className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border focus:border-[#10b981] focus:bg-white/20 outline-none cursor-pointer transition-all font-sans"
             >
               <option value="ALL" className="bg-[#0b0f19]">همه وضعیت‌ها</option>
               <option value="PUBLISHED" className="bg-[#0b0f19]">منتشر شده</option>
@@ -228,20 +227,20 @@ export default function ProductsListPage() {
       </div>
 
       {/* ۳. جدول نمایش دیتا */}
-      <div className="relative rounded-2xl border border-white/10 shadow-2xl overflow-hidden group animate-[fadeIn_0.6s_ease-out]">
-        <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+      <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent animate-[fadeIn_0.6s_ease-out]">
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
         <div className="overflow-x-auto custom-scrollbar relative z-10">
           <table className="w-full text-sm text-right whitespace-nowrap">
-            <thead className="bg-black/40 text-gray-400 font-bold border-b border-white/10">
+            <thead className="bg-black/20 text-gray-400 font-bold border-b border-white/10">
               <tr>
-                <th className="px-6 py-4 rounded-tr-2xl">عنوان محتوا</th>
+                <th className="px-6 py-4 rounded-tr-3xl">عنوان محتوا</th>
                 <th className="px-6 py-4">نوع</th>
                 <th className="px-6 py-4">وضعیت</th>
                 <th className="px-6 py-4">تاریخ انتشار</th>
                 <th className="px-6 py-4">بازدید</th>
-                <th className="px-6 py-4 text-center rounded-tl-2xl">عملیات</th>
+                <th className="px-6 py-4 text-center rounded-tl-3xl">عملیات</th>
               </tr>
             </thead>
             
@@ -267,8 +266,8 @@ export default function ProductsListPage() {
               ) : (
                 <AnimatePresence>
                   {contents.map((item) => {
-                    const typeConfig = TYPE_MAP[item.type] || { label: item.type, icon: 'fileText', color: 'text-gray-400 bg-white/5 border-white/10' };
-                    const statusConfig = STATUS_MAP[item.status] || { label: item.status, dot: 'bg-gray-400', color: 'text-gray-400 border-white/10 bg-white/5' };
+                    const typeConfig = TYPE_MAP[item.type] || { label: item.type, icon: 'fileText', color: 'text-gray-400 bg-white/5' };
+                    const statusConfig = STATUS_MAP[item.status] || { label: item.status, dot: 'bg-gray-400', color: 'text-gray-400 bg-white/5 border-transparent' };
                     const frontendUrl = getFrontendUrl(item);
 
                     return (
@@ -281,7 +280,7 @@ export default function ProductsListPage() {
                       >
                         {/* عنوان و کاور */}
                         <td className="px-6 py-4 flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                          <div className="w-12 h-12 rounded-xl bg-black/30 border border-transparent shadow-inner flex items-center justify-center overflow-hidden shrink-0">
                             {item.coverDesktop || item.coverMobile ? (
                               <img 
                                 src={item.coverDesktop || item.coverMobile} 
@@ -289,20 +288,20 @@ export default function ProductsListPage() {
                                 className="w-full h-full object-cover opacity-80 group-hover/row:opacity-100 group-hover/row:scale-110 transition-all duration-300" 
                               />
                             ) : (
-                              <Icon name="image" className="w-5 h-5 text-gray-600" />
+                              <Icon name="image" className="w-5 h-5 text-gray-500" />
                             )}
                           </div>
                           <div className="flex flex-col gap-1 max-w-xs md:max-w-md truncate">
                             <span className="text-white font-bold truncate">
                               {item.titleBase} {item.titleHighlight && <span className="text-[#10b981]">{item.titleHighlight}</span>}
                             </span>
-                            <span className="text-xs text-gray-500 truncate dir-ltr text-left font-mono">/{item.slug}</span>
+                            <span className="text-xs text-gray-500 truncate dir-ltr text-left font-sans">/{item.slug}</span>
                           </div>
                         </td>
 
                         {/* نوع محتوا */}
                         <td className="px-6 py-4">
-                          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${typeConfig.color}`}>
+                          <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold border shadow-inner ${typeConfig.color}`}>
                             <Icon name={typeConfig.icon} className="w-3.5 h-3.5 fill-current" />
                             {typeConfig.label}
                           </div>
@@ -310,7 +309,7 @@ export default function ProductsListPage() {
 
                         {/* وضعیت */}
                         <td className="px-6 py-4">
-                          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${statusConfig.color}`}>
+                          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold border shadow-inner ${statusConfig.color}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot} animate-pulse`}></span>
                             {statusConfig.label}
                           </div>
@@ -332,51 +331,45 @@ export default function ProductsListPage() {
                           </div>
                         </td>
 
-                        {/* عملیات (همراه با تول‌تیپ اختصاصی و مدرن) */}
+                        {/* عملیات */}
                         <td className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center gap-2">
                             
-                            {/* دکمه پیش‌نمایش در فرانت */}
                             <div className="relative group/tooltip">
                               <a 
                                 href={frontendUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#10b981] text-gray-400 hover:text-[#10b981] hover:bg-[#10b981]/10 transition-all cursor-pointer shadow-inner flex items-center justify-center"
+                                className="p-2.5 rounded-xl bg-white/5 hover:border-[#10b981] text-gray-400 hover:text-[#10b981] hover:bg-[#10b981]/10 transition-all cursor-pointer shadow-inner flex items-center justify-center border border-transparent"
                               >
                                 <Icon name="arrowUpRight" className="w-4 h-4" />
                               </a>
-                              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#0b0f19] border border-white/15 text-[11px] font-bold text-gray-200 rounded-lg whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1 transition-all duration-200 z-30 shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
+                              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-black/80 backdrop-blur-md border border-white/10 text-[11px] font-bold text-gray-200 rounded-xl whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1 transition-all duration-200 z-30 shadow-xl">
                                 مشاهده در سایت
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[#0b0f19]" />
                               </div>
                             </div>
 
-                            {/* دکمه ویرایش */}
                             <div className="relative group/tooltip">
                               <Link 
                                 href={`/portal-entry-99/products/edit/${item.id}`}
-                                className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#06b6d4] text-gray-400 hover:text-[#06b6d4] hover:bg-[#06b6d4]/10 transition-all shadow-inner flex items-center justify-center"
+                                className="p-2.5 rounded-xl bg-white/5 hover:border-[#06b6d4] text-gray-400 hover:text-[#06b6d4] hover:bg-[#06b6d4]/10 transition-all shadow-inner flex items-center justify-center border border-transparent"
                               >
                                 <Icon name="pencil" className="w-4 h-4" />
                               </Link>
-                              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#0b0f19] border border-white/15 text-[11px] font-bold text-gray-200 rounded-lg whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1 transition-all duration-200 z-30 shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
+                              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-black/80 backdrop-blur-md border border-white/10 text-[11px] font-bold text-gray-200 rounded-xl whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1 transition-all duration-200 z-30 shadow-xl">
                                 ویرایش محتوا
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[#0b0f19]" />
                               </div>
                             </div>
                             
-                            {/* دکمه حذف */}
                             <div className="relative group/tooltip">
                               <button 
                                 onClick={() => setDeleteModalItem(item)}
-                                className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/50 text-rose-500 hover:bg-rose-500/20 transition-all cursor-pointer shadow-inner flex items-center justify-center"
+                                className="p-2.5 rounded-xl bg-rose-500/10 border border-transparent hover:border-rose-500/50 text-rose-500 hover:bg-rose-500/20 transition-all cursor-pointer shadow-inner flex items-center justify-center"
                               >
                                 <Icon name="trash" className="w-4 h-4" />
                               </button>
-                              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-[#0b0f19] border border-rose-500/30 text-[11px] font-bold text-rose-400 rounded-lg whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1 transition-all duration-200 z-30 shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
+                              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-black/80 backdrop-blur-md border border-rose-500/30 text-[11px] font-bold text-rose-400 rounded-xl whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1 transition-all duration-200 z-30 shadow-xl">
                                 حذف دائمی
-                                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[#0b0f19]" />
                               </div>
                             </div>
 
@@ -392,7 +385,7 @@ export default function ProductsListPage() {
         </div>
       </div>
 
-      {/* پاپ‌آپ اختصاصی و شیشه‌ای تأیید حذف (جایگزین پنجره مرورگر) */}
+      {/* پاپ‌آپ اختصاصی و شیشه‌ای تأیید حذف */}
       <AnimatePresence>
         {deleteModalItem && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -401,17 +394,17 @@ export default function ProductsListPage() {
               onClick={() => !isDeleting && setDeleteModalItem(null)} 
             />
             <div 
-              className="relative z-10 bg-[#0b0f19]/95 backdrop-blur-xl border border-white/10 rounded-3xl w-full max-w-sm p-6 shadow-2xl overflow-hidden animate-[scaleIn_0.3s_ease-out]" 
+              className="relative z-10 bg-[#0b0f19]/90 backdrop-blur-2xl rounded-3xl w-full max-w-sm p-6 shadow-[inset_0_0_20px_rgba(255,255,255,0.02),0_10px_40px_rgba(0,0,0,0.5)] border border-transparent overflow-hidden animate-[scaleIn_0.3s_ease-out]" 
               onClick={(e) => e.stopPropagation()}
             >
               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-90 pointer-events-none z-20" />
 
               <div className="flex flex-col items-center text-center mb-6 pt-2">
-                <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-4 shadow-[0_0_20px_rgba(244,63,94,0.2)]">
+                <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-transparent shadow-inner flex items-center justify-center text-rose-400 mb-4">
                   <Icon name="trash" className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">حذف دائمی محتوا</h3>
-                <p className="text-xs text-gray-300 leading-relaxed text-center font-light">
+                <h3 className="text-lg font-bold text-white mb-2 font-sans">حذف دائمی محتوا</h3>
+                <p className="text-xs text-gray-300 leading-relaxed text-center font-light font-sans">
                   آیا از حذف <span className="text-white font-bold">«{deleteModalItem.titleBase}»</span> اطمینان دارید؟ این عمل غیرقابل بازگشت است.
                 </p>
               </div>
@@ -420,14 +413,14 @@ export default function ProductsListPage() {
                 <button 
                   onClick={() => setDeleteModalItem(null)} 
                   disabled={isDeleting}
-                  className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 py-3 rounded-xl text-sm font-bold transition-colors cursor-pointer disabled:opacity-50"
+                  className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 py-3 rounded-xl text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 border border-transparent shadow-inner font-sans"
                 >
                   انصراف
                 </button>
                 <button 
                   onClick={confirmDelete} 
                   disabled={isDeleting}
-                  className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 border border-transparent font-sans"
                 >
                   {isDeleting ? (
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
