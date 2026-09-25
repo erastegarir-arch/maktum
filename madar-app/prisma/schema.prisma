@@ -60,26 +60,26 @@ enum Gender {
 }
 
 model User {
-  id     String     @id @default(cuid())
-  phone  String     @unique
-  status UserStatus @default(ACTIVE)
+  id      String     @id @default(cuid())
+  phone   String     @unique
+  status  UserStatus @default(ACTIVE)
 
   // اطلاعات پروفایل (قابل ویرایش توسط کاربر)
-  firstName            String?
-  lastName             String?
-  gender               Gender?
-  birthYear            String? // به صورت رشته نگه می‌داریم تا تاریخ شمسی مانند "1361" به سادگی ذخیره شود
-  province             String?
-  city                 String?
-  educationDegree      String? // مدرک تحصیلی
-  major                String? // رشته تحصیلی
-  artResearchField     String? // حوزه فعالیت هنری / پژوهشی
+  firstName          String?
+  lastName           String?
+  gender             Gender?
+  birthYear          String? // به صورت رشته نگه می‌داریم تا تاریخ شمسی مانند "1361" به سادگی ذخیره شود
+  province           String?
+  city               String?
+  educationDegree    String? // مدرک تحصیلی
+  major              String? // رشته تحصیلی
+  artResearchField   String? // حوزه فعالیت هنری / پژوهشی
   cooperationInterests String? // زمینه‌های تمایل به همکاری
-  email                String?
+  email              String?
 
   // سیستم دسترسی مبتنی بر نقش (RBAC)
-  roleId String?
-  role   Role?   @relation(fields: [roleId], references: [id])
+  roleId  String?
+  role    Role?   @relation(fields: [roleId], references: [id])
 
   // روابط با سایر جداول
   favorites     Favorite[]
@@ -98,7 +98,7 @@ model Role {
   id          String  @id @default(cuid())
   name        String  @unique // مثال: "سردبیر"
   slug        String  @unique // مثال: "editor"
-  permissions String // ذخیره آرایه مجوزها به صورت رشته متنی (JSON String)
+  permissions String  // ذخیره آرایه مجوزها به صورت رشته متنی (JSON String)
   isSystem    Boolean @default(false) // برای جلوگیری از حذف نقش‌های اصلی
 
   users User[] // ارتباط با کاربران
@@ -112,7 +112,7 @@ model Role {
 // ------------------------------------------------
 enum NotificationType {
   SYSTEM // اعلان‌های خودکار سیستم (مثل خوشامدگویی)
-  BULK // ارسال گروهی، فیلتردار یا دستی توسط ادمین
+  BULK   // ارسال گروهی، فیلتردار یا دستی توسط ادمین
   PRIVATE // پیام اختصاصی فقط برای یک شخص یا عده‌ای خاص
 }
 
@@ -136,8 +136,8 @@ model Notification {
   ctaButtons String? // باکس لینک‌دار (آرایه دکمه‌ها ذخیره شده به صورت JSON String)
 
   // ۲. محتوای پیامکی (SMS Payload)
-  sendSms Boolean @default(false) // آیا پیامک ارسال شود؟
-  smsText String? // متن خام پیامک (با پشتیبانی از کاراکتر و ایموجی)
+  sendSms  Boolean @default(false) // آیا پیامک ارسال شود؟
+  smsText  String? // متن خام پیامک (با پشتیبانی از کاراکتر و ایموجی)
 
   // ۳. آمار و گزارش‌گیری (Analytics)
   targetCount  Int @default(0) // کل کاربرانی که در لیست ارسال بوده‌اند
@@ -161,8 +161,8 @@ model UserNotification {
   notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
   notificationId String
 
-  isRead Boolean   @default(false)
-  readAt DateTime?
+  isRead  Boolean   @default(false)
+  readAt  DateTime?
 
   createdAt DateTime @default(now()) // زمان دقیق ایجاد این رکورد برای این کاربر خاص
 
@@ -203,12 +203,12 @@ model DownloadHistory {
 // ------------------------------------------------
 enum TaxonomyType {
   CATEGORY // دسته‌بندی
-  HASHTAG // هشتگ
-  CREATOR // پدیدآورنده
+  HASHTAG  // هشتگ
+  CREATOR  // پدیدآورنده
 }
 
 model Taxonomy {
-  id   String       @id @default(cuid())
+  id   String        @id @default(cuid())
   type TaxonomyType // نوع: دسته‌بندی، هشتگ یا پدیدآورنده
 
   name String // نام (مثل: تاریخ)
@@ -242,16 +242,16 @@ model Taxonomy {
 // Enums محتوا و پرونده‌ها
 // ------------------------------------------------
 enum ContentType {
-  RAW // محتوای خام
+  RAW      // محتوای خام
   PRODUCED // محتوای تولیدی
-  TOOL // ابزارها
-  BLOG // بلاگ
+  TOOL     // ابزارها
+  BLOG     // بلاگ
 }
 
 enum ContentStatus {
-  DRAFT // پیش‌نویس
+  DRAFT     // پیش‌نویس
   PUBLISHED // منتشر شده
-  ARCHIVED // بایگانی
+  ARCHIVED  // بایگانی
 }
 
 // ================================================
@@ -268,6 +268,11 @@ model Dossier {
   hubCoverMobile  String? // کاور 1:1 برای صفحه اصلی
   isVisibleInHub  Boolean @default(true) // نمایش در صفحه اصلی؟
   orderIndex      Int     @default(0) // ترتیب چینش با درگ و دراپ
+  
+  // ------------------------------------
+  // فیلد اضافه‌شده: وضعیت چیدمان (گرید) در هاب
+  layoutSize      String? @default("STANDARD") // VIP | STANDARD
+  // ------------------------------------
 
   // 2. هدر صفحه داخلی (Hero Section)
   preTitle     String? // روتیتر (مثلاً: اسناد محرمانه سفارت)
@@ -276,10 +281,17 @@ model Dossier {
   coverDesktop String? // کاور واید هدر (16:9)
   coverMobile  String? // کاور هدر موبایل (1:1)
 
-  // تنظیمات گرافیکی
-  themeColor   String? @default("#06b6d4") // رنگ اصلی نئون
-  gradientFrom String? @default("#06b6d4") // رنگ شروع گرادیان عنوان
-  gradientTo   String? @default("#d946ef") // رنگ پایان گرادیان عنوان
+  // تنظیمات گرافیکی و رنگ‌بندی جدید
+  themeColor          String? @default("#06b6d4") // رنگ اصلی نئون
+  gradientFrom        String? @default("#06b6d4") // رنگ قدیمی (جهت سازگاری)
+  gradientTo          String? @default("#d946ef") // رنگ قدیمی (جهت سازگاری)
+  // ------------------------------------
+  // فیلدهای اضافه‌شده: رنگ‌بندی داینامیک متون
+  titleGradientStart  String? @default("#ffffff")
+  titleGradientEnd    String? @default("#ffffff")
+  preTitleColor       String? @default("#a3a3a3")
+  descColor           String? @default("#d1d5db")
+  // ------------------------------------
 
   // 3. رادار موضوعی
   showRadar  Boolean @default(true)
@@ -380,15 +392,15 @@ model Content {
 // ================================================
 
 enum CommentStatus {
-  PENDING // در انتظار تایید
+  PENDING  // در انتظار تایید
   APPROVED // تایید شده و قابل نمایش
   REJECTED // رد شده
 }
 
 model Comment {
-  id     String        @id @default(cuid())
-  text   String // متن نظر کاربر
-  status CommentStatus @default(PENDING) // وضعیت تایید نظر
+  id      String        @id @default(cuid())
+  text    String // متن نظر کاربر
+  status  CommentStatus @default(PENDING) // وضعیت تایید نظر
 
   adminReply String? // فیلد پاسخ مستقیم ادمین (ساختار تخت و بهینه)
 

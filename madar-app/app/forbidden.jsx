@@ -50,7 +50,7 @@ export default function ForbiddenAccess() {
 
       {/* ================== تایپوگرافی غول‌پیکر پس‌زمینه (مهر محرمانه) ================== */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none pointer-events-none z-0 mix-blend-screen flex items-center justify-center opacity-60">
-        <span className="text-[32vw] font-black text-transparent bg-clip-text bg-gradient-to-b from-white/5 to-transparent blur-[4px] tracking-tighter" dir="ltr">
+        <span className="text-[32vw] font-black text-transparent bg-clip-text bg-gradient-to-b from-white/5 to-transparent blur-[4px] tracking-tighter font-sans" dir="ltr">
           403
         </span>
       </div>
@@ -60,7 +60,7 @@ export default function ForbiddenAccess() {
         <div 
           ref={cardRef}
           onMouseMove={handleMouseMove}
-          className="relative w-full rounded-3xl bg-[#0b0f19]/85 backdrop-blur-2xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden group animate-[scaleIn_0.5s_ease-out]"
+          className="relative w-full rounded-3xl bg-white/[0.02] backdrop-blur-3xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(255,255,255,0.02)] border border-transparent overflow-hidden group animate-[scaleIn_0.5s_ease-out]"
         >
           {/* خط نئونی بالای کارت در هاور (بنفش به قرمز) */}
           <div className="absolute top-0 inset-x-0 h-[2px] opacity-70 pointer-events-none z-20 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent group-hover:via-rose-500 transition-colors duration-700" />
@@ -80,7 +80,7 @@ export default function ForbiddenAccess() {
               <div className="absolute inset-6 border border-rose-500/20 rounded-full" />
               
               {/* کادر مرکزی قفل */}
-              <div className="relative w-24 h-24 bg-gradient-to-tr from-[#0b0f19] to-fuchsia-900/30 border border-fuchsia-500/30 rounded-2xl backdrop-blur-md flex items-center justify-center shadow-[0_0_30px_rgba(217,70,239,0.2)] z-10 overflow-hidden">
+              <div className="relative w-24 h-24 bg-black/40 border border-transparent rounded-2xl backdrop-blur-md flex items-center justify-center shadow-[inset_0_0_15px_rgba(217,70,239,0.2),0_0_30px_rgba(217,70,239,0.3)] z-10 overflow-hidden">
                 <Icon name="lockKey" className="w-10 h-10 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] opacity-80" />
                 
                 {/* لیزر اسکنر */}
@@ -94,33 +94,33 @@ export default function ForbiddenAccess() {
 
             {/* ================== محتوای متنی کاربرپسند ================== */}
             <div className="text-center space-y-4 mb-8">
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-full text-xs font-bold text-fuchsia-400 tracking-widest shadow-inner mb-2">
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-white/5 border border-transparent rounded-full text-xs font-bold text-fuchsia-400 tracking-widest shadow-inner mb-2 font-sans">
                 دسترسی مسدود شد
               </div>
 
-              <h1 className="text-2xl md:text-3xl font-black text-white leading-tight">
+              <h1 className="text-2xl md:text-3xl font-black text-white leading-tight font-sans">
                 اسناد طبقه‌بندی شده!
               </h1>
               
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light max-w-md mx-auto text-justify md:text-center">
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light max-w-md mx-auto text-justify md:text-center font-sans">
                 پروفایل کاربری شما فاقد مجوزهای لازم (Clearance) برای ورود به این بخش از پایگاه داده مدار است. این محتوا برای سطح کاربری شما محدود شده است.
               </p>
             </div>
 
             {/* ================== پنل تشخیص وضعیت (Clearance Diagnostic UI) ================== */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 border-t border-white/5 border-b border-white/5 py-5">
+            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 bg-white/5 border border-transparent shadow-inner rounded-2xl py-4 px-6">
               
               <div className="flex items-center justify-center gap-2.5 w-full sm:w-1/2">
                 <Icon name="fingerprint" className="w-4 h-4 text-fuchsia-500" />
-                <span className="text-xs text-gray-500">وضعیت مجوز:</span>
+                <span className="text-xs text-gray-400 font-sans">وضعیت مجوز:</span>
                 <span className="text-xs font-bold text-rose-400 tracking-wider font-sans" dir="ltr">DENIED</span>
               </div>
 
               <div className="hidden sm:block w-[1px] h-8 bg-white/10"></div>
 
               <div className="flex items-center justify-center gap-2.5 w-full sm:w-1/2">
-                <Icon name="shieldCheck" className="w-4 h-4 text-gray-600" />
-                <span className="text-xs text-gray-500">کد امنیتی:</span>
+                <Icon name="shieldCheck" className="w-4 h-4 text-gray-500" />
+                <span className="text-xs text-gray-400 font-sans">کد امنیتی:</span>
                 <span className="text-xs font-bold text-gray-300 tracking-wider font-sans" dir="ltr">ERR_403</span>
               </div>
 
@@ -131,15 +131,15 @@ export default function ForbiddenAccess() {
               
               <Link 
                 href="/portal-entry-99/profile" 
-                className="w-full sm:w-auto bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 shadow-[0_0_20px_rgba(192,38,211,0.3)] hover:shadow-[0_0_30px_rgba(192,38,211,0.5)] transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                className="w-full sm:w-auto bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 shadow-[0_0_20px_rgba(192,38,211,0.3)] hover:shadow-[0_0_30px_rgba(192,38,211,0.5)] border border-transparent transition-all duration-300 hover:-translate-y-1 cursor-pointer font-sans"
               >
                 <Icon name="userPlus" className="w-5 h-5" />
                 ارتقاء سطح دسترسی
               </Link>
               
               <Link 
-                href="/archive" 
-                className="w-full sm:w-auto bg-white/5 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-300 cursor-pointer"
+                href="/t" 
+                className="w-full sm:w-auto bg-white/5 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:bg-white/10 hover:text-white border border-transparent shadow-inner transition-all duration-300 cursor-pointer font-sans"
               >
                 <Icon name="files" className="w-5 h-5 text-gray-400 group-hover:text-white" />
                 بازگشت به آرشیو عمومی

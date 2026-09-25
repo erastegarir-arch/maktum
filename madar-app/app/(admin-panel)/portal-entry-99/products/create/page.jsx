@@ -73,7 +73,7 @@ const DynamicSelector = ({ options, selectedIds, onChange, placeholder, activeTh
         />
         <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-20" />
         
-        {/* لیست کشویی (Dropdown) - اصلاح شد تا کدر باشد و روی متن‌های زیرین سایه نیندازد */}
+        {/* لیست کشویی (Dropdown) */}
         <AnimatePresence>
           {isOpen && query.trim() !== '' && (
             <motion.div 
@@ -229,7 +229,6 @@ export default function CreateContentPage() {
   const creators = taxonomies.filter(t => t.type === 'CREATOR');
   const tags = taxonomies.filter(t => t.type === 'HASHTAG');
 
-  // ارور هیدریشن در خط بعدی (حذف کلاس اضافی z-10) برطرف شد
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 pb-20 font-sans text-right select-none relative">
       
@@ -603,7 +602,7 @@ export default function CreateContentPage() {
               </div>
 
               {/* مقادیر دستی متادیتا */}
-              <div className="grid grid-cols-2 gap-4 pt-5 border-t border-white/10">
+              <div className="grid grid-cols-2 gap-4 pt-5 border-t border-white/10 mb-6">
                 <div className="space-y-2">
                   <label className="text-[10px] text-gray-400 font-bold text-center block">زمان مطالعه (دقیقه)</label>
                   <input type="text" value={readTime} onChange={e => setReadTime(e.target.value)} placeholder="مثال: ۱۲" className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl p-3 text-sm text-white placeholder:text-white/40 text-center outline-none focus:border focus:bg-white/20 transition-all font-sans" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
@@ -613,6 +612,50 @@ export default function CreateContentPage() {
                   <input type="text" value={ageRating} onChange={e => setAgeRating(e.target.value)} placeholder="مثال: +۷" className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl p-3 text-sm text-white placeholder:text-white/40 text-center outline-none dir-ltr font-bold focus:border focus:bg-white/20 transition-all font-sans" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
                 </div>
               </div>
+
+              {/* === بلوک تصاویر شاخص (کاور) که به این مکان منتقل شد === */}
+              <div className="pt-2">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
+                  <Icon name="image" className={`w-5 h-5 ${activeTheme.color}`} /> تصاویر شاخص (کاور)
+                </h3>
+                
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-300 font-bold text-center block mb-2">کاور دسکتاپ (16:9)</label>
+                    {coverDesktop ? (
+                      <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 group/img bg-black/50 shadow-inner">
+                        <img src={coverDesktop} alt="Cover Desktop" className="w-full h-full object-cover opacity-80 group-hover/img:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 flex items-center justify-center gap-3 transition-all backdrop-blur-sm">
+                          <button type="button" onClick={() => setMediaPickerTarget('desktop')} className={`p-2.5 bg-white/10 hover:${activeTheme.bg} rounded-full text-white cursor-pointer transition-colors`}><Icon name="image" className="w-5 h-5" /></button>
+                          <button type="button" onClick={() => setCoverDesktop('')} className="p-2.5 bg-white/10 hover:bg-rose-500 rounded-full text-white cursor-pointer transition-colors"><Icon name="close" className="w-5 h-5" /></button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => setMediaPickerTarget('desktop')} className="w-full aspect-video rounded-xl border border-dashed border-white/20 hover:border-white/50 bg-white/5 hover:bg-white/10 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-white transition-all cursor-pointer shadow-inner">
+                        <Icon name="device" className="w-6 h-6" /> <span className="text-xs font-bold">انتخاب تصویر</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-300 font-bold text-center block mb-2">کاور موبایل (1:1 مربعی)</label>
+                    {coverMobile ? (
+                      <div className="relative w-full aspect-square max-w-[180px] mx-auto rounded-xl overflow-hidden border border-white/10 group/img bg-black/50 shadow-inner">
+                        <img src={coverMobile} alt="Cover Mobile" className="w-full h-full object-cover opacity-80 group-hover/img:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 flex items-center justify-center gap-3 transition-all backdrop-blur-sm">
+                          <button type="button" onClick={() => setMediaPickerTarget('mobile')} className={`p-2.5 bg-white/10 hover:${activeTheme.bg} rounded-full text-white cursor-pointer transition-colors`}><Icon name="image" className="w-4 h-4" /></button>
+                          <button type="button" onClick={() => setCoverMobile('')} className="p-2.5 bg-white/10 hover:bg-rose-500 rounded-full text-white cursor-pointer transition-colors"><Icon name="close" className="w-4 h-4" /></button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => setMediaPickerTarget('mobile')} className="w-full aspect-square max-w-[180px] mx-auto rounded-xl border border-dashed border-white/20 hover:border-white/50 bg-white/5 hover:bg-white/10 flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-white transition-all cursor-pointer shadow-inner">
+                        <Icon name="deviceMobile" className="w-6 h-6" /> <span className="text-xs font-bold">انتخاب تصویر</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {/* ========================================================== */}
 
             </div>
           </div>

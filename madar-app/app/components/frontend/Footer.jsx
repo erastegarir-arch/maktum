@@ -24,12 +24,11 @@ function SocialIconItem({ social, allIcons }) {
           href={social.url || '#'}
           target="_blank"
           rel="noopener noreferrer"
-          // ✅ تغییر بنیادین: رنگ پیش‌فرض سفید، رنگ موس داینامیک، و هاله نوری همرنگِ آیکون فقط در حالت هاور
-          className="p-1.5 text-white hover:text-[var(--hover-color)] drop-shadow-none hover:drop-shadow-[0_0_8px_currentColor] flex items-center justify-center transition-all duration-300 cursor-pointer"
+          // رنگ پیش‌فرض شیشه‌ای (سفید شفاف) و در حالت هاور همرنگ شبکه با درخشش
+          className="p-2 text-white/40 hover:text-[var(--hover-color)] hover:opacity-90 drop-shadow-none hover:drop-shadow-[0_0_12px_currentColor] flex items-center justify-center transition-all duration-300 cursor-pointer"
           style={{ '--hover-color': social.hoverColor || '#06b6d4' }}
         >
           {isUrl ? (
-            // ✅ استفاده از تکنیک Mask Image: تبدیل عکس/SVG آپلودی به یک لایه رنگ‌پذیر داینامیک
             <div 
               className="w-6 h-6 transition-all duration-300"
               style={{
@@ -54,10 +53,9 @@ function SocialIconItem({ social, allIcons }) {
 
       {social.tooltip && (
         <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out]">
-          <div className="bg-[#0b0f19]/95 backdrop-blur-xl text-white text-[11px] py-1.5 px-3 rounded-lg shadow-2xl whitespace-nowrap font-sans font-medium">
+          <div className="bg-[#050810]/95 border border-white/10 backdrop-blur-md text-white text-[11px] py-1.5 px-3 rounded-lg shadow-2xl whitespace-nowrap font-sans font-bold">
             {social.tooltip}
           </div>
-          <div className="w-0 h-0 border-x-[5px] border-x-transparent -[6px] -[#0b0f19]"></div>
         </div>
       )}
     </div>
@@ -88,9 +86,9 @@ export default function Footer({ initialData }) {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
-      className="w-full bg-[#0b0f19]/80 backdrop-blur-xl  text-gray-300 py-12 px-4 md:px-8 mt-auto relative z-10 overflow-hidden font-sans select-none shadow-2xl"
+      className="w-full bg-white/[0.01] backdrop-blur-3xl text-gray-300 py-12 px-4 md:px-8 mt-auto relative z-10 overflow-hidden font-sans select-none shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-transparent"
     >
-      <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+      <div className="absolute inset-0 bg-[#050810]/50 pointer-events-none -z-10 shadow-[inset_0_0_15px_rgba(255,255,255,0.01)]" />
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 pointer-events-none z-20" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.15)_0%,transparent_70%)] pointer-events-none -z-10"></div>
 
@@ -108,10 +106,10 @@ export default function Footer({ initialData }) {
             ) : null}
 
             {footerText && (
-              <span className="text-white font-black text-xl tracking-wider group-hover:text-gray-200 transition-colors">{footerText}</span>
+              <span className="text-white font-black text-xl tracking-wider group-hover:text-cyan-400 transition-colors">{footerText}</span>
             )}
           </Link>
-          <p className="text-sm text-gray-400 font-light leading-relaxed mt-2">{footerDesc}</p>
+          <p className="text-sm text-gray-400 font-light leading-relaxed mt-2 text-justify">{footerDesc}</p>
         </div>
 
         {/* لیست‌ها (دسترسی سریع و همراهان) */}
@@ -119,12 +117,12 @@ export default function Footer({ initialData }) {
           { title: 'دسترسی سریع', links: fastLinks, color: '#06b6d4' },
           { title: 'همراهان', links: companionLinks, color: '#a855f7' }
         ].map((section, idx) => (
-          <div key={idx} className="space-y-3">
-            <div className="flex items-center gap-2 pb-2">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: section.color, boxShadow: `0 0 10px ${section.color}` }}></span>
-              <h3 className="text-white font-bold text-base">{section.title}</h3>
+          <div key={idx} className="space-y-4">
+            <div className="flex items-center gap-2 pb-3 border-b border-white/5 mb-3">
+              <span className="w-2 h-2 rounded-full shadow-lg" style={{ backgroundColor: section.color, boxShadow: `0 0 10px ${section.color}` }}></span>
+              <h3 className="text-white font-bold text-sm md:text-base">{section.title}</h3>
             </div>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-3 text-sm">
               {section.links.length > 0 ? (
                 section.links.map((link) => (
                   <motion.li 
@@ -137,17 +135,16 @@ export default function Footer({ initialData }) {
                       href={link.url || '#'} 
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-white transition-colors font-medium"
+                      className="text-gray-400 hover:text-white transition-colors font-medium text-xs md:text-sm"
                     >
                       {link.title}
                     </Link>
 
                     {link.tooltip && (
                       <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover/link:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out]">
-                        <div className="bg-[#0b0f19]/95 backdrop-blur-xl text-white text-[11px] py-1.5 px-3 rounded-lg shadow-2xl whitespace-nowrap font-sans font-medium">
+                        <div className="bg-[#050810]/95 border border-white/10 backdrop-blur-md text-white text-[11px] py-1.5 px-3 rounded-lg shadow-2xl whitespace-nowrap font-sans font-bold">
                           {link.tooltip}
                         </div>
-                        <div className="w-0 h-0 border-x-[5px] border-x-transparent -[6px] -[#0b0f19]"></div>
                       </div>
                     )}
                   </motion.li>
@@ -160,7 +157,7 @@ export default function Footer({ initialData }) {
         ))}
 
         {/* شبکه‌های اجتماعی و نمادها */}
-        <div className="space-y-6 flex flex-col justify-end">
+        <div className="space-y-6 flex flex-col justify-end pt-4 md:pt-0 border-t border-white/5 md:border-none">
           <div className="flex flex-wrap items-center gap-3">
             {socialLinks.map((social) => (
               <SocialIconItem key={social.id} social={social} allIcons={allIcons} />
@@ -184,7 +181,7 @@ export default function Footer({ initialData }) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto mt-12 pt-6  text-center text-xs text-gray-500 font-medium relative z-10">
+      <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/5 text-center text-[10px] md:text-xs text-gray-500 font-light relative z-10">
         {copyrightText}
       </div>
     </motion.footer>

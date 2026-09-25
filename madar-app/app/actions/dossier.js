@@ -13,21 +13,19 @@ export async function getAllDossiers() {
       orderBy: { orderIndex: 'asc' },
       include: { _count: { select: { contents: true, taxonomies: true } } }
     });
-    return { success: true, data: dossiers };
+    return { success: true, data: JSON.parse(JSON.stringify(dossiers)) };
   } catch (error) {
     return { success: false, error: 'خطا در دریافت پرونده‌ها' };
   }
 }
 
 // ==========================================
-// دریافت اطلاعات کامل یک پرونده
+// ۲. دریافت اطلاعات کامل یک پرونده (حل مشکل ارور صفحه داخلی)
 // ==========================================
 export async function getDossierBySlug(slug) {
   try {
-    // ۱. پاکسازی کامل و استانداردسازی لینک ورودی
     const cleanSlug = decodeURIComponent(slug).trim().toLowerCase();
     
-    // ۲. استفاده از findFirst برای جلوگیری از ارورهای حساسیت به حروف
     const dossier = await prisma.dossier.findFirst({
       where: { slug: cleanSlug },
       include: {
@@ -47,7 +45,8 @@ export async function getDossierBySlug(slug) {
     const topics = dossier.taxonomies.filter(t => t.type === 'CATEGORY' || t.type === 'HASHTAG');
     const creators = dossier.taxonomies.filter(t => t.type === 'CREATOR');
 
-    return { success: true, data: { ...dossier, topics, creators } };
+    const payload = { ...dossier, topics, creators };
+    return { success: true, data: JSON.parse(JSON.stringify(payload)) };
   } catch (error) {
     console.error('Error fetching dossier by slug:', error);
     return { success: false, error: 'خطا در ارتباط با دیتابیس' };
@@ -55,7 +54,7 @@ export async function getDossierBySlug(slug) {
 }
 
 // ==========================================
-// ۳. دریافت تمام پرونده‌ها برای پنل ادمین (تابعی که ارور داده بود)
+// ۳. دریافت تمام پرونده‌ها برای پنل ادمین
 // ==========================================
 export async function getAllDossiersAdmin() {
   try {
@@ -63,14 +62,14 @@ export async function getAllDossiersAdmin() {
       orderBy: { orderIndex: 'asc' },
       include: { _count: { select: { contents: true } }, taxonomies: true, contents: true }
     });
-    return { success: true, data: dossiers };
+    return { success: true, data: JSON.parse(JSON.stringify(dossiers)) };
   } catch (error) {
     return { success: false, error: 'خطا در دریافت اطلاعات' };
   }
 }
 
 // ==========================================
-// ساخت یا ویرایش پرونده
+// ۴. ساخت یا ویرایش پرونده (آپدیت شده برای رفع ارور ذخیره)
 // ==========================================
 export async function saveDossier(data) {
   try {
@@ -81,16 +80,22 @@ export async function saveDossier(data) {
 
     restData.status = 'PUBLISHED';
     
-    // پاکسازی قطعی اسلاگ قبل از ذخیره در دیتابیس (حذف فاصله‌ها و حروف بزرگ)
     if (restData.slug) {
       restData.slug = restData.slug.trim().toLowerCase().replace(/\s+/g, '-');
     }
+
+    // پاکسازی فیلدهای سیستمی برای جلوگیری از کراش دیتابیس
+    delete restData.taxonomies;
+    delete restData.contents;
+    delete restData._count;
+    delete restData.createdAt;
+    delete restData.updatedAt;
 
     if (id) {
       await prisma.dossier.update({
         where: { id },
         data: {
-          ...restData,
+          ...restData, 
           taxonomies: { set: taxonomyConnect },
           contents: { set: contentConnect }
         }
@@ -108,11 +113,14 @@ export async function saveDossier(data) {
     }
 
     revalidatePath('/c');
-    revalidatePath(`/c/${restData.slug}`);
+    if (restData.slug) {
+      revalidatePath(`/c/${restData.slug}`);
+    }
     revalidatePath('/portal-entry-99/dossiers');
+    
     return { success: true };
   } catch (error) {
-    console.error(error);
+    console.error("خطا در دیتابیس هنگام ذخیره پرونده:", error);
     return { success: false, error: 'خطا در ذخیره پرونده' };
   }
 }
@@ -132,7 +140,7 @@ export async function deleteDossier(id) {
 }
 
 // ==========================================
-// ۶. ذخیره ترتیب چینش پرونده‌ها در هاب
+// ۶. آپدیت ترتیب چینش
 // ==========================================
 export async function updateDossiersOrder(orderedIds) {
   try {
@@ -148,15 +156,24 @@ export async function updateDossiersOrder(orderedIds) {
 // ۷. دریافت تنظیمات هاب
 // ==========================================
 export async function getHubSettings() {
-  const keys = ['hub_title', 'hub_desc', 'hub_meta_title', 'hub_meta_desc'];
+  const keys = [
+    'hub_title', 'hub_desc', 'hub_meta_title', 'hub_meta_desc',
+    'hub_icon', 'hub_bg_desktop', 'hub_bg_mobile',
+    'hub_title_gradient_start', 'hub_title_gradient_end'
+  ];
   const settings = await prisma.setting.findMany({ where: { key: { in: keys } } });
   
   const map = settings.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {});
   return {
     title: map.hub_title || 'پرونده‌های ویـژه مـدار',
-    description: map.hub_desc || 'مجموعه‌ای گلچین‌شده از اسناد...',
+    description: map.hub_desc || '',
     metaTitle: map.hub_meta_title || 'پرونده‌های ویژه مدار',
-    metaDesc: map.hub_meta_desc || ''
+    metaDesc: map.hub_meta_desc || '',
+    icon: map.hub_icon || '',
+    bgDesktop: map.hub_bg_desktop || '',
+    bgMobile: map.hub_bg_mobile || '',
+    titleGradientStart: map.hub_title_gradient_start || '#ffffff',
+    titleGradientEnd: map.hub_title_gradient_end || '#ffffff'
   };
 }
 
@@ -165,10 +182,15 @@ export async function getHubSettings() {
 // ==========================================
 export async function saveHubSettings(data) {
   const settingsToSave = [
-    { key: 'hub_title', value: data.title },
-    { key: 'hub_desc', value: data.description },
-    { key: 'hub_meta_title', value: data.metaTitle },
-    { key: 'hub_meta_desc', value: data.metaDesc },
+    { key: 'hub_title', value: data.title || '' },
+    { key: 'hub_desc', value: data.description || '' },
+    { key: 'hub_meta_title', value: data.metaTitle || '' },
+    { key: 'hub_meta_desc', value: data.metaDesc || '' },
+    { key: 'hub_icon', value: data.icon || '' },
+    { key: 'hub_bg_desktop', value: data.bgDesktop || '' },
+    { key: 'hub_bg_mobile', value: data.bgMobile || '' },
+    { key: 'hub_title_gradient_start', value: data.titleGradientStart || '#ffffff' },
+    { key: 'hub_title_gradient_end', value: data.titleGradientEnd || '#ffffff' }
   ];
 
   await Promise.all(settingsToSave.map(s => 

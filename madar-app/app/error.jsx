@@ -34,7 +34,7 @@ export default function ServerError({ error, reset }) {
         <div className="absolute bottom-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(168,85,247,0.1)_0%,transparent_60%)] animate-[float_20s_infinite_ease-in-out_alternate-reverse]" />
 
         {/* پترن نقطه‌ای ظریف مهندسی */}
-        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:32px_32px]" />
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:32px_32px]" />
       </div>
 
       {/* ================== کارت شیشه‌ای اصلی (GKS1) ================== */}
@@ -42,7 +42,7 @@ export default function ServerError({ error, reset }) {
         <div 
           ref={cardRef}
           onMouseMove={handleMouseMove}
-          className="relative w-full rounded-3xl bg-[#0b0f19]/80 backdrop-blur-2xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden group animate-[scaleIn_0.6s_ease-out]"
+          className="relative w-full rounded-3xl bg-white/[0.02] backdrop-blur-3xl p-8 md:p-14 shadow-[0_30px_60px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(255,255,255,0.02)] border border-transparent overflow-hidden group animate-[scaleIn_0.6s_ease-out]"
         >
           {/* خط نئونی بالای کارت در هاور */}
           <div className="absolute top-0 inset-x-0 h-[2px] opacity-70 pointer-events-none z-20 bg-gradient-to-r from-transparent via-rose-500 to-transparent group-hover:via-rose-400 transition-colors duration-700" />
@@ -64,7 +64,7 @@ export default function ServerError({ error, reset }) {
               <div className="absolute inset-3 border-[2px] border-dashed border-rose-500/40 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
 
               {/* هسته مرکزی مدار */}
-              <div className="absolute inset-8 bg-gradient-to-tr from-[#0b0f19] to-rose-900/40 border border-rose-500/30 rounded-full backdrop-blur-md flex items-center justify-center shadow-[0_0_30px_rgba(244,63,94,0.3)] z-10">
+              <div className="absolute inset-8 bg-black/40 border border-transparent shadow-[inset_0_0_15px_rgba(244,63,94,0.2),0_0_30px_rgba(244,63,94,0.3)] rounded-full backdrop-blur-md flex items-center justify-center z-10">
                 <span className="text-4xl md:text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.6)] font-sans tracking-tighter" dir="ltr">
                   500
                 </span>
@@ -77,31 +77,31 @@ export default function ServerError({ error, reset }) {
 
             {/* ================== محتوای متنی کاربرپسند ================== */}
             <div className="text-center space-y-4 mb-8">
-              <h1 className="text-2xl md:text-3xl font-black text-white leading-tight">
+              <h1 className="text-2xl md:text-3xl font-black text-white leading-tight font-sans">
                 ارتباط با هسته پردازش قطع شد
               </h1>
 
-              <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light max-w-md mx-auto text-justify md:text-center">
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light max-w-md mx-auto text-justify md:text-center font-sans">
                 مشکلی در مسیر دریافت اطلاعات از سرورهای مدار رخ داده است. مهندسین ما در حال بررسی و رفع این تداخل هستند. لطفاً چند لحظه دیگر مجدداً تلاش کنید.
               </p>
             </div>
 
             {/* ================== پنل تشخیص وضعیت (Diagnostic UI) ================== */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 border-y border-white/5 py-5">
+            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-6 w-full max-w-sm mx-auto mb-10 bg-white/5 border border-transparent shadow-inner rounded-2xl py-4 px-6">
               <div className="flex items-center justify-center gap-2.5 w-full sm:w-1/2">
                 <span className="relative flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
                 </span>
-                <span className="text-xs text-gray-500">وضعیت سرور:</span>
+                <span className="text-xs text-gray-400 font-sans">وضعیت سرور:</span>
                 <span className="text-xs font-bold text-rose-400 tracking-wider font-sans" dir="ltr">OFFLINE</span>
               </div>
 
               <div className="hidden sm:block w-[1px] h-8 bg-white/10"></div>
 
               <div className="flex items-center justify-center gap-2.5 w-full sm:w-1/2">
-                <Icon name="hash" className="w-4 h-4 text-gray-600" />
-                <span className="text-xs text-gray-500">شناسه خطا:</span>
+                <Icon name="hash" className="w-4 h-4 text-gray-500" />
+                <span className="text-xs text-gray-400 font-sans">شناسه خطا:</span>
                 <span className="text-xs font-bold text-gray-300 tracking-wider font-sans" dir="ltr">ERR_500</span>
               </div>
             </div>
@@ -111,7 +111,7 @@ export default function ServerError({ error, reset }) {
 
               <button 
                 onClick={() => reset()} 
-                className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(244,63,94,0.3)] hover:shadow-[0_0_30px_rgba(244,63,94,0.5)] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+                className="w-full sm:w-auto bg-rose-500 hover:bg-rose-600 text-white px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(244,63,94,0.3)] hover:shadow-[0_0_30px_rgba(244,63,94,0.5)] border border-transparent transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer font-sans"
               >
                 <Icon name="update" className="w-5 h-5" />
                 تلاش مجدد
@@ -119,7 +119,7 @@ export default function ServerError({ error, reset }) {
 
               <Link 
                 href="/" 
-                className="w-full sm:w-auto bg-white/5 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white transition-all duration-300 cursor-pointer"
+                className="w-full sm:w-auto bg-white/5 text-gray-300 px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white border border-transparent shadow-inner transition-all duration-300 cursor-pointer font-sans"
               >
                 <Icon name="arrowLeft" className="w-5 h-5" />
                 بازگشت به خانه

@@ -38,10 +38,9 @@ function Tooltip({ text, children }) {
     <div className="relative z-30 group/tooltip inline-flex items-center justify-center">
       {children}
       <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover/tooltip:flex flex-col items-center z-50 pointer-events-none">
-        <div className="bg-[#0b0f19] text-white text-[11px] py-1 px-2.5 rounded-lg shadow-xl whitespace-nowrap font-sans">
+        <div className="bg-[#050810]/95 border border-white/10 backdrop-blur-md text-white text-[11px] py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap font-sans font-bold">
           {text}
         </div>
-        <div className="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-[#0b0f19] -mt-[1px]"></div>
       </div>
     </div>
   );
@@ -99,35 +98,35 @@ function CustomAudioPlayer({ src, title }) {
   };
 
   return (
-    <div className="w-full max-w-lg p-6 rounded-3xl bg-[#0b0f19] shadow-2xl flex flex-col gap-6 font-sans relative overflow-hidden mx-auto my-4">
+    <div className="w-full max-w-lg p-6 rounded-3xl bg-white/[0.02] backdrop-blur-2xl border border-transparent shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_10px_40px_rgba(0,0,0,0.5)] flex flex-col gap-6 font-sans relative overflow-hidden mx-auto my-4">
       <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent" />
       <audio ref={audioRef} src={src} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleTimeUpdate} onEnded={() => setIsPlaying(false)} loop={isLooping} className="hidden" />
 
-      <div className="flex items-center justify-center gap-2 px-4">
+      <div className="flex items-center justify-center gap-2 px-4 relative z-10">
         <span className="relative flex h-2.5 w-2.5 shrink-0">
           {isPlaying && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#06b6d4] opacity-75"></span>}
-          <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", isPlaying ? 'bg-[#06b6d4]' : 'bg-gray-600')}></span>
+          <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", isPlaying ? 'bg-[#06b6d4]' : 'bg-gray-500')}></span>
         </span>
         <h4 className="text-white font-bold truncate text-sm dir-rtl">{title || 'فایل صوتی'}</h4>
       </div>
 
-      <div className="relative w-full h-16 flex items-center justify-between gap-[2px]" dir="ltr">
+      <div className="relative w-full h-16 flex items-center justify-between gap-[2px] z-10" dir="ltr">
         {waveformBars.map((height, i) => {
           const fillPercentage = (i / waveformBars.length) * 100;
           const isFilled = progress >= fillPercentage;
           return (
-            <div key={i} className={cn("flex-1 rounded-full transition-colors duration-150", isFilled ? 'bg-[#06b6d4]' : 'bg-gray-700')} style={{ height: `${height}%` }}></div>
+            <div key={i} className={cn("flex-1 rounded-full transition-colors duration-150", isFilled ? 'bg-[#06b6d4]' : 'bg-gray-600/50')} style={{ height: `${height}%` }}></div>
           );
         })}
         <input type="range" min="0" max="100" value={progress} onChange={handleSeek} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
       </div>
 
-      <div className="flex justify-between items-center text-xs text-gray-400" dir="ltr">
+      <div className="flex justify-between items-center text-xs text-gray-400 z-10" dir="ltr">
         <span>{formatTime(currentTime)}</span>
         <span>{formatTime(duration)}</span>
       </div>
 
-      <div className="relative flex items-center justify-center w-full mt-2" dir="ltr">
+      <div className="relative flex items-center justify-center w-full mt-2 z-10" dir="ltr">
         <div className="flex items-center gap-3">
           <Tooltip text="۱۵ ثانیه به عقب">
             <button onClick={() => skip(-15)} className="text-gray-400 hover:text-white transition-colors p-1 cursor-pointer">
@@ -138,7 +137,7 @@ function CustomAudioPlayer({ src, title }) {
           </Tooltip>
 
           <Tooltip text={isPlaying ? 'توقف' : 'پخش'}>
-            <button onClick={togglePlay} className="w-16 h-16 flex items-center justify-center bg-[#06b6d4] hover:bg-[#0891b2] rounded-full text-white shadow-lg shadow-[#06b6d4]/20 hover:scale-105 transition-transform cursor-pointer">
+            <button onClick={togglePlay} className="w-16 h-16 flex items-center justify-center bg-[#06b6d4] hover:bg-[#0891b2] border border-transparent rounded-full text-white shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:scale-105 transition-transform cursor-pointer">
               <svg className={cn("w-7 h-7", !isPlaying ? 'ml-1' : '')} fill="currentColor" viewBox="0 0 24 24">
                 {isPlaying ? (
                   <>
@@ -182,10 +181,13 @@ function CustomAudioPlayer({ src, title }) {
             </Tooltip>
             <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="w-16 h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, #4b5563 ${(isMuted ? 0 : volume) * 100}%)` }} />
           </div>
-          <Tooltip text={isLooping ? 'تکرار: فعال' : 'تکرار: غیرفعال'}>
-            <button onClick={() => setIsLooping(!isLooping)} className={cn("p-2 transition-colors cursor-pointer", isLooping ? 'text-[#06b6d4]' : 'text-gray-500 hover:text-gray-300')}>
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M0,11.5C0,6.813,3.813,3,8.5,3h10.5V1.337C19,.446,20.077,0,20.707,.63l3,3.163c.391,.391,.39,1.024,0,1.414l-3,3.163c-.63,.63-1.707,.184-1.707-.707v-1.663H8.5c-3.033,0-5.5,2.468-5.5,5.5,0,.828-.671,1.5-1.5,1.5s-1.5-.672-1.5-1.5Zm22.5-.5c-.829,0-1.5,.672-1.5,1.5,0,3.032-2.467,5.5-5.5,5.5H5v-1.663c0-.891-1.077-1.337-1.707-.707L.293,18.793c-.391,.391-.391,1.024,0,1.414l3,3.163c.63,.63,1.707,.184,1.707-.707v-1.663H15.5c4.687,0,8.5-3.813,8.5-8.5,0-.828-.671-1.5-1.5-1.5Z"/>
+          <Tooltip text="تمام‌صفحه">
+            <button onClick={toggleFullScreen} className="text-gray-300 hover:text-white transition-colors p-1 cursor-pointer">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M22.5,15.5A1.5,1.5,0,0,0,21,17v1.5A2.5,2.5,0,0,1,18.5,21H17a1.5,1.5,0,0,0,0,3h1.5A5.506,5.506,0,0,0,24,18.5V17A1.5,1.5,0,0,0,22.5,15.5Z"/>
+                <path d="M7,0H5.5A5.506,5.506,0,0,0,0,5.5V7A1.5,1.5,0,0,0,3,7V5.5A2.5,2.5,0,0,1,5.5,3H7A1.5,1.5,0,0,0,7,0Z"/>
+                <path d="M7,21H5.5A2.5,2.5,0,0,1,3,18.5V17a1.5,1.5,0,0,0-3,0v1.5A5.506,5.506,0,0,0,5.5,24H7a1.5,1.5,0,0,0,0-3Z"/>
+                <path d="M18.5,0H17a1.5,1.5,0,0,0,0,3h1.5A2.5,2.5,0,0,1,21,5.5V7a1.5,1.5,0,0,0,3,0V5.5A5.506,5.506,0,0,0,18.5,0Z"/>
               </svg>
             </button>
           </Tooltip>
@@ -250,7 +252,7 @@ function CustomVideoPlayer({ src, mimeType, title }) {
   };
 
   return (
-    <div ref={containerRef} className="relative group w-full h-full flex items-center justify-center bg-black rounded-xl overflow-hidden shadow-[0_0_40px_rgba(6,182,212,0.15)] max-h-[75vh] font-sans my-4">
+    <div ref={containerRef} className="relative group w-full h-full flex items-center justify-center bg-black rounded-xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-transparent max-h-[75vh] font-sans my-4">
       <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-20">
         <span className="relative flex h-2.5 w-2.5 shrink-0">
           {isPlaying && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#06b6d4] opacity-75"></span>}
@@ -392,11 +394,12 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
   }, [type]);
 
   const title = `${data?.titleBase || ''} ${data?.titleHighlight || ''}`.trim();
-  const author = data?.creators?.[0] || { name: 'مرکز مدار' };
-  const authorImage = author?.imageUrl || author?.avatarUrl || null;
   const mainImage = data?.coverDesktop || '/images/placeholder-cover.jpg'; 
   const mobileImage = data?.coverMobile || mainImage; 
   
+  // رفع مشکل نویسندگان
+  const authors = data?.creators?.length > 0 ? data.creators : [{ name: 'مرکز مدار', imageUrl: null, avatarUrl: null }];
+
   const displaySettings = safeParse(data?.displaySettings, {});
   const formatsList = safeParse(data?.formats, []);
   const fileSpecs = safeParse(data?.fileSpecs, []);
@@ -436,7 +439,7 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
             toast.dismiss(t.id);
             setShowAuthModal(true); 
           }}
-          className={`mt-2 ${currentTheme.primaryBg} text-white px-4 py-2 rounded-lg text-xs font-bold hover:brightness-110 transition-all cursor-pointer`}
+          className={`mt-2 ${currentTheme.primaryBg} text-white px-4 py-2 rounded-lg text-xs font-bold shadow-[0_0_15px_rgba(0,0,0,0.3)] border border-transparent hover:brightness-110 transition-all cursor-pointer`}
         >
           ورود / عضویت
         </button>
@@ -530,13 +533,13 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8 mt-4">
           <div className="lg:col-span-7 flex flex-col gap-4 relative animate-[fadeIn_0.5s_ease-out]">
-            <div className="relative w-full aspect-square md:aspect-video rounded-3xl overflow-hidden shadow-2xl p-1 group">
-              <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+            <div className="relative w-full aspect-square md:aspect-video rounded-3xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-transparent p-1 group cursor-pointer">
+              <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
               <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
-              <div className="relative w-full h-full rounded-[22px] overflow-hidden bg-black/50">
+              <div className="relative w-full h-full rounded-[22px] overflow-hidden bg-black/40 shadow-inner">
                 <picture className="w-full h-full">
                   <source media="(max-width: 768px)" srcSet={mobileImage} />
-                  <img src={mainImage} alt={title} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                  <img src={mainImage} alt={title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
                 </picture>
               </div>
             </div>
@@ -544,12 +547,12 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
 
           <div className="lg:col-span-5 flex flex-col justify-center space-y-6 lg:pl-6 animate-[fadeIn_0.6s_ease-out]">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`border text-[10px] font-bold px-3 py-1.5 rounded-full tracking-widest uppercase ${currentTheme.badgeBg}`}>
+              <span className={`border text-[10px] font-bold px-3 py-1.5 rounded-full tracking-widest uppercase shadow-inner ${currentTheme.badgeBg}`}>
                 {parentBreadcrumb.label}
               </span>
               
               {formatsList.length > 0 && (
-                <div className="flex flex-wrap items-center gap-y-2 gap-x-1.5 ml-2 bg-white/5 px-3 py-1.5 rounded-2xl text-xs text-gray-300">
+                <div className="flex flex-wrap items-center gap-y-2 gap-x-1.5 ml-2 bg-white/5 border border-transparent shadow-inner px-3 py-1.5 rounded-2xl text-xs text-gray-300">
                   {formatsList.map((fmt, idx) => {
                     const isOther = fmt.startsWith("سایر:") || fmt.startsWith("سایر");
                     const displayLabel = isOther ? fmt.replace(/^سایر\s*:\s*/, '').trim() : fmt;
@@ -557,9 +560,9 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
 
                     return (
                       <div key={idx} className="flex items-center gap-1.5 shrink-0">
-                        {idx > 0 && <span className="w-1 h-1 rounded-full bg-gray-600"></span>}
+                        {idx > 0 && <span className="w-1 h-1 rounded-full bg-gray-500"></span>}
                         <Icon name={formatData.icon} className={`w-3.5 h-3.5 ${formatData.color} fill-current`} />
-                        <span>{displayLabel}</span>
+                        <span className="font-sans">{displayLabel}</span>
                       </div>
                     );
                   })}
@@ -568,43 +571,26 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
             </div>
 
             <div>
-              <h1 className="text-3xl md:text-4xl font-black text-white leading-tight mb-3">
+              <h1 className="text-3xl md:text-4xl font-black text-white leading-tight mb-3 font-sans">
                 {data?.titleBase} <span className={currentTheme.primaryText}>{data?.titleHighlight}</span>
               </h1>
               {data?.subtitle && (
-                <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light text-justify">
+                <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light text-justify font-sans">
                   {data.subtitle}
                 </p>
               )}
             </div>
 
-            <div className="flex items-start justify-between pt-4 border-t border-white/5 w-full">
-              {displaySettings.showAuthor !== false && (
-                <a href={`/t/${author.slug || author.name}`} className="flex items-center gap-3 group cursor-pointer">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 shrink-0 relative bg-gray-900 flex items-center justify-center">
-                    {authorImage ? (
-                      <BlurImage src={authorImage} alt={author.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-                    ) : (
-                      <Icon name="user" className="w-6 h-6 text-gray-500" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-0.5">تهیه‌کننده</p>
-                    <span className={`text-sm font-bold text-white ${currentTheme.hoverText} transition-colors flex items-center gap-1`}>
-                      {author.name}
-                    </span>
-                  </div>
-                </a>
-              )}
-
-              <div className="flex items-center gap-3 mt-1">
+            <div className="flex items-start justify-between pt-4 border-t border-white/10 w-full">
+              
+              <div className="flex items-center gap-3 mt-1 ml-auto">
                 <Tooltip text="اشتراک‌گذاری">
-                  <button onClick={() => setIsShareModalOpen(true)} className="transition-colors cursor-pointer text-gray-400 hover:text-white p-2">
+                  <button onClick={() => setIsShareModalOpen(true)} className="transition-colors cursor-pointer text-gray-400 hover:text-white p-2.5 bg-white/5 hover:bg-white/10 rounded-full border border-transparent shadow-inner">
                     <Icon name="shareNetwork" className="w-5 h-5" />
                   </button>
                 </Tooltip>
                 <Tooltip text={isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}>
-                  <button onClick={handleFavoriteClick} className={`transition-colors cursor-pointer flex items-center gap-1.5 p-2 rounded-full ${isFavorite ? 'text-rose-500 bg-rose-500/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                  <button onClick={handleFavoriteClick} className={`transition-all cursor-pointer flex items-center gap-1.5 p-2.5 rounded-full border border-transparent shadow-inner ${isFavorite ? 'text-rose-500 bg-rose-500/10' : 'text-gray-400 hover:text-white bg-white/5 hover:bg-white/10'}`}>
                     <Icon name="heart" className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
                     <span className="text-[11px] font-sans font-bold pt-0.5">{toPersianDigits(favCount)}</span>
                   </button>
@@ -618,22 +604,22 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
           <div className="lg:col-span-8 space-y-6">
             
             {hasAnyMetaInfo && (
-              <div className="relative flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-gray-400 bg-white/5 px-6 py-3 rounded-2xl font-sans shadow-inner mb-6 group/meta z-30">
-                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl rounded-2xl pointer-events-none -z-10" />
+              <div className="relative flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-gray-400 bg-white/5 border border-transparent px-6 py-3.5 rounded-2xl font-sans shadow-inner mb-6 group/meta z-30 transition-all hover:bg-white/10">
+                <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] rounded-2xl pointer-events-none -z-10" />
                 <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-0 group-hover/meta:opacity-90 transition-opacity pointer-events-none z-20 rounded-t-2xl`} />
                 
                 {showDateFlag && (
-                  <><Tooltip text="تاریخ انتشار"><span className="flex items-center gap-2 cursor-default"><Icon name="calendarBlank" className="w-4 h-4" /> {toPersianDigits(new Date(data.publishedAt).toLocaleDateString('fa-IR'))}</span></Tooltip><span className="w-1 h-1 bg-gray-600 rounded-full"></span></>
+                  <><Tooltip text="تاریخ انتشار"><span className="flex items-center gap-2 cursor-default font-bold"><Icon name="calendarBlank" className="w-4 h-4" /> {toPersianDigits(new Date(data.publishedAt).toLocaleDateString('fa-IR'))}</span></Tooltip><span className="w-1 h-1 bg-white/20 rounded-full"></span></>
                 )}
                 {showReadTimeFlag && (
-                  <><Tooltip text="زمان تخمینی مطالعه/مشاهده"><span className="flex items-center gap-2 cursor-default"><Icon name="clock" className="w-4 h-4" /> {toPersianDigits(data.readTime)} دقیقه</span></Tooltip><span className="w-1 h-1 bg-gray-600 rounded-full"></span></>
+                  <><Tooltip text="زمان تخمینی مطالعه/مشاهده"><span className="flex items-center gap-2 cursor-default font-bold"><Icon name="clock" className="w-4 h-4" /> {toPersianDigits(data.readTime)} دقیقه</span></Tooltip><span className="w-1 h-1 bg-white/20 rounded-full"></span></>
                 )}
                 {showViewsFlag && (
-                  <Tooltip text="تعداد بازدیدکنندگان"><span className="flex items-center gap-2 cursor-default"><Icon name="eye" className="w-4 h-4" /> {toPersianDigits(data?.viewCount || 0)} بازدید</span></Tooltip>
+                  <Tooltip text="تعداد بازدیدکنندگان"><span className="flex items-center gap-2 cursor-default font-bold"><Icon name="eye" className="w-4 h-4" /> {toPersianDigits(data?.viewCount || 0)} بازدید</span></Tooltip>
                 )}
                 {showAgeRatingFlag && (
                   <>
-                    <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                    <span className="w-1 h-1 bg-white/20 rounded-full"></span>
                     <Tooltip text="رده‌بندی سنی محتوا">
                       <span className="flex items-center gap-1.5 cursor-default">
                         <Icon name="shieldCheck" className={`w-4 h-4 ${currentTheme.primaryText}`} />
@@ -647,11 +633,11 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
             )}
 
             {data?.body && (
-              <div className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-2xl group">
-                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent group">
+                <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                 <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
-                <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10">
+                <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10 font-sans border-b border-white/10 pb-4">
                   <Icon name="info" className={`w-6 h-6 ${currentTheme.fillCurrent}`} /> معرفی کامل
                 </h2>
                 
@@ -662,21 +648,21 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
             )}
 
             {previewGallery.length > 0 && (
-              <div className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-2xl group">
-                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent group">
+                <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                 <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
-                <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10">
+                <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10 font-sans border-b border-white/10 pb-4">
                   <Icon name="playCircle" className={`w-6 h-6 ${currentTheme.fillCurrent}`} /> پیش‌نمایش محتوا
                 </h2>
                 
                 {activeMedia && activeMedia.url ? (
-                  <div className="relative z-10 w-full aspect-video rounded-2xl overflow-hidden flex items-center justify-center bg-black/80 group/vid mb-4">
+                  <div className="relative z-10 w-full aspect-video rounded-2xl overflow-hidden flex items-center justify-center bg-black/60 shadow-inner border border-transparent group/vid mb-4">
                     
                     {previewGallery.length > 1 && (
                       <>
-                        <button onClick={prevMedia} className="absolute right-4 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-white/20 text-white flex items-center justify-center transition-all shadow-lg backdrop-blur-md cursor-pointer"><Icon name="chevronRight" className="w-5 h-5" /></button>
-                        <button onClick={nextMedia} className="absolute left-4 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-white/20 text-white flex items-center justify-center transition-all shadow-lg backdrop-blur-md cursor-pointer"><Icon name="chevronLeft" className="w-5 h-5" /></button>
+                        <button onClick={prevMedia} className="absolute right-4 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 border border-transparent shadow-inner text-white flex items-center justify-center transition-all backdrop-blur-md cursor-pointer"><Icon name="chevronRight" className="w-5 h-5" /></button>
+                        <button onClick={nextMedia} className="absolute left-4 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 border border-transparent shadow-inner text-white flex items-center justify-center transition-all backdrop-blur-md cursor-pointer"><Icon name="chevronLeft" className="w-5 h-5" /></button>
                       </>
                     )}
 
@@ -687,17 +673,17 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                          <CustomAudioPlayer src={activeMedia.url} title={activeMedia.desc || title} />
                       </div>
                     ) : (
-                      <BlurImage src={activeMedia.url} className="w-full h-full object-contain bg-black" alt="Preview Image" />
+                      <BlurImage src={activeMedia.url} className="w-full h-full object-contain" alt="Preview Image" />
                     )}
                   </div>
                 ) : (
-                  <div className="relative z-10 w-full aspect-video rounded-2xl flex flex-col items-center justify-center bg-black/50 text-gray-500 mb-4">
+                  <div className="relative z-10 w-full aspect-video rounded-2xl flex flex-col items-center justify-center bg-black/40 border border-transparent shadow-inner text-gray-500 mb-4">
                     <Icon name="image" className="w-10 h-10 mb-2" />
-                    <span className="text-xs">لینک رسانه معتبر نیست یا خالی است</span>
+                    <span className="text-xs font-sans">لینک رسانه معتبر نیست یا خالی است</span>
                   </div>
                 )}
                 
-                <p className="text-sm text-gray-400 text-center mb-6 px-4 font-light relative z-10">{activeMedia?.desc || ''}</p>
+                <p className="text-sm text-gray-400 text-center mb-6 px-4 font-light relative z-10 font-sans">{activeMedia?.desc || ''}</p>
 
                 {previewGallery.length > 1 && (
                   <div className="flex gap-3 overflow-x-auto custom-scrollbar pb-3 relative z-10">
@@ -705,10 +691,10 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                       <button 
                         key={idx} 
                         onClick={() => setActiveMediaIndex(idx)} 
-                        className={`w-28 h-20 shrink-0 rounded-xl overflow-hidden border-2 cursor-pointer relative transition-all bg-gray-900 group/thumb ${activeMediaIndex === idx ? currentTheme.borderClass.replace('/30', '') : 'border-t border-white/5ransparent opacity-60 hover:opacity-100'}`}
+                        className={`w-28 h-20 shrink-0 rounded-xl overflow-hidden cursor-pointer relative transition-all bg-black/40 shadow-inner border border-transparent group/thumb ${activeMediaIndex === idx ? `ring-2 ring-[${currentTheme.primaryText.replace('text-[', '').replace(']', '')}]` : 'opacity-60 hover:opacity-100'}`}
                       >
                         <BlurImage src={media.thumbnail || media.url} className="w-full h-full object-cover" alt="thumbnail" />
-                        <div className={`absolute inset-0 flex items-center justify-center transition-all ${activeMediaIndex === idx ? 'bg-black/20' : 'bg-black/60 group-hover/thumb:bg-black/40'}`}>
+                        <div className={`absolute inset-0 flex items-center justify-center transition-all ${activeMediaIndex === idx ? 'bg-black/10' : 'bg-black/50 group-hover/thumb:bg-black/30'}`}>
                           <Icon name={media.type === 'video' ? 'film' : media.type === 'audio' ? 'music' : 'photo'} className={`w-6 h-6 text-white drop-shadow-lg ${activeMediaIndex === idx ? currentTheme.fillCurrent : ''}`} />
                         </div>
                       </button>
@@ -721,12 +707,12 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
             {combinedTaxonomies.length > 0 && (
               <div className="pt-2 mt-2">
                 <div className="flex items-center gap-3 mb-4">
-                  <Icon name="hash" className="w-5 h-5 text-gray-500" />
-                  <span className="text-sm font-bold text-gray-300">دسته‌بندی‌ها و برچسب‌ها:</span>
+                  <Icon name="hash" className="w-5 h-5 text-gray-400" />
+                  <span className="text-sm font-bold text-gray-300 font-sans">دسته‌بندی‌ها و برچسب‌ها:</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {combinedTaxonomies.map((tax, idx) => (
-                    <a key={idx} href={tax.link} className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/5 text-xs text-gray-400 ${currentTheme.hoverText} ${currentTheme.hoverBorder}/50 transition-all`}>
+                    <a key={idx} href={tax.link} className={`flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 border border-transparent shadow-inner text-xs font-bold text-gray-300 ${currentTheme.hoverText} hover:bg-white/10 transition-all font-sans`}>
                       {tax.isTag && (
                         <Icon name="hash" className="w-3.5 h-3.5 opacity-60 shrink-0" />
                       )}
@@ -737,30 +723,61 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
               </div>
             )}
 
+            {/* بخش تهیه‌کنندگان / پژوهشگران */}
+            {displaySettings.showAuthor !== false && (
+              <div className="pt-6 mt-8 border-t border-white/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <Icon name="user" className="w-5 h-5 text-gray-400" />
+                  <span className="text-sm font-bold text-gray-300 font-sans">تهیه‌کنندگان و پژوهشگران:</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-6">
+                  {authors.map((author, index) => {
+                    const authorImage = author?.imageUrl || author?.avatarUrl || null;
+                    return (
+                      <a key={index} href={`/t/${author.slug || author.name}`} className="flex items-center gap-3 group cursor-pointer bg-white/5 hover:bg-white/10 border border-transparent shadow-inner transition-colors px-4 py-3 rounded-2xl">
+                        <div className="w-10 h-10 rounded-full overflow-hidden border border-transparent shadow-inner shrink-0 relative bg-black/40 flex items-center justify-center">
+                          {authorImage ? (
+                            <BlurImage src={authorImage} alt={author.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                          ) : (
+                            <Icon name="user" className="w-5 h-5 text-gray-500" />
+                          )}
+                        </div>
+                        <div>
+                          <span className={`text-sm font-bold text-white ${currentTheme.hoverText} transition-colors flex items-center gap-1 font-sans`}>
+                            {author.name}
+                          </span>
+                        </div>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* بخش محتوای مرتبط */}
             {relatedContent && relatedContent.length > 0 && (
-              <section className="mt-10 pt-6 border-t border-white/5 relative z-10">
+              <section className="mt-10 pt-6 border-t border-white/10 relative z-10">
                 <div className="flex items-end justify-between mb-6">
                   <div>
-                    <h2 className="text-xl font-bold text-white mb-1.5">محتوای مرتبط</h2>
-                    <p className="text-xs text-gray-400 font-light">محتوای مشابه که ممکن است برایتان جالب باشد</p>
+                    <h2 className="text-xl font-bold text-white mb-1.5 font-sans">محتوای مرتبط</h2>
+                    <p className="text-xs text-gray-400 font-light font-sans">محتوای مشابه که ممکن است برایتان جالب باشد</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {relatedContent.map(rel => (
-                    <a key={rel.id} href={rel.link || '#'} className="relative group flex flex-col p-3 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 shadow-lg">
-                      <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                    <a key={rel.id} href={rel.link || '#'} className="relative group flex flex-col p-3 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 shadow-[0_5px_15px_rgba(0,0,0,0.3)] border border-transparent">
+                      <div className="absolute inset-0 bg-white/5 border border-transparent shadow-inner group-hover:bg-white/10 backdrop-blur-xl pointer-events-none -z-10 transition-colors" />
                       <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-0 group-hover:opacity-90 transition-opacity pointer-events-none z-20`} />
                       
-                      <div className="relative w-full h-36 rounded-xl bg-gray-900 overflow-hidden mb-3 flex items-center justify-center z-10">
+                      <div className="relative w-full h-36 rounded-xl bg-black/40 shadow-inner overflow-hidden mb-3 flex items-center justify-center z-10 border border-transparent">
                         <BlurImage src={rel.image || '/images/placeholder-cover.jpg'} className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" alt={rel.title || "Related"} />
                       </div>
                       <div className="flex-grow z-10">
-                        <h3 className={`text-xs font-bold text-white mb-2 leading-relaxed ${currentTheme.hoverText} transition-colors line-clamp-2`}>{rel.title}</h3>
+                        <h3 className={`text-xs font-bold text-white mb-2 leading-relaxed ${currentTheme.hoverText} transition-colors line-clamp-2 font-sans`}>{rel.title}</h3>
                       </div>
-                      <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-500 font-sans z-10">
-                        <span className="flex items-center gap-1 cursor-help" title="تاریخ انتشار"><Icon name="calendarBlank" className="w-3 h-3" /> {toPersianDigits(rel.date)}</span>
-                        <span className="flex items-center gap-1 cursor-help" title="تعداد بازدید"><Icon name="eye" className="w-3 h-3" /> {toPersianDigits(rel.views)}</span>
+                      <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-gray-400 font-sans z-10 font-bold">
+                        <span className="flex items-center gap-1 cursor-default"><Icon name="calendarBlank" className="w-3.5 h-3.5" /> {toPersianDigits(rel.date)}</span>
+                        <span className="flex items-center gap-1 cursor-default"><Icon name="eye" className="w-3.5 h-3.5" /> {toPersianDigits(rel.views)}</span>
                       </div>
                     </a>
                   ))}
@@ -770,42 +787,47 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
 
             {/* بخش نظرات کاربران */}
             {isCommentsEnabled && (
-              <section id="comments" className="mt-10 pt-6 border-t border-white/5 relative z-10">
-                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+              <section id="comments" className="mt-10 pt-6 border-t border-white/10 relative z-10">
+                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3 font-sans">
                   <Icon name="chat" className={`w-6 h-6 ${currentTheme.fillCurrent}`} /> نظرات کاربران 
-                  <span className="text-xs font-sans text-gray-400 bg-white/5 px-2.5 py-0.5 rounded-full">
+                  <span className="text-[10px] font-sans font-bold text-gray-300 bg-white/10 border border-transparent shadow-inner px-3 py-1 rounded-full">
                     {toPersianDigits(commentsList.length)} نظر
                   </span>
                 </h3>
 
-                <div className="relative p-5 sm:p-6 rounded-2xl mb-6 overflow-hidden shadow-2xl">
-                  <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+                <div className="relative p-5 sm:p-6 rounded-3xl mb-6 overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent">
+                  <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                   <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
                   <form className="relative z-10" onSubmit={handleCommentSubmit}>
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between mb-2">
+                    <div className="mb-4 space-y-2">
+                      <div className="flex items-center justify-between mb-1">
                         {currentUser ? (
-                          <span className="text-xs font-bold text-white">شما با حساب کاربری وارد شده‌اید</span>
+                          <span className="text-[11px] font-bold text-[#10b981] font-sans pl-1">شما با حساب کاربری وارد شده‌اید</span>
                         ) : (
-                          <span className="text-xs font-bold text-rose-400">ابتدا وارد سایت شوید</span>
+                          <span className="text-[11px] font-bold text-rose-400 font-sans pl-1">ابتدا وارد سایت شوید</span>
                         )}
-                        <span className="text-[10px] text-gray-500 px-2 py-0.5 rounded">پس از تأیید نمایش داده می‌شود</span>
+                        <span className="text-[9px] text-gray-400 font-sans font-bold px-2 py-0.5 bg-black/40 rounded-lg shadow-inner">پس از تأیید نمایش داده می‌شود</span>
                       </div>
                       <textarea 
-                        rows="3" 
+                        rows="4" 
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
-                        onFocus={handleCommentFocus}
+                        onFocus={(e) => {
+                          handleCommentFocus(e);
+                          e.target.style.borderColor = currentTheme.primaryBg.replace('bg-', '');
+                        }}
+                        onBlur={(e) => e.target.style.borderColor = 'transparent'}
                         placeholder={currentUser ? "نظر خود را درباره این محتوا بنویسید..." : "برای ثبت دیدگاه کلیک کنید..."} 
-                        className={`w-full bg-[#080c16] rounded-2xl p-4 text-white text-sm leading-relaxed ${currentTheme.focusBorder} outline-none transition-all resize-none shadow-inner`}
+                        className={`w-full bg-white/10 border border-transparent rounded-2xl p-4 text-white placeholder:text-white/40 text-sm leading-relaxed ${currentTheme.focusBorder} focus:bg-white/20 outline-none transition-all resize-none shadow-inner font-sans`}
+                        style={{ '--tw-ring-color': currentTheme.primaryText }} 
                       />
                     </div>
                     <div className="flex justify-end">
                       <button 
                         type="submit" 
                         disabled={!commentText.trim() || !currentUser} 
-                        className={`bg-white/10 text-white hover:bg-white/20 px-6 py-2.5 rounded-xl text-sm font-bold ${currentTheme.hoverBg} hover:text-deep-base ${currentTheme.hoverBorder} transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
+                        className={`bg-white/10 border border-transparent text-white hover:bg-white/20 px-8 py-3 rounded-xl text-sm font-bold ${currentTheme.hoverBg} hover:text-white transition-all duration-300 shadow-[0_5px_15px_rgba(0,0,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-sans`}
                       >
                         ارسال دیدگاه
                       </button>
@@ -815,30 +837,29 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
 
                 <div className="space-y-4 relative z-10">
                   {commentsList.map((comment, idx) => (
-                    <div key={idx} className="bg-[#080c16] rounded-2xl p-5 shadow-inner">
+                    <div key={idx} className="bg-white/5 border border-transparent hover:bg-white/10 transition-colors rounded-2xl p-5 shadow-inner">
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-black/40 border border-transparent shadow-inner flex items-center justify-center shrink-0">
                             <Icon name="user" className={`w-5 h-5 ${currentTheme.primaryText}`} />
                           </div>                    
                           <div>
-                            <h4 className="text-sm font-bold text-white">{comment.user}</h4>
-                            <span className="text-[10px] text-gray-500 font-sans">{toPersianDigits(comment.date)}</span>
+                            <h4 className="text-sm font-bold text-white font-sans">{comment.user}</h4>
+                            <span className="text-[10px] text-gray-500 font-sans font-bold block mt-0.5">{toPersianDigits(comment.date)}</span>
                           </div>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-300 leading-relaxed font-light text-justify">
+                      <p className="text-sm text-gray-300 leading-relaxed font-light text-justify font-sans">
                         {comment.text}
                       </p>
                       {comment.adminReply && (
-                      <div className={`mt-4 bg-white/5 border-r-2 ${currentTheme.borderClass.replace('/30', '')} p-4 rounded-xl`}>
-                        <span className={`text-[10px] ${currentTheme.primaryText} font-bold mb-2 flex items-center gap-1.5`}>
+                      <div className={`mt-4 bg-black/30 border-r-2 ${currentTheme.borderClass.replace('/30', '')} border-transparent shadow-inner p-4 rounded-xl`}>
+                        <span className={`text-[10px] ${currentTheme.primaryText} font-bold mb-2 flex items-center gap-1.5 font-sans`}>
                           <Icon name="shield" className="w-3.5 h-3.5" /> پاسخ مدار:
                         </span>
-                        <p className="text-xs text-gray-300 leading-relaxed">{comment.adminReply}</p>
+                        <p className="text-xs text-gray-300 leading-relaxed font-light font-sans text-justify">{comment.adminReply}</p>
                       </div>
                     )}
-                    {/* ================================================= */}
                     </div>
                   ))}
                 </div>
@@ -850,18 +871,18 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
           <div className="lg:col-span-4 space-y-6">
             
             {fileSpecs.length > 0 && (
-              <div className="relative p-6 rounded-3xl overflow-hidden shadow-2xl group">
-                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent group">
+                <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                 <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
-                <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest text-center border-b border-white/5 pb-4 relative z-10">اطلاعات فایل‌ها</h3>
+                <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest text-center border-b border-white/10 pb-4 relative z-10 font-sans">اطلاعات فایل‌ها</h3>
                 <ul className="space-y-4 relative z-10">
                   {fileSpecs.map((spec, idx) => (
                     <li key={idx} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-gray-400 text-sm">
+                      <div className="flex items-center gap-2 text-gray-400 text-xs font-bold font-sans">
                         {spec.iconUrl ? <img src={spec.iconUrl} alt="icon" className="w-4 h-4" /> : <Icon name="fileText" className="w-5 h-5" />} {spec.label}
                       </div>
-                      <span className="text-white text-sm font-sans" dir="ltr">{spec.value}</span>
+                      <span className="text-white text-sm font-sans font-bold" dir="ltr">{spec.value}</span>
                     </li>
                   ))}
                 </ul>
@@ -869,37 +890,37 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
             )}
 
             {timeline.length > 0 && (
-              <div className="relative p-6 rounded-3xl overflow-hidden shadow-2xl group">
-                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent group">
+                <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                 <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
-                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2 relative z-10">
+                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2 relative z-10 font-sans border-b border-white/10 pb-4">
                   <Icon name="update" className={`w-5 h-5 ${currentTheme.fillCurrent}`} /> تاریخچه به‌روزرسانی‌ها
                 </h3>
 
-                <div className="relative z-10 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="relative z-10 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                   <div className="absolute right-[11px] top-2 bottom-2 w-0.5 bg-white/10 z-0"></div>
                   <div className="space-y-6 relative z-10">
                     {timeline.map((item, idx) => {
                       const descText = item.desc || item.description || '';
                       return (
                         <div key={idx} className="relative pl-4 pr-8">
-                          <div className={`absolute right-0 top-1 w-6 h-6 rounded-full bg-deep-base border-2 ${idx === 0 ? `${currentTheme.borderClass.replace('/30', '')} shadow-[0_0_10px_${currentTheme.glowBg.replace('0.15', '0.5')}]` : 'border-white/20'} flex items-center justify-center z-10`}>
+                          <div className={`absolute right-0 top-1 w-6 h-6 rounded-full bg-[#050810] border-2 ${idx === 0 ? `${currentTheme.borderClass.replace('/30', '')} shadow-[0_0_10px_${currentTheme.glowBg.replace('0.15', '0.5')}]` : 'border-white/20'} flex items-center justify-center z-10`}>
                             {idx === 0 && <div className={`w-2 h-2 ${currentTheme.primaryBg} rounded-full`}></div>}
                           </div>
 
                           <div className="flex flex-col gap-2">
-                            <span className={`${idx === 0 ? `${currentTheme.primaryText} ${currentTheme.borderClass}` : 'bg-white/5 text-gray-400'} text-[10px] font-sans px-2 py-0.5 rounded border w-fit`}>
+                            <span className={`${idx === 0 ? `${currentTheme.primaryText} ${currentTheme.borderClass} border shadow-inner bg-white/5` : 'bg-black/40 border border-transparent shadow-inner text-gray-400'} text-[10px] font-sans font-bold px-3 py-1 rounded-lg w-fit`}>
                               نسخه {toPersianDigits(item.version)}
                             </span>
                             
-                            <div className="flex justify-between items-start gap-4">
-                              <h4 className={`text-sm font-bold leading-relaxed ${idx === 0 ? 'text-white' : 'text-gray-400'}`}>{item.title}</h4>
-                              <span className="text-[10px] text-gray-500 font-sans shrink-0 pt-0.5">{toPersianDigits(item.date)}</span>
+                            <div className="flex justify-between items-start gap-4 mt-1.5">
+                              <h4 className={`text-sm font-bold leading-relaxed font-sans ${idx === 0 ? 'text-white' : 'text-gray-400'}`}>{item.title}</h4>
+                              <span className="text-[10px] text-gray-500 font-sans font-bold shrink-0 pt-0.5">{toPersianDigits(item.date)}</span>
                             </div>
 
                             {descText && (
-                              <ul className="list-disc pr-4 space-y-1.5 text-[11px] text-gray-400 leading-relaxed marker:text-gray-500 text-justify">
+                              <ul className="list-disc pr-4 space-y-1.5 text-[11px] text-gray-400 leading-relaxed font-light marker:text-gray-500 text-justify font-sans mt-2">
                                 {descText.split('\n').map((descLine, i) => (
                                   descLine.trim() ? <li key={i}>{toPersianDigits(descLine.trim())}</li> : null
                                 ))}
@@ -916,57 +937,57 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
 
             {/* بخش دکمه‌های دانلود متصل به سیستم لاگین */}
             {displaySettings.isDownloadActive !== false && downloads.length > 0 && (
-              <div className="relative p-6 rounded-3xl overflow-hidden shadow-2xl group">
-                <div className="absolute inset-0 bg-[#0b0f19]/80 backdrop-blur-xl pointer-events-none -z-10" />
+              <div className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent group">
+                <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                 <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
                 <div className={`absolute -right-10 -top-10 w-32 h-32 ${currentTheme.primaryBg} opacity-10 rounded-full blur-3xl pointer-events-none`}></div>
                 
-                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10">
+                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2 relative z-10 font-sans border-b border-white/10 pb-4">
                   <Icon name="download" className={`w-6 h-6 ${currentTheme.fillCurrent}`} /> دانلود فایل‌ها
                 </h3>
 
                 {/* ===== باکس دانلود: پوشش شیشه‌ای وقتی کاربر لاگین نیست ===== */}
                 <div className="relative">
                   {!currentUser && (
-                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0b0f19]/80 backdrop-blur-sm rounded-2xl">
+                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#050810]/80 backdrop-blur-md rounded-2xl border border-white/10">
                       <Icon name="lock" className="w-12 h-12 text-gray-400 mb-3 opacity-80" />
-                      <h4 className="text-lg font-bold text-white mb-2">دسترسی محدود</h4>
-                      <p className="text-[11px] text-gray-400 mb-6 text-center px-6 leading-relaxed">برای دانلود و مشاهده لینک‌های این محتوا باید وارد حساب کاربری خود شوید.</p>
+                      <h4 className="text-lg font-bold text-white mb-2 font-sans">دسترسی محدود</h4>
+                      <p className="text-[11px] font-sans font-light text-gray-400 mb-6 text-center px-6 leading-relaxed">برای دانلود و مشاهده لینک‌های این محتوا باید وارد حساب کاربری خود شوید.</p>
                       
                       <button 
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setShowAuthModal(true); // <--- باز شدن پاپ‌آپ
+                          setShowAuthModal(true); 
                         }} 
-                        className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                        className="px-8 py-3 bg-white/10 border border-transparent shadow-inner hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer font-sans"
                       >
                         ورود / عضویت
                       </button>
                     </div>
                   )}
 
-                  <div className={cn("space-y-3 relative z-10 max-h-[300px] overflow-y-auto px-2 custom-scrollbar", !currentUser && "opacity-30 pointer-events-none select-none blur-[2px] pb-4")}>
+                  <div className={cn("space-y-3 relative z-10 max-h-[350px] overflow-y-auto px-1 custom-scrollbar", !currentUser && "opacity-30 pointer-events-none select-none blur-[2px] pb-4")}>
                     {downloads.map((dl, idx) => (
                       <button 
                         key={idx} 
                         onClick={(e) => handleDownloadClick(e, dl.url)}
-                        className={`w-full flex items-center justify-between gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 ${currentTheme.hoverBorder}/50 transition-colors group/item cursor-pointer text-right`}
+                        className={`w-full flex items-center justify-between gap-4 p-4 rounded-xl bg-white/5 border border-transparent shadow-inner hover:bg-white/10 ${currentTheme.hoverBorder}/50 transition-colors group/item cursor-pointer text-right`}
                       >
                         <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-                          <h4 className="text-sm font-bold text-white leading-snug">{dl.title}</h4>
+                          <h4 className="text-sm font-bold text-white leading-snug font-sans">{dl.title}</h4>
                           {dl.format && (
-                            <span className="text-xs text-gray-400 font-sans">{dl.format}</span>
+                            <span className="text-xs text-gray-400 font-sans font-bold">{dl.format}</span>
                           )}
                           {dl.desc && (
-                            <p className="text-[11px] text-gray-400 font-sans text-justify leading-relaxed">
+                            <p className="text-[11px] text-gray-500 font-sans font-light text-justify leading-relaxed mt-1">
                               {dl.desc}
                             </p>
                           )}
                         </div>
 
                         <div 
-                          className={`shrink-0 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 ${currentTheme.hoverBg} hover:border-t border-white/5ransparent hover:text-deep-base transition-colors`}
+                          className={`shrink-0 w-10 h-10 rounded-full bg-black/40 shadow-inner flex items-center justify-center text-gray-400 ${currentTheme.hoverBg} border border-transparent hover:text-white transition-colors`}
                         >
                           <Icon name="download" className="w-5 h-5" />
                         </div>
@@ -985,26 +1006,25 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
 
       <AnimatePresence>
         {isShareModalOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#050810]/40 backdrop-blur-xl font-sans">
             <div className="absolute inset-0 cursor-pointer" onClick={() => setIsShareModalOpen(false)}></div>
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.25 }} className="relative z-10 w-full max-w-sm p-6 rounded-3xl overflow-hidden shadow-2xl">
-              <div className="absolute inset-0 bg-[#0b0f19]/90 backdrop-blur-xl pointer-events-none -z-10" />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.25 }} className="relative z-10 w-full max-w-sm p-6 rounded-3xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] bg-[#050810]/90 backdrop-blur-2xl border border-transparent">
               <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
-              <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4 relative z-10">
+              <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 relative z-10">
                 <h3 className={`text-base font-bold text-white flex items-center gap-2`}><Icon name="shareNetwork" className={`w-5 h-5 ${currentTheme.primaryText}`} /> اشتراک‌گذاری</h3>
-                <button onClick={() => setIsShareModalOpen(false)} className="text-gray-400 hover:text-white transition-colors cursor-pointer bg-white/5 hover:bg-white/10 rounded-full p-1.5">
+                <button onClick={() => setIsShareModalOpen(false)} className="text-gray-400 hover:text-white transition-colors cursor-pointer bg-white/5 hover:bg-white/10 rounded-full p-2 border border-transparent shadow-inner">
                   <Icon name="close" className="w-4 h-4" />
                 </button>
               </div>
               
-              <p className="text-center text-sm text-gray-300 mb-5 relative z-10">این محتوا را در شبکه‌های اجتماعی به اشتراک بگذارید:</p>
+              <p className="text-center text-sm font-light text-gray-300 mb-5 relative z-10">این محتوا را در شبکه‌های اجتماعی به اشتراک بگذارید:</p>
 
               <div className="flex gap-6 justify-center items-center mb-8 relative z-10">
                 {sharePlatforms.map((platform) => (
                   <div key={platform.name} className="relative flex items-center justify-center">
                     <Tooltip text={platform.name}>
-                      <a href={platform.getUrl(typeof window !== 'undefined' ? window.location.href : 'https://madar.ir', title)} target="_blank" rel="noopener noreferrer" className={`p-2 text-gray-400 flex items-center justify-center transition-all duration-300 transform hover:scale-125 ${platform.hoverColorClass} cursor-pointer`}>
+                      <a href={platform.getUrl(typeof window !== 'undefined' ? window.location.href : 'https://madar.ir', title)} target="_blank" rel="noopener noreferrer" className={`p-3 text-gray-400 flex items-center justify-center transition-all duration-300 transform hover:scale-125 ${platform.hoverColorClass} cursor-pointer`}>
                         <Icon name={platform.icon} className="w-7 h-7 transition-colors" />
                       </a>
                     </Tooltip>
@@ -1013,10 +1033,10 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
               </div>
 
               <div className="flex flex-col gap-2 relative z-10">
-                <label className="text-xs text-gray-400">لینک مستقیم صفحه:</label>
-                <div className="flex items-center gap-2 bg-[#080c16] rounded-xl p-1.5 shadow-inner">
+                <label className="text-[11px] font-bold text-gray-400 pl-1">لینک مستقیم صفحه:</label>
+                <div className="flex items-center gap-2 bg-white/10 border border-white/10 rounded-xl p-1.5 shadow-inner">
                   <input type="text" readOnly value={typeof window !== 'undefined' ? window.location.href : 'https://madar.ir'} className="bg-transparent text-gray-400 text-[11px] w-full outline-none px-2 dir-ltr text-left font-sans" />
-                  <button onClick={handleCopyLink} className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-lg ${isCopied ? `${currentTheme.primaryBg} text-white` : 'bg-white/10 text-white hover:bg-white/20'}`}>
+                  <button onClick={handleCopyLink} className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-lg border border-transparent ${isCopied ? `${currentTheme.primaryBg} text-white` : 'bg-black/40 text-gray-300 hover:text-white hover:bg-black/60 shadow-inner'}`}>
                     {isCopied ? 'کپی شد' : 'کپی لینک'}
                   </button>
                 </div>

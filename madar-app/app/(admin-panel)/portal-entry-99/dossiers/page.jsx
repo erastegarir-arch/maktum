@@ -6,6 +6,7 @@ import Icon from '@/app/components/Icon';
 import BlurImage from '@/app/components/BlurImage';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import MediaLibraryPage from '@/app/(admin-panel)/portal-entry-99/media/page';
 
 // === اکشن‌های بک‌اند ===
 import { getAllDossiersAdmin, saveDossier, deleteDossier, updateDossiersOrder, getHubSettings, saveHubSettings } from '@/app/actions/dossier';
@@ -29,6 +30,16 @@ const Tooltip = ({ children, text }) => (
   </div>
 );
 
+// تبدیل نوع محتوا به فارسی همراه با رنگ‌بندی اختصاصی
+const getContentTypeConfig = (type) => {
+  const t = type?.toUpperCase() || '';
+  if(t.includes('VIDEO') || t.includes('AUDIO') || t === 'محتوای تولیدی') return { label: 'محتوای تولیدی', bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20' };
+  if(t.includes('RAW') || t.includes('FOOTAGE') || t === 'فوتیج و راش') return { label: 'فوتیج و راش', bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' };
+  if(t.includes('TOOL') || t === 'ابزارها' || t === 'محتوای ابزارها') return { label: 'ابزارها', bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/20' };
+  if(t.includes('BLOG') || t.includes('ARTICLE') || t === 'بلاگ') return { label: 'بلاگ', bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' };
+  return { label: type || 'نامشخص', bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/20' };
+};
+
 export default function AdminDossiersManager() {
   const [activeTab, setActiveTab] = useState('HUB_SETTINGS'); 
   const [dossiers, setDossiers] = useState([]);
@@ -38,8 +49,11 @@ export default function AdminDossiersManager() {
   const [allTaxonomies, setAllTaxonomies] = useState([]);
   const [allContents, setAllContents] = useState([]);
 
-  // استیت‌های تب هاب
-  const [hubSettings, setHubSettings] = useState({ title: '', description: '', metaTitle: '', metaDesc: '' });
+  // استیت‌های تب هاب (همراه با فیلدهای جدید)
+  const [hubSettings, setHubSettings] = useState({ 
+    title: '', description: '', metaTitle: '', metaDesc: '',
+    icon: '', bgDesktop: '', bgMobile: '', titleGradientStart: '#ffffff', titleGradientEnd: '#ffffff'
+  });
   const [isSavingHub, setIsSavingHub] = useState(false);
   const [draggedItem, setDraggedItem] = useState(null);
 
@@ -65,10 +79,12 @@ export default function AdminDossiersManager() {
     id: null, slug: '', title: '', preTitle: '', description: '',
     metaTitle: '', metaDesc: '', hubCoverDesktop: '', hubCoverMobile: '',
     coverDesktop: '', coverMobile: '', themeColor: '#06b6d4',
+    titleGradientStart: '#ffffff', titleGradientEnd: '#ffffff', preTitleColor: '#a3a3a3', descColor: '#d1d5db',
     showRadar: true, radarTitle: 'رادار موضوعی پرونده', selectedTopics: [],
     showCreators: true, creatorsTitle: 'اشخاص و پدیدآورندگان مرتبط', selectedCreators: [],
     selectedContents: [], showTipLine: true, tipPreTitle: 'پورتال ارتباط امن', 
-    tipTitle: 'سندی در دست دارید؟', tipDesc: '', tipBtnText: 'ارسال امن سند', tipBtnLink: '#', tipBtnIcon: 'upload'
+    tipTitle: 'سندی در دست دارید؟', tipDesc: '', tipBtnText: 'ارسال امن سند', tipBtnLink: '#', tipBtnIcon: 'upload',
+    layoutSize: 'STANDARD' // VIP | STANDARD
   });
 
   useEffect(() => { loadAllData(); }, []);
@@ -80,7 +96,7 @@ export default function AdminDossiersManager() {
         getHubSettings(), getAllDossiersAdmin(), getTaxonomies(), getContents(), getMedia()
       ]);
 
-      if (hubRes) setHubSettings(hubRes);
+      if (hubRes) setHubSettings(prev => ({ ...prev, ...hubRes }));
       if (dosRes?.success) setDossiers(dosRes.data);
       if (taxRes?.success) setAllTaxonomies(taxRes.data);
       if (contRes) setAllContents(contRes);
@@ -96,7 +112,7 @@ export default function AdminDossiersManager() {
     setIsSavingHub(true);
     const res = await saveHubSettings(hubSettings);
     setIsSavingHub(false);
-    if(res.success) toast.success('تنظیمات متنی صفحه هاب ذخیره شد.');
+    if(res.success) toast.success('تنظیمات صفحه هاب با موفقیت ذخیره شد.');
     else toast.error('خطا در ذخیره تنظیمات');
   };
 
@@ -129,8 +145,17 @@ export default function AdminDossiersManager() {
     const d = dossiers.find(x => x.id === id);
     const updated = { ...d, isVisibleInHub: !d.isVisibleInHub };
     setDossiers(prev => prev.map(x => x.id === id ? updated : x));
-    await saveDossier({ ...updated, selectedTopics: updated.taxonomies.filter(t => t.type !== 'CREATOR'), selectedCreators: updated.taxonomies.filter(t => t.type === 'CREATOR'), selectedContents: updated.contents });
+    await saveDossier({ ...updated, selectedTopics: updated.taxonomies?.filter(t => t.type !== 'CREATOR') || [], selectedCreators: updated.taxonomies?.filter(t => t.type === 'CREATOR') || [], selectedContents: updated.contents || [] });
     toast.success('وضعیت نمایش تغییر کرد.');
+  };
+
+  const toggleDossierLayout = async (id, layoutType) => {
+    const d = dossiers.find(x => x.id === id);
+    if (d.layoutSize === layoutType) return;
+    const updated = { ...d, layoutSize: layoutType };
+    setDossiers(prev => prev.map(x => x.id === id ? updated : x));
+    await saveDossier({ ...updated, selectedTopics: updated.taxonomies?.filter(t => t.type !== 'CREATOR') || [], selectedCreators: updated.taxonomies?.filter(t => t.type === 'CREATOR') || [], selectedContents: updated.contents || [] });
+    toast.success('ابعاد پرونده تغییر کرد.');
   };
 
   const confirmDelete = async () => {
@@ -146,6 +171,11 @@ export default function AdminDossiersManager() {
     if (dossier) {
       setFormData({
         ...dossier,
+        titleGradientStart: dossier.titleGradientStart || '#ffffff',
+        titleGradientEnd: dossier.titleGradientEnd || '#ffffff',
+        preTitleColor: dossier.preTitleColor || '#a3a3a3',
+        descColor: dossier.descColor || '#d1d5db',
+        layoutSize: dossier.layoutSize || 'STANDARD',
         selectedTopics: dossier.taxonomies?.filter(t => t.type === 'CATEGORY' || t.type === 'HASHTAG') || [],
         selectedCreators: dossier.taxonomies?.filter(t => t.type === 'CREATOR') || [],
         selectedContents: dossier.contents || []
@@ -154,10 +184,12 @@ export default function AdminDossiersManager() {
       setFormData({
         id: null, slug: '', title: '', preTitle: '', description: '', metaTitle: '', metaDesc: '',
         hubCoverDesktop: '', hubCoverMobile: '', coverDesktop: '', coverMobile: '', themeColor: '#06b6d4',
+        titleGradientStart: '#ffffff', titleGradientEnd: '#ffffff', preTitleColor: '#a3a3a3', descColor: '#d1d5db',
         showRadar: true, radarTitle: 'رادار موضوعی پرونده', selectedTopics: [],
         showCreators: true, creatorsTitle: 'اشخاص و پدیدآورندگان مرتبط', selectedCreators: [],
         selectedContents: [], showTipLine: true, tipPreTitle: 'پورتال ارتباط امن', 
-        tipTitle: 'سندی در دست دارید؟', tipDesc: '', tipBtnText: 'ارسال امن سند', tipBtnLink: '#', tipBtnIcon: 'upload'
+        tipTitle: 'سندی در دست دارید؟', tipDesc: '', tipBtnText: 'ارسال امن سند', tipBtnLink: '#', tipBtnIcon: 'upload',
+        layoutSize: 'STANDARD'
       });
     }
     setEditorTab('basic');
@@ -181,7 +213,13 @@ export default function AdminDossiersManager() {
 
   const handleSelectMedia = (url) => {
     if(mediaModal.targetField) {
-      setFormData({ ...formData, [mediaModal.targetField]: url });
+      if (['hubIcon', 'hubBgDesktop', 'hubBgMobile'].includes(mediaModal.targetField)) {
+        const field = mediaModal.targetField.replace('hub', ''); 
+        const finalField = field.charAt(0).toLowerCase() + field.slice(1);
+        setHubSettings({ ...hubSettings, [finalField]: url });
+      } else {
+        setFormData({ ...formData, [mediaModal.targetField]: url });
+      }
     }
     setMediaModal({ isOpen: false, targetField: null });
   };
@@ -191,16 +229,20 @@ export default function AdminDossiersManager() {
   const searchResultsCreators = allTaxonomies.filter(t => t.type === 'CREATOR' && t.name.includes(creatorSearch) && !formData.selectedCreators.find(sc => sc.id === t.id));
   const searchResultsContents = allContents.filter(c => c.titleBase.includes(contentSearch) && !formData.selectedContents.find(sc => sc.id === c.id));
 
+  const isTipIconUrl = formData.tipBtnIcon && (formData.tipBtnIcon.includes('/') || formData.tipBtnIcon.startsWith('http'));
+
   const renderEditorForm = () => {
     switch(editorTab) {
       case 'basic':
         return (
           <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
               <div className="space-y-2">
                 <label className="block text-[11px] text-gray-300 font-bold pl-1">لینک اختصاصی (Slug)</label>
                 <input type="text" dir="ltr" value={formData.slug} onChange={(e) => setFormData({...formData, slug: e.target.value})} className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border focus:border-[#8b5cf6] focus:bg-white/20 placeholder:text-white/40 outline-none transition-all font-sans text-left" placeholder="مثال: us-embassy" />
               </div>
+              
               <div className="space-y-2">
                 <label className="block text-[11px] text-gray-300 font-bold pl-1">رنگ اصلی (Theme)</label>
                 <div className="flex gap-2 items-center bg-white/10 border border-white/10 shadow-inner p-1.5 rounded-xl">
@@ -208,17 +250,44 @@ export default function AdminDossiersManager() {
                   <input type="text" value={formData.themeColor} onChange={(e) => setFormData({...formData, themeColor: e.target.value})} className="flex-1 bg-transparent text-sm text-white dir-ltr text-center uppercase outline-none font-sans" />
                 </div>
               </div>
+
               <div className="space-y-2">
                 <label className="block text-[11px] text-gray-300 font-bold pl-1">روتیتر هدر</label>
-                <input type="text" value={formData.preTitle} onChange={(e) => setFormData({...formData, preTitle: e.target.value})} className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border focus:border-[#8b5cf6] focus:bg-white/20 placeholder:text-white/40 outline-none transition-all font-sans" placeholder="اسناد محرمانه سفارت" />
+                <div className="flex gap-2">
+                  <input type="text" value={formData.preTitle} onChange={(e) => setFormData({...formData, preTitle: e.target.value})} className="flex-1 bg-white/10 border border-white/10 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border focus:border-[#8b5cf6] focus:bg-white/20 placeholder:text-white/40 outline-none transition-all font-sans" placeholder="اسناد محرمانه سفارت" />
+                  <div className="flex items-center justify-center bg-white/10 border border-white/10 shadow-inner p-1.5 rounded-xl shrink-0" title="رنگ روتیتر">
+                    <input type="color" value={formData.preTitleColor || '#a3a3a3'} onChange={(e) => setFormData({...formData, preTitleColor: e.target.value})} className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent" />
+                  </div>
+                </div>
               </div>
+              
               <div className="space-y-2">
                 <label className="block text-[11px] text-gray-300 font-bold pl-1">عنوان اصلی پرونده</label>
                 <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border focus:border-[#8b5cf6] focus:bg-white/20 placeholder:text-white/40 outline-none transition-all font-sans" placeholder="لانه جاسوسی" />
               </div>
+
+              <div className="md:col-span-2 space-y-2">
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">گرادینت عنوان پرونده (از بالا به پایین)</label>
+                <div className="flex gap-4">
+                  <div className="flex items-center gap-2 bg-white/10 border border-white/10 shadow-inner p-1.5 rounded-xl flex-1">
+                    <input type="color" value={formData.titleGradientStart || '#ffffff'} onChange={(e) => setFormData({...formData, titleGradientStart: e.target.value})} className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent" />
+                    <span className="text-xs text-white">رنگ بالا</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/10 border border-white/10 shadow-inner p-1.5 rounded-xl flex-1">
+                    <input type="color" value={formData.titleGradientEnd || '#ffffff'} onChange={(e) => setFormData({...formData, titleGradientEnd: e.target.value})} className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent" />
+                    <span className="text-xs text-white">رنگ پایین</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="md:col-span-2 space-y-2">
                 <label className="block text-[11px] text-gray-300 font-bold pl-1">توضیح دو خطی هدر</label>
-                <textarea rows="3" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border focus:border-[#8b5cf6] focus:bg-white/20 resize-none placeholder:text-white/40 outline-none transition-all font-sans" placeholder="در این پرونده ویژه به بررسی عمیق..."></textarea>
+                <div className="flex gap-2 items-start">
+                  <textarea rows="3" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="flex-1 bg-white/10 border border-white/10 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border focus:border-[#8b5cf6] focus:bg-white/20 resize-none placeholder:text-white/40 outline-none transition-all font-sans" placeholder="در این پرونده ویژه به بررسی عمیق..."></textarea>
+                  <div className="flex items-center justify-center bg-white/10 border border-white/10 shadow-inner p-1.5 rounded-xl shrink-0" title="رنگ توضیحات">
+                    <input type="color" value={formData.descColor || '#d1d5db'} onChange={(e) => setFormData({...formData, descColor: e.target.value})} className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent" />
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -344,28 +413,35 @@ export default function AdminDossiersManager() {
                 
                 {contentSearch && searchResultsContents.length > 0 && (
                   <div className="absolute z-50 w-full mt-2 bg-[#050810]/90 backdrop-blur-2xl rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-transparent overflow-hidden p-2 max-h-60 overflow-y-auto custom-scrollbar">
-                    {searchResultsContents.map(c => (
-                      <button key={c.id} onClick={() => { setFormData({...formData, selectedContents: [c, ...formData.selectedContents]}); setContentSearch(''); }} className="w-full text-right px-4 py-3 hover:bg-white/10 rounded-lg text-sm text-white flex justify-between cursor-pointer font-sans">
-                         <span className="text-[#06b6d4] font-bold">{c.titleBase}</span> <span className="text-[10px] text-gray-400 bg-black/40 px-2 py-1 rounded shadow-inner border border-transparent">{c.type}</span>
-                      </button>
-                    ))}
+                    {searchResultsContents.map(c => {
+                      const typeConfig = getContentTypeConfig(c.type);
+                      return (
+                        <button key={c.id} onClick={() => { setFormData({...formData, selectedContents: [c, ...formData.selectedContents]}); setContentSearch(''); }} className="w-full text-right px-4 py-3 hover:bg-white/10 rounded-lg text-sm text-white flex justify-between items-center cursor-pointer font-sans">
+                           <span className="text-[#06b6d4] font-bold">{c.titleBase}</span> 
+                           <span className={`text-[10px] ${typeConfig.bg} ${typeConfig.text} border ${typeConfig.border} px-2 py-1 rounded shadow-inner font-bold`}>{typeConfig.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
              </div>
              
              {formData.selectedContents.length > 0 ? (
                <div className="rounded-2xl p-4 bg-white/5 border border-transparent shadow-inner space-y-2 max-h-[350px] overflow-y-auto custom-scrollbar">
-                  {formData.selectedContents.map((c, i) => (
-                    <div key={c.id} className="flex justify-between items-center bg-black/30 border border-transparent shadow-inner p-3 rounded-xl hover:bg-black/50 transition-colors">
-                       <span className="text-sm font-bold text-white truncate max-w-[70%] font-sans">{c.titleBase}</span>
-                       <div className="flex items-center gap-4 shrink-0">
-                         <span className={`text-[10px] font-bold px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-sans border border-emerald-500/20`}>{c.type}</span>
-                         <button type="button" onClick={() => setFormData({...formData, selectedContents: formData.selectedContents.filter(item => item.id !== c.id)})} className="text-gray-400 hover:text-rose-500 transition-colors cursor-pointer p-1">
-                           <Icon name="close" className="w-4 h-4" />
-                         </button>
-                       </div>
-                    </div>
-                  ))}
+                  {formData.selectedContents.map((c, i) => {
+                    const typeConfig = getContentTypeConfig(c.type);
+                    return (
+                      <div key={c.id} className="flex justify-between items-center bg-black/30 border border-transparent shadow-inner p-3 rounded-xl hover:bg-black/50 transition-colors">
+                         <span className="text-sm font-bold text-white truncate max-w-[70%] font-sans">{c.titleBase}</span>
+                         <div className="flex items-center gap-4 shrink-0">
+                           <span className={`text-[10px] font-bold px-2 py-1 rounded ${typeConfig.bg} ${typeConfig.text} border ${typeConfig.border} font-sans`}>{typeConfig.label}</span>
+                           <button type="button" onClick={() => setFormData({...formData, selectedContents: formData.selectedContents.filter(item => item.id !== c.id)})} className="text-gray-400 hover:text-rose-500 transition-colors cursor-pointer p-1">
+                             <Icon name="close" className="w-4 h-4" />
+                           </button>
+                         </div>
+                      </div>
+                    );
+                  })}
                </div>
              ) : (
                <div className="border border-dashed border-white/10 rounded-2xl p-10 text-center text-gray-500 text-sm font-sans bg-white/[0.02]">هیچ محتوایی متصل نشده است.</div>
@@ -404,7 +480,13 @@ export default function AdminDossiersManager() {
               <div className="space-y-2">
                 <label className="block text-[11px] text-gray-300 font-bold pl-1">آیکون دکمه</label>
                 <div className="flex gap-2">
-                  <div className="w-[50px] h-[50px] flex items-center justify-center bg-white/10 border border-white/10 shadow-inner rounded-xl shrink-0"><Icon name={formData.tipBtnIcon || 'folder'} className="w-5 h-5 text-white" /></div>
+                  <div className="w-[50px] h-[50px] flex items-center justify-center bg-white/10 border border-white/10 shadow-inner rounded-xl shrink-0 overflow-hidden p-1">
+                    {isTipIconUrl ? (
+                       <img src={formData.tipBtnIcon} alt="icon" className="w-6 h-6 object-contain" />
+                    ) : (
+                       <Icon name={formData.tipBtnIcon || 'folder'} className="w-5 h-5 text-white" />
+                    )}
+                  </div>
                   <button onClick={() => setMediaModal({ isOpen: true, targetField: 'tipBtnIcon' })} className="flex-grow bg-white/5 border border-transparent shadow-inner hover:bg-white/10 text-gray-300 hover:text-white rounded-xl text-xs transition-colors cursor-pointer text-center font-bold">انتخاب آیکون از رسانه</button>
                 </div>
               </div>
@@ -452,18 +534,59 @@ export default function AdminDossiersManager() {
             <div className="relative rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden border border-transparent">
               <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
               <h2 className="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4 relative z-10">متون صفحه اصلی منظومه‌ها</h2>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                <div className="space-y-2">
+                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">آیکون هاب (بالای عنوان)</label>
+                  <div className="flex gap-2">
+                    <input type="text" readOnly value={hubSettings.icon || ''} placeholder="انتخاب نشده" className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#06b6d4] focus:bg-white/20 outline-none transition-all dir-ltr text-left font-sans" />
+                    <button onClick={() => setMediaModal({ isOpen: true, targetField: 'hubIcon' })} className="px-4 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-transparent shadow-inner rounded-xl text-xs transition-colors whitespace-nowrap cursor-pointer font-bold">انتخاب رسانه</button>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <label className="block text-[11px] text-gray-300 font-bold pl-1">عنوان اصلی صفحه (H1)</label>
                   <input type="text" value={hubSettings.title} onChange={(e)=>setHubSettings({...hubSettings, title: e.target.value})} className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#06b6d4] focus:bg-white/20 outline-none transition-all font-sans" />
                 </div>
-                <div className="space-y-2">
-                  <label className="block text-[11px] text-gray-300 font-bold pl-1">متن متا سئو</label>
-                  <input type="text" value={hubSettings.metaTitle} onChange={(e)=>setHubSettings({...hubSettings, metaTitle: e.target.value})} className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#06b6d4] focus:bg-white/20 outline-none transition-all font-sans" />
+
+                <div className="md:col-span-2 space-y-2">
+                  <label className="block text-[11px] text-gray-300 font-bold pl-1">گرادینت عنوان (از بالا به پایین)</label>
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-2 bg-white/10 border border-white/10 shadow-inner p-1.5 rounded-xl flex-1">
+                      <input type="color" value={hubSettings.titleGradientStart || '#ffffff'} onChange={(e) => setHubSettings({...hubSettings, titleGradientStart: e.target.value})} className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent" />
+                      <span className="text-xs text-white">رنگ بالا</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/10 border border-white/10 shadow-inner p-1.5 rounded-xl flex-1">
+                      <input type="color" value={hubSettings.titleGradientEnd || '#ffffff'} onChange={(e) => setHubSettings({...hubSettings, titleGradientEnd: e.target.value})} className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent" />
+                      <span className="text-xs text-white">رنگ پایین</span>
+                    </div>
+                  </div>
                 </div>
+
                 <div className="space-y-2">
                   <label className="block text-[11px] text-gray-300 font-bold pl-1">توضیح دو خطی هدر</label>
                   <textarea rows="3" value={hubSettings.description} onChange={(e)=>setHubSettings({...hubSettings, description: e.target.value})} className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#06b6d4] focus:bg-white/20 outline-none transition-all resize-none font-sans"></textarea>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">تصویر پس‌زمینه دسکتاپ (۱۶:۹)</label>
+                  <div className="flex gap-2">
+                    <input type="text" readOnly value={hubSettings.bgDesktop || ''} placeholder="انتخاب نشده" className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#06b6d4] focus:bg-white/20 outline-none transition-all dir-ltr text-left font-sans" />
+                    <button onClick={() => setMediaModal({ isOpen: true, targetField: 'hubBgDesktop' })} className="px-4 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-transparent shadow-inner rounded-xl text-xs transition-colors whitespace-nowrap cursor-pointer font-bold">انتخاب رسانه</button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">تصویر پس‌زمینه موبایل (۱:۱)</label>
+                  <div className="flex gap-2">
+                    <input type="text" readOnly value={hubSettings.bgMobile || ''} placeholder="انتخاب نشده" className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#06b6d4] focus:bg-white/20 outline-none transition-all dir-ltr text-left font-sans" />
+                    <button onClick={() => setMediaModal({ isOpen: true, targetField: 'hubBgMobile' })} className="px-4 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-transparent shadow-inner rounded-xl text-xs transition-colors whitespace-nowrap cursor-pointer font-bold">انتخاب رسانه</button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-[11px] text-gray-300 font-bold pl-1">متن متا سئو</label>
+                  <input type="text" value={hubSettings.metaTitle} onChange={(e)=>setHubSettings({...hubSettings, metaTitle: e.target.value})} className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#06b6d4] focus:bg-white/20 outline-none transition-all font-sans" />
                 </div>
                 <div className="space-y-2">
                   <label className="block text-[11px] text-gray-300 font-bold pl-1">توضیحات متا سئو</label>
@@ -472,7 +595,7 @@ export default function AdminDossiersManager() {
               </div>
               <div className="mt-6 flex justify-end relative z-10 border-t border-white/10 pt-4">
                 <button onClick={handleSaveHubSettings} disabled={isSavingHub} className="px-8 py-3.5 bg-[#06b6d4] hover:bg-[#0891b2] text-white font-bold text-sm rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all cursor-pointer disabled:opacity-50 hover:scale-105 active:scale-95 border border-transparent">
-                  {isSavingHub ? 'در حال ذخیره...' : 'ذخیره متون'}
+                  {isSavingHub ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
                 </button>
               </div>
             </div>
@@ -482,7 +605,7 @@ export default function AdminDossiersManager() {
               <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 relative z-10">
                 <div>
                   <h2 className="text-xl font-bold text-white mb-1">چیدمان پرونده‌ها در هاب</h2>
-                  <p className="text-xs text-gray-400">ردیف ۱: ویژه (بزرگ) | ردیف ۲ و ۳: کناری | سایر: گرید استاندارد. با موس درگ کنید.</p>
+                  <p className="text-xs text-gray-400">با درگ کردن، ترتیب اولویت‌ها را مشخص کنید. انتخاب وضعیت «ویژه» یا «استاندارد» مستقیماً در سایت اعمال می‌شود.</p>
                 </div>
               </div>
 
@@ -510,11 +633,12 @@ export default function AdminDossiersManager() {
                         </div>
                         
                         <div className="flex items-center gap-4">
-                           <span className="text-[10px] px-3 py-1.5 rounded-lg bg-black/40 text-gray-400 hidden sm:block font-bold border border-transparent shadow-inner">
-                             {index === 0 ? 'ویژه (بزرگ بالا)' : index === 1 || index === 2 ? 'ویژه (کناری)' : 'گرید استاندارد'}
-                           </span>
+                           <div className="flex bg-black/40 rounded-lg p-1 shadow-inner border border-transparent shrink-0">
+                             <button onClick={() => toggleDossierLayout(dossier.id, 'VIP')} className={`text-[10px] px-3 py-1.5 rounded-md transition-colors font-bold ${dossier.layoutSize === 'VIP' ? 'bg-[#06b6d4] text-white shadow-md' : 'text-gray-400 hover:text-white'}`}>ویژه</button>
+                             <button onClick={() => toggleDossierLayout(dossier.id, 'STANDARD')} className={`text-[10px] px-3 py-1.5 rounded-md transition-colors font-bold ${dossier.layoutSize !== 'VIP' ? 'bg-[#06b6d4] text-white shadow-md' : 'text-gray-400 hover:text-white'}`}>استاندارد</button>
+                           </div>
                            <Tooltip text={dossier.isVisibleInHub ? "عدم نمایش در هاب" : "نمایش در هاب"}>
-                             <button onClick={() => toggleDossierVisibility(dossier.id)} className={`w-12 h-6 rounded-full transition-colors relative shadow-inner cursor-pointer border border-transparent ${dossier.isVisibleInHub ? 'bg-emerald-500' : 'bg-black/40'}`}>
+                             <button onClick={() => toggleDossierVisibility(dossier.id)} className={`w-12 h-6 rounded-full transition-colors relative shadow-inner cursor-pointer border border-transparent shrink-0 ${dossier.isVisibleInHub ? 'bg-emerald-500' : 'bg-black/40'}`}>
                                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-md ${dossier.isVisibleInHub ? 'left-1' : 'right-1'}`} />
                              </button>
                            </Tooltip>

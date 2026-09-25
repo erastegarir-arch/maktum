@@ -28,8 +28,7 @@ function HeaderTooltip({ text, children }) {
     <div className="relative group/tooltip flex items-center justify-center">
       {children}
       <div className="absolute top-full mt-3 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out]">
-        <div className="w-0 h-0 border-x-[5px] border-x-transparent border-b-[6px] border-b-[#0b0f19]"></div>
-        <div className="bg-[#0b0f19]/95 backdrop-blur-xl text-white text-[11px] py-1.5 px-3 rounded-lg shadow-2xl whitespace-nowrap font-sans font-medium">
+        <div className="bg-[#050810]/95 border border-white/10 backdrop-blur-md text-white text-[11px] py-1.5 px-3 rounded-lg shadow-xl whitespace-nowrap font-sans font-bold">
           {text}
         </div>
       </div>
@@ -134,11 +133,11 @@ export default function Header() {
   return (
     <>
       <header className="fixed top-4 inset-x-0 z-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 font-sans select-none">
-        <div className="relative rounded-full shadow-2xl overflow-hidden group">
+        <div className="relative rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent overflow-hidden group">
           
           <div 
-            style={{ backgroundColor: `rgba(11, 15, 25, ${opacityValue})` }}
-            className="absolute inset-0 backdrop-blur-xl rounded-full pointer-events-none -z-10" 
+            style={{ backgroundColor: `rgba(5, 8, 16, ${opacityValue})` }}
+            className="absolute inset-0 backdrop-blur-3xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] rounded-full pointer-events-none -z-10" 
           />
 
           <div className="absolute top-0 inset-x-8 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 pointer-events-none z-20" />
@@ -198,7 +197,7 @@ export default function Header() {
                 <button 
                   type="button" 
                   onClick={() => setIsSearchOpen(true)}
-                  className="w-10 h-10 rounded-full bg-white/5 hover:border-[#06b6d4]/50 hover:bg-[#06b6d4]/10 flex items-center justify-center text-gray-300 hover:text-[#06b6d4] transition-all cursor-pointer shadow-inner"
+                  className="w-10 h-10 rounded-full bg-white/5 border border-transparent hover:border-[#06b6d4]/50 hover:bg-[#06b6d4]/10 flex items-center justify-center text-gray-300 hover:text-[#06b6d4] transition-all cursor-pointer shadow-inner"
                 >
                   <Icon name="search" className="w-5 h-5" />
                 </button>
@@ -209,7 +208,7 @@ export default function Header() {
                   {/* دکمه حساب کاربری همراه با دایره چشمک‌زن اعلان‌ها */}
                   <Link 
                     href="/profile" 
-                    className="relative w-10 h-10 rounded-full bg-white/5 hover:border-[#06b6d4]/50 hover:bg-[#06b6d4]/10 flex items-center justify-center text-gray-300 hover:text-[#06b6d4] transition-all cursor-pointer shadow-inner"
+                    className="relative w-10 h-10 rounded-full bg-white/5 border border-transparent hover:border-[#06b6d4]/50 hover:bg-[#06b6d4]/10 flex items-center justify-center text-gray-300 hover:text-[#06b6d4] transition-all cursor-pointer shadow-inner"
                   >
                     <Icon name="user" className="w-5 h-5" />
                     
@@ -228,7 +227,7 @@ export default function Header() {
                   <button 
                     type="button"
                     onClick={() => setIsAuthOpen(true)}
-                    className="px-4 py-2 rounded-full bg-white/5 hover:border-[#06b6d4] hover:bg-[#06b6d4]/10 text-gray-200 hover:text-[#06b6d4] text-xs font-bold transition-all cursor-pointer flex items-center gap-2 font-sans"
+                    className="px-4 py-2 rounded-full bg-white/5 border border-transparent hover:border-[#06b6d4] hover:bg-[#06b6d4]/10 text-gray-200 hover:text-[#06b6d4] text-xs font-bold transition-all cursor-pointer flex items-center gap-2 font-sans shadow-inner"
                   >
                     <Icon name="user" className="w-4 h-4 text-[#06b6d4]" />
                     <span>ورود / عضویت</span>

@@ -11,13 +11,13 @@ import { sendOtpAction, verifyOtpAction } from '@/app/actions/auth';
 const cn = (...inputs) => twMerge(clsx(inputs));
 
 const BaseSkeleton = ({ className = "" }) => (
-  <div className={cn("relative overflow-hidden bg-white/5 backdrop-blur-sm rounded-xl", className)}>
+  <div className={cn("relative overflow-hidden bg-white/5 border border-transparent shadow-inner backdrop-blur-sm rounded-xl", className)}>
     <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
   </div>
 );
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1); // 1: Phone, 2: OTP, 3: Success
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,9 +32,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  // ==========================================
-  // اصلاحیه اول: فقط مدیریت باز شدن و ریست فرم (بدون وابستگی به لودینگ)
-  // ==========================================
+  // مدیریت باز شدن و ریست فرم
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -54,21 +52,17 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     }
   }, [isOpen]);
 
-  // ==========================================
-  // اصلاحیه دوم: فقط مدیریت دکمه بستن (Escape)
-  // ==========================================
+  // مدیریت دکمه بستن (Escape)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && !isLoading) onCloseRef.current?.();
+      if (e.key === 'Escape' && !isLoading && step !== 3) onCloseRef.current?.();
     };
 
     if (isOpen) {
       window.addEventListener('keydown', handleKeyDown);
-      return () => {
-        window.removeEventListener('keydown', handleKeyDown);
-      };
+      return () => window.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen, isLoading]);
+  }, [isOpen, isLoading, step]);
 
   useEffect(() => {
     let interval;
@@ -129,10 +123,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     }
     
     setIsLoading(true);
-    
-    // ارسال واقعی به اکشن بک‌اند
     const res = await sendOtpAction(phone);
-    
     setIsLoading(false);
 
     if (!res.success) {
@@ -155,7 +146,6 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     setIsLoading(true);
     
     const code = codeString || otp.join('');
-    
     const res = await verifyOtpAction(phone, code);
 
     if (!res.success) {
@@ -166,14 +156,15 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       return;
     }
 
-    toast.success('ورود با موفقیت انجام شد!');
+    // تغییر استیت به مرحله ۳ (موفقیت‌آمیز) به جای بستن سریع
+    setStep(3);
     
     setTimeout(() => {
       setIsLoading(false);
       localStorage.setItem('isLoggedIn', 'true');
       onLoginSuccess?.();
       onCloseRef.current?.();
-    }, 1500); 
+    }, 2000); // دو ثانیه مکث برای تماشای انیمیشن ورود موفق
   };
 
   const formatTime = (seconds) => {
@@ -184,49 +175,54 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
   if (!isOpen) return null;
 
-  const currentColor = step === 1 ? '#f59e0b' : '#06b6d4';
-
   return (
     <AnimatePresence>
       <motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4"
-        onClick={() => !isLoading && onCloseRef.current?.()}
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-[#050810]/70 backdrop-blur-xl p-4"
+        onClick={() => !isLoading && step !== 3 && onCloseRef.current?.()}
       >
         <motion.div 
           ref={cardRef}
           onMouseMove={handleMouseMove}
           onClick={(e) => e.stopPropagation()}
-          initial={{ scale: 0.95, opacity: 0 }} 
-          animate={{ scale: 1, opacity: 1 }} 
-          exit={{ scale: 0.95, opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="relative w-full max-w-md rounded-[32px] overflow-hidden p-8 shadow-[0_30px_60px_rgba(0,0,0,0.8)] group"
+          initial={{ scale: 0.95, opacity: 0, y: 20 }} 
+          animate={{ scale: 1, opacity: 1, y: 0 }} 
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="relative w-full max-w-md rounded-[32px] overflow-hidden p-8 shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-transparent group"
         >
-          <div className="absolute inset-0 bg-[#0b0f19]/85 backdrop-blur-xl rounded-[32px] pointer-events-none -z-10" />
+          {/* پس‌زمینه گلس‌مورفیسم مودال */}
+          <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-3xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
 
+          {/* خط نوری بالای مودال (همیشه فیروزه‌ای) */}
           <div 
             className="absolute top-0 inset-x-0 h-[2px] transition-all duration-500 opacity-90 z-20 pointer-events-none"
             style={{ 
-              background: `linear-gradient(90deg, transparent 0%, ${currentColor} 50%, transparent 100%)` 
+              background: `linear-gradient(90deg, transparent 0%, #06b6d4 50%, transparent 100%)` 
             }}
           />
+          {/* هاله نوری متمرکز در بالا */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-20 bg-[#06b6d4] opacity-20 blur-[50px] pointer-events-none -z-10" />
 
-          <div className="absolute inset-0 pointer-events-none rounded-[32px] z-0 bg-[radial-gradient(400px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.06),transparent_40%)]" />
+          <div className="absolute inset-0 pointer-events-none rounded-[32px] z-0 bg-[radial-gradient(400px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(6,182,212,0.06),transparent_40%)]" />
 
-          <button 
-            onClick={() => onCloseRef.current?.()} 
-            disabled={isLoading}
-            className="absolute top-6 left-6 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/20 transition-all z-20 disabled:opacity-50 cursor-pointer"
-          >
-            <Icon name="close" className="w-4 h-4" />
-          </button>
+          {/* دکمه بستن (در مرحله سوم مخفی می‌شود) */}
+          {step !== 3 && (
+            <button 
+              onClick={() => onCloseRef.current?.()} 
+              disabled={isLoading}
+              className="absolute top-6 left-6 w-8 h-8 rounded-full bg-white/5 border border-transparent shadow-inner flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-all z-20 disabled:opacity-50 cursor-pointer"
+            >
+              <Icon name="close" className="w-4 h-4" />
+            </button>
+          )}
 
           {isInitializing ? (
             <div className="py-6 space-y-6 flex flex-col items-center relative z-10">
-              <BaseSkeleton className="w-16 h-16 rounded-2xl" />
+              <BaseSkeleton className="w-16 h-16 rounded-full" />
               <div className="w-full space-y-3">
                 <BaseSkeleton className="w-full h-12" />
               </div>
@@ -235,7 +231,9 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
           ) : (
             <div className="relative z-10 flex flex-col items-center">
               <AnimatePresence mode="wait">
-                {step === 1 ? (
+                
+                {/* ===================== مرحله ۱: وارد کردن شماره ===================== */}
+                {step === 1 && (
                   <motion.div 
                     key="step1" 
                     initial={{ opacity: 0, x: 20 }} 
@@ -244,12 +242,12 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     transition={{ duration: 0.3 }}
                     className="w-full text-center"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 mx-auto shadow-[0_0_20px_rgba(245,158,11,0.15)] group-hover:border-amber-500/40 transition-colors duration-300">
-                      <Icon name="fingerprint" className="w-8 h-8 text-amber-500 group-hover:scale-110 transition-transform duration-300" />
+                    <div className="mb-6 flex justify-center">
+                      <Icon name="fingerprint" className="w-16 h-16 text-cyan-400 drop-shadow-[0_0_20px_rgba(6,182,212,0.6)] group-hover:scale-110 transition-transform duration-500" />
                     </div>
 
-                    <h2 className="text-2xl font-bold text-white mb-2">ورود به شبکه مدار</h2>
-                    <p className="text-sm text-gray-400 font-light mb-8">شماره موبایل خود را وارد کنید.</p>
+                    <h2 className="text-2xl font-bold text-white mb-2 font-sans">ورود به شبکه مدار</h2>
+                    <p className="text-sm text-gray-400 font-light mb-8 font-sans">شماره موبایل خود را جهت دریافت کد وارد کنید.</p>
 
                     <div className="w-full relative mb-6">
                       <input 
@@ -261,19 +259,30 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                         onChange={handlePhoneChange}
                         onKeyDown={handlePhoneKeyDown}
                         disabled={isLoading}
-                        className="w-full bg-white/5 rounded-xl py-4 px-4 text-left text-lg text-white outline-none focus:border-amber-500 transition-all disabled:opacity-50"
+                        className="w-full bg-white/10 border border-transparent shadow-inner rounded-xl py-4 px-4 text-left text-lg font-bold tracking-widest text-white outline-none focus:bg-white/20 focus:border-cyan-400/50 transition-all disabled:opacity-50 font-sans"
                       />
                     </div>
 
                     <button 
                       onClick={handleSubmitPhone}
                       disabled={phone.length < 10 || isLoading}
-                      className="w-full bg-amber-500 text-black py-4 rounded-xl font-bold text-lg hover:bg-amber-400 hover:shadow-[0_0_25px_rgba(245,158,11,0.3)] transition-all disabled:opacity-50 cursor-pointer"
+                      className="w-full bg-[#06b6d4] border border-transparent shadow-[0_5px_20px_rgba(6,182,212,0.3)] text-white py-4 rounded-xl font-bold text-base hover:bg-[#0891b2] hover:shadow-[0_8px_25px_rgba(6,182,212,0.5)] transition-all disabled:opacity-50 cursor-pointer font-sans flex items-center justify-center gap-2"
                     >
-                      {isLoading ? <Icon name="loading" className="w-6 h-6 animate-spin mx-auto" /> : 'دریافت کد تایید'}
+                      {isLoading ? <Icon name="loading" className="w-5 h-5 animate-spin" /> : 'دریافت کد تایید'}
                     </button>
+
+                    <p className="mt-8 text-[11px] text-gray-500 font-sans font-light leading-relaxed">
+                      ورود و عضویت شما در شبکه مدار به منزله مطالعه و پذیرش کامل{' '}
+                      <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 hover:underline transition-colors font-bold">
+                        قوانین و مقررات
+                      </a>
+                      {' '}است.
+                    </p>
                   </motion.div>
-                ) : (
+                )}
+
+                {/* ===================== مرحله ۲: وارد کردن کد تایید ===================== */}
+                {step === 2 && (
                   <motion.div 
                     key="step2" 
                     initial={{ opacity: 0, x: 20 }} 
@@ -282,16 +291,16 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     transition={{ duration: 0.3 }}
                     className="w-full text-center"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 mx-auto shadow-[0_0_20px_rgba(6,182,212,0.15)] group-hover:border-cyan-400/40 transition-colors duration-300">
-                      <Icon name="password" className="w-8 h-8 text-cyan-400 group-hover:scale-110 transition-transform duration-300" />
+                    <div className="mb-6 flex justify-center">
+                      <Icon name="password" className="w-16 h-16 text-cyan-400 drop-shadow-[0_0_20px_rgba(6,182,212,0.6)] group-hover:scale-110 transition-transform duration-500" />
                     </div>
 
-                    <h2 className="text-2xl font-bold text-white mb-2">تایید هویت</h2>
-                    <p className="text-sm text-gray-400 font-light mb-8">
-                      کد ارسال شده به <span dir="ltr" className="text-cyan-400 font-sans font-bold">{phone}</span> را وارد کنید.
+                    <h2 className="text-2xl font-bold text-white mb-2 font-sans">تایید هویت</h2>
+                    <p className="text-sm text-gray-400 font-light mb-8 font-sans">
+                      کد ارسال شده به شماره <span dir="ltr" className="text-cyan-400 font-sans font-bold ml-1">{phone}</span> را وارد کنید.
                     </p>
 
-                    <div className="flex items-center justify-center gap-2 w-full mb-6" dir="ltr">
+                    <div className="flex items-center justify-center gap-3 w-full mb-8" dir="ltr">
                       {otp.map((digit, idx) => (
                         <input 
                           key={idx}
@@ -302,7 +311,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                           onChange={(e) => handleOtpChange(idx, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                           disabled={isLoading}
-                          className="w-12 h-14 bg-white/5 rounded-xl text-center text-xl font-bold text-white outline-none focus:border-cyan-400 transition-all disabled:opacity-50"
+                          className="w-14 h-16 bg-white/10 border border-transparent shadow-inner rounded-2xl text-center text-2xl font-bold text-white outline-none focus:bg-white/20 focus:border-cyan-400/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all disabled:opacity-50 font-sans"
                         />
                       ))}
                     </div>
@@ -310,19 +319,48 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     <button 
                       onClick={() => handleSubmitOtp()}
                       disabled={isLoading}
-                      className="w-full bg-cyan-400 text-black py-4 rounded-xl font-bold text-lg hover:bg-cyan-300 hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] transition-all disabled:opacity-50 cursor-pointer"
+                      className="w-full bg-[#06b6d4] border border-transparent shadow-[0_5px_20px_rgba(6,182,212,0.3)] text-white py-4 rounded-xl font-bold text-base hover:bg-[#0891b2] hover:shadow-[0_8px_25px_rgba(6,182,212,0.5)] transition-all disabled:opacity-50 cursor-pointer font-sans flex items-center justify-center gap-2"
                     >
-                      {isLoading ? <Icon name="loading" className="w-6 h-6 animate-spin mx-auto" /> : 'تایید و ورود'}
+                      {isLoading ? <Icon name="loading" className="w-5 h-5 animate-spin" /> : 'تایید و ورود به حساب'}
                     </button>
 
-                    <div className="w-full flex items-center justify-between mt-6 text-xs text-gray-400">
-                      <button onClick={() => setStep(1)} disabled={isLoading} className="hover:text-white transition-colors cursor-pointer">
-                        اصلاح شماره
+                    <div className="w-full flex items-center justify-between mt-6 px-1 text-xs text-gray-400">
+                      <button onClick={() => setStep(1)} disabled={isLoading} className="hover:text-cyan-400 transition-colors cursor-pointer font-sans font-bold flex items-center gap-1">
+                        <Icon name="arrowRight" className="w-3.5 h-3.5" /> اصلاح شماره
                       </button>
-                      <span className="font-sans dir-ltr">{formatTime(timer)}</span>
+                      <span className="font-sans font-bold dir-ltr bg-white/5 px-3 py-1.5 rounded-lg shadow-inner">{formatTime(timer)}</span>
                     </div>
                   </motion.div>
                 )}
+
+                {/* ===================== مرحله ۳: موفقیت و انتقال ===================== */}
+                {step === 3 && (
+                  <motion.div 
+                    key="step3" 
+                    initial={{ opacity: 0, scale: 0.8 }} 
+                    animate={{ opacity: 1, scale: 1 }} 
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    className="w-full text-center py-8"
+                  >
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                      className="w-24 h-24 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+                    >
+                      <Icon name="check" className="w-12 h-12 text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                    </motion.div>
+
+                    <h2 className="text-2xl font-black text-white mb-3 font-sans">خوش آمدید!</h2>
+                    <p className="text-sm text-gray-400 font-light font-sans mb-8">ورود شما با موفقیت انجام شد.</p>
+
+                    <div className="flex items-center justify-center gap-3 text-cyan-400 text-xs font-bold font-sans">
+                      <Icon name="loading" className="w-4 h-4 animate-spin" />
+                      <span>در حال انتقال به داشبورد...</span>
+                    </div>
+                  </motion.div>
+                )}
+
               </AnimatePresence>
             </div>
           )}
