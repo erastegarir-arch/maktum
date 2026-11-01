@@ -47,6 +47,18 @@ model IconLibrary {
 }
 
 // ------------------------------------------------
+// جدول کدهای تایید یکبار مصرف (OTP)
+// ------------------------------------------------
+model OtpCode {
+  id        String   @id @default(cuid())
+  phone     String   @unique // شماره موبایل کاربر
+  code      String   // کد ۵ یا ۶ رقمی پیامک شده
+  expiresAt DateTime // زمان انقضای کد
+  attempts  Int      @default(0) // تعداد تلاش‌های ناموفق برای جلوگیری از بروت‌فورس
+  createdAt DateTime @default(now())
+}
+
+// ------------------------------------------------
 // مدیریت کاربران و سطوح دسترسی (User Management & RBAC)
 // ------------------------------------------------
 enum UserStatus {
@@ -60,50 +72,38 @@ enum Gender {
 }
 
 model User {
-  id      String     @id @default(cuid())
-  phone   String     @unique
-  status  UserStatus @default(ACTIVE)
+  id       String     @id @default(cuid())
+  phone    String     @unique
+  password String?    // رمز عبور اصلی حساب کاربری (هش‌شده)
+  status   UserStatus @default(ACTIVE)
 
   // اطلاعات پروفایل (قابل ویرایش توسط کاربر)
-  firstName          String?
-  lastName           String?
-  gender             Gender?
-  birthYear          String? // به صورت رشته نگه می‌داریم تا تاریخ شمسی مانند "1361" به سادگی ذخیره شود
-  province           String?
-  city               String?
-  educationDegree    String? // مدرک تحصیلی
-  major              String? // رشته تحصیلی
-  artResearchField   String? // حوزه فعالیت هنری / پژوهشی
+  firstName            String?
+  lastName             String?
+  gender               Gender?
+  birthYear            String? // ذخیره تاریخ شمسی به صورت رشته
+  province             String?
+  city                 String?
+  educationDegree      String? // مدرک تحصیلی
+  major                String? // رشته تحصیلی
+  artResearchField     String? // حوزه فعالیت هنری / پژوهشی
   cooperationInterests String? // زمینه‌های تمایل به همکاری
-  email              String?
+  email                String?
 
-  // سیستم دسترسی مبتنی بر نقش (RBAC)
-  roleId  String?
-  role    Role?   @relation(fields: [roleId], references: [id])
+  // سیستم دسترسی چک‌لیستی (مدل تلگرامی) و امنیت مدیران
+  isSuperAdmin     Boolean @default(false) // مدیر کل ارشد (غیرقابل تغییر، محدودسازی یا مسدودسازی توسط هیچ مدیری)
+  isAdmin          Boolean @default(false) // فلگ تفکیک‌کننده مدیران از کاربران عادی برای فیلتر سریع
+  adminPermissions String? // آرایه مجوزهای دانه‌ریز به صورت JSON String (مثال: ["CONTENT_CREATE", "CONTENT_EDIT"])
+  adminPassword    String? // رمز عبور دوم ویژه ورود و عملیات مدیریتی (هش‌شده)
 
   // روابط با سایر جداول
   favorites     Favorite[]
   downloads     DownloadHistory[]
   notifications UserNotification[]
-  comments      Comment[] // <--- اضافه شده برای ارتباط کاربر با نظراتش
+  comments      Comment[] // ارتباط کاربر با نظراتش
+  searchLogs    SearchLog[] // تاریخچه سرچ‌های این کاربر
 
-  createdAt DateTime @default(now()) // همان تاریخ عضویت غیرقابل ویرایش
-  updatedAt DateTime @updatedAt
-}
-
-// ------------------------------------------------
-// جدول نقش‌ها (سطوح دسترسی مدیریتی)
-// ------------------------------------------------
-model Role {
-  id          String  @id @default(cuid())
-  name        String  @unique // مثال: "سردبیر"
-  slug        String  @unique // مثال: "editor"
-  permissions String  // ذخیره آرایه مجوزها به صورت رشته متنی (JSON String)
-  isSystem    Boolean @default(false) // برای جلوگیری از حذف نقش‌های اصلی
-
-  users User[] // ارتباط با کاربران
-
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) // تاریخ عضویت غیرقابل ویرایش
   updatedAt DateTime @updatedAt
 }
 
@@ -111,39 +111,38 @@ model Role {
 // سیستم جامع اعلان‌ها (Notifications)
 // ------------------------------------------------
 enum NotificationType {
-  SYSTEM // اعلان‌های خودکار سیستم (مثل خوشامدگویی)
-  BULK   // ارسال گروهی، فیلتردار یا دستی توسط ادمین
+  SYSTEM  // اعلان‌های خودکار سیستم (مثل خوشامدگویی)
+  BULK    // ارسال گروهی، فیلتردار یا دستی توسط ادمین
   PRIVATE // پیام اختصاصی فقط برای یک شخص یا عده‌ای خاص
 }
 
-// بدنه اصلی پیام (یکپارچه برای سایت و پیامک)
 model Notification {
   id String @id @default(cuid())
 
   // تنظیمات کلان و اتوماسیون
   type         NotificationType @default(BULK)
-  isTemplate   Boolean          @default(false) // در صورت فعال بودن، یک قالب سیستمی است
-  triggerEvent String?          @unique // شناسه اتوماسیون (مثال: WELCOME, BIRTHDAY, COMMENT_REPLY)
-  isActive     Boolean          @default(true) // امکان فعال/غیرفعال کردن ارسال اتوماتیک
+  isTemplate   Boolean          @default(false)
+  triggerEvent String?          @unique
+  isActive     Boolean          @default(true)
 
   // ۱. محتوای درون‌سایتی (In-App Rich Payload)
   sendInApp  Boolean @default(true)
-  title      String? // عنوان اعلان
-  bodyHtml   String? // توضیحات با ادیتور پیشرفته (Rich Text)
-  themeColor String? // انتخاب تم رنگی (مثلاً #10b981)
-  iconUrl    String? // آیکون انتخابی از کتابخانه رسانه
-  coverUrl   String? // تصویر بنر اعلان از کتابخانه رسانه
-  ctaButtons String? // باکس لینک‌دار (آرایه دکمه‌ها ذخیره شده به صورت JSON String)
+  title      String?
+  bodyHtml   String?
+  themeColor String?
+  iconUrl    String?
+  coverUrl   String?
+  ctaButtons String?
 
   // ۲. محتوای پیامکی (SMS Payload)
-  sendSms  Boolean @default(false) // آیا پیامک ارسال شود؟
-  smsText  String? // متن خام پیامک (با پشتیبانی از کاراکتر و ایموجی)
+  sendSms Boolean @default(false)
+  smsText String?
 
   // ۳. آمار و گزارش‌گیری (Analytics)
-  targetCount  Int @default(0) // کل کاربرانی که در لیست ارسال بوده‌اند
-  smsSentCount Int @default(0) // پیامک‌های موفق کاوه‌نگار
-  smsFailCount Int @default(0) // پیامک‌های ناموفق
-  readCount    Int @default(0) // تعداد کاربرانی که اعلان را در سایت دیده‌اند
+  targetCount  Int @default(0)
+  smsSentCount Int @default(0)
+  smsFailCount Int @default(0)
+  readCount    Int @default(0)
 
   userNotifications UserNotification[]
 
@@ -151,7 +150,6 @@ model Notification {
   updatedAt DateTime @updatedAt
 }
 
-// وضعیت خوانده شدن پیام به ازای هر کاربر
 model UserNotification {
   id String @id @default(cuid())
 
@@ -161,12 +159,12 @@ model UserNotification {
   notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
   notificationId String
 
-  isRead  Boolean   @default(false)
-  readAt  DateTime?
+  isRead Boolean   @default(false)
+  readAt DateTime?
 
-  createdAt DateTime @default(now()) // زمان دقیق ایجاد این رکورد برای این کاربر خاص
+  createdAt DateTime @default(now())
 
-  @@unique([userId, notificationId]) // هر کاربر فقط یک نسخه از هر اعلان دارد
+  @@unique([userId, notificationId])
 }
 
 // ------------------------------------------------
@@ -183,7 +181,7 @@ model Favorite {
 
   createdAt DateTime @default(now())
 
-  @@unique([userId, contentId]) // جلوگیری از لایک تکراری برای یک محصول
+  @@unique([userId, contentId])
 }
 
 model DownloadHistory {
@@ -208,32 +206,28 @@ enum TaxonomyType {
 }
 
 model Taxonomy {
-  id   String        @id @default(cuid())
-  type TaxonomyType // نوع: دسته‌بندی، هشتگ یا پدیدآورنده
+  id   String       @id @default(cuid())
+  type TaxonomyType
 
-  name String // نام (مثل: تاریخ)
-  slug String // لینک انگلیسی (مثل: history)
+  name String
+  slug String
 
-  preTitle    String? // روتیتر (باکس بالای عنوان)
-  description String? // توضیحات
-  imageUrl    String? // تصویر پروفایل (مخصوص پدیدآورنده)
+  preTitle    String?
+  description String?
+  imageUrl    String?
 
-  // سئو (متا)
   metaTitle String?
   metaDesc  String?
 
-  // روابط معکوس چندگانه با جدول محتوا
   categoryContents Content[] @relation("ContentCategories")
   creatorContents  Content[] @relation("ContentCreators")
   tagContents      Content[] @relation("ContentTags")
 
-  // اتصال سرشاخه‌ها به پرونده‌های ویژه
   dossiers Dossier[] @relation("DossierTaxonomies")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // قوانین یکتا بودن نام و اسلاگ در هر نوع سرشاخه
   @@unique([type, name])
   @@unique([type, slug])
 }
@@ -259,49 +253,36 @@ enum ContentStatus {
 // ================================================
 model Dossier {
   id   String @id @default(cuid())
-  slug String @unique // لینک یکتا برای دامنه /c/[slug]
+  slug String @unique
 
-  // 1. اطلاعات سئو و نمایش در صفحه اصلی (Hub)
   metaTitle       String?
   metaDesc        String?
-  hubCoverDesktop String? // کاور 16:9 برای صفحه اصلی
-  hubCoverMobile  String? // کاور 1:1 برای صفحه اصلی
-  isVisibleInHub  Boolean @default(true) // نمایش در صفحه اصلی؟
-  orderIndex      Int     @default(0) // ترتیب چینش با درگ و دراپ
-  
-  // ------------------------------------
-  // فیلد اضافه‌شده: وضعیت چیدمان (گرید) در هاب
-  layoutSize      String? @default("STANDARD") // VIP | STANDARD
-  // ------------------------------------
+  hubCoverDesktop String?
+  hubCoverMobile  String?
+  isVisibleInHub  Boolean @default(true)
+  orderIndex      Int     @default(0)
+  layoutSize      String? @default("STANDARD")
 
-  // 2. هدر صفحه داخلی (Hero Section)
-  preTitle     String? // روتیتر (مثلاً: اسناد محرمانه سفارت)
-  title        String // عنوان اصلی
-  description  String? // توضیح دو خطی
-  coverDesktop String? // کاور واید هدر (16:9)
-  coverMobile  String? // کاور هدر موبایل (1:1)
+  preTitle     String?
+  title        String
+  description  String?
+  coverDesktop String?
+  coverMobile  String?
 
-  // تنظیمات گرافیکی و رنگ‌بندی جدید
-  themeColor          String? @default("#06b6d4") // رنگ اصلی نئون
-  gradientFrom        String? @default("#06b6d4") // رنگ قدیمی (جهت سازگاری)
-  gradientTo          String? @default("#d946ef") // رنگ قدیمی (جهت سازگاری)
-  // ------------------------------------
-  // فیلدهای اضافه‌شده: رنگ‌بندی داینامیک متون
-  titleGradientStart  String? @default("#ffffff")
-  titleGradientEnd    String? @default("#ffffff")
-  preTitleColor       String? @default("#a3a3a3")
-  descColor           String? @default("#d1d5db")
-  // ------------------------------------
+  themeColor         String? @default("#06b6d4")
+  gradientFrom       String? @default("#06b6d4")
+  gradientTo         String? @default("#d946ef")
+  titleGradientStart String? @default("#ffffff")
+  titleGradientEnd   String? @default("#ffffff")
+  preTitleColor      String? @default("#a3a3a3")
+  descColor          String? @default("#d1d5db")
 
-  // 3. رادار موضوعی
   showRadar  Boolean @default(true)
   radarTitle String? @default("رادار موضوعی پرونده")
 
-  // 4. پدیدآورندگان
   showCreators  Boolean @default(true)
   creatorsTitle String? @default("اشخاص و پدیدآورندگان مرتبط")
 
-  // 5. اقدام به عمل (Tip Line / ارتباط امن)
   showTipLine Boolean @default(true)
   tipPreTitle String? @default("پورتال ارتباط امن")
   tipTitle    String? @default("سندی در دست دارید؟")
@@ -314,7 +295,6 @@ model Dossier {
   publishedAt DateTime?     @default(now())
   viewCount   Int           @default(0)
 
-  // روابط جادویی (چند به چند): اتصال پرونده به محتواها و سرشاخه‌های دیگر
   contents   Content[]  @relation("DossierContents")
   taxonomies Taxonomy[] @relation("DossierTaxonomies")
 
@@ -328,60 +308,48 @@ model Dossier {
 model Content {
   id String @id @default(cuid())
 
-  // فیلدهای متنی و پایه
-  titleBase      String // نیمه اول عنوان (سفید)
-  titleHighlight String? // نیمه دوم عنوان (رنگی)
-  subtitle       String? // زیرعنوان
-  slug           String  @unique // پیوند یکتا
+  titleBase      String
+  titleHighlight String?
+  subtitle       String?
+  slug           String  @unique
 
-  // نوع و وضعیت
   type   ContentType
   status ContentStatus @default(DRAFT)
 
-  // تصاویر شاخص
-  coverDesktop String? // کاور کامپیوتر
-  coverMobile  String? // کاور موبایل
+  coverDesktop String?
+  coverMobile  String?
 
-  // متادیتا و آمار
-  publishedAt DateTime? @default(now()) // تاریخ انتشار
-  readTime    String? // زمان مطالعه
-  ageRating   String? // رده‌بندی سنی
-  viewCount   Int       @default(0) // تعداد بازدید
+  publishedAt DateTime? @default(now())
+  readTime    String?
+  ageRating   String?
+  viewCount   Int       @default(0)
 
-  // سئو (Meta SEO)
-  metaTitle String? // عنوان سئو
-  metaDesc  String? // توضیحات متا سئو
+  metaTitle String?
+  metaDesc  String?
 
-  // تنظیمات تاگل‌های نمایش (JSON)
-  displaySettings Json? // وضعیت فعال/غیرفعال بودن نمایش المان‌ها در صفحه
+  displaySettings Json?
 
-  // محتوای اصلی
-  body          String? // متن اصلی ادیتور (معرفی / متن خبر)
-  allowComments Boolean @default(true) // امکان ثبت نظر
+  body          String?
+  allowComments Boolean @default(true)
 
-  // فیلدهای اختصاصی بلاگ
-  lead String? // لید خبر
+  lead String?
 
-  // فیلدهای پویا (JSON) برای محصولات و ابزارها
-  formats        Json? // فرمت‌های ارائه شده
-  previews       Json? // پیش‌نمایش کلی (اختیاری)
-  previewGallery Json? // گالری پیش‌نمایش چندگانه (فیلم، عکس، صوت)
-  fileSpecs      Json? // مشخصات فایل
-  changelog      Json? // تاریخچه به‌روزرسانی‌ها
-  downloadLinks  Json? // لینک‌های دانلود
+  formats        Json?
+  previews       Json?
+  previewGallery Json?
+  fileSpecs      Json?
+  changelog      Json?
+  downloadLinks  Json?
 
-  // روابط با سرشاخه‌ها
   categories Taxonomy[] @relation("ContentCategories")
   creators   Taxonomy[] @relation("ContentCreators")
   tags       Taxonomy[] @relation("ContentTags")
 
-  // اتصال محتوا به پرونده‌های ویژه
   dossiers Dossier[] @relation("DossierContents")
 
-  // روابط با تعاملات کاربر
   favoritedBy  Favorite[]
   downloadedBy DownloadHistory[]
-  comments     Comment[] // ارتباط محتوا با نظرات
+  comments     Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -390,7 +358,6 @@ model Content {
 // ================================================
 // جداول سیستم تعاملات و نظرات
 // ================================================
-
 enum CommentStatus {
   PENDING  // در انتظار تایید
   APPROVED // تایید شده و قابل نمایش
@@ -398,20 +365,32 @@ enum CommentStatus {
 }
 
 model Comment {
-  id      String        @id @default(cuid())
-  text    String // متن نظر کاربر
-  status  CommentStatus @default(PENDING) // وضعیت تایید نظر
+  id     String        @id @default(cuid())
+  text   String
+  status CommentStatus @default(PENDING)
 
-  adminReply String? // فیلد پاسخ مستقیم ادمین (ساختار تخت و بهینه)
+  adminReply String?
 
-  // ارتباط با کاربر (نویسنده نظر)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
-  // ارتباط با محتوای مورد نظر
   content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
   contentId String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ------------------------------------------------
+// جدول ذخیره آمار جستجوهای کاربران (Search Analytics)
+// ------------------------------------------------
+model SearchLog {
+  id           String   @id @default(cuid())
+  keyword      String
+  resultsCount Int
+  
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt    DateTime @default(now())
 }

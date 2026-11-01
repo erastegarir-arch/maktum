@@ -230,3 +230,40 @@ export async function getAllTaxonomiesForArchive() {
     return { hashtags: [], categories: [], creators: [] };
   }
 }
+// دریافت تنظیمات
+export async function getArchiveSettingsAction() {
+  try {
+    const settings = await prisma.setting.findMany({
+      where: { key: { in: ['archive_badge', 'archive_title', 'archive_desc'] } }
+    });
+    const mapped = settings.reduce((acc, item) => {
+      acc[item.key] = item.value;
+      return acc;
+    }, {});
+    return { success: true, data: mapped };
+  } catch (error) {
+    return { success: false };
+  }
+}
+
+// ذخیره تنظیمات
+export async function saveArchiveSettingsAction(data) {
+  try {
+    const settingsToSave = [
+      { key: 'archive_badge', value: data.badge },
+      { key: 'archive_title', value: data.title },
+      { key: 'archive_desc', value: data.description }
+    ];
+
+    for (const item of settingsToSave) {
+      await prisma.setting.upsert({
+        where: { key: item.key },
+        update: { value: item.value },
+        create: { key: item.key, value: item.value, group: 'ARCHIVE_PAGE' }
+      });
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'خطا در ذخیره در دیتابیس' };
+  }
+}

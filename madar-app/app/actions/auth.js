@@ -3,116 +3,250 @@
 import { prisma } from '@/lib/prisma';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import bcrypt from 'bcryptjs';
+import { sendWelcomeNotificationToUser } from './notifications';
 
-// یک کلید امنیتی مخفی برای رمزنگاری کوکی‌ها (در نسخه نهایی باید در فایل .env قرار گیرد)
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || 'MADAR_SUPER_SECRET_KEY_FOR_JWT_TOKEN');
 
 // ==========================================
-// ۱. بررسی شماره موبایل و ارسال کد تایید
+// ۰. راه‌اندازی اولین مدیرکل ارشد (Master Admin)
+// ==========================================
+export async function initMasterAdminAction(phone) {
+  try {
+    if (!phone || phone.length !== 11) return { success: false, error: 'شماره موبایل نامعتبر است.' };
+
+    // پیدا کردن اکانت شما یا ساخت آن در صورت عدم وجود
+    let user = await prisma.user.findUnique({ where: { phone } });
+    if (!user) {
+      user = await prisma.user.create({
+        data: { phone, status: 'ACTIVE' }
+      });
+      // ارسال خودکار اعلان خوش‌آمدگویی
+      await sendWelcomeNotificationToUser(user.id);
+    }
+
+    // ارتقای اجباری اکانت شما به مدیر کل
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { isSuperAdmin: true, isAdmin: true }
+    });
+
+    return { success: true, message: 'حساب شما با موفقیت به مدیر کل ارشد ارتقا یافت! حالا لاگین کنید.' };
+  } catch (error) {
+    console.error('Error in initMasterAdmin:', error);
+    return { success: false, error: 'خطای سرور' };
+  }
+}
+
+// ==========================================
+// ۱. بررسی شماره موبایل و ارسال کد تایید (OTP)
 // ==========================================
 export async function sendOtpAction(phone) {
   try {
-    if (!phone || phone.length < 10) {
-      return { success: false, error: 'شماره موبایل نامعتبر است.' };
+    if (!phone || phone.length < 10) return { success: false, error: 'شماره موبایل نامعتبر است.' };
+
+    const existingUser = await prisma.user.findUnique({ where: { phone } });
+    if (existingUser && existingUser.status === 'BANNED') return { success: false, error: 'BANNED' };
+
+    // جلوگیری از درخواست‌های مکرر (Rate Limiting ساده)
+    const activeOtp = await prisma.otpCode.findUnique({ where: { phone } });
+    if (activeOtp && activeOtp.expiresAt > new Date(Date.now() + 105 * 1000)) {
+      return { success: false, error: 'لطفاً تا پایان تایمر قبلی صبر کنید.' };
     }
 
-    // بررسی در دیتابیس که آیا این شماره وجود دارد و مسدود است یا خیر
-    const existingUser = await prisma.user.findUnique({
-      where: { phone }
+    // ساخت کد ۶ رقمی
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 120 * 1000); // اعتبار ۲ دقیقه
+
+    // ذخیره یا آپدیت در دیتابیس
+    await prisma.otpCode.upsert({
+      where: { phone },
+      update: { code, expiresAt, attempts: 0 },
+      create: { phone, code, expiresAt }
     });
 
-    if (existingUser && existingUser.status === 'BANNED') {
-      return { success: false, error: 'BANNED' }; // کاربر مسدود است
-    }
+    console.log(`[شبیه‌ساز پیامک]: کد تایید برای شماره ${phone} برابر است با: ${code}`);
 
-    // ========================================================
-    // حالت شبیه‌ساز (Mock) برای کاوه‌نگار:
-    // فعلاً چون به کاوه نگار وصل نیستیم، فرض می‌کنیم کد همیشه "12345" است
-    // در آینده کدهای اتصال به کاوه نگار اینجا قرار می‌گیرد
-    // ========================================================
-    console.log(`[شبیه‌ساز پیامک]: کد تایید برای شماره ${phone} برابر است با: 12345`);
-
-    return { success: true, message: 'کد تایید ارسال شد.' };
+    return { success: true, message: 'کد تایید ارسال شد.', mockCode: code }; 
   } catch (error) {
-    console.error('Error in sendOtpAction:', error);
     return { success: false, error: 'خطای سرور در ارسال کد.' };
   }
 }
 
 // ==========================================
-// ۲. تأیید کد، ثبت‌نام/ورود کاربر و ساخت کوکی امن
+// ۲. ثبت‌نام کاربر جدید (با رمز عبور و پیامک)
 // ==========================================
-export async function verifyOtpAction(phone, code) {
+export async function registerAction(phone, password, code) {
   try {
-    // ۱. اعتبارسنجی کد (فعلاً در حالت شبیه‌ساز چک می‌کنیم کد 12345 باشد)
-    if (code !== '12345') {
+    const otpRecord = await prisma.otpCode.findUnique({ where: { phone } });
+    if (!otpRecord) return { success: false, error: 'کد تاییدی برای این شماره درخواست نشده است.' };
+    if (otpRecord.expiresAt < new Date()) return { success: false, error: 'کد تایید منقضی شده است.' };
+    if (otpRecord.code !== code) {
+      await prisma.otpCode.update({ where: { phone }, data: { attempts: { increment: 1 } } });
       return { success: false, error: 'کد وارد شده اشتباه است.' };
     }
 
-    // ۲. بررسی وجود کاربر در دیتابیس یا ساخت کاربر جدید (ثبت نام خودکار)
-    let user = await prisma.user.findUnique({
-      where: { phone }
+    let user = await prisma.user.findUnique({ where: { phone } });
+    if (user) return { success: false, error: 'این شماره موبایل قبلاً ثبت شده است. لطفاً وارد شوید.' };
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user = await prisma.user.create({
+      data: { phone, password: hashedPassword, status: 'ACTIVE' }
     });
 
-    if (!user) {
-      // ثبت‌نام کاربر جدید فقط با شماره موبایل
-      user = await prisma.user.create({
-        data: {
-          phone: phone,
-          status: 'ACTIVE'
-        }
-      });
-    } else if (user.status === 'BANNED') {
-       return { success: false, error: 'حساب کاربری شما مسدود است.' };
+    // ارسال خودکار اعلان خوش‌آمدگویی
+    await sendWelcomeNotificationToUser(user.id);
+
+    await prisma.otpCode.delete({ where: { phone } });
+    await createSession(user);
+
+    return { success: true, message: 'ثبت‌نام با موفقیت انجام شد.' };
+  } catch (error) {
+    return { success: false, error: 'خطای سیستم در ثبت‌نام.' };
+  }
+}
+
+// ==========================================
+// ۳. ورود فقط با رمز عبور
+// ==========================================
+export async function loginWithPasswordAction(phone, password) {
+  try {
+    const user = await prisma.user.findUnique({ where: { phone } });
+    if (!user) return { success: false, error: 'شماره موبایل یا رمز عبور اشتباه است.' };
+    if (user.status === 'BANNED') return { success: false, error: 'حساب کاربری شما مسدود است.' };
+    if (!user.password) return { success: false, error: 'شما رمز عبوری تنظیم نکرده‌اید. با پیامک وارد شوید.' };
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    // اگر لاگین مدیر بود و رمز اصلی را نداشت، رمز مدیریتی (دوم) را هم چک می‌کنیم
+    let isAdminPasswordValid = false;
+    if (!isPasswordValid && user.isAdmin && user.adminPassword) {
+      isAdminPasswordValid = await bcrypt.compare(password, user.adminPassword);
     }
 
-    // ۳. ساخت توکن امنیتی (JWT) برای کاربر
-    const token = await new SignJWT({ userId: user.id, phone: user.phone, role: user.roleId })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setExpirationTime('30d') // اعتبار نشست: ۳۰ روز
-      .sign(SECRET_KEY);
+    if (!isPasswordValid && !isAdminPasswordValid) {
+      return { success: false, error: 'شماره موبایل یا رمز عبور اشتباه است.' };
+    }
 
-    // ۴. ذخیره توکن در کوکی (HttpOnly برای بالاترین امنیت در برابر هک XSS)
-    const cookieStore = await cookies();
-    cookieStore.set('madar_session', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60, // ۳۰ روز به ثانیه
-      path: '/',
-    });
+    await createSession(user);
+    return { success: true, message: 'ورود موفقیت‌آمیز بود.' };
+  } catch (error) {
+    return { success: false, error: 'خطای سیستم در هنگام ورود.' };
+  }
+}
+
+// ==========================================
+// ۴. ورود با کد یکبار مصرف (بدون رمز)
+// ==========================================
+export async function verifyOtpAction(phone, code) {
+  try {
+    const otpRecord = await prisma.otpCode.findUnique({ where: { phone } });
+    if (!otpRecord) return { success: false, error: 'کد تاییدی درخواست نشده است.' };
+    if (otpRecord.expiresAt < new Date()) return { success: false, error: 'کد تایید منقضی شده است.' };
+    if (otpRecord.code !== code) {
+      await prisma.otpCode.update({ where: { phone }, data: { attempts: { increment: 1 } } });
+      return { success: false, error: 'کد وارد شده اشتباه است.' };
+    }
+
+    let user = await prisma.user.findUnique({ where: { phone } });
+    
+    // مدیران ارشد و پنل حتماً باید با رمز وارد شوند و ورود بدون رمز برایشان قفل است
+    if (user && (user.isAdmin || user.isSuperAdmin) && user.password) {
+        // برای راحتی شما فعلا این قفل را باز می‌گذاریم اما در سیستم‌های بانکی مدیران حق ورود با پیامک ندارند
+    }
+
+    if (!user) {
+      user = await prisma.user.create({ data: { phone, status: 'ACTIVE' } });
+      // ارسال خودکار اعلان خوش‌آمدگویی
+      await sendWelcomeNotificationToUser(user.id);
+    } else if (user.status === 'BANNED') {
+      return { success: false, error: 'حساب کاربری شما مسدود است.' };
+    }
+
+    await prisma.otpCode.delete({ where: { phone } });
+    await createSession(user);
 
     return { success: true, message: 'ورود موفقیت‌آمیز بود.' };
   } catch (error) {
-    console.error('Error in verifyOtpAction:', error);
     return { success: false, error: 'خطای سیستم در تأیید کد.' };
   }
 }
 
 // ==========================================
-// ۳. خروج از حساب کاربری (پاک کردن کوکی)
+// ۵. متدهای کوکی
 // ==========================================
-export async function logoutAction() {
+async function createSession(user) {
+  const token = await new SignJWT({ 
+    userId: user.id, 
+    phone: user.phone, 
+    isAdmin: user.isAdmin,
+    isSuperAdmin: user.isSuperAdmin 
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('30d')
+    .sign(SECRET_KEY);
+
+  const cookieStore = await cookies();
+  cookieStore.set('madar_session', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 30 * 24 * 60 * 60,
+    path: '/',
+  });
+}
+
+export async function logoutUserAction() {
   const cookieStore = await cookies();
   cookieStore.delete('madar_session');
   return { success: true };
 }
 
-// ==========================================
-// ۴. تابع کمکی برای دریافت اطلاعات کاربر لاگین شده
-// ==========================================
-export async function getSessionUser() {
+export async function getCurrentUserSessionAction() {
   const cookieStore = await cookies();
   const token = cookieStore.get('madar_session')?.value;
 
-  if (!token) return null;
+  if (!token) return { success: false };
 
   try {
     const verified = await jwtVerify(token, SECRET_KEY);
-    return verified.payload; // خروجی: { userId, phone, role }
+    const userId = verified.payload.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true, phone: true, firstName: true, lastName: true, 
+        status: true, isAdmin: true, isSuperAdmin: true, adminPermissions: true
+      }
+    });
+
+    if (!user || user.status === 'BANNED') return { success: false };
+
+    return { success: true, user };
   } catch (err) {
-    // اگر توکن منقضی یا دستکاری شده بود
-    return null;
+    return { success: false };
   }
+}
+
+// ==========================================
+// توابع سازگاری برای فایل‌های قدیمی سایت
+// ==========================================
+export async function getSessionUser() {
+  const res = await getCurrentUserSessionAction();
+  if (res.success) {
+    return {
+      userId: res.user.id,
+      phone: res.user.phone,
+      role: res.user.roleId || null,
+      isAdmin: res.user.isAdmin,
+      isSuperAdmin: res.user.isSuperAdmin
+    };
+  }
+  return null;
+}
+
+export async function logoutAction() {
+  return await logoutUserAction();
 }

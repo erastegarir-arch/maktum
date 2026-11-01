@@ -1,7 +1,7 @@
 export const metadata = {
-  title: 'مدیریت صفحات اصلی',
+  title: 'مدیریت صفحات فرعی سایت',
 };
 
-export default function MainPagesLayout({ children }) {
+export default function MainPageSettingsLayout({ children }) {
   return children;
 }

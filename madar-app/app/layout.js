@@ -1,35 +1,37 @@
+// مسیر فایل: app/layout.jsx
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import Header from '@/app/components/frontend/Header';
 import Footer from '@/app/components/frontend/Footer';
 import { getSetting } from '@/app/actions/settings';
 import { getIcons } from '@/app/actions/icons';
+import AmbientBackground from '@/app/components/frontend/AmbientBackground';
 
-// ✅ گام جدید و بنیادین: Import سیستم ContextProvider سراسری (تأمین‌کننده تنظیمات تاریخ ضد-Bilid)
+// تامین‌کننده تاریخ
 import { DateSettingsProvider } from '@/app/components/providers/DateSettingsContext';
 
+// ✅ کامپوننت جدید برای انیمیشن‌های روان بین صفحات
+import PageTransitionProvider from '@/app/components/providers/PageTransitionProvider';
+
 // ==========================================
-// ✅ اضافه شدن این بخش برای حل مشکل ۴ (اعمال سراسری فاوآیکون)
+// اعمال سراسری فاوآیکون و متا دیتا
 // ==========================================
 export async function generateMetadata() {
   const dynamicFavicon = await getSetting('favicon');
   
   return {
     title: {
-      template: 'مدار | %s', // %s با عنوان هر صفحه جایگزین می‌شود
-      default: 'مدار', // عنوان پیش‌فرض برای صفحه اصلی سایت
+      template: 'مدار | %s',
+      default: 'مدار',
     },
-      icons: {
-      icon: dynamicFavicon || '/favicon.ico', // خواندن از دیتابیس یا مقدار پیش‌فرض
+    icons: {
+      icon: dynamicFavicon || '/favicon.ico',
     }
   };
 }
 
 export default async function RootLayout({ children }) {
-  // ۱. دریافت کل آیکون‌ها و تنظیمات روی سرور (بدون هیچ تاخیری برای کاربر)
-  // ✅ گام جدید و بهینه‌سازی: درخواست‌ها همزمان (Promise.all) شدند تا Bilid پروژه روی سرور سریع‌تر شود.
-  
-  // تعریف کلیدهای تنظیماتی که نیاز داریم
+  // ۱. دریافت کل آیکون‌ها و تنظیمات روی سرور با پرامیس‌های همزمان
   const settingsKeys = [
     'header_icon', 'header_text', 'header_links',
     'footer_icon', 'footer_text', 'footer_desc', 'copyright_text', 'footer_fast_links', 'footer_companion_links', 'footer_social_links',
@@ -38,26 +40,23 @@ export default async function RootLayout({ children }) {
     'satra_type', 'satra_code', 'satra_img', 'satra_url'
   ];
 
-  // ایجاد یک لیسیت از پرامیس‌ها برای اجرای همزمان درخواست‌ها
   const settingsPromises = settingsKeys.map(key => getSetting(key));
 
-  // ✅ گام جدید و بهینه‌سازی: اجرای همزمان کل درخواست‌ها و دریافت آیکون‌ها
   const [allIcons, ...settingsResults] = await Promise.all([
     getIcons(),
     ...settingsPromises
   ]);
 
-  // ✅ گام جدید و بهینه‌سازی: نگاشت نتایج درخواست‌ها به یک شیء تنظیمات برای استفاده راحت‌تر
   const settings = settingsKeys.reduce((acc, key, index) => {
     acc[key] = settingsResults[index];
     return acc;
   }, {});
 
-  // تنظیمات هدر (پاکسازی و بهینه‌سازی)
+  // تنظیمات هدر
   const headerLinksStr = settings['header_links'];
   const headerLinks = headerLinksStr ? JSON.parse(headerLinksStr) : [];
 
-  // تنظیمات فوتر (پاکسازی و بهینه‌سازی)
+  // تنظیمات فوتر
   const fastStr = settings['footer_fast_links'];
   const fastLinks = fastStr ? JSON.parse(fastStr) : [];
 
@@ -67,7 +66,6 @@ export default async function RootLayout({ children }) {
   const socStr = settings['footer_social_links'];
   const socialLinks = socStr ? JSON.parse(socStr) : [];
 
-  // بسته‌بندی داده‌ها برای فرستادن به هدر و فوتر (بدون تغییر در ساختار داده‌ها)
   const headerData = {
     headerIcon: settings['header_icon'] || '',
     headerText: settings['header_text'] || '',
@@ -84,7 +82,6 @@ export default async function RootLayout({ children }) {
     companionLinks,
     socialLinks,
     allIcons,
-    // نمادها (بهینه‌سازی)
     enamad: {
       type: settings['enamad_type'] || 'code',
       code: settings['enamad_code'] || '',
@@ -107,35 +104,50 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="fa" dir="rtl">
-      <body className="bg-[#080c16] text-white min-h-screen flex flex-col antialiased">
-        {/* ✅ بنیادین: سیستم Provider سراسری کلاینت‌ساید برای مدیریت تاریخ و تنظیمات سراسری ضد-Bilid */}
-        {/* اینProvider کل اپلیکیشن (Header، children و Footer) را در بر می‌گیرد. */}
+      <body className="text-white min-h-screen flex flex-col antialiased relative selection:bg-cyan-500/30">
         <DateSettingsProvider>
-          {/* سیستم پیام‌های شناور توست در کل پروژه (بدون تغییر) */}
+          
+          {/* ۱. پس‌زمینه زنده در لایه صفر */}
+          <AmbientBackground />
+          
           <Toaster
             position="bottom-center"
+            containerClassName="mb-24 md:mb-6"
             toastOptions={{
               duration: 4000,
+              className: "bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-[0_15px_40px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(255,255,255,0.02)] text-white text-[11px] md:text-sm font-sans rounded-2xl font-bold",
               style: {
-                background: '#0b0f19',
+                background: 'transparent',
                 color: '#fff',
-                border: '1px solid rgba(255,255,255,0.1)',
                 direction: 'rtl',
-                fontSize: '14px',
-                borderRadius: '12px',
+                padding: '12px 16px',
               },
-              success: {
-                iconTheme: { primary: '#10b981', secondary: '#0b0f19' },
+              success: { 
+                iconTheme: { primary: '#10b981', secondary: '#050810' },
+                className: "bg-emerald-500/[0.05] backdrop-blur-2xl border border-emerald-500/[0.15] shadow-[0_10px_30px_rgba(16,185,129,0.1),inset_0_0_15px_rgba(16,185,129,0.05)] text-white text-[11px] md:text-sm font-sans rounded-2xl font-bold",
               },
-              error: {
-                iconTheme: { primary: '#ef4444', secondary: '#0b0f19' },
+              error: { 
+                iconTheme: { primary: '#f43f5e', secondary: '#050810' },
+                className: "bg-rose-500/[0.05] backdrop-blur-2xl border border-rose-500/[0.15] shadow-[0_10px_30px_rgba(244,63,94,0.1),inset_0_0_15px_rgba(244,63,94,0.05)] text-white text-[11px] md:text-sm font-sans rounded-2xl font-bold",
               },
             }}
           />
 
-          <Header initialData={headerData} />
-          {children}
-          <Footer initialData={footerData} />
+          {/* ۲. کانتینر اصلی سایت با معماری جدید برای ترانزیشن */}
+          <div className="relative z-10 flex flex-col min-h-screen w-full">
+            <Header initialData={headerData} />
+            
+            {/* 
+               ✅ به جای <div> ساده، حالا از کامپوننت واسطی که ساختیم استفاده می‌کنیم.
+               این کامپوننت با تغییر URL، صفحه قدیمی را محو و صفحه جدید را ظاهر می‌کند.
+            */}
+            <PageTransitionProvider>
+              {children}
+            </PageTransitionProvider>
+            
+            <Footer initialData={footerData} />
+          </div>
+
         </DateSettingsProvider>
       </body>
     </html>

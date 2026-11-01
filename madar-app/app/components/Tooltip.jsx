@@ -1,46 +1,52 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+const cn = (...inputs) => twMerge(clsx(inputs));
 
 export default function Tooltip({ 
   children, 
   content, 
   position = 'top', // top, bottom, left, right
-  delay = 300,      // تاخیر در نمایش
+  delay = 200,      // تاخیر در نمایش (کاهش یافت برای تجربه بهتر)
   className = '' 
 }) {
   const [isVisible, setIsVisible] = useState(false);
-  const [isRendered, setIsRendered] = useState(false);
   const timeoutRef = useRef(null);
 
   const handleMouseEnter = () => {
     timeoutRef.current = setTimeout(() => {
-      setIsRendered(true);
-      setTimeout(() => setIsVisible(true), 10); 
+      setIsVisible(true);
     }, delay);
   };
 
   const handleMouseLeave = () => {
     clearTimeout(timeoutRef.current);
     setIsVisible(false);
-    setTimeout(() => setIsRendered(false), 200); 
   };
 
   useEffect(() => {
     return () => clearTimeout(timeoutRef.current);
   }, []);
 
-  const positionClasses = {
-    top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-    bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-    left: 'right-full top-1/2 -translate-y-1/2 mr-2',
-    right: 'left-full top-1/2 -translate-y-1/2 ml-2',
+  // تنظیمات موقعیت برای انیمیشن
+  const getVariants = () => {
+    switch(position) {
+      case 'top': return { hidden: { opacity: 0, y: 8, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1 } };
+      case 'bottom': return { hidden: { opacity: 0, y: -8, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1 } };
+      case 'left': return { hidden: { opacity: 0, x: 8, scale: 0.95 }, visible: { opacity: 1, x: 0, scale: 1 } };
+      case 'right': return { hidden: { opacity: 0, x: -8, scale: 0.95 }, visible: { opacity: 1, x: 0, scale: 1 } };
+      default: return { hidden: { opacity: 0, scale: 0.95 }, visible: { opacity: 1, scale: 1 } };
+    }
   };
 
-  const arrowClasses = {
-    top: 'bottom-[-4px] left-1/2 -translate-x-1/2 border-b border-white/5 border-r',
-    bottom: 'top-[-4px] left-1/2 -translate-x-1/2 border-t border-white/5 border-l',
-    left: 'right-[-4px] top-1/2 -translate-y-1/2 border-t border-white/5 border-r',
-    right: 'left-[-4px] top-1/2 -translate-y-1/2 border-b border-white/5 border-l',
+  const positionClasses = {
+    top: 'bottom-full left-1/2 -translate-x-1/2 mb-2.5',
+    bottom: 'top-full left-1/2 -translate-x-1/2 mt-2.5',
+    left: 'right-full top-1/2 -translate-y-1/2 mr-2.5',
+    right: 'left-full top-1/2 -translate-y-1/2 ml-2.5',
   };
 
   return (
@@ -53,23 +59,25 @@ export default function Tooltip({
     >
       {children}
 
-      {isRendered && (
-        <span 
-          className={`absolute ${positionClasses[position]} z-[100] transition-all duration-200 ease-out pointer-events-none
-            ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95'}
-            ${position === 'top' && !isVisible ? 'translate-y-1' : ''}
-            ${position === 'bottom' && !isVisible ? '-translate-y-1' : ''}
-            ${position === 'left' && !isVisible ? 'translate-x-1' : ''}
-            ${position === 'right' && !isVisible ? '-translate-x-1' : ''}
-          `}
-        >
-          <span className={`block bg-[#080c16]/95 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] text-white text-xs font-medium px-3 py-2 rounded-xl whitespace-nowrap ${className}`}>
-            {content}
-          </span>
-
-          <span className={`absolute w-2 h-2 bg-[#080c16] rotate-45 transform ${arrowClasses[position]}`}></span>
-        </span>
-      )}
+      <AnimatePresence>
+        {isVisible && (
+          <motion.span 
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={getVariants()}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className={cn("absolute z-[100] pointer-events-none", positionClasses[position])}
+          >
+            <span className={cn(
+              "block bg-[#050810]/95 backdrop-blur-2xl shadow-[0_15px_30px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(255,255,255,0.02)] border border-white/[0.08] text-white text-[10px] md:text-xs font-bold px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl whitespace-nowrap font-sans text-center",
+              className
+            )}>
+              {content}
+            </span>
+          </motion.span>
+        )}
+      </AnimatePresence>
     </span>
   );
 }

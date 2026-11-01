@@ -5,7 +5,7 @@ import { getSessionUser } from './auth';
 import crypto from 'crypto'; 
 
 // ==========================================
-// فاز ۳: سیستم افزودن / حذف از علاقه‌مندی‌ها
+// سیستم افزودن / حذف از علاقه‌مندی‌ها
 // ==========================================
 export async function toggleFavoriteAction(contentId) {
   try {
@@ -39,7 +39,7 @@ export async function toggleFavoriteAction(contentId) {
 }
 
 // ==========================================
-// فاز ۲: سیستم دروازه دانلود و تولید لینک هش‌دار
+// سیستم دروازه دانلود و تولید لینک هوشمند و امن
 // ==========================================
 export async function generateSecureDownloadAction(contentId, fileUrl) {
   try {
@@ -48,6 +48,7 @@ export async function generateSecureDownloadAction(contentId, fileUrl) {
       return { success: false, error: 'برای دانلود فایل‌ها باید وارد حساب کاربری خود شوید.', requireAuth: true };
     }
 
+    // ۱. ثبت در تاریخچه دانلود
     await prisma.downloadHistory.create({
       data: {
         userId: session.userId,
@@ -55,32 +56,51 @@ export async function generateSecureDownloadAction(contentId, fileUrl) {
       }
     });
 
+    // تنظیمات سرور دانلود اختصاصی شما (Nginx)
     const DL_SECRET = process.env.DL_SECRET || 'MySuperSecretKey_Madar99'; 
-    const DL_HOST = process.env.DL_HOST || 'https://dl.madar.com';
+    const DL_HOST = process.env.DL_HOST || 'dl.madar.com'; // نام دامنه سرور دانلود شما بدون پروتکل
 
-    // اصلاح قدرتمند مسیر فایل برای جلوگیری از چسبیدن کلمات
-    let filePath = fileUrl;
-    try {
-      const urlObj = new URL(filePath.startsWith('http') ? filePath : `http://${filePath}`);
-      filePath = urlObj.pathname;
-    } catch (e) {
-      if (!filePath.startsWith('/')) filePath = '/' + filePath;
-    }
+    let finalUrl = fileUrl;
+    let isSecureLink = false;
 
-    const expireTime = Math.floor(Date.now() / 1000) + (3 * 3600); 
-    const stringToHash = `${DL_SECRET}${filePath}${expireTime}`;
-    
-    const hash = crypto.createHash('md5').update(stringToHash).digest('base64')
+    // ۲. مسیریابی هوشمند: بررسی تعلق لینک به سرور اختصاصی مدار
+    if (fileUrl.startsWith('/') || fileUrl.includes(DL_HOST)) {
+      isSecureLink = true;
+      
+      let filePath = fileUrl;
+      try {
+        if (filePath.startsWith('http')) {
+          const urlObj = new URL(filePath);
+          filePath = urlObj.pathname; // فقط مسیر فایل را استخراج می‌کند (مثلاً /videos/file.mp4)
+        }
+      } catch (e) {
+        if (!filePath.startsWith('/')) filePath = '/' + filePath;
+      }
+
+      // ۳. ساخت مهر زمانی (۷۲ ساعت اعتبار)
+      const expireTime = Math.floor(Date.now() / 1000) + (72 * 3600); 
+      
+      // ۴. ساخت هش MD5 به فرمت مخصوص Nginx
+      const stringToHash = `${DL_SECRET}${filePath}${expireTime}`;
+      const hash = crypto.createHash('md5').update(stringToHash).digest('base64')
                   .replace(/=/g, '')
                   .replace(/\+/g, '-')
                   .replace(/\//g, '_');
 
-    // استفاده از شیء URL برای ساخت لینک نهایی بدون باگ
-    const secureUrl = new URL(filePath, DL_HOST);
-    secureUrl.searchParams.append('md5', hash);
-    secureUrl.searchParams.append('expires', expireTime);
+      // ۵. ترکیب نهایی لینک امن
+      const secureUrl = new URL(filePath, `https://${DL_HOST}`);
+      secureUrl.searchParams.append('md5', hash);
+      secureUrl.searchParams.append('expires', expireTime);
 
-    return { success: true, url: secureUrl.toString() };
+      finalUrl = secureUrl.toString();
+    }
+
+    // ۶. تنظیم پیام اختصاصی برای نمایش به کاربر
+    const message = isSecureLink 
+      ? 'لینک امن آماده شد. این لینک اختصاصی فقط تا ۷۲ ساعت اعتبار دارد.'
+      : 'لینک دانلود شما آماده است.';
+
+    return { success: true, url: finalUrl, message: message };
   } catch (error) {
     console.error("Download Error:", error);
     return { success: false, error: 'خطا در تولید لینک دانلود. لطفا مجدد تلاش کنید.' };
@@ -88,7 +108,7 @@ export async function generateSecureDownloadAction(contentId, fileUrl) {
 }
 
 // ==========================================
-// فاز ۴: سیستم ثبت نظر کاربر
+// سیستم ثبت نظر کاربر
 // ==========================================
 export async function submitCommentAction(contentId, text) {
   try {

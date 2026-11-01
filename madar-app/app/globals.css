@@ -14,11 +14,16 @@
 /* تنظیمات پایه (Body) */
 /* ========================================= */
 @layer base {
+  html {
+    background-color: #050810;
+    direction: rtl;
+  }
   html, body {
     @apply text-gray-100 overflow-x-hidden scroll-smooth;
-    background-color: #030712; 
-    direction: rtl;
     min-height: 100vh;
+  }
+  body {
+    background-color: transparent !important;
   }
 
   body::after, body::before {
@@ -282,3 +287,15 @@
 .theme-produced ::selection, .theme-produced::selection { background-color: rgba(244, 63, 94, 0.35) !important; color: #ffffff !important; }
 .theme-tool ::selection, .theme-tool::selection { background-color: rgba(16, 185, 129, 0.35) !important; color: #ffffff !important; }
 .theme-blog ::selection, .theme-blog::selection { background-color: rgba(168, 85, 247, 0.35) !important; color: #ffffff !important; }
+
+/* غیرفعال کردن انتخاب متن با موس در کل بدنه سایت */
+body {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* محافظت از فیلدهای ورودی و متون محتوایی برای جلوگیری از خرابی فرم‌ها */
+input, textarea, select, .rich-text, .select-text {
+  user-select: text;
+  -webkit-user-select: text;
+}

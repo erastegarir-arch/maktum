@@ -8,12 +8,17 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDisplayDate } from '@/app/utils/CalendarUtils';
 
+// ایمپورت‌های الزامی برای چک ترکیبی ۱
+import { useAuth } from '@/app/hooks/useAuth';
+import AdminLoading from '@/app/(admin-panel)/loading';
+import ModalPortal from '@/app/components/admin/ModalPortal';
+
 // نگاشت نوع محتوا برای نمایش در جدول
 const TYPE_MAP = {
-  PRODUCED: { label: 'تولیدی', icon: 'videoCamera', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
-  RAW: { label: 'خام', icon: 'fileText', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
-  TOOL: { label: 'ابزار', icon: 'setting', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-  BLOG: { label: 'بلاگ', icon: 'browser', color: 'text-blue-400 bg-blue-500/10 border border-blue-500/20' }
+  PRODUCED: { label: 'تولیدی', icon: 'product', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
+  RAW: { label: 'خام', icon: 'footage', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+  TOOL: { label: 'ابزار', icon: 'pen-nib', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+  BLOG: { label: 'بلاگ', icon: 'blog', color: 'text-blue-400 bg-blue-500/10 border border-blue-500/20' }
 };
 
 // نگاشت وضعیت محتوا (حذف وضعیت بایگانی)
@@ -23,18 +28,47 @@ const STATUS_MAP = {
 };
 
 export default function ProductsListPage() {
+
+  // ==========================================
+  // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
+  // ==========================================
+  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can } = useAuth();
+  const [hasAccess, setHasAccess] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => { setIsMounted(true); }, []);
+
+  useEffect(() => {
+    const isWorking = authIsLoading || authLoading || isFetching;
+    if (isWorking) return;
+
+    if (user) {
+      setHasAccess(can('CONTENT_MANAGE') || user.isSuperAdmin);
+    } else if (typeof window !== 'undefined') {
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      if (!isLoggedIn) {
+        setHasAccess(false);
+      } else {
+        const timer = setTimeout(() => setHasAccess(false), 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [user, authIsLoading, authLoading, isFetching, can]);
+
+  // ==========================================
+  // ۲. استیت‌ها و مدیریت داده‌ها
+  // ==========================================
   const [contents, setContents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteModalItem, setDeleteModalItem] = useState(null);
 
-  // استیت‌های فیلتر و جستجو
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
 
-  // دریافت اطلاعات با توجه به فیلترها
   const fetchContents = async () => {
+    if (!hasAccess) return;
     setIsLoading(true);
     try {
       const data = await getContents({ search: searchQuery, type: filterType, status: filterStatus });
@@ -47,23 +81,21 @@ export default function ProductsListPage() {
   };
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      fetchContents();
-    }, 400);
+    if (hasAccess) {
+      const delayDebounceFn = setTimeout(() => {
+        fetchContents();
+      }, 400);
+      return () => clearTimeout(delayDebounceFn);
+    }
+  }, [searchQuery, filterType, filterStatus, hasAccess]);
 
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, filterType, filterStatus]);
-
-  // محاسبه آمارهای سریع
   const stats = useMemo(() => {
     const total = contents.length;
     const published = contents.filter(c => c.status === 'PUBLISHED').length;
     const draft = contents.filter(c => c.status === 'DRAFT').length;
-    const totalViews = contents.reduce((sum, c) => sum + (c.viewCount || 0), 0);
-    return { total, published, draft, totalViews };
+    return { total, published, draft };
   }, [contents]);
 
-  // تأیید نهایی حذف در پاپ‌آپ
   const confirmDelete = async () => {
     if (!deleteModalItem) return;
     
@@ -79,7 +111,6 @@ export default function ProductsListPage() {
     setIsDeleting(false);
   };
 
-  // تشخیص آدرس صفحه فرانت بر اساس نوع محتوا
   const getFrontendUrl = (item) => {
     if (!item?.slug) return '#';
     if (item.type === 'BLOG') return `/blog/${item.slug}`;
@@ -89,7 +120,6 @@ export default function ProductsListPage() {
     return `/products/${item.slug}`;
   };
 
-  // تبدیل امن تاریخ به شمسی
   const renderDate = (dateVal) => {
     if (!dateVal) return '—';
     try {
@@ -98,6 +128,23 @@ export default function ProductsListPage() {
       return '—';
     }
   };
+
+  // ==========================================
+  // ۳. کنترل رندر لودینگ و انسداد دسترسی
+  // ==========================================
+  if (!isMounted || hasAccess === null) return <AdminLoading />;
+
+  if (hasAccess === false) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center min-h-[60vh] text-center select-none font-sans">
+        <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mb-6 border border-rose-500/20 shadow-inner">
+          <Icon name="lock" className="w-8 h-8 text-rose-500" />
+        </div>
+        <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
+        <p className="text-gray-400">شما مجوز لازم برای مدیریت و ویرایش محتوا را ندارید.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 pb-20 font-sans text-right select-none relative">
@@ -120,7 +167,7 @@ export default function ProductsListPage() {
       </div>
 
       {/* ۱. کارت‌های آمار سریع */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-[fadeIn_0.4s_ease-out]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-[fadeIn_0.4s_ease-out]">
         
         <div className="relative rounded-3xl p-4 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] border border-transparent flex items-center justify-between overflow-hidden">
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-80" />
@@ -155,25 +202,14 @@ export default function ProductsListPage() {
           </div>
         </div>
 
-        <div className="relative rounded-3xl p-4 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] border border-transparent flex items-center justify-between overflow-hidden">
-          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-80" />
-          <div className="space-y-1 relative z-10">
-            <span className="text-xs text-gray-400 font-light">مجموع بازدیدها</span>
-            <p className="text-xl font-black text-rose-400 font-sans">{stats.totalViews.toLocaleString('fa-IR')}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400 shadow-inner border border-transparent relative z-10">
-            <Icon name="eye" className="w-5 h-5" />
-          </div>
-        </div>
-
       </div>
 
       {/* ۲. نوار فیلتر و جستجو */}
-      <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent animate-[fadeIn_0.5s_ease-out]">
-        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
+      <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent animate-[fadeIn_0.5s_ease-out] bg-[#0f172a]/40 backdrop-blur-2xl">
+        <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
-        <div className="p-5 flex flex-col md:flex-row items-center gap-4 relative z-10">
+        <div className="p-5 flex flex-col md:flex-row items-center gap-4 relative z-10 bg-[#050810]/50 shadow-inner">
           
           {/* باکس جستجو */}
           <div className="relative flex-1 w-full">
@@ -183,12 +219,12 @@ export default function ProductsListPage() {
               placeholder="جستجو در عنوان یا پیوند یکتا (Slug)..." 
               value={searchQuery} 
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl pr-12 pl-4 py-3.5 text-sm text-white placeholder:text-white/40 focus:border focus:border-[#10b981] focus:bg-white/20 outline-none transition-all font-sans"
+              className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl pr-12 pl-4 py-3.5 text-sm text-white placeholder:text-gray-600 focus:border focus:border-[#10b981] outline-none transition-all font-sans select-text"
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white p-1"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white p-1 cursor-pointer"
               >
                 <Icon name="close" className="w-4 h-4" />
               </button>
@@ -200,7 +236,7 @@ export default function ProductsListPage() {
             <select 
               value={filterType} 
               onChange={(e) => setFilterType(e.target.value)}
-              className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border focus:border-[#10b981] focus:bg-white/20 outline-none cursor-pointer transition-all font-sans"
+              className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border focus:border-[#10b981] outline-none cursor-pointer transition-all font-sans select-text appearance-none"
             >
               <option value="ALL" className="bg-[#0b0f19]">همه انواع محتوا</option>
               <option value="PRODUCED" className="bg-[#0b0f19]">محتوای تولیدی</option>
@@ -215,7 +251,7 @@ export default function ProductsListPage() {
             <select 
               value={filterStatus} 
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full bg-white/10 border border-white/10 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border focus:border-[#10b981] focus:bg-white/20 outline-none cursor-pointer transition-all font-sans"
+              className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border focus:border-[#10b981] outline-none cursor-pointer transition-all font-sans select-text appearance-none"
             >
               <option value="ALL" className="bg-[#0b0f19]">همه وضعیت‌ها</option>
               <option value="PUBLISHED" className="bg-[#0b0f19]">منتشر شده</option>
@@ -227,19 +263,18 @@ export default function ProductsListPage() {
       </div>
 
       {/* ۳. جدول نمایش دیتا */}
-      <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent animate-[fadeIn_0.6s_ease-out]">
-        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
+      <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent animate-[fadeIn_0.6s_ease-out] bg-[#0f172a]/40 backdrop-blur-2xl">
+        <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
-        <div className="overflow-x-auto custom-scrollbar relative z-10">
+        <div className="overflow-x-auto custom-scrollbar relative z-10 bg-[#050810]/50 shadow-inner">
           <table className="w-full text-sm text-right whitespace-nowrap">
-            <thead className="bg-black/20 text-gray-400 font-bold border-b border-white/10">
+            <thead className="bg-black/20 text-gray-400 font-bold border-b border-white/10 shadow-inner">
               <tr>
                 <th className="px-6 py-4 rounded-tr-3xl">عنوان محتوا</th>
                 <th className="px-6 py-4">نوع</th>
                 <th className="px-6 py-4">وضعیت</th>
                 <th className="px-6 py-4">تاریخ انتشار</th>
-                <th className="px-6 py-4">بازدید</th>
                 <th className="px-6 py-4 text-center rounded-tl-3xl">عملیات</th>
               </tr>
             </thead>
@@ -247,7 +282,7 @@ export default function ProductsListPage() {
             <tbody className="divide-y divide-white/5">
               {isLoading ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500 font-sans">
+                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500 font-sans">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="w-8 h-8 border-3 border-white/20 border-t-[#10b981] rounded-full animate-spin"></div>
                       <span>در حال دریافت اطلاعات...</span>
@@ -256,8 +291,8 @@ export default function ProductsListPage() {
                 </tr>
               ) : contents.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500 font-sans">
-                    <div className="flex flex-col items-center justify-center gap-3">
+                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500 font-sans">
+                    <div className="flex flex-col items-center justify-center gap-3 bg-black/20 p-6 rounded-xl border border-white/5 shadow-inner mx-4">
                       <Icon name="browser" className="w-10 h-10 text-gray-600" />
                       <span>هیچ محتوایی با این مشخصات یافت نشد.</span>
                     </div>
@@ -292,10 +327,10 @@ export default function ProductsListPage() {
                             )}
                           </div>
                           <div className="flex flex-col gap-1 max-w-xs md:max-w-md truncate">
-                            <span className="text-white font-bold truncate">
+                            <span className="text-white font-bold truncate select-text">
                               {item.titleBase} {item.titleHighlight && <span className="text-[#10b981]">{item.titleHighlight}</span>}
                             </span>
-                            <span className="text-xs text-gray-500 truncate dir-ltr text-left font-sans">/{item.slug}</span>
+                            <span className="text-xs text-gray-500 truncate dir-ltr text-left font-sans select-text">/{item.slug}</span>
                           </div>
                         </td>
 
@@ -317,17 +352,9 @@ export default function ProductsListPage() {
 
                         {/* تاریخ انتشار شمسی */}
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-2 text-gray-300 font-sans text-xs">
+                          <div className="flex items-center gap-2 text-gray-300 font-sans text-xs select-text">
                             <Icon name="calendar" className="w-3.5 h-3.5 text-gray-500" />
                             <span>{renderDate(item.publishedAt || item.createdAt)}</span>
-                          </div>
-                        </td>
-
-                        {/* بازدید */}
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-1.5 text-gray-400">
-                            <Icon name="eye" className="w-4 h-4 text-[#10b981]" />
-                            <span className="font-sans font-bold">{item.viewCount ? item.viewCount.toLocaleString('fa-IR') : '۰'}</span>
                           </div>
                         </td>
 
@@ -335,7 +362,7 @@ export default function ProductsListPage() {
                         <td className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center gap-2">
                             
-                            <div className="relative group/tooltip">
+                            <div className="relative group/tooltip flex items-center justify-center z-20">
                               <a 
                                 href={frontendUrl}
                                 target="_blank"
@@ -344,32 +371,38 @@ export default function ProductsListPage() {
                               >
                                 <Icon name="arrowUpRight" className="w-4 h-4" />
                               </a>
-                              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-black/80 backdrop-blur-md border border-white/10 text-[11px] font-bold text-gray-200 rounded-xl whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1 transition-all duration-200 z-30 shadow-xl">
-                                مشاهده در سایت
+                              <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out] pointer-events-none">
+                                <div className="bg-[#0f172a]/95 text-white text-[10px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-bold font-sans border border-white/10">
+                                  مشاهده در سایت
+                                </div>
                               </div>
                             </div>
 
-                            <div className="relative group/tooltip">
+                            <div className="relative group/tooltip flex items-center justify-center z-20">
                               <Link 
                                 href={`/portal-entry-99/products/edit/${item.id}`}
                                 className="p-2.5 rounded-xl bg-white/5 hover:border-[#06b6d4] text-gray-400 hover:text-[#06b6d4] hover:bg-[#06b6d4]/10 transition-all shadow-inner flex items-center justify-center border border-transparent"
                               >
                                 <Icon name="pencil" className="w-4 h-4" />
                               </Link>
-                              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-black/80 backdrop-blur-md border border-white/10 text-[11px] font-bold text-gray-200 rounded-xl whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1 transition-all duration-200 z-30 shadow-xl">
-                                ویرایش محتوا
+                              <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out] pointer-events-none">
+                                <div className="bg-[#0f172a]/95 text-white text-[10px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-bold font-sans border border-white/10">
+                                  ویرایش محتوا
+                                </div>
                               </div>
                             </div>
                             
-                            <div className="relative group/tooltip">
+                            <div className="relative group/tooltip flex items-center justify-center z-20">
                               <button 
                                 onClick={() => setDeleteModalItem(item)}
                                 className="p-2.5 rounded-xl bg-rose-500/10 border border-transparent hover:border-rose-500/50 text-rose-500 hover:bg-rose-500/20 transition-all cursor-pointer shadow-inner flex items-center justify-center"
                               >
                                 <Icon name="trash" className="w-4 h-4" />
                               </button>
-                              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-black/80 backdrop-blur-md border border-rose-500/30 text-[11px] font-bold text-rose-400 rounded-xl whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1 transition-all duration-200 z-30 shadow-xl">
-                                حذف دائمی
+                              <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out] pointer-events-none">
+                                <div className="bg-[#0f172a]/95 text-rose-400 text-[10px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-bold font-sans border border-rose-500/30">
+                                  حذف دائمی
+                                </div>
                               </div>
                             </div>
 
@@ -388,49 +421,55 @@ export default function ProductsListPage() {
       {/* پاپ‌آپ اختصاصی و شیشه‌ای تأیید حذف */}
       <AnimatePresence>
         {deleteModalItem && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <div 
-              className="absolute inset-0 bg-black/75 backdrop-blur-md cursor-pointer animate-[fadeIn_0.2s_ease-out]" 
-              onClick={() => !isDeleting && setDeleteModalItem(null)} 
-            />
-            <div 
-              className="relative z-10 bg-[#0b0f19]/90 backdrop-blur-2xl rounded-3xl w-full max-w-sm p-6 shadow-[inset_0_0_20px_rgba(255,255,255,0.02),0_10px_40px_rgba(0,0,0,0.5)] border border-transparent overflow-hidden animate-[scaleIn_0.3s_ease-out]" 
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-90 pointer-events-none z-20" />
+          <ModalPortal>
+            <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 select-none font-sans bg-black/70 backdrop-blur-md">
+              <div 
+                className="absolute inset-0 cursor-pointer animate-[fadeIn_0.2s_ease-out]" 
+                onClick={() => !isDeleting && setDeleteModalItem(null)} 
+              />
+              <motion.div 
+                initial={{ scale: 0.95, opacity: 0, y: 15 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 15 }}
+                transition={{ duration: 0.25 }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative z-10 bg-[#0f172a]/95 backdrop-blur-3xl rounded-3xl w-full max-w-sm p-6 shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden" 
+              >
+                <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-90 pointer-events-none z-20" />
 
-              <div className="flex flex-col items-center text-center mb-6 pt-2">
-                <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-transparent shadow-inner flex items-center justify-center text-rose-400 mb-4">
-                  <Icon name="trash" className="w-8 h-8" />
+                <div className="flex flex-col items-center text-center mb-6 pt-2">
+                  <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-transparent shadow-inner flex items-center justify-center text-rose-400 mb-4">
+                    <Icon name="trash" className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2 font-sans">حذف دائمی محتوا</h3>
+                  <p className="text-xs text-gray-300 leading-relaxed text-center font-light font-sans select-text">
+                    آیا از حذف <span className="text-white font-bold">«{deleteModalItem.titleBase}»</span> اطمینان دارید؟ این عمل غیرقابل بازگشت است.
+                  </p>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2 font-sans">حذف دائمی محتوا</h3>
-                <p className="text-xs text-gray-300 leading-relaxed text-center font-light font-sans">
-                  آیا از حذف <span className="text-white font-bold">«{deleteModalItem.titleBase}»</span> اطمینان دارید؟ این عمل غیرقابل بازگشت است.
-                </p>
-              </div>
 
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setDeleteModalItem(null)} 
-                  disabled={isDeleting}
-                  className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 py-3 rounded-xl text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 border border-transparent shadow-inner font-sans"
-                >
-                  انصراف
-                </button>
-                <button 
-                  onClick={confirmDelete} 
-                  disabled={isDeleting}
-                  className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 border border-transparent font-sans"
-                >
-                  {isDeleting ? (
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  ) : (
-                    'بله، حذف شود'
-                  )}
-                </button>
-              </div>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={confirmDelete} 
+                    disabled={isDeleting}
+                    className="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 border border-transparent font-sans"
+                  >
+                    {isDeleting ? (
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      'بله، حذف شود'
+                    )}
+                  </button>
+                  <button 
+                    onClick={() => setDeleteModalItem(null)} 
+                    disabled={isDeleting}
+                    className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 py-3 rounded-xl text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 border border-transparent shadow-inner font-sans"
+                  >
+                    انصراف
+                  </button>
+                </div>
+              </motion.div>
             </div>
-          </div>
+          </ModalPortal>
         )}
       </AnimatePresence>
 

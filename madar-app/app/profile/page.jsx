@@ -4,7 +4,7 @@ import UserDashboard from '@/app/components/frontend/UserDashboard';
 import { getUserProfile } from '@/app/actions/user';
 
 export const metadata = {
-  title: 'حساب کاربری | مدار',
+  title: 'حساب کاربری',
 };
 
 // ==========================================

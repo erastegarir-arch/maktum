@@ -2,6 +2,6 @@ export const metadata = {
   title: 'مدیریت محتوا',
 };
 
-export default function CreateContentLayout({ children }) {
+export default function ProductsLayout({ children }) {
   return children;
 }

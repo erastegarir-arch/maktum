@@ -7,21 +7,18 @@ export default function BlurImage({ src, alt, className = "", ...props }) {
   return (
     <>
       {/* 
-        ۱. لایه زیرین: اسکلتون شیمر متحرک 
-        تا زمانی که عکس لود نشده، این افکت نوری در پس‌زمینه نمایش داده می‌شود
+        ۱. لایه زیرین: اسکلتون شیمر شیشه‌ای
+        تا زمانی که عکس لود نشده، این افکت در پس‌زمینه نمایش داده می‌شود
       */}
       <div 
-        className={`absolute inset-0 bg-[#080c16] transition-opacity duration-500 z-0 ${
+        className={`absolute inset-0 bg-[#050810]/60 backdrop-blur-xl border border-white/[0.05] transition-opacity duration-700 z-0 flex items-center justify-center overflow-hidden ${
           isLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
       >
-        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
       </div>
       
-      {/* 
-        ۲. عکس اصلی: با لودینگ تنبل مرورگر (loading="lazy")
-        وقتی لود تمام شد، تاری از بین می‌رود و عکس نمایان می‌شود
-      */}
+      {/* ۲. عکس اصلی */}
       <img
         src={src}
         alt={alt || 'تصویر مدار'}
@@ -30,11 +27,11 @@ export default function BlurImage({ src, alt, className = "", ...props }) {
         className={`
           relative z-10
           ${className} 
-          ${isLoaded ? 'blur-0' : 'blur-xl opacity-0'}
+          ${isLoaded ? 'blur-0 opacity-100' : 'blur-2xl opacity-0'}
         `}
         style={{ 
-          transitionProperty: 'filter, opacity',
-          transitionDuration: '500ms',
+          transitionProperty: 'filter, opacity, transform',
+          transitionDuration: '700ms',
           transitionTimingFunction: 'ease-out'
         }}
         {...props}

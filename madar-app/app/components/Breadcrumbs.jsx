@@ -1,16 +1,23 @@
-import React from 'react';
-import Icon from './Icon'; // بسته به محل قرارگیری فایل، مسیر را تنظیم کنید
+'use client';
 
-export default function Breadcrumbs({ items }) {
+import React from 'react';
+import Icon from './Icon';
+
+export default function Breadcrumbs({ items = [], className = '' }) {
+  if (!items || items.length === 0) return null;
+
   return (
-    <nav className="pt-28 lg:pt-32 flex items-center justify-center md:justify-start gap-2 text-xs text-gray-400 mb-8 font-sans w-full relative z-10">
+    <nav 
+      className={`pt-[78px] md:pt-[96px] mb-4 flex items-center justify-center md:justify-start gap-2 text-xs text-gray-400 font-sans w-full relative z-10 ${className}`}
+      aria-label="Breadcrumb"
+    >
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
 
         return (
           <div key={index} className="flex items-center gap-2">
             {index > 0 && (
-              <Icon name="caretLeft" className="w-3 h-3 text-gray-600" />
+              <Icon name="caretLeft" className="w-3 h-3 text-gray-600 shrink-0" />
             )}
 
             {isLast ? (

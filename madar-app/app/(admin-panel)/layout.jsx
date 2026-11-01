@@ -5,7 +5,7 @@ import AdminHeader from '../components/admin/AdminHeader';
 export const metadata = {
   title: {
     template: 'پنل مدار | %s',
-    default: 'پنل مدار | پیشخوان',
+    absolute: 'پنل مدار | پیشخوان',
   },
   description: 'پنل مدیریت یکپارچه پایگاه مدار',
 };
@@ -16,13 +16,22 @@ export default function AdminLayout({ children }) {
       {/* سایدبار سمت راست */}
       <Sidebar />
 
-      {/* بخش اصلی محتوا (هدر بالا و محتوای داشبورد) */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#030712]">
-        <AdminHeader />
+      {/* 
+        راه حل سراسری: کانتینر اصلی به یک فضای یکپارچه اسکرول‌شونده تبدیل شد.
+        حالا هر پاپ‌آپی در هر صفحه‌ای باز شود، به صورت اتوماتیک هدر را می‌پوشاند.
+      */}
+      <div className="flex-1 h-screen overflow-y-auto bg-[#030712] relative custom-scrollbar">
         
-        <main className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        {/* هدر به جای جدا بودن، حالا به صورت چسبان در بالاترین سطح این کانتینر قرار می‌گیرد */}
+        <div className="sticky top-0 z-40 w-full">
+          <AdminHeader />
+        </div>
+        
+        {/* محتوای داشبورد */}
+        <main className="p-8 min-h-[calc(100vh-80px)]">
           {children}
         </main>
+
       </div>
     </div>
   );
