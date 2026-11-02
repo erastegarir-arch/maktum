@@ -371,7 +371,7 @@ export default function RichTextEditor({
 
         {/* ۷. لیست‌ها و نقل‌قول */}
         <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive('bulletList')} title="لیست نقطه‌ای">
-          <EditorIcon name="listBullets"/>
+          <EditorIcon name="listbullet"/>
         </ToolbarButton>
 
         <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive('orderedList')} title="لیست عددی">

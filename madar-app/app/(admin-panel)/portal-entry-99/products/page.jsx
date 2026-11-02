@@ -43,7 +43,8 @@ export default function ProductsListPage() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(can('CONTENT_MANAGE') || user.isSuperAdmin);
+      // این صفحه برای تمام مدیران جهت مشاهده لیست باز است
+      setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -98,6 +99,7 @@ export default function ProductsListPage() {
 
   const confirmDelete = async () => {
     if (!deleteModalItem) return;
+    if (!can('CONTENT_DELETE')) return toast.error('شما مجوز حذف محتوا را ندارید.');
     
     setIsDeleting(true);
     const res = await deleteContent(deleteModalItem.id);
@@ -158,12 +160,14 @@ export default function ProductsListPage() {
           </h1>
           <p className="text-sm text-gray-400 font-light">فهرست تمامی محتوا، فایل‌ها و مقالات پایگاه مدار.</p>
         </div>
-        <Link 
-          href="/portal-entry-99/products/create"
-          className="px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 hover:scale-105 active:scale-95 shrink-0 border border-transparent"
-        >
-          <Icon name="plus" className="w-4 h-4" />افزودن محتوا
-        </Link>
+        {can('CONTENT_CREATE') && (
+          <Link 
+            href="/portal-entry-99/products/create"
+            className="px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 hover:scale-105 active:scale-95 shrink-0 border border-transparent"
+          >
+            <Icon name="plus" className="w-4 h-4" />افزودن محتوا
+          </Link>
+        )}
       </div>
 
       {/* ۱. کارت‌های آمار سریع */}
@@ -378,33 +382,37 @@ export default function ProductsListPage() {
                               </div>
                             </div>
 
-                            <div className="relative group/tooltip flex items-center justify-center z-20">
-                              <Link 
-                                href={`/portal-entry-99/products/edit/${item.id}`}
-                                className="p-2.5 rounded-xl bg-white/5 hover:border-[#06b6d4] text-gray-400 hover:text-[#06b6d4] hover:bg-[#06b6d4]/10 transition-all shadow-inner flex items-center justify-center border border-transparent"
-                              >
-                                <Icon name="pencil" className="w-4 h-4" />
-                              </Link>
-                              <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out] pointer-events-none">
-                                <div className="bg-[#0f172a]/95 text-white text-[10px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-bold font-sans border border-white/10">
-                                  ویرایش محتوا
+                            {can('CONTENT_EDIT') && (
+                              <div className="relative group/tooltip flex items-center justify-center z-20">
+                                <Link 
+                                  href={`/portal-entry-99/products/edit/${item.id}`}
+                                  className="p-2.5 rounded-xl bg-white/5 hover:border-[#06b6d4] text-gray-400 hover:text-[#06b6d4] hover:bg-[#06b6d4]/10 transition-all shadow-inner flex items-center justify-center border border-transparent"
+                                >
+                                  <Icon name="pencil" className="w-4 h-4" />
+                                </Link>
+                                <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out] pointer-events-none">
+                                  <div className="bg-[#0f172a]/95 text-white text-[10px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-bold font-sans border border-white/10">
+                                    ویرایش محتوا
+                                  </div>
                                 </div>
                               </div>
-                            </div>
+                            )}
                             
-                            <div className="relative group/tooltip flex items-center justify-center z-20">
-                              <button 
-                                onClick={() => setDeleteModalItem(item)}
-                                className="p-2.5 rounded-xl bg-rose-500/10 border border-transparent hover:border-rose-500/50 text-rose-500 hover:bg-rose-500/20 transition-all cursor-pointer shadow-inner flex items-center justify-center"
-                              >
-                                <Icon name="trash" className="w-4 h-4" />
-                              </button>
-                              <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out] pointer-events-none">
-                                <div className="bg-[#0f172a]/95 text-rose-400 text-[10px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-bold font-sans border border-rose-500/30">
-                                  حذف دائمی
+                            {can('CONTENT_DELETE') && (
+                              <div className="relative group/tooltip flex items-center justify-center z-20">
+                                <button 
+                                  onClick={() => setDeleteModalItem(item)}
+                                  className="p-2.5 rounded-xl bg-rose-500/10 border border-transparent hover:border-rose-500/50 text-rose-500 hover:bg-rose-500/20 transition-all cursor-pointer shadow-inner flex items-center justify-center"
+                                >
+                                  <Icon name="trash" className="w-4 h-4" />
+                                </button>
+                                <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out] pointer-events-none">
+                                  <div className="bg-[#0f172a]/95 text-rose-400 text-[10px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-bold font-sans border border-rose-500/30">
+                                    حذف دائمی
+                                  </div>
                                 </div>
                               </div>
-                            </div>
+                            )}
 
                           </div>
                         </td>

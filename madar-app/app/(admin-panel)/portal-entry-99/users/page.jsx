@@ -89,6 +89,15 @@ const EDUCATION_DEGREES = [
   "سطح ۱ حوزوی", "سطح ۲ حوزوی", "سطح ۳ حوزوی", "سطح ۴ حوزوی"
 ];
 
+const USER_SECTION_PERMISSIONS = [
+  'USERS_VIEW',
+  'USERS_EXPORT',
+  'USERS_CREATE',
+  'USERS_EDIT',
+  // خط USERS_GRANT_ADMIN از اینجا حذف شد
+  'USERS_BAN'
+];
+
 const autofillFixStyle = {
   WebkitBoxShadow: '0 0 0px 1000px rgba(15, 23, 42, 0.6) inset',
   WebkitTextFillColor: 'white',
@@ -110,7 +119,7 @@ const Tooltip = ({ children, text, position = 'bottom-full mb-2' }) => (
 // کامپوننت اصلی
 // ==========================================
 export default function AdminUsersPage() {
-  const { user, can } = useAuth();
+  const { user, can, canAny, loading: authLoading } = useAuth();
   const [isMounted, setIsMounted] = useState(false); 
   const [hasAccess, setHasAccess] = useState(null);
 
@@ -179,9 +188,16 @@ export default function AdminUsersPage() {
     }, {});
   }, []);
 
+  // بررسی دقیق سطح دسترسی پس از اتمام لودینگ احراز هویت
   useEffect(() => {
-    if (can) setHasAccess(can('USERS_VIEW_EDIT') || user?.isSuperAdmin);
-  }, [can, user]);
+    if (authLoading) return;
+    if (!user) {
+      setHasAccess(false);
+      return;
+    }
+    const allowed = user.isSuperAdmin || (canAny && canAny(USER_SECTION_PERMISSIONS));
+    setHasAccess(!!allowed);
+  }, [authLoading, user, canAny]);
 
   const loadData = async () => {
     setLoading(true);
@@ -193,7 +209,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => { 
     setIsMounted(true);
-    if (hasAccess) loadData(); 
+    if (hasAccess === true) loadData(); 
   }, [hasAccess]);
 
   useEffect(() => { setCurrentPage(1); }, [searchQuery, typeFilter, statusFilter]);
@@ -204,6 +220,9 @@ export default function AdminUsersPage() {
   };
 
   const filteredUsers = users.filter(u => {
+    // مخفی کردن مدیر کل از دید مدیران پنل (فقط مدیر کل می‌تواند سوپر ادمین‌ها را ببیند)
+    if (u.isSuperAdmin && !user?.isSuperAdmin) return false;
+
     const matchSearch = u.phone.includes(searchQuery) || 
                         (u.firstName && u.firstName.includes(searchQuery)) || 
                         (u.lastName && u.lastName.includes(searchQuery)) ||
@@ -234,8 +253,7 @@ export default function AdminUsersPage() {
 
   const handleOpenProfile = (targetUser) => {
     setSelectedUser(targetUser);
-    let parsedPerms = [];
-    try { if (targetUser.adminPermissions) parsedPerms = JSON.parse(targetUser.adminPermissions); } catch {}
+    const parsedPerms = safeParse(targetUser.adminPermissions, []);
 
     setEditFormData({ 
       ...targetUser, 
@@ -266,6 +284,7 @@ export default function AdminUsersPage() {
   // هندلرهای مدیریت نظرات
   // ==========================================
   const handleChangeCommentStatus = async (commentId, newStatus) => {
+    if (!can('COMMENT_APPROVE_REJECT')) return toast.error('شما مجوز تایید یا رد نظرات را ندارید.');
     setIsProcessing(true);
     const res = await updateCommentStatusAction(commentId, newStatus);
     if (res.success) {
@@ -277,6 +296,7 @@ export default function AdminUsersPage() {
 
   const handleSaveCommentReply = async (e) => {
     e.preventDefault();
+    if (!can('COMMENT_EDIT_REPLY')) return toast.error('شما مجوز ویرایش یا پاسخ به نظرات را ندارید.');
     setIsProcessing(true);
     const res = await saveAdminReplyAction(commentReplyModal.id, commentReplyModal.adminReply, commentReplyModal.text, true);
     if (res.success) {
@@ -301,6 +321,7 @@ export default function AdminUsersPage() {
 
   const handleSendDirectNotif = async (e) => {
     e.preventDefault();
+    if (!can('NOTIF_CREATE')) return toast.error('شما مجوز ارسال اعلان را ندارید.');
     if (!notifData.title) return toast.error('عنوان پیام الزامی است.');
     setIsProcessing(true);
 
@@ -365,15 +386,17 @@ export default function AdminUsersPage() {
                        {item.status === 'APPROVED' ? 'تایید شده' : item.status === 'REJECTED' ? 'رد شده' : 'در انتظار بررسی'}
                      </span>
                      
-                     {can('COMMENT_MANAGE') && (
+                     {(can('COMMENT_APPROVE_REJECT') || can('COMMENT_EDIT_REPLY')) && (
                        <div className="flex items-center gap-1.5">
-                          {item.status !== 'APPROVED' && (
+                          {can('COMMENT_APPROVE_REJECT') && item.status !== 'APPROVED' && (
                             <button onClick={() => handleChangeCommentStatus(item.id, 'APPROVED')} disabled={isProcessing} className="p-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-md transition-colors cursor-pointer" title="تایید نظر"><Icon name="checkCircle" className="w-3.5 h-3.5" /></button>
                           )}
-                          {item.status !== 'REJECTED' && (
+                          {can('COMMENT_APPROVE_REJECT') && item.status !== 'REJECTED' && (
                             <button onClick={() => handleChangeCommentStatus(item.id, 'REJECTED')} disabled={isProcessing} className="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-md transition-colors cursor-pointer" title="رد نظر"><Icon name="close" className="w-3.5 h-3.5" /></button>
                           )}
-                          <button onClick={() => setCommentReplyModal(item)} className="p-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-md transition-colors cursor-pointer" title="پاسخ یا ویرایش"><Icon name="pencil" className="w-3.5 h-3.5" /></button>
+                          {can('COMMENT_EDIT_REPLY') && (
+                            <button onClick={() => setCommentReplyModal(item)} className="p-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-md transition-colors cursor-pointer" title="پاسخ یا ویرایش"><Icon name="pencil" className="w-3.5 h-3.5" /></button>
+                          )}
                        </div>
                      )}
                    </div>
@@ -410,6 +433,7 @@ export default function AdminUsersPage() {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
+    if (!can('USERS_CREATE')) return toast.error('شما مجوز افزودن کاربر جدید را ندارید.');
     const engPhone = toEnglishDigits(newPhone);
     if(engPhone.length < 10) return toast.error('شماره موبایل نامعتبر است.');
     const res = await adminCreateUserAction(engPhone);
@@ -422,6 +446,7 @@ export default function AdminUsersPage() {
   };
 
   const askToggleStatus = (id, currentStatus) => {
+    if (!can('USERS_BAN')) return toast.error('شما مجوز مسدودسازی یا فعال‌سازی حساب را ندارید.');
     const isBanning = currentStatus === 'ACTIVE';
     setConfirmModal({
       isOpen: true,
@@ -443,7 +468,8 @@ export default function AdminUsersPage() {
   };
 
   const handleTogglePermission = (perm) => {
-    if (selectedUser.isSuperAdmin) return; 
+    // فقط و فقط مدیر کل (Super Admin) مجاز به لمس و تغییر دسترسی‌ها است
+    if (selectedUser?.isSuperAdmin || !user?.isSuperAdmin) return; 
 
     setEditFormData(prev => {
       let perms = [...(prev.adminPermissions || [])];
@@ -464,7 +490,30 @@ export default function AdminUsersPage() {
   };
 
   const handleSaveEdit = async () => {
+    const isSelf = user?.id === selectedUser?.id;
+    
+    // ۱. جلوگیری از دستکاری مدیران کل توسط سایرین
+    if (selectedUser?.isSuperAdmin && !user?.isSuperAdmin) {
+      return toast.error('شما اجازه دستکاری حساب مدیران کل را ندارید.');
+    }
+
+    // ۲. جلوگیری از دستکاری اطلاعات یک مدیر توسط مدیر دیگر (مدیر عادی فقط پروفایل خودش یا کاربران عادی را می‌تواند ویرایش کند)
+    if (selectedUser?.isAdmin && !user?.isSuperAdmin && !isSelf) {
+      return toast.error('شما اجازه ویرایش اطلاعات سایر مدیران را ندارید.');
+    }
+
+    if (!can('USERS_EDIT') && !user?.isSuperAdmin && !isSelf) {
+      return toast.error('شما مجوز ویرایش اطلاعات را ندارید.');
+    }
+
     const submitData = { ...editFormData, phone: toEnglishDigits(editFormData.phone || '') };
+    
+    // ۳. قفل امنیتی: اگر شخص ذخیره‌کننده مدیر کل نیست، به هیچ وجه فیلدهای ادمین شدن را به دیتابیس نمی‌فرستیم
+    if (!user?.isSuperAdmin) {
+      delete submitData.isAdmin;
+      delete submitData.adminPermissions;
+    }
+
     const res = await adminUpdateUserAction(selectedUser.id, submitData);
     if (res.success) {
       toast.success(res.message);
@@ -472,6 +521,7 @@ export default function AdminUsersPage() {
       setSelectedUser({ 
         ...selectedUser, 
         ...submitData, 
+        adminPermissions: user?.isSuperAdmin ? JSON.stringify(submitData.adminPermissions || []) : selectedUser.adminPermissions,
         password: submitData.newPassword ? 'HAS_PASSWORD' : selectedUser.password 
       });
       loadData();
@@ -486,6 +536,7 @@ export default function AdminUsersPage() {
   };
 
   const handleExportCSV = () => {
+    if (!can('USERS_EXPORT')) return toast.error('شما مجوز دریافت خروجی اکسل را ندارید.');
     const headers = [];
     if (exportFields.id) headers.push('شناسه سیستمی');
     if (exportFields.phone) headers.push('موبایل');
@@ -552,7 +603,9 @@ export default function AdminUsersPage() {
     toast.success('خروجی اکسل با موفقیت ایجاد شد.');
   };
 
-  if (!isMounted) return null; 
+  if (!isMounted || authLoading || hasAccess === null) {
+    return <AdminLoading />;
+  }
 
   if (hasAccess === false) {
     return (
@@ -568,6 +621,13 @@ export default function AdminUsersPage() {
   if (loading && users.length === 0) {
     return <AdminLoading />;
   }
+
+  // آیا کاربر در حال مشاهده پروفایل خودش است؟
+  const isSelfProfile = user?.id === selectedUser?.id;
+  // مدیر عادی فقط می‌تواند اطلاعات هویتی خودش یا یک "کاربر عادی" را ویرایش کند
+  const canEditPersonalInfo = user?.isSuperAdmin || isSelfProfile || (can('USERS_EDIT') && !selectedUser?.isAdmin && !selectedUser?.isSuperAdmin);
+  // اعطای مقام مدیریت فقط در انحصار مدیر کل است
+  const canGrantAdmin = !!user?.isSuperAdmin;
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-8 font-sans text-right select-none pb-20">
@@ -728,7 +788,7 @@ export default function AdminUsersPage() {
                               <Icon name="user" className="w-4 h-4" />
                             </button>
                           </Tooltip>
-                          {can('USERS_BAN') && (
+                          {can('USERS_BAN') && !u.isSuperAdmin && (
                             <Tooltip text={u.status === 'ACTIVE' ? "مسدودسازی حساب" : "فعال‌سازی حساب"}>
                               <button onClick={() => askToggleStatus(u.id, u.status)} className={`p-1.5 rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner ${u.status === 'ACTIVE' ? 'bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white'}`}>
                                 <Icon name="lock" className="w-4 h-4" />
@@ -1055,7 +1115,7 @@ export default function AdminUsersPage() {
                 <div className="bg-white/[0.02] border-b border-white/10 p-5 flex flex-wrap justify-between items-center z-20 shrink-0 gap-4">
                   <div className="flex items-center gap-4">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border shadow-inner ${selectedUser.isSuperAdmin ? 'bg-fuchsia-600/10 text-fuchsia-400 border-fuchsia-500/20' : selectedUser.isAdmin ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-[#8b5cf6]/10 text-[#8b5cf6] border-[#8b5cf6]/20'}`}>
-                      <Icon name={selectedUser.isAdmin || selectedUser.isSuperAdmin ? 'user' : 'user'} className="w-7 h-7" />
+                      <Icon name="user" className="w-7 h-7" />
                     </div>
                     <div>
                       <h2 className="text-xl font-bold text-white leading-tight flex items-center gap-2 font-sans mb-1 select-text">
@@ -1088,7 +1148,7 @@ export default function AdminUsersPage() {
                   </div>
 
                   <div className="flex items-center gap-2 print-hide w-full sm:w-auto justify-end">
-                    {profileTab === 'info' && can('USERS_VIEW_EDIT') && (
+                    {profileTab === 'info' && (canEditPersonalInfo || canGrantAdmin) && (
                       <button onClick={() => setIsEditMode(!isEditMode)} className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer font-sans border shadow-inner flex items-center gap-2 ${isEditMode ? 'bg-[#8b5cf6] text-white border-transparent shadow-[0_0_15px_rgba(139,92,246,0.3)]' : 'bg-black/30 border-white/5 text-gray-300 hover:bg-white/10 hover:text-white'}`}>
                         {isEditMode ? 'انصراف' : 'ویرایش'}
                       </button>
@@ -1119,60 +1179,86 @@ export default function AdminUsersPage() {
                         <form className="space-y-6">
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                            {can('USERS_GRANT_ADMIN') && !selectedUser.isSuperAdmin && (
+                            {/* نمایش بخش دسترسی‌ها: مدیر کل همه را می‌بیند تا ویرایش کند. مدیر عادی فقط اگر پروفایل خودش باشد می‌بیند (آن هم فقط تیک‌های فعال را) */}
+                            {(user?.isSuperAdmin || (editFormData.isAdmin && isSelfProfile)) && !selectedUser?.isSuperAdmin && (
                               <div className="lg:col-span-3 bg-amber-500/5 p-5 rounded-2xl border border-amber-500/20 shadow-inner">
                                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-amber-500/10 pb-4 mb-5">
                                   <div>
                                     <h3 className="text-sm font-bold text-amber-400 font-sans flex items-center gap-2">
                                       <Icon name="shieldCheck" className="w-4 h-4" /> سطح دسترسی مدیریت سایت
                                     </h3>
-                                    <p className="text-[10px] text-amber-400/60 font-sans mt-1">با روشن کردن این گزینه، این کاربر به مدیر پنل تبدیل می‌شود.</p>
+                                    <p className="text-[10px] text-amber-400/60 font-sans mt-1">
+                                      {user?.isSuperAdmin ? 'با روشن کردن این گزینه، کاربر به مدیر پنل تبدیل می‌شود.' : 'فهرست دسترسی‌های مدیریتی شما (غیرقابل ویرایش)'}
+                                    </p>
                                   </div>
-                                  <label className="flex items-center cursor-pointer">
-                                    <div className="relative">
-                                      <input type="checkbox" className="sr-only" checked={editFormData.isAdmin} onChange={(e) => setEditFormData({...editFormData, isAdmin: e.target.checked, adminPermissions: e.target.checked ? editFormData.adminPermissions : []})} />
-                                      <div className={`block w-14 h-8 rounded-full transition-colors ${editFormData.isAdmin ? 'bg-amber-500' : 'bg-black/50 border border-white/10'}`}></div>
-                                      <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${editFormData.isAdmin ? 'transform translate-x-6' : ''}`}></div>
-                                    </div>
-                                    <span className="ml-3 text-xs font-bold text-white font-sans">ارتقا به مدیر سایت</span>
-                                  </label>
+                                  
+                                  {/* دکمه تاگل (ارتقا به مدیر) فقط برای مدیر کل نمایش داده شود */}
+                                  {user?.isSuperAdmin && (
+                                    <label className="flex items-center cursor-pointer">
+                                      <div className="relative">
+                                        <input type="checkbox" className="sr-only" checked={editFormData.isAdmin} onChange={(e) => setEditFormData({...editFormData, isAdmin: e.target.checked, adminPermissions: e.target.checked ? editFormData.adminPermissions : []})} />
+                                        <div className={`block w-14 h-8 rounded-full transition-colors ${editFormData.isAdmin ? 'bg-amber-500' : 'bg-black/50 border border-white/10'}`}></div>
+                                        <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${editFormData.isAdmin ? 'transform translate-x-6' : ''}`}></div>
+                                      </div>
+                                      <span className="ml-3 text-xs font-bold text-white font-sans">ارتقا به مدیر سایت</span>
+                                    </label>
+                                  )}
                                 </div>
 
                                 <AnimatePresence>
                                   {editFormData.isAdmin && (
                                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-6">
 
-                                      {Object.entries(permissionsByCategory).map(([category, perms]) => (
-                                        <div key={category} className="bg-black/30 p-4 rounded-xl border border-white/5">
-                                          <h4 className="text-xs font-bold text-amber-400/80 mb-4 font-sans uppercase tracking-widest">{category}</h4>
-                                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                            {perms.map(perm => {
-                                              const isSelected = editFormData.adminPermissions.includes(perm.id);
-                                              const isDisabled = perm.requires && !editFormData.adminPermissions.includes(perm.requires);
+                                      {Object.entries(permissionsByCategory).map(([category, perms]) => {
+                                        // فیلتر کردن تیک‌ها: مدیر کل همه را می‌بیند. مدیران عادی فقط تیک‌های فعال خودشان را می‌بینند.
+                                        const visiblePerms = user?.isSuperAdmin 
+                                          ? perms 
+                                          : perms.filter(perm => editFormData.adminPermissions.includes(perm.id));
 
-                                              return (
-                                                <label key={perm.id} className={`p-3 rounded-xl transition-all flex items-start gap-3 border shadow-inner select-none ${isDisabled ? 'bg-black/40 border-transparent opacity-50 cursor-not-allowed' : isSelected ? 'bg-amber-500/10 border-amber-500/20 cursor-pointer' : 'bg-white/5 border-transparent hover:bg-white/10 cursor-pointer'}`}>
-                                                  <input 
-                                                    type="checkbox" 
-                                                    className="hidden" 
-                                                    checked={isSelected}
-                                                    disabled={isDisabled}
-                                                    onChange={() => handleTogglePermission(perm)} 
-                                                  />
-                                                  <div className={`w-5 h-5 rounded-full flex items-center justify-center mt-0.5 shrink-0 transition-colors border-2 ${isSelected ? 'bg-amber-500 border-amber-500' : isDisabled ? 'border-gray-600 bg-transparent' : 'border-gray-500 bg-transparent group-hover:border-gray-400'}`}>
-                                                    {isSelected && <Icon name="check" className="w-3 h-3 text-white" />}
-                                                  </div>
-                                                  <div>
-                                                    <h5 className={`text-xs font-bold mb-1 transition-colors font-sans ${isSelected ? 'text-amber-400' : 'text-gray-300'}`}>{perm.label}</h5>
-                                                    {perm.desc && <p className="text-[9px] text-gray-500 leading-relaxed font-sans">{perm.desc}</p>}
-                                                    {isDisabled && <p className="text-[8px] text-rose-400 mt-1">نیاز به فعالسازی "{GRANULAR_PERMISSIONS.find(p => p.id === perm.requires)?.label}" دارد</p>}
-                                                  </div>
-                                                </label>
-                                              );
-                                            })}
+                                        if (visiblePerms.length === 0) return null;
+
+                                        return (
+                                          <div key={category} className="bg-black/30 p-4 rounded-xl border border-white/5">
+                                            <h4 className="text-xs font-bold text-amber-400/80 mb-4 font-sans uppercase tracking-widest">{category}</h4>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                              {visiblePerms.map(perm => {
+                                                const isSelected = editFormData.adminPermissions.includes(perm.id);
+                                                const isDisabled = perm.requires && !editFormData.adminPermissions.includes(perm.requires);
+
+                                                return (
+                                                  <label key={perm.id} className={`p-3 rounded-xl transition-all flex items-start gap-3 border shadow-inner select-none ${!user?.isSuperAdmin ? 'bg-amber-500/5 border-amber-500/10' : isDisabled ? 'bg-black/40 border-transparent opacity-50 cursor-not-allowed' : isSelected ? 'bg-amber-500/10 border-amber-500/20 cursor-pointer' : 'bg-white/5 border-transparent hover:bg-white/10 cursor-pointer'}`}>
+                                                    
+                                                    {user?.isSuperAdmin && (
+                                                      <input 
+                                                        type="checkbox" 
+                                                        className="hidden" 
+                                                        checked={isSelected}
+                                                        disabled={isDisabled}
+                                                        onChange={() => handleTogglePermission(perm)} 
+                                                      />
+                                                    )}
+                                                    
+                                                    {/* نمایش مربعی تیک برای مدیر کل، و نمایش فشرده (بدون کادر انتخاب) برای مدیران عادی */}
+                                                    {user?.isSuperAdmin ? (
+                                                      <div className={`w-5 h-5 rounded-full flex items-center justify-center mt-0.5 shrink-0 transition-colors border-2 ${isSelected ? 'bg-amber-500 border-amber-500' : isDisabled ? 'border-gray-600 bg-transparent' : 'border-gray-500 bg-transparent group-hover:border-gray-400'}`}>
+                                                        {isSelected && <Icon name="check" className="w-3 h-3 text-white" />}
+                                                      </div>
+                                                    ) : (
+                                                      <div className="mt-0.5 shrink-0"><Icon name="checkCircle" className="w-4 h-4 text-amber-500" /></div>
+                                                    )}
+
+                                                    <div>
+                                                      <h5 className={`text-xs font-bold mb-1 transition-colors font-sans ${isSelected ? 'text-amber-400' : 'text-gray-300'}`}>{perm.label}</h5>
+                                                      {perm.desc && <p className="text-[9px] text-gray-500 leading-relaxed font-sans">{perm.desc}</p>}
+                                                      {(isDisabled && user?.isSuperAdmin) && <p className="text-[8px] text-rose-400 mt-1">نیاز به فعالسازی "{GRANULAR_PERMISSIONS.find(p => p.id === perm.requires)?.label}" دارد</p>}
+                                                    </div>
+                                                  </label>
+                                                );
+                                              })}
+                                            </div>
                                           </div>
-                                        </div>
-                                      ))}
+                                        );
+                                      })}
 
                                     </motion.div>
                                   )}
@@ -1189,20 +1275,20 @@ export default function AdminUsersPage() {
                               </div>
                             )}
 
-                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">نام</label><input type="text" value={editFormData.firstName || ''} onChange={(e) => setEditFormData({...editFormData, firstName: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none transition-colors select-text" style={autofillFixStyle} /></div>
-                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">نام خانوادگی</label><input type="text" value={editFormData.lastName || ''} onChange={(e) => setEditFormData({...editFormData, lastName: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none transition-colors select-text" style={autofillFixStyle} /></div>
+                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">نام</label><input type="text" disabled={!canEditPersonalInfo} value={editFormData.firstName || ''} onChange={(e) => setEditFormData({...editFormData, firstName: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none transition-colors select-text disabled:opacity-50" style={autofillFixStyle} /></div>
+                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">نام خانوادگی</label><input type="text" disabled={!canEditPersonalInfo} value={editFormData.lastName || ''} onChange={(e) => setEditFormData({...editFormData, lastName: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none transition-colors select-text disabled:opacity-50" style={autofillFixStyle} /></div>
 
                             <div>
                               <label className="block text-xs text-rose-400 mb-2 font-bold font-sans pl-1">شماره موبایل (دقت در ویرایش!)</label>
-                              <input type="tel" dir="ltr" value={toPersianDigits(editFormData.phone || '')} onChange={(e) => {
+                              <input type="tel" dir="ltr" disabled={!canEditPersonalInfo} value={toPersianDigits(editFormData.phone || '')} onChange={(e) => {
                                   let val = e.target.value.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\D/g, '');
                                   setEditFormData({...editFormData, phone: val});
-                              }} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-rose-500 font-sans text-left shadow-[inset_0_0_10px_rgba(244,63,94,0.1)] outline-none tracking-widest transition-colors select-text" style={autofillFixStyle} />
+                              }} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-rose-500 font-sans text-left shadow-[inset_0_0_10px_rgba(244,63,94,0.1)] outline-none tracking-widest transition-colors select-text disabled:opacity-50" style={autofillFixStyle} />
                             </div>
 
                             <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">جنسیت</label>
                               <div className="relative">
-                                <select value={editFormData.gender || ''} onChange={(e) => setEditFormData({...editFormData, gender: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] appearance-none font-sans shadow-inner outline-none cursor-pointer transition-colors" style={autofillFixStyle}>
+                                <select disabled={!canEditPersonalInfo} value={editFormData.gender || ''} onChange={(e) => setEditFormData({...editFormData, gender: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] appearance-none font-sans shadow-inner outline-none cursor-pointer transition-colors disabled:opacity-50" style={autofillFixStyle}>
                                   <option value="" className="bg-[#0f172a]">نامشخص</option><option value="MALE" className="bg-[#0f172a]">مرد</option><option value="FEMALE" className="bg-[#0f172a]">زن</option>
                                 </select>
                                 <Icon name="caretDown" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
@@ -1228,20 +1314,21 @@ export default function AdminUsersPage() {
                             <div>
                                <label className="block text-xs text-gray-400 mb-2 font-sans pl-1">تاریخ تولد (تقویم شمسی)</label>
                                <DatePicker
+                                  disabled={!canEditPersonalInfo}
                                   value={editFormData.birthYear || ''}
                                   onChange={(date) => setEditFormData({...editFormData, birthYear: date?.format('YYYY/MM/DD') || ''})}
                                   calendar={persian}
                                   locale={persian_fa}
                                   calendarPosition="bottom-right"
                                   className="bg-dark"
-                                  inputClass="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none cursor-pointer transition-colors select-text"
+                                  inputClass="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none cursor-pointer transition-colors select-text disabled:opacity-50"
                                   placeholder="انتخاب از تقویم..."
                                />
                             </div>
 
                             <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">استان</label>
                               <div className="relative">
-                                <select value={editFormData.province || ''} onChange={(e) => setEditFormData({...editFormData, province: e.target.value, city: ''})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] appearance-none font-sans shadow-inner outline-none cursor-pointer transition-colors" style={autofillFixStyle}>
+                                <select disabled={!canEditPersonalInfo} value={editFormData.province || ''} onChange={(e) => setEditFormData({...editFormData, province: e.target.value, city: ''})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] appearance-none font-sans shadow-inner outline-none cursor-pointer transition-colors disabled:opacity-50" style={autofillFixStyle}>
                                   <option value="" className="bg-[#0f172a]">انتخاب استان...</option>
                                   {provincesList.map(prov => <option key={prov} value={prov} className="bg-[#0f172a]">{prov}</option>)}
                                 </select>
@@ -1251,7 +1338,7 @@ export default function AdminUsersPage() {
 
                             <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">شهر</label>
                               <div className="relative">
-                                <select disabled={!editFormData.province || availableCities.length === 0} value={editFormData.city || ''} onChange={(e) => setEditFormData({...editFormData, city: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] appearance-none font-sans shadow-inner outline-none cursor-pointer disabled:opacity-50 transition-colors" style={autofillFixStyle}>
+                                <select disabled={!canEditPersonalInfo || !editFormData.province || availableCities.length === 0} value={editFormData.city || ''} onChange={(e) => setEditFormData({...editFormData, city: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] appearance-none font-sans shadow-inner outline-none cursor-pointer disabled:opacity-50 transition-colors" style={autofillFixStyle}>
                                   <option value="" className="bg-[#0f172a]">ابتدا استان را انتخاب کنید...</option>
                                   {availableCities.map(city => <option key={city} value={city} className="bg-[#0f172a]">{city}</option>)}
                                 </select>
@@ -1261,7 +1348,7 @@ export default function AdminUsersPage() {
 
                             <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">مدرک تحصیلی</label>
                                <div className="relative">
-                                 <select value={editFormData.educationDegree || ''} onChange={(e) => setEditFormData({...editFormData, educationDegree: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] appearance-none font-sans shadow-inner outline-none cursor-pointer transition-colors" style={autofillFixStyle}>
+                                 <select disabled={!canEditPersonalInfo} value={editFormData.educationDegree || ''} onChange={(e) => setEditFormData({...editFormData, educationDegree: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] appearance-none font-sans shadow-inner outline-none cursor-pointer transition-colors disabled:opacity-50" style={autofillFixStyle}>
                                   <option value="" className="bg-[#0f172a]">انتخاب مدرک...</option>
                                   {EDUCATION_DEGREES.map(deg => <option key={deg} value={deg} className="bg-[#0f172a]">{deg}</option>)}
                                  </select>
@@ -1269,11 +1356,11 @@ export default function AdminUsersPage() {
                                </div>
                             </div>
 
-                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">رشته تحصیلی</label><input type="text" value={editFormData.major || ''} onChange={(e) => setEditFormData({...editFormData, major: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none transition-colors select-text" style={autofillFixStyle} /></div>
-                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">ایمیل</label><input type="email" dir="ltr" value={editFormData.email || ''} onChange={(e) => setEditFormData({...editFormData, email: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] text-left font-sans shadow-inner outline-none transition-colors select-text" style={autofillFixStyle} /></div>
-                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">حوزه فعالیت هنری/پژوهشی</label><input type="text" value={editFormData.artResearchField || ''} onChange={(e) => setEditFormData({...editFormData, artResearchField: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none transition-colors select-text" style={autofillFixStyle} /></div>
+                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">رشته تحصیلی</label><input type="text" disabled={!canEditPersonalInfo} value={editFormData.major || ''} onChange={(e) => setEditFormData({...editFormData, major: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none transition-colors select-text disabled:opacity-50" style={autofillFixStyle} /></div>
+                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">ایمیل</label><input type="email" dir="ltr" disabled={!canEditPersonalInfo} value={editFormData.email || ''} onChange={(e) => setEditFormData({...editFormData, email: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] text-left font-sans shadow-inner outline-none transition-colors select-text disabled:opacity-50" style={autofillFixStyle} /></div>
+                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">حوزه فعالیت هنری/پژوهشی</label><input type="text" disabled={!canEditPersonalInfo} value={editFormData.artResearchField || ''} onChange={(e) => setEditFormData({...editFormData, artResearchField: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none transition-colors select-text disabled:opacity-50" style={autofillFixStyle} /></div>
 
-                            <div className="col-span-1 md:col-span-2 lg:col-span-3"><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">زمینه‌های تمایل به همکاری</label><textarea rows="3" value={editFormData.cooperationInterests || ''} onChange={(e) => setEditFormData({...editFormData, cooperationInterests: e.target.value})} className="w-full bg-black/40 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] resize-none font-sans border border-white/10 shadow-inner outline-none leading-relaxed text-justify transition-colors select-text" style={autofillFixStyle}></textarea></div>
+                            <div className="col-span-1 md:col-span-2 lg:col-span-3"><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">زمینه‌های تمایل به همکاری</label><textarea rows="3" disabled={!canEditPersonalInfo} value={editFormData.cooperationInterests || ''} onChange={(e) => setEditFormData({...editFormData, cooperationInterests: e.target.value})} className="w-full bg-black/40 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] resize-none font-sans border border-white/10 shadow-inner outline-none leading-relaxed text-justify transition-colors select-text disabled:opacity-50" style={autofillFixStyle}></textarea></div>
 
                             <div className={`lg:col-span-3 p-5 rounded-2xl mt-2 border shadow-inner ${editFormData.isAdmin || selectedUser.isSuperAdmin ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-black/30 border-white/10'}`}>
                               <label className={`text-xs mb-4 font-bold flex items-center gap-2 font-sans ${editFormData.isAdmin || selectedUser.isSuperAdmin ? 'text-emerald-400' : 'text-gray-300'}`}>
@@ -1285,10 +1372,11 @@ export default function AdminUsersPage() {
                                   <input 
                                     type="text" 
                                     dir="ltr"
+                                    disabled={!canEditPersonalInfo && !canGrantAdmin}
                                     placeholder="رمز جدید (در صورت عدم نیاز خالی بگذارید)"
                                     value={editFormData.newPassword || ''}
                                     onChange={(e) => setEditFormData({...editFormData, newPassword: e.target.value})}
-                                    className={`w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 pl-10 text-sm text-white outline-none text-left font-sans shadow-inner tracking-widest placeholder:tracking-normal placeholder:text-gray-500 transition-colors select-text ${editFormData.isAdmin || selectedUser.isSuperAdmin ? 'focus:border-emerald-500' : 'focus:border-[#8b5cf6]'}`}
+                                    className={`w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 pl-10 text-sm text-white outline-none text-left font-sans shadow-inner tracking-widest placeholder:tracking-normal placeholder:text-gray-500 transition-colors select-text disabled:opacity-50 ${editFormData.isAdmin || selectedUser.isSuperAdmin ? 'focus:border-emerald-500' : 'focus:border-[#8b5cf6]'}`}
                                   />
                                   <Icon name="lockKey" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
                                 </div>
@@ -1392,7 +1480,7 @@ export default function AdminUsersPage() {
                       <div className="space-y-6">
                         <div className="flex justify-between items-center border-b border-white/10 pb-4">
                           <h3 className="font-bold text-white font-sans">صندوق اعلانات این کاربر</h3>
-                          {can('NOTIF_MANAGE') && (
+                          {can('NOTIF_CREATE') && (
                             <button onClick={() => setDirectNotifModal(true)} className="bg-[#8b5cf6]/20 text-[#8b5cf6] hover:bg-[#8b5cf6] hover:text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer font-sans border border-transparent shadow-inner hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
                               <Icon name="bell" className="w-4 h-4" /> ارسال پیام اختصاصی
                             </button>

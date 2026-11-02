@@ -66,7 +66,7 @@ export default function AboutSettingsPage() {
   // ==========================================
   // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
+  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -77,7 +77,8 @@ export default function AboutSettingsPage() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
+      // فقط مدیرانی که تیک ویرایش صفحه درباره ما را دارند مجاز به ورود هستند
+      setHasAccess(user.isSuperAdmin || (can && can('ABOUT_EDIT')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -87,7 +88,7 @@ export default function AboutSettingsPage() {
         return () => clearTimeout(timer);
       }
     }
-  }, [user, authIsLoading, authLoading, isFetching]);
+  }, [user, authIsLoading, authLoading, isFetching, can]);
 
   // ==========================================
   // ۲. استیت‌ها و دریافت اطلاعات دیتابیس
@@ -136,6 +137,8 @@ export default function AboutSettingsPage() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!can('ABOUT_EDIT')) return toast.error('شما مجوز تغییر و ذخیره اطلاعات این صفحه را ندارید.');
+    
     setSaving(true);
     toast.promise(
       saveSetting('about_page_data', JSON.stringify(data), 'ABOUT_PAGE'),

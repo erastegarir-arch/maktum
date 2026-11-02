@@ -31,7 +31,7 @@ export default function MainPagesManager() {
   // ==========================================
   // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
+  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -42,7 +42,8 @@ export default function MainPagesManager() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
+      // فقط مدیرانی که تیک ویرایش صفحات فرعی را دارند مجاز به ورود هستند
+      setHasAccess(user.isSuperAdmin || (can && can('PAGES_EDIT')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -52,7 +53,7 @@ export default function MainPagesManager() {
         return () => clearTimeout(timer);
       }
     }
-  }, [user, authIsLoading, authLoading, isFetching]);
+  }, [user, authIsLoading, authLoading, isFetching, can]);
 
   // ==========================================
   // ۲. استیت‌های محتوا و دریافت داده
@@ -132,6 +133,8 @@ export default function MainPagesManager() {
   };
 
   const handleSave = async () => {
+    if (!can('PAGES_EDIT')) return toast.error('شما مجوز ذخیره و ویرایش این صفحات را ندارید.');
+    
     setIsSaving(true);
     try {
       await saveSetting(activeTheme.key, JSON.stringify(currentData), 'PAGES_CONFIG');

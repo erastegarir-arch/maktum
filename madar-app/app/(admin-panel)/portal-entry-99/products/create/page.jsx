@@ -126,7 +126,8 @@ export default function CreateContentPage() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(!!(can('CONTENT_MANAGE') || user.isSuperAdmin));
+      // فقط مدیرانی که تیک ایجاد محتوا را دارند مجاز به ورود هستند
+      setHasAccess(user.isSuperAdmin || (can && can('CONTENT_CREATE')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -226,6 +227,8 @@ export default function CreateContentPage() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!can('CONTENT_CREATE')) return toast.error('شما مجوز ایجاد محتوای جدید را ندارید.');
+    
     if (!titleBase && !titleHighlight) return toast.error('حداقل یکی از بخش‌های عنوان باید وارد شود!');
     if (!slug) return toast.error('پیوند یکتا (Slug) الزامی است!');
     

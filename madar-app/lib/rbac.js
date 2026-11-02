@@ -1,6 +1,6 @@
 // lib/rbac.js
 
-// کلید مخفی امضای دیجیتال توکن‌ها و لینک‌های دانلود (در محیط واقعی از فایل .env خوانده می‌شود)
+// کلید مخفی امضای دیجیتال توکن‌ها و لینک‌های دانلود
 export const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || 'MADAR_SUPER_SECRET_KEY_FOR_JWT_TOKEN');
 
 // ==========================================
@@ -53,7 +53,7 @@ export const GRANULAR_PERMISSIONS = [
   { id: 'USERS_EXPORT', category: 'کاربران', label: 'خروجی اکسل گرفتن' },
   { id: 'USERS_CREATE', category: 'کاربران', label: 'افزودن کاربر جدید' },
   { id: 'USERS_EDIT', category: 'کاربران', label: 'ویرایش کاربران' },
-  { id: 'USERS_GRANT_ADMIN', category: 'کاربران', label: 'تعیین سطح مدیریت' },
+  // خط USERS_GRANT_ADMIN از اینجا حذف شد
   { id: 'USERS_BAN', category: 'کاربران', label: 'مسدود یا فعال کردن حساب' }
 ];
 
@@ -71,19 +71,12 @@ export const ADMIN_ROUTE_PERMISSIONS = [
   { pathPrefix: '/portal-entry-99/pages/collaboration-settings', requiredAny: ['CAREER_EDIT'] },
   { pathPrefix: '/portal-entry-99/pages/rules-settings', requiredAny: ['TERMS_EDIT'] },
 
-  // برای ورود به صفحه کاربران، فرد باید حداقل یکی از مجوزهای کاربران را داشته باشد (مثل دیدن لیست)
-  { pathPrefix: '/portal-entry-99/users', requiredAny: ['USERS_VIEW', 'USERS_EXPORT', 'USERS_CREATE', 'USERS_EDIT', 'USERS_GRANT_ADMIN', 'USERS_BAN'] },
+  // برای ورود به صفحه کاربران، فرد باید حداقل یکی از مجوزهای کاربران را داشته باشد
+{ pathPrefix: '/portal-entry-99/users', requiredAny: ['USERS_VIEW', 'USERS_EXPORT', 'USERS_CREATE', 'USERS_EDIT', 'USERS_BAN'] },
   
   // برای دسترسی به اعلانات و نظرات داشتن تیک‌هایشان ضروری است
   { pathPrefix: '/portal-entry-99/notifications', requiredAny: ['NOTIF_CREATE', 'NOTIF_DELETE'] },
   { pathPrefix: '/portal-entry-99/comments', requiredAny: ['COMMENT_EDIT_REPLY', 'COMMENT_APPROVE_REJECT'] }
-
-  // نکته: مسیرهای زیر به دستور شما نیاز به تیک ورود ندارند و فقط دکمه‌های داخلشان محافظت می‌شود:
-  // /portal-entry-99 (پیشخوان)
-  // /portal-entry-99/media (رسانه)
-  // /portal-entry-99/taxonomies (طبقه‌بندی)
-  // /portal-entry-99/products (محتوا)
-  // /portal-entry-99/dossiers (منظومه)
 ];
 
 // ==========================================
@@ -93,7 +86,11 @@ export function parsePermissions(permsInput) {
   if (!permsInput) return [];
   if (Array.isArray(permsInput)) return permsInput;
   try {
-    const parsed = JSON.parse(permsInput);
+    let parsed = JSON.parse(permsInput);
+    // محافظت در برابر داده‌هایی که احیاناً دو بار stringify شده‌اند
+    if (typeof parsed === 'string') {
+      parsed = JSON.parse(parsed);
+    }
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
@@ -145,10 +142,10 @@ function base64UrlDecode(base64Url) {
 }
 
 async function getCryptoKey() {
-  const enc = new TextEncoder();
+  // اصلاح باگ: SECRET_KEY خودش از نوع Uint8Array است و نباید دوباره encode شود
   return await crypto.subtle.importKey(
     'raw',
-    enc.encode(SECRET_KEY),
+    SECRET_KEY,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign', 'verify']

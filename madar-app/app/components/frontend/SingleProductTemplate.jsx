@@ -515,8 +515,8 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
   const tocSections = useMemo(() => {
     const list = [];
     if (data?.body) list.push({ id: 'sec-body', title: 'معرفی' });
-    if (fileSpecs.length > 0) list.push({ id: 'sec-files', title: 'اطلاعات' });
-    if (timeline.length > 0) list.push({ id: 'sec-timeline', title: 'تاریخچه' });
+    if (fileSpecs.length > 0) list.push({ id: 'sec-files', title: 'اطلاعات فایل‌ها' });
+    if (timeline.length > 0) list.push({ id: 'sec-timeline', title: 'به‌روزرسانی' });
     if (previewGallery.length > 0) list.push({ id: 'sec-preview', title: 'پیش‌نمایش' });
     if (displaySettings.isDownloadActive !== false && downloads.length > 0) list.push({ id: 'sec-download', title: 'دانلود' });
     if (isCommentsEnabled) list.push({ id: 'sec-comments', title: 'نظرات' });
@@ -552,8 +552,8 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
   }, [tocSections]);
 
   return (
-    // حذف bg-[#05080f] برای دیده شدن نورهای متحرک زیرین
-    <div className={`relative min-h-screen flex flex-col scroll-smooth theme-${type.toLowerCase()}`}>
+    // حذف bg-[#05080f] برای دیده شدن نورهای متحرک زیرین - اضافه شدن select-none
+    <div className={`relative min-h-screen flex flex-col scroll-smooth select-none theme-${type.toLowerCase()}`}>
       
       <ProgressBar />
 
@@ -565,7 +565,8 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
 
         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-0 lg:gap-8 mt-4 relative">
           
-          <div className="lg:col-span-7 fixed top-0 inset-x-0 z-0 h-[45vh] md:h-auto md:relative md:z-auto w-full md:aspect-video md:rounded-[2.5rem] md:shadow-[0_10px_40px_rgba(0,0,0,0.5)] md:p-1 md:border border-transparent group pointer-events-none md:pointer-events-auto">
+          {/* ۱. افزایش ارتفاع تصویر موبایل از 45vh به 62vh برای پوشش کامل فضای خالی */}
+          <div className="lg:col-span-7 fixed top-0 inset-x-0 z-0 h-[62vh] md:h-auto md:relative md:z-auto w-full md:aspect-video md:rounded-[2.5rem] md:shadow-[0_10px_40px_rgba(0,0,0,0.5)] md:p-1 md:border border-transparent group pointer-events-none md:pointer-events-auto">
             <div className="hidden md:block absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10 rounded-[2.5rem]" />
             <div className={`hidden md:block absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
             
@@ -578,23 +579,23 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
               )}
             </div>
             
-            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#05080f] to-transparent md:hidden pointer-events-none z-10" />
+            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#05080f] via-[#05080f]/60 to-transparent md:hidden pointer-events-none z-10" />
             <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#05080f] to-transparent md:hidden pointer-events-none z-10" />
           </div>
 
-          {/* کانتینر اصلی - ویژگی backdrop-blur از اینجا حذف شد تا position: fixed فرزندانش خراب نشود */}
-          <div className="lg:col-span-5 relative z-10 md:bg-transparent rounded-t-[2.5rem] md:rounded-none mt-[35vh] md:mt-0 px-5 pt-7 pb-4 md:p-0 shadow-[0_-20px_40px_rgba(0,0,0,0.8)] md:shadow-none flex flex-col justify-center">
+          {/* ۲. کانتینر باکس اول - حذف سایه برش‌دهنده زیرین و محو تدریجی انتهای لایه */}
+          <div className="lg:col-span-5 relative md:bg-transparent rounded-t-[2.5rem] md:rounded-none mt-[35vh] md:mt-0 px-5 pt-7 pb-4 md:p-0 flex flex-col justify-center">
             
-            {/* لایه شیشه‌ای و تاریک مستقل (حل باگ اسکرول و fixed) */}
-            <div className="md:hidden absolute inset-0 bg-[#050810]/70 backdrop-blur-3xl rounded-t-[2.5rem] pointer-events-none -z-20" />
+            {/* لایه شیشه‌ای و تاریک زیر باکس اول با محو تدریجی در انتها */}
+            <div className="md:hidden absolute inset-x-0 top-0 -bottom-32 bg-[#050810]/70 backdrop-blur-3xl rounded-t-[2.5rem] pointer-events-none z-[1] [mask-image:linear-gradient(to_bottom,black_calc(100%-128px),rgba(0,0,0,0.7)_calc(100%-64px),transparent_100%)]" />
 
-            {/* لایه هاله‌های نوری کمکی برای موبایل */}
-            <div className="md:hidden absolute inset-x-0 top-0 h-[420px] rounded-t-[2.5rem] overflow-hidden pointer-events-none -z-10">
+            {/* لایه هاله‌های نوری کمکی برای موبایل با محو تدریجی بدون برش افقی */}
+            <div className="md:hidden absolute inset-x-0 top-0 h-[420px] rounded-t-[2.5rem] overflow-hidden pointer-events-none z-[2] [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)]">
               <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full blur-[70px] opacity-40" style={{ background: `radial-gradient(circle, ${currentTheme.glowBg.replace('0.15', '1')} 0%, transparent 70%)` }} />
               <div className="absolute top-24 -left-16 w-60 h-60 rounded-full blur-[70px] opacity-30" style={{ background: 'radial-gradient(circle, #06b6d4 0%, transparent 70%)' }} />
             </div>
 
-            <div className="p-5 rounded-3xl bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] md:p-0 md:rounded-none md:bg-transparent md:backdrop-blur-none md:border-transparent md:shadow-none space-y-5 md:space-y-6">
+            <div className="relative z-10 p-5 rounded-3xl bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] md:p-0 md:rounded-none md:bg-transparent md:backdrop-blur-none md:border-transparent md:shadow-none space-y-5 md:space-y-6">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`border text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-full tracking-widest uppercase shadow-inner ${currentTheme.badgeBg}`}>
                   {parentBreadcrumb.label}
@@ -633,19 +634,19 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
           </div>
         </div>
 
-        <div className="relative z-10 md:bg-transparent px-5 md:px-0 pb-20 md:pb-10 -mt-2 md:mt-0 pt-1 md:pt-0">
+        <div className="relative md:bg-transparent px-5 md:px-0 pb-20 md:pb-10 mt-0 pt-1 md:pt-0">
           
-          {/* لایه شیشه‌ای و تاریک مستقل (حل باگ اسکرول و fixed در بخش پایین) */}
-          <div className="md:hidden absolute inset-0 bg-[#050810]/70 backdrop-blur-3xl pointer-events-none -z-20" />
+          {/* لایه شیشه‌ای بخش پایین با شروع و پایان محوشونده تدریجی برای اتصال نامرئی به لایه بالایی */}
+          <div className="md:hidden absolute inset-x-0 -top-32 bottom-0 bg-[#050810]/70 backdrop-blur-3xl pointer-events-none z-[1] [mask-image:linear-gradient(to_bottom,transparent_0px,rgba(0,0,0,0.7)_64px,black_128px,black_calc(100%-120px),transparent_100%)]" />
 
-          <div className="md:hidden absolute inset-0 overflow-hidden pointer-events-none -z-10">
+          <div className="md:hidden absolute inset-0 overflow-hidden pointer-events-none z-[2]">
             <div className="absolute top-[10%] -right-16 w-72 h-72 rounded-full blur-[80px] opacity-30" style={{ background: 'radial-gradient(circle, #8b5cf6 0%, transparent 70%)' }} />
             <div className="absolute top-[35%] -left-16 w-72 h-72 rounded-full blur-[80px] opacity-30" style={{ background: `radial-gradient(circle, ${currentTheme.glowBg.replace('0.15', '1')} 0%, transparent 70%)` }} />
             <div className="absolute top-[60%] -right-12 w-72 h-72 rounded-full blur-[80px] opacity-30" style={{ background: 'radial-gradient(circle, #06b6d4 0%, transparent 70%)' }} />
             <div className="absolute bottom-[8%] -left-12 w-72 h-72 rounded-full blur-[80px] opacity-30" style={{ background: 'radial-gradient(circle, #3b82f6 0%, transparent 70%)' }} />
           </div>
 
-          <div className="lg:hidden mt-5 mb-5 w-full">
+          <div className="lg:hidden relative z-10 mt-5 mb-5 w-full">
             {hasAnyMetaInfo && (
               <div className="relative flex flex-wrap items-center justify-between gap-y-3 gap-x-4 text-xs text-gray-400 bg-white/[0.03] backdrop-blur-md px-4 py-3 rounded-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] border border-white/[0.05] font-sans w-full">
                 
@@ -773,7 +774,7 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
               </div>
 
               {data?.body && (
-                <div id="sec-body" className="order-2 lg:order-none mb-6 lg:mb-0 relative p-5 md:p-8 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent group">
+                <div id="sec-body" className="order-2 lg:order-none mb-6 lg:mb-0 relative p-5 md:p-8 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent group select-none">
                   <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                   <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
@@ -781,7 +782,8 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                     <Icon name="info" className={`w-5 h-5 md:w-6 md:h-6 ${currentTheme.fillCurrent}`} /> معرفی کامل
                   </h2>
                   
-                  <div className={`rich-text theme-${type.toLowerCase()} relative z-10 text-sm md:text-base leading-relaxed`}>
+                  {/* اضافه شدن select-none و کلاس اجباری [&_*]:!select-none */}
+                  <div className={`rich-text theme-${type.toLowerCase()} relative z-10 text-sm md:text-base leading-relaxed select-none [&_*]:!select-none [&_*]:!backdrop-blur-none [&_*]:!blur-none`}>
                     <div dangerouslySetInnerHTML={{ __html: data.body }} />
                   </div>
                 </div>
@@ -910,30 +912,26 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
               )}
 
               {displaySettings.showAuthor !== false && (
-                <div id="sec-creators" className="order-8 lg:order-none mb-0 pt-3 mt-3 md:pt-6 md:mt-8 border-t border-white/10">
+                <div className="mb-0 pt-3 mt-3 md:pt-6 md:mt-8 border-t border-white/10">
                   <div className="flex items-center gap-2 md:gap-3 mb-4">
                     <Icon name="user" className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
-                    <span className="text-xs md:text-sm font-bold text-gray-300 font-sans">تهیه‌کنندگان و پژوهشگران:</span>
+                    <span className="text-xs md:text-sm font-bold text-gray-300 font-sans">نویسندگان و پژوهشگران:</span>
                   </div>
                   <div className="flex flex-wrap gap-2 md:gap-3">
                     {authors.map((author, index) => {
+                      // اصلاح و یکپارچه‌سازی متغیر استخراج تصویر
                       const rawImage = author?.avatar || author?.image || author?.imageUrl || author?.avatarUrl || author?.creator?.avatar || author?.creator?.imageUrl || null;
                       const authorImage = typeof rawImage === 'string' && rawImage.trim() !== ''
                         ? (rawImage.startsWith('http') || rawImage.startsWith('/') || rawImage.startsWith('data:') ? rawImage.trim() : `/${rawImage.trim()}`)
                         : null;
                       
                       return (
-                        <a key={index} href={`/t/${author.slug || author.name}`} className="inline-flex items-center gap-2 group cursor-pointer bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)] hover:bg-white/[0.08] transition-colors pr-1.5 pl-3 md:pl-4 py-1.5 rounded-full w-max">
-                          
-                          <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-white/[0.1] shadow-inner shrink-0 relative bg-white/10 flex items-center justify-center">
+                        <a key={index} href={`/t/${author.slug || author.name}`} className="inline-flex items-center gap-2 group cursor-pointer bg-white/5 hover:bg-white/10 border border-transparent shadow-inner transition-colors pr-1.5 pl-3 md:pl-4 py-1.5 rounded-full w-max">
+                          <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-transparent shadow-inner shrink-0 relative bg-black/40 flex items-center justify-center">
                             {authorImage ? (
-                              <img 
-                                src={authorImage} 
-                                alt={author.name} 
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
-                              />
+                              <BlurImage src={authorImage} alt={author.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                             ) : (
-                              <Icon name="user" className="w-4 h-4 text-white/60" />
+                              <Icon name="user" className="w-4 h-4 text-gray-500" />
                             )}
                           </div>
                           <span className={`text-[11px] md:text-xs font-bold text-white ${currentTheme.hoverText} transition-colors font-sans`}>

@@ -387,10 +387,14 @@ function CustomVideoPlayer({ src, mimeType, title }) {
 // ==========================================
 export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }) {
   // ==========================================
-  // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
+  // ۱. منطق احراز هویت و استخراج مجوزهای دانه‌ریز رسانه
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
+  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
+
+  const canUpload = can('MEDIA_UPLOAD');
+  const canEdit = can('MEDIA_EDIT');
+  const canDelete = can('MEDIA_DELETE');
 
   const [isMounted, setIsMounted] = useState(false);
   const [mediaList, setMediaList] = useState([]);
@@ -415,7 +419,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
     loadMedia();
   }, []);
 
-  // کنترل دسترسی هوشمند (پشتیبانی از حالت مستقل و حالت Picker)
+  // دیدن لیست رسانه‌ها برای همه مدیران پنل و در حالت Picker مجاز است
   useEffect(() => {
     if (isPickerMode) {
       setHasAccess(true);
@@ -427,14 +431,8 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
 
     if (user) {
       setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
-    } else if (typeof window !== 'undefined') {
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      if (!isLoggedIn) {
-        setHasAccess(false);
-      } else {
-        const timer = setTimeout(() => setHasAccess(false), 1500);
-        return () => clearTimeout(timer);
-      }
+    } else {
+      setHasAccess(false);
     }
   }, [user, authIsLoading, authLoading, isFetching, isPickerMode]);
 
@@ -477,6 +475,10 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
   };
 
   const handleFilesUpload = async (files) => {
+    if (!canUpload) {
+      toast.error('شما مجوز آپلود فایل در کتابخانه رسانه را ندارید.');
+      return;
+    }
     if (!files || files.length === 0) return;
 
     setUploading(true);
@@ -509,6 +511,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    if (!canUpload) return;
     setIsDragging(true);
   };
 
@@ -520,6 +523,10 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
+    if (!canUpload) {
+      toast.error('شما مجوز آپلود فایل را ندارید.');
+      return;
+    }
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFilesUpload(e.dataTransfer.files);
     }
@@ -534,6 +541,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
   };
 
   const handleUpdateMedia = async () => {
+    if (!canEdit) return toast.error('شما مجوز ویرایش مشخصات رسانه را ندارید.');
     setSaveStatus('در حال ذخیره...');
     toast.promise(
       updateMedia(selectedMedia.id, { title: editTitle, altText: editAlt }),
@@ -558,6 +566,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
   };
   
   const requestRename = () => {
+    if (!canEdit) return toast.error('شما مجوز تغییر نام فایل را ندارید.');
     if (!editFileName || editFileName.trim() === '') return;
     setConfirmDialog({ isOpen: true, type: 'RENAME', payload: null });
   };
@@ -592,6 +601,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
   };
 
   const requestDelete = (id) => {
+    if (!canDelete) return toast.error('شما مجوز حذف رسانه را ندارید.');
     setConfirmDialog({ isOpen: true, type: 'DELETE', payload: id });
   };
 
@@ -695,8 +705,8 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
       className="max-w-7xl mx-auto space-y-6 pb-10 relative text-right font-sans select-none"
     >
       
-      {/* اورلی رها کردن فایل (Drag & Drop Zone) */}
-      {isDragging && (
+      {/* اورلی رها کردن فایل (فقط در صورت داشتن مجوز آپلود) */}
+      {isDragging && canUpload && (
         <div className="fixed inset-0 z-25 bg-[#06b6d4]/20 backdrop-blur-md border-4 border-dashed border-[#06b6d4] rounded-3xl flex flex-col items-center justify-center gap-4 m-4 pointer-events-none animate-pulse">
           <Icon name="upload" className="w-16 h-16 text-[#06b6d4]" />
           <p className="text-xl font-bold text-white">فایل‌ها را برای آپلود سریع رها کنید</p>
@@ -721,22 +731,25 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
           <p className="text-sm text-gray-400 font-light">مدیریت فایل‌ها، تصاویر و ویدیوهای سایت</p>
         </div>
         
-        <div className="relative z-10">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={(e) => handleFilesUpload(e.target.files)} 
-            multiple 
-            className="hidden" 
-          />
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 cursor-pointer border border-transparent"
-          >
-            {uploading ? 'در حال آپلود...' : 'افزودن'}
-          </button>
-        </div>
+        {/* دکمه آپلود فقط برای دارندگان مجوز MEDIA_UPLOAD */}
+        {canUpload && (
+          <div className="relative z-10">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={(e) => handleFilesUpload(e.target.files)} 
+              multiple 
+              className="hidden" 
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 cursor-pointer border border-transparent"
+            >
+              {uploading ? 'در حال آپلود...' : 'افزودن'}
+            </button>
+          </div>
+        )}
       </motion.div>
 
       {/* تب‌ها و باکس سرچ */}
@@ -819,7 +832,6 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                       <Icon name="document" className="w-12 h-12 text-gray-400" />
                     )}
                     
-                    {/* بدج نوع فایل روی کارت */}
                     <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-[10px] px-2 py-1 rounded-lg text-gray-200 shadow-md flex items-center gap-1 z-10 font-bold border border-white/5">
                       {badge.icon}
                       <span>{badge.label}</span>
@@ -923,32 +935,53 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                       <p className="text-xs text-gray-300 select-text"><strong className="text-gray-500 select-none">Size:</strong> {formatBytes(selectedMedia.size)}</p>
                     </div>
 
-                    <div className="space-y-2 p-4 bg-[#050810]/50 rounded-xl border border-[#06b6d4]/20 shadow-inner">
-                      <label className="block text-sm font-bold text-[#06b6d4]">تغییر نام اصلی فایل</label>
-                      <p className="text-[10px] text-gray-400 leading-tight">توجه: تغییر نام باعث تغییر لینک می‌شود.</p>
-                      <div className="flex gap-2 mt-2">
-                        <input type="text" value={editFileName} onChange={(e) => setEditFileName(e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-lg p-2.5 text-sm text-white focus:border-[#06b6d4] dir-ltr font-sans outline-none shadow-inner select-text transition-all" />
-                        <button onClick={requestRename} className="px-3 bg-[#06b6d4]/20 hover:bg-[#06b6d4] hover:text-gray-900 text-[#06b6d4] rounded-lg text-xs font-bold transition-colors cursor-pointer border border-transparent">اعمال نام</button>
+                    {/* بخش تغییر نام اصلی فایل (فقط با مجوز MEDIA_EDIT) */}
+                    {canEdit && (
+                      <div className="space-y-2 p-4 bg-[#050810]/50 rounded-xl border border-[#06b6d4]/20 shadow-inner">
+                        <label className="block text-sm font-bold text-[#06b6d4]">تغییر نام اصلی فایل</label>
+                        <p className="text-[10px] text-gray-400 leading-tight">توجه: تغییر نام باعث تغییر لینک می‌شود.</p>
+                        <div className="flex gap-2 mt-2">
+                          <input type="text" value={editFileName} onChange={(e) => setEditFileName(e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-lg p-2.5 text-sm text-white focus:border-[#06b6d4] dir-ltr font-sans outline-none shadow-inner select-text transition-all" />
+                          <button onClick={requestRename} className="px-3 bg-[#06b6d4]/20 hover:bg-[#06b6d4] hover:text-gray-900 text-[#06b6d4] rounded-lg text-xs font-bold transition-colors cursor-pointer border border-transparent">اعمال نام</button>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="space-y-2">
                       <label className="block text-sm font-medium text-gray-300 pl-1">عنوان فایل</label>
-                      <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full bg-black/40 rounded-xl p-3 text-sm text-white focus:border focus:border-[#06b6d4] border border-white/5 font-sans outline-none shadow-inner select-text transition-all" placeholder="عنوان دلخواه..." />
+                      <input 
+                        type="text" 
+                        value={editTitle} 
+                        disabled={!canEdit}
+                        onChange={(e) => setEditTitle(e.target.value)} 
+                        className="w-full bg-black/40 rounded-xl p-3 text-sm text-white focus:border focus:border-[#06b6d4] border border-white/5 font-sans outline-none shadow-inner select-text transition-all disabled:opacity-60 disabled:cursor-not-allowed" 
+                        placeholder="عنوان دلخواه..." 
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <label className="block text-sm font-medium text-gray-300 pl-1">
                         متن جایگزین (Alt Text) <span className="text-xs text-rose-400">*سئو</span>
                       </label>
-                      <textarea rows="3" value={editAlt} onChange={(e) => setEditAlt(e.target.value)} className="w-full bg-black/40 rounded-xl p-3 text-sm text-white focus:border focus:border-[#06b6d4] border border-white/5 font-sans outline-none shadow-inner resize-none select-text transition-all" placeholder="توضیح تصویر/فایل..."></textarea>
+                      <textarea 
+                        rows="3" 
+                        value={editAlt} 
+                        disabled={!canEdit}
+                        onChange={(e) => setEditAlt(e.target.value)} 
+                        className="w-full bg-black/40 rounded-xl p-3 text-sm text-white focus:border focus:border-[#06b6d4] border border-white/5 font-sans outline-none shadow-inner resize-none select-text transition-all disabled:opacity-60 disabled:cursor-not-allowed" 
+                        placeholder="توضیح تصویر/فایل..."
+                      ></textarea>
                     </div>
                   </div>
 
                   <div className="p-6 bg-[#050810]/80 border-t border-white/10 flex items-center justify-between font-sans shadow-inner">
-                    <button onClick={() => requestDelete(selectedMedia.id)} className="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors cursor-pointer">
-                      <Icon name="trash" className="w-3.5 h-3.5" />
-                    </button>
+                    <div>
+                      {canDelete && (
+                        <button onClick={() => requestDelete(selectedMedia.id)} className="text-sm font-medium text-rose-500 hover:text-rose-400 transition-colors cursor-pointer" title="حذف رسانه">
+                          <Icon name="trash" className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs font-bold text-[#10b981]">{saveStatus}</span>
                       
@@ -964,9 +997,11 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                         </button>
                       )}
 
-                      <button onClick={handleUpdateMedia} className="px-8 py-2.5 bg-[#06b6d4] hover:bg-[#0891b2] hover:scale-105 text-white rounded-xl text-sm font-bold transition-transform shadow-[0_0_20px_rgba(6,182,212,0.3)] cursor-pointer border border-transparent">
-                        ذخیره
-                      </button>
+                      {canEdit && (
+                        <button onClick={handleUpdateMedia} className="px-8 py-2.5 bg-[#06b6d4] hover:bg-[#0891b2] hover:scale-105 text-white rounded-xl text-sm font-bold transition-transform shadow-[0_0_20px_rgba(6,182,212,0.3)] cursor-pointer border border-transparent">
+                          ذخیره
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

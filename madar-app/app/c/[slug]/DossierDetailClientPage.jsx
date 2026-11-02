@@ -10,7 +10,7 @@ import EmptyState from '@/app/components/EmptyState';
 const getContentTypeConfig = (type) => {
   const t = type?.toUpperCase() || '';
   if(t.includes('VIDEO') || t.includes('AUDIO') || t.includes('PRODUCED') || t === 'محتوای تولیدی') return { label: 'محتوای تولیدی', bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-transparent', icon: 'video', hex: '#f43f5e', prefix: '/p' };
-  if(t.includes('RAW') || t.includes('FOOTAGE') || t === 'فوتیج و راش') return { label: 'فوتیج و راش', bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-transparent', icon: 'grid', hex: '#f59e0b', prefix: '/f' };
+  if(t.includes('RAW') || t.includes('FOOTAGE') || t === 'فوتیج و راش') return { label: 'فوتیج و راش', bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-transparent', icon: 'footage', hex: '#f59e0b', prefix: '/f' };
   if(t.includes('TOOL') || t === 'ابزارها' || t === 'محتوای ابزارها') return { label: 'ابزارها', bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-transparent', icon: 'project', hex: '#06b6d4', prefix: '/tool' };
   if(t.includes('BLOG') || t.includes('ARTICLE') || t === 'بلاگ') return { label: 'بلاگ', bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-transparent', icon: 'fileText', hex: '#10b981', prefix: '/blog' };
   return { label: type || 'نامشخص', bg: 'bg-white/5', text: 'text-gray-300', border: 'border-transparent', icon: 'document', hex: '#9ca3af', prefix: '/p' };

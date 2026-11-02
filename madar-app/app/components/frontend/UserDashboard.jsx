@@ -1042,7 +1042,7 @@ export default function UserDashboard({ initialUser }) {
                             محتواهای دانلود شده
                           </h2>
                           <span className="text-xs font-bold text-[#06b6d4] bg-white/[0.05] border border-white/[0.1] px-3 py-1.5 rounded-full shadow-inner">
-                            {toPersianDigits(uniqueDownloads.length)} اثر یکتا
+                            {toPersianDigits(uniqueDownloads.length)} اثر
                           </span>
                         </div>
 

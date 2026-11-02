@@ -59,7 +59,7 @@ export default function RulesSettingsPage() {
   // ==========================================
   // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
+  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -70,7 +70,8 @@ export default function RulesSettingsPage() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
+      // فقط مدیرانی که تیک ویرایش قوانین را دارند مجاز به ورود هستند
+      setHasAccess(user.isSuperAdmin || (can && can('TERMS_EDIT')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -80,7 +81,7 @@ export default function RulesSettingsPage() {
         return () => clearTimeout(timer);
       }
     }
-  }, [user, authIsLoading, authLoading, isFetching]);
+  }, [user, authIsLoading, authLoading, isFetching, can]);
 
   // ==========================================
   // ۲. استیت‌های محتوا و دریافت داده
@@ -132,6 +133,8 @@ export default function RulesSettingsPage() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!can('TERMS_EDIT')) return toast.error('شما مجوز ذخیره و ویرایش صفحه قوانین را ندارید.');
+    
     setSaving(true);
 
     toast.promise(

@@ -34,7 +34,7 @@ export default function AdminCommentsPage() {
   // ==========================================
   // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can } = useAuth();
+  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can, canAny } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -45,7 +45,8 @@ export default function AdminCommentsPage() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(can('COMMENT_MANAGE') || user.isSuperAdmin);
+      // فقط مدیرانی که حداقل یکی از تیک‌های مربوط به نظرات را دارند می‌توانند لیست را ببینند
+      setHasAccess(user.isSuperAdmin || (canAny && canAny(['COMMENT_APPROVE_REJECT', 'COMMENT_EDIT_REPLY'])));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -55,7 +56,7 @@ export default function AdminCommentsPage() {
         return () => clearTimeout(timer);
       }
     }
-  }, [user, authIsLoading, authLoading, isFetching, can]);
+  }, [user, authIsLoading, authLoading, isFetching, canAny]);
 
   // ==========================================
   // ۲. استیت‌ها و دریافت اطلاعات
@@ -137,6 +138,8 @@ export default function AdminCommentsPage() {
   const visibleComments = filteredAndSortedComments.slice(0, visibleCount);
 
   const handleQuickStatusChange = async (id, status) => {
+    if (!can('COMMENT_APPROVE_REJECT')) return toast.error('شما مجوز تایید یا رد سریع نظرات را ندارید.');
+    
     setComments(prev => prev.map(c => c.id === id ? { ...c, status } : c));
     
     const res = await updateCommentStatusAction(id, status);
@@ -149,6 +152,8 @@ export default function AdminCommentsPage() {
   };
 
   const openReplyModal = (comment) => {
+    if (!can('COMMENT_EDIT_REPLY')) return toast.error('شما مجوز ویرایش و پاسخ‌گویی به نظرات را ندارید.');
+    
     setSelectedComment(comment);
     setReplyFormData({
       userText: comment.text,
@@ -160,6 +165,8 @@ export default function AdminCommentsPage() {
 
   const handleSaveReply = async (e) => {
     e.preventDefault();
+    if (!can('COMMENT_EDIT_REPLY')) return toast.error('شما مجوز ویرایش و پاسخ‌گویی را ندارید.');
+    
     const toastId = toast.loading('در حال ثبت اطلاعات...');
     const res = await saveAdminReplyAction(
       selectedComment.id, 
@@ -338,17 +345,19 @@ export default function AdminCommentsPage() {
 
                   {/* ستون چپ: دکمه‌های اکشن */}
                   <div className="flex md:flex-col gap-2 shrink-0 md:w-36 pt-4 md:pt-0 border-t border-white/10 md:border-t-0 mt-4 md:mt-0">
-                    <button onClick={() => openReplyModal(comment)} className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6] text-[#8b5cf6] hover:text-white rounded-xl text-xs font-bold transition-colors border border-transparent hover:border-[#8b5cf6]/40 shadow-sm cursor-pointer">
-                      <Icon name="pencil" className="w-4 h-4" /> ویرایش / پاسخ
-                    </button>
+                    {can('COMMENT_EDIT_REPLY') && (
+                      <button onClick={() => openReplyModal(comment)} className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6] text-[#8b5cf6] hover:text-white rounded-xl text-xs font-bold transition-colors border border-transparent hover:border-[#8b5cf6]/40 shadow-sm cursor-pointer">
+                        <Icon name="pencil" className="w-4 h-4" /> ویرایش / پاسخ
+                      </button>
+                    )}
                     
-                    {comment.status !== 'APPROVED' && (
+                    {can('COMMENT_APPROVE_REJECT') && comment.status !== 'APPROVED' && (
                       <button onClick={() => handleQuickStatusChange(comment.id, 'APPROVED')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-xl text-xs font-bold transition-colors border border-transparent hover:border-emerald-500/40 shadow-sm cursor-pointer">
                         <Icon name="checkCircle" className="w-4 h-4" /> تایید سریع
                       </button>
                     )}
                     
-                    {comment.status !== 'REJECTED' && (
+                    {can('COMMENT_APPROVE_REJECT') && comment.status !== 'REJECTED' && (
                       <button onClick={() => handleQuickStatusChange(comment.id, 'REJECTED')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white rounded-xl text-xs font-bold transition-colors border border-transparent hover:border-rose-500/40 shadow-sm cursor-pointer">
                         <Icon name="trash" className="w-4 h-4" /> حذف
                       </button>
@@ -418,7 +427,7 @@ export default function AdminCommentsPage() {
                     />
                   </div>
 
-                  {selectedComment?.status !== 'APPROVED' && (
+                  {selectedComment?.status !== 'APPROVED' && can('COMMENT_APPROVE_REJECT') && (
                     <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl border border-transparent bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors shadow-inner">
                       <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${replyFormData.autoApprove ? 'bg-emerald-500 border-emerald-500' : 'border-gray-500 bg-black/40'}`}>
                         {replyFormData.autoApprove && <Icon name="checkCircle" className="w-3 h-3 text-white" />}

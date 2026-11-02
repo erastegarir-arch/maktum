@@ -38,7 +38,7 @@ export default function TaxonomiesPage() {
   // ==========================================
   // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
+  const { user, can, canAny, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -49,6 +49,8 @@ export default function TaxonomiesPage() {
     if (isWorking) return;
 
     if (user) {
+      // این صفحه برای تمام کسانی که نقش مدیر دارند باز است تا فقط ببینند.
+      // بنابراین همین شرط کافیست، اما عملیات داخلش محدود می‌شود.
       setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -156,6 +158,11 @@ export default function TaxonomiesPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // کنترل دسترسی برای ثبت و ویرایش
+    if (editingId && !can('TAXONOMY_EDIT')) return toast.error('شما مجوز ویرایش این آیتم را ندارید.');
+    if (!editingId && !can('TAXONOMY_CREATE')) return toast.error('شما مجوز ایجاد آیتم جدید را ندارید.');
+
     if (!name.trim()) {
       setErrorMsg('نام آیتم الزامی است.');
       toast.error('لطفاً نام آیتم را وارد کنید.');
@@ -201,18 +208,19 @@ export default function TaxonomiesPage() {
     );
   };
 
-  // آپدیتِ تابع ذخیره‌سازی برای ارسال اطلاعات به دیتابیس
   const handleSaveSettings = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
+    // برای تغییر ظاهر صفحه بایگانی، حداقل به مجوز ویرایش نیاز است
+    if (!can('TAXONOMY_EDIT')) return toast.error('شما مجوز ویرایش ظاهر این صفحه را ندارید.');
     
+    setSubmitting(true);
     const res = await saveArchiveSettingsAction({
       badge: pageBadge,
       title: pageTitle,
       description: pageDesc
     });
-    
     setSubmitting(false);
+    
     if (res.success) {
       toast.success('تنظیمات صفحه طبقه‌بندی‌ها با موفقیت در دیتابیس ذخیره شد.');
     } else {
@@ -221,6 +229,8 @@ export default function TaxonomiesPage() {
   };
 
   const handleEdit = (item) => {
+    if (!can('TAXONOMY_EDIT')) return toast.error('شما مجوز ویرایش را ندارید.');
+    
     setEditingId(item.id);
     setName(item.name);
     setSlug(item.slug);
@@ -233,8 +243,9 @@ export default function TaxonomiesPage() {
 
   const confirmDelete = async () => {
     if (!deletingItem) return;
+    if (!can('TAXONOMY_DELETE')) return toast.error('شما مجوز حذف را ندارید.');
+    
     setIsDeleting(true);
-
     toast.promise(
       deleteTaxonomy(deletingItem.id),
       {
@@ -344,125 +355,132 @@ export default function TaxonomiesPage() {
         {activeTab !== 'SETTINGS' ? (
           <>
             {/* فرم افزودن / ویرایش */}
-            <div className="lg:col-span-1 sticky top-6 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden h-fit group border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
-              <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
-              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
+            {(can('TAXONOMY_CREATE') || can('TAXONOMY_EDIT')) ? (
+              <div className="lg:col-span-1 sticky top-6 rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden h-fit group border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
+                <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
+                <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
-              <div className="p-6 space-y-4 relative z-10 bg-[#050810]/50 shadow-inner rounded-3xl">
-                <h2 className="text-lg font-bold text-white border-b border-white/5 pb-3 flex items-center gap-2">
-                  <Icon name="plus" className="w-4 h-4 text-[#10b981]" />
-                  {editingId ? `ویرایش ${getSingularTitle()}` : `افزودن ${getSingularTitle()} جدید`}
-                </h2>
+                <div className="p-6 space-y-4 relative z-10 bg-[#050810]/50 shadow-inner rounded-3xl">
+                  <h2 className="text-lg font-bold text-white border-b border-white/5 pb-3 flex items-center gap-2">
+                    <Icon name="plus" className="w-4 h-4 text-[#10b981]" />
+                    {editingId ? `ویرایش ${getSingularTitle()}` : `افزودن ${getSingularTitle()} جدید`}
+                  </h2>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-300 pl-1">نام (عنوان) *</label>
-                    <input 
-                      type="text" 
-                      value={name} 
-                      onChange={handleNameChange} 
-                      placeholder={`مثال: ${activeTab === 'CREATOR' ? 'آنتونی گیدنز' : 'فلسفه'}`} 
-                      className="w-full bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] border border-white/5 transition-colors shadow-inner select-text font-sans" 
-                    />
-                  </div>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-300 pl-1">نام (عنوان) *</label>
+                      <input 
+                        type="text" 
+                        value={name} 
+                        onChange={handleNameChange} 
+                        placeholder={`مثال: ${activeTab === 'CREATOR' ? 'آنتونی گیدنز' : 'فلسفه'}`} 
+                        className="w-full bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] border border-white/5 transition-colors shadow-inner select-text font-sans" 
+                      />
+                    </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-300 pl-1">لینک انگلیسی (Slug)</label>
-                    <input 
-                      type="text" 
-                      value={slug} 
-                      onChange={(e) => setSlug(e.target.value)} 
-                      placeholder="تولید خودکار یا دستی..." 
-                      className="w-full bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] border border-white/5 dir-ltr text-left transition-colors font-sans shadow-inner select-text" 
-                    />
-                  </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-300 pl-1">لینک انگلیسی (Slug)</label>
+                      <input 
+                        type="text" 
+                        value={slug} 
+                        onChange={(e) => setSlug(e.target.value)} 
+                        placeholder="تولید خودکار یا دستی..." 
+                        className="w-full bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] border border-white/5 dir-ltr text-left transition-colors font-sans shadow-inner select-text" 
+                      />
+                    </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-300 pl-1">روتیتر (باکس بالای عنوان)</label>
-                    <input 
-                      type="text" 
-                      value={preTitle} 
-                      onChange={(e) => setPreTitle(e.target.value)} 
-                      placeholder="مثال: پرونده ویژه / استاد برجسته" 
-                      className="w-full bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] border border-white/5 transition-colors shadow-inner select-text font-sans" 
-                    />
-                  </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-300 pl-1">روتیتر (باکس بالای عنوان)</label>
+                      <input 
+                        type="text" 
+                        value={preTitle} 
+                        onChange={(e) => setPreTitle(e.target.value)} 
+                        placeholder="مثال: پرونده ویژه / استاد برجسته" 
+                        className="w-full bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] border border-white/5 transition-colors shadow-inner select-text font-sans" 
+                      />
+                    </div>
 
-                  {activeTab === 'CREATOR' && (
-                    <div className="space-y-2">
-                      <label className="text-xs text-gray-300 pl-1">تصویر پروفایل پدیدآورنده</label>
-                      {imageUrl ? (
-                        <div className="flex items-center gap-3 p-3 bg-black/20 border border-white/5 rounded-xl shadow-inner">
-                          <img src={imageUrl} alt="تصویر پروفایل" className="w-12 h-12 object-cover rounded-lg shrink-0 border border-white/5" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-emerald-400 font-bold truncate">تصویر انتخاب شد</p>
-                            <p className="text-[10px] text-gray-500 truncate dir-ltr text-right font-sans select-text">{imageUrl}</p>
+                    {activeTab === 'CREATOR' && (
+                      <div className="space-y-2">
+                        <label className="text-xs text-gray-300 pl-1">تصویر پروفایل پدیدآورنده</label>
+                        {imageUrl ? (
+                          <div className="flex items-center gap-3 p-3 bg-black/20 border border-white/5 rounded-xl shadow-inner">
+                            <img src={imageUrl} alt="تصویر پروفایل" className="w-12 h-12 object-cover rounded-lg shrink-0 border border-white/5" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-emerald-400 font-bold truncate">تصویر انتخاب شد</p>
+                              <p className="text-[10px] text-gray-500 truncate dir-ltr text-right font-sans select-text">{imageUrl}</p>
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={() => setIsMediaModalOpen(true)}
+                              className="px-3 py-1.5 bg-white/10 hover:bg-[#10b981] text-white text-xs rounded-lg transition-colors cursor-pointer shrink-0 font-bold border border-transparent shadow-inner"
+                            >
+                              <Icon name="change" className="w-3.5 h-3.5" />
+                            </button>
+                            <Tooltip text="حذف تصویر">
+                              <button 
+                                type="button"
+                                onClick={() => setImageUrl('')}
+                                className="p-1.5 text-rose-400 hover:bg-rose-500/20 rounded-lg transition-colors cursor-pointer shrink-0 border border-transparent shadow-inner"
+                              >
+                                <Icon name="trash" className="w-4 h-4" />
+                              </button>
+                            </Tooltip>
                           </div>
+                        ) : (
                           <button 
                             type="button"
                             onClick={() => setIsMediaModalOpen(true)}
-                            className="px-3 py-1.5 bg-white/10 hover:bg-[#10b981] text-white text-xs rounded-lg transition-colors cursor-pointer shrink-0 font-bold border border-transparent shadow-inner"
+                            className="w-full py-4 bg-black/40 hover:bg-white/10 border border-dashed border-white/20 hover:border-[#10b981] text-gray-400 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-inner font-sans"
                           >
-                            <Icon name="change" className="w-3.5 h-3.5" />
+                            <Icon name="image" className="w-5 h-5 text-[#10b981]" />
+                            انتخاب تصویر از رسانه
                           </button>
-                          <Tooltip text="حذف تصویر">
-                            <button 
-                              type="button"
-                              onClick={() => setImageUrl('')}
-                              className="p-1.5 text-rose-400 hover:bg-rose-500/20 rounded-lg transition-colors cursor-pointer shrink-0 border border-transparent shadow-inner"
-                            >
-                              <Icon name="trash" className="w-4 h-4" />
-                            </button>
-                          </Tooltip>
-                        </div>
-                      ) : (
+                        )}
+                      </div>
+                    )}
+
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-300 pl-1">توضیحات</label>
+                      <textarea 
+                        rows="3" 
+                        value={description} 
+                        onChange={(e) => setDescription(e.target.value)} 
+                        placeholder="توضیحات تکمیلی..." 
+                        className="w-full bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] border border-white/5 transition-colors shadow-inner resize-none select-text font-sans" 
+                      />
+                    </div>
+
+                    {errorMsg && <p className="text-xs text-rose-500 bg-rose-500/10 p-2.5 rounded-lg border border-transparent shadow-inner font-sans">{errorMsg}</p>}
+
+                    <div className="flex gap-2 mt-2 border-t border-white/5 pt-3">
+                      <button 
+                        type="submit" 
+                        disabled={submitting} 
+                        className="flex-1 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer disabled:opacity-50 hover:scale-105 active:scale-95 border border-transparent font-sans"
+                      >
+                        {submitting ? 'در حال ثبت...' : 'ذخیره'}
+                      </button>
+                      
+                      {editingId && (
                         <button 
                           type="button"
-                          onClick={() => setIsMediaModalOpen(true)}
-                          className="w-full py-4 bg-black/40 hover:bg-white/10 border border-dashed border-white/20 hover:border-[#10b981] text-gray-400 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-inner font-sans"
+                          onClick={resetForm}
+                          className="py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-sm transition-all cursor-pointer border border-transparent shadow-inner font-sans"
                         >
-                          <Icon name="image" className="w-5 h-5 text-[#10b981]" />
-                          انتخاب تصویر از رسانه
+                          انصراف
                         </button>
                       )}
                     </div>
-                  )}
-
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-300 pl-1">توضیحات</label>
-                    <textarea 
-                      rows="3" 
-                      value={description} 
-                      onChange={(e) => setDescription(e.target.value)} 
-                      placeholder="توضیحات تکمیلی..." 
-                      className="w-full bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] border border-white/5 transition-colors shadow-inner resize-none select-text font-sans" 
-                    />
-                  </div>
-
-                  {errorMsg && <p className="text-xs text-rose-500 bg-rose-500/10 p-2.5 rounded-lg border border-transparent shadow-inner font-sans">{errorMsg}</p>}
-
-                  <div className="flex gap-2 mt-2 border-t border-white/5 pt-3">
-                    <button 
-                      type="submit" 
-                      disabled={submitting} 
-                      className="flex-1 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer disabled:opacity-50 hover:scale-105 active:scale-95 border border-transparent font-sans"
-                    >
-                      {submitting ? 'در حال ثبت...' : 'ذخیره'}
-                    </button>
-                    
-                    {editingId && (
-                      <button 
-                        type="button"
-                        onClick={resetForm}
-                        className="py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-sm transition-all cursor-pointer border border-transparent shadow-inner font-sans"
-                      >
-                        انصراف
-                      </button>
-                    )}
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="lg:col-span-1 sticky top-6 rounded-3xl overflow-hidden h-fit p-6 text-center border border-white/5 bg-black/20 shadow-inner">
+                <Icon name="lock" className="w-8 h-8 text-rose-500/50 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm">شما مجوز ایجاد یا ویرایش ندارید.</p>
+              </div>
+            )}
 
             {/* لیست موجودیت‌ها */}
             <div className="lg:col-span-2 relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
@@ -535,22 +553,26 @@ export default function TaxonomiesPage() {
                               <Icon name="arrowUpRight" className="w-4 h-4" />
                             </a>
                           </Tooltip>
-                          <Tooltip text="ویرایش">
-                            <button 
-                              onClick={() => handleEdit(item)}
-                              className="p-2.5 text-[#10b981] hover:bg-[#10b981]/10 rounded-xl transition-all cursor-pointer flex items-center justify-center text-xs border border-transparent shadow-inner"
-                            >
-                              <Icon name="pencil" className="w-4 h-4" />
-                            </button>
-                          </Tooltip>
-                          <Tooltip text="حذف">
-                            <button 
-                              onClick={() => setDeletingItem(item)}
-                              className="p-2.5 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer flex items-center justify-center text-xs border border-transparent shadow-inner"
-                            >
-                              <Icon name="trash" className="w-4 h-4" />
-                            </button>
-                          </Tooltip>
+                          {can('TAXONOMY_EDIT') && (
+                            <Tooltip text="ویرایش">
+                              <button 
+                                onClick={() => handleEdit(item)}
+                                className="p-2.5 text-[#10b981] hover:bg-[#10b981]/10 rounded-xl transition-all cursor-pointer flex items-center justify-center text-xs border border-transparent shadow-inner"
+                              >
+                                <Icon name="pencil" className="w-4 h-4" />
+                              </button>
+                            </Tooltip>
+                          )}
+                          {can('TAXONOMY_DELETE') && (
+                            <Tooltip text="حذف">
+                              <button 
+                                onClick={() => setDeletingItem(item)}
+                                className="p-2.5 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer flex items-center justify-center text-xs border border-transparent shadow-inner"
+                              >
+                                <Icon name="trash" className="w-4 h-4" />
+                              </button>
+                            </Tooltip>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -621,7 +643,7 @@ export default function TaxonomiesPage() {
                   <div className="pt-4 border-t border-white/5">
                     <button 
                       type="submit" 
-                      disabled={submitting} 
+                      disabled={submitting || !can('TAXONOMY_EDIT')} 
                       className="w-full py-4 rounded-xl bg-[#3b82f6] hover:bg-blue-600 text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] cursor-pointer disabled:opacity-50 hover:scale-[1.02] active:scale-95 border border-transparent mt-2 font-sans"
                     >
                       {submitting ? 'در حال ذخیره...' : 'ذخیره'}

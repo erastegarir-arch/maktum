@@ -1,3 +1,4 @@
+// مسیر فایل: app/components/frontend/TaxonomyClientPage.jsx
 'use client';
 
 import { useState, useRef, useMemo } from 'react';
@@ -133,142 +134,148 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
   };
 
   return (
-    // کلاس select-none برای جلوگیری از خط کشیده شدن متن‌ها اضافه شده است
-    <div className="relative min-h-screen flex flex-col scroll-smooth font-sans select-none text-right">   
-      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 pb-10 md:pb-12 w-full relative z-10 pt-0">
-        
-        <Breadcrumbs 
-          items={[
-            { label: 'مدار', href: '/' },
-            {
-             label: activeTheme.parentLabel, 
-             href: `/t?tab=${tType === 'CREATOR' ? 'creators' : tType === 'CATEGORY' ? 'categories' : 'hashtags'}` 
-            },
-            { label: taxonomy.title || taxonomy.name } 
-           ]} 
-          /> 
-            
-        {/* ================= هدر معرفی (باکس گلس‌مورفیک با هاله نور) ================= */}
-        <section className="relative overflow-hidden p-6 md:p-12 group rounded-3xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] border border-white/[0.08] animate-[fadeIn_0.5s_ease-out] bg-white/[0.03] backdrop-blur-3xl">
-          
-          <div className="absolute inset-0 shadow-[inset_0_0_30px_rgba(255,255,255,0.03)] pointer-events-none -z-10" />
-          <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.via} to-transparent opacity-90 pointer-events-none z-20`} />
-          
-          <div className={`absolute left-1/2 md:left-0 top-0 w-full md:w-1/2 h-full ${activeTheme.bgSoft} opacity-40 blur-[60px] md:blur-[80px] rounded-full transform -translate-x-1/2 md:-translate-x-0 -translate-y-1/4 pointer-events-none -z-10`}></div>
+    <>
+      {/* تزریق استایل قطعی برای جلوگیری از انتخاب متن در تمامی لایه‌ها و متن‌های دیتابیس */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .strict-no-select, .strict-no-select * {
+          -webkit-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          user-select: none !important;
+        }
+      `}} />
 
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-5 md:gap-8 relative z-10">
+      <div className="relative min-h-screen flex flex-col scroll-smooth font-sans text-right strict-no-select select-none [&_*]:!select-none">   
+        <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 pb-10 md:pb-12 w-full relative z-10 pt-0">
+          
+          <Breadcrumbs 
+            items={[
+              { label: 'مدار', href: '/' },
+              {
+               label: activeTheme.parentLabel, 
+               href: `/t?tab=${tType === 'CREATOR' ? 'creators' : tType === 'CATEGORY' ? 'categories' : 'hashtags'}` 
+              },
+              { label: taxonomy.title || taxonomy.name } 
+             ]} 
+            /> 
+              
+          {/* ================= هدر معرفی (باکس گلس‌مورفیک با هاله نور) ================= */}
+          <section className="relative overflow-hidden p-6 md:p-12 group rounded-3xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] border border-white/[0.08] animate-[fadeIn_0.5s_ease-out] bg-white/[0.03] backdrop-blur-3xl">
             
-            <div className="flex-shrink-0 relative group/icon cursor-pointer">
-              {/* بازگردانی سایز آواتار به اندازه کوچکتر قبلی */}
-              <div className={`w-24 h-24 md:w-40 md:h-40 rounded-full overflow-hidden border border-white/[0.1] shadow-[inset_0_0_15px_rgba(255,255,255,0.04),0_10px_20px_rgba(0,0,0,0.4)] bg-black/20 backdrop-blur-md flex items-center justify-center relative transition-all duration-500`}>
-                {renderAvatar()}
+            <div className="absolute inset-0 shadow-[inset_0_0_30px_rgba(255,255,255,0.03)] pointer-events-none -z-10" />
+            <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.via} to-transparent opacity-90 pointer-events-none z-20`} />
+            
+            <div className={`absolute left-1/2 md:left-0 top-0 w-full md:w-1/2 h-full ${activeTheme.bgSoft} opacity-40 blur-[60px] md:blur-[80px] rounded-full transform -translate-x-1/2 md:-translate-x-0 -translate-y-1/4 pointer-events-none -z-10`}></div>
+
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-5 md:gap-8 relative z-10">
+              
+              <div className="flex-shrink-0 relative group/icon cursor-pointer">
+                <div className={`w-24 h-24 md:w-40 md:h-40 rounded-full overflow-hidden border border-white/[0.1] shadow-[inset_0_0_15px_rgba(255,255,255,0.04),0_10px_20px_rgba(0,0,0,0.4)] bg-black/20 backdrop-blur-md flex items-center justify-center relative transition-all duration-500`}>
+                  {renderAvatar()}
+                </div>
+              </div>
+
+              <div className="flex-grow text-center md:text-right mt-2 md:mt-0 flex flex-col items-center md:items-start">
+                
+                {taxonomy.preTitle && (
+                  <div className={`inline-flex items-center gap-2 px-3 py-1.5 md:px-4 bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)] rounded-full text-[10px] md:text-xs font-bold ${activeTheme.text} tracking-widest font-sans mb-3 md:mb-4`}>
+                    <span className="relative flex h-2 w-2 md:h-2.5 md:w-2.5 items-center justify-center shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: activeTheme.color }}></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: activeTheme.color, boxShadow: `0 0 8px ${activeTheme.color}` }}></span>
+                    </span>
+                    {taxonomy.preTitle}
+                  </div>
+                )}
+                
+                {(taxonomy.title || taxonomy.name) && (
+                  <h1 className="text-2xl md:text-4xl font-black text-white drop-shadow-lg mb-3 md:mb-4">
+                    {taxonomy.title || taxonomy.name}
+                  </h1>
+                )}
+
+                {taxonomy.description && (
+                  <div className="rich-text text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed max-w-3xl font-light text-justify [text-align-last:center] md:[text-align-last:right] font-sans drop-shadow-md">
+                    <p>{taxonomy.description}</p>
+                  </div>
+                )}
+               
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 md:gap-8 mt-5 md:mt-8 border-t border-white/10 pt-5 md:pt-6 w-full">
+                  <div className="flex flex-col items-center md:items-start cursor-default">
+                    <span className="text-xl md:text-2xl font-black text-white font-sans">{toPersianDigits(totalContentsCount)}</span>
+                    <span className="text-[10px] md:text-xs text-gray-400 font-sans mt-0.5">محتوای مرتبط</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ================= گرید محتوا با فیلتر لمسی در موبایل ================= */}
+          <section className="space-y-4 md:space-y-6">
+            <div className="flex flex-col md:flex-row items-center justify-between border-b border-white/10 pb-4 gap-4">
+              <div className="w-full text-center md:text-right">
+                <h2 className="text-lg md:text-2xl font-black text-white mb-1 font-sans">محتوای بایگانی شده</h2>
+                <p className="text-xs md:text-sm text-gray-400 font-light font-sans">تمام مستندات و مقالاتی که شامل این برچسب هستند.</p>
+              </div>
+              
+              <div className="w-full md:w-auto mt-4 md:mt-0">
+                <div className="flex flex-nowrap items-center justify-between md:justify-end gap-1 md:gap-2 bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] p-1 md:p-1.5 rounded-xl md:rounded-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] w-full md:w-auto">
+                  {[
+                    { id: 'all', label: 'همه' },
+                    { id: 'raw', label: 'راش و فوتیج' },
+                    { id: 'produced', label: 'تولیدی' },
+                    { id: 'tools', label: 'ابزارها' },
+                    { id: 'article', label: 'بلاگ' }
+                  ].map(filter => (
+                    <button 
+                      key={filter.id}
+                      onClick={() => { setActiveFilter(filter.id); setVisibleCount(12); }}
+                      className={`px-1.5 md:px-5 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[9px] sm:text-[10px] md:text-xs font-bold transition-all cursor-pointer font-sans border flex-1 md:flex-none text-center whitespace-nowrap ${
+                        activeFilter === filter.id 
+                          ? 'bg-white/[0.08] text-white border-white/[0.1] shadow-[inset_0_0_10px_rgba(255,255,255,0.05)] hover:bg-white/[0.12]' 
+                          : 'text-gray-400 border-transparent hover:text-white hover:bg-white/[0.04]'
+                      }`}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="flex-grow text-center md:text-right mt-2 md:mt-0 flex flex-col items-center md:items-start">
-              
-              {/* کپسول روتیتر - متن‌های پیش‌فرض حذف شد و فقط در صورت وجود روتیتر داینامیک نمایش داده می‌شود */}
-              {taxonomy.preTitle && (
-                <div className={`inline-flex items-center gap-2 px-3 py-1.5 md:px-4 bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)] rounded-full text-[10px] md:text-xs font-bold ${activeTheme.text} tracking-widest font-sans mb-3 md:mb-4`}>
-                  <span className="relative flex h-2 w-2 md:h-2.5 md:w-2.5 items-center justify-center shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: activeTheme.color }}></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: activeTheme.color, boxShadow: `0 0 8px ${activeTheme.color}` }}></span>
-                  </span>
-                  {taxonomy.preTitle}
-                </div>
-              )}
-              
-              {/* سایز فونت عنوان به حالت استاندارد بازگشت */}
-              {(taxonomy.title || taxonomy.name) && (
-                <h1 className="text-2xl md:text-4xl font-black text-white drop-shadow-lg mb-3 md:mb-4">
-                  {taxonomy.title || taxonomy.name}
-                </h1>
-              )}
-
-              {/* سایز فونت توضیحات به حالت استاندارد بازگشت */}
-              {taxonomy.description && (
-                <div className="rich-text text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed max-w-3xl font-light text-justify [text-align-last:center] md:[text-align-last:right] font-sans drop-shadow-md">
-                  <p>{taxonomy.description}</p>
-                </div>
-              )}
-             
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 md:gap-8 mt-5 md:mt-8 border-t border-white/10 pt-5 md:pt-6 w-full">
-                {/* کادر باکس‌مانند دور محتوای مرتبط حذف شد */}
-                <div className="flex flex-col items-center md:items-start cursor-default">
-                  <span className="text-xl md:text-2xl font-black text-white font-sans">{toPersianDigits(totalContentsCount)}</span>
-                  <span className="text-[10px] md:text-xs text-gray-400 font-sans mt-0.5">محتوای مرتبط</span>
-                </div>
+            {filteredItems.length === 0 ? (
+              <div className="py-12 md:py-20 w-full flex items-center justify-center">
+                <EmptyState 
+                  icon={activeFilter === 'all' ? 'search' : 'folder'}
+                  title="محتوایی یافت نشد"
+                  description="هنوز محتوایی در این بخش به این تخصیص داده نشده است."
+                  actionText={activeFilter !== 'all' ? "نمایش همه موارد" : undefined}
+                  onAction={() => setActiveFilter('all')}
+                  color={activeTheme.text}
+                />
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ================= گرید محتوا با فیلتر لمسی در موبایل ================= */}
-        <section className="space-y-4 md:space-y-6">
-          <div className="flex flex-col md:flex-row items-center justify-between border-b border-white/10 pb-4 gap-4">
-            <div className="w-full text-center md:text-right">
-              <h2 className="text-lg md:text-2xl font-black text-white mb-1 font-sans">محتوای بایگانی شده</h2>
-              <p className="text-xs md:text-sm text-gray-400 font-light font-sans">تمام مستندات و مقالاتی که شامل این برچسب هستند.</p>
-            </div>
-            
-            <div className="w-full md:w-auto mt-4 md:mt-0">
-              <div className="flex flex-nowrap items-center justify-between md:justify-end gap-1 md:gap-2 bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] p-1 md:p-1.5 rounded-xl md:rounded-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] w-full md:w-auto">
-                {[
-                  { id: 'all', label: 'همه' },
-                  { id: 'raw', label: 'راش و فوتیج' },
-                  { id: 'produced', label: 'تولیدی' },
-                  { id: 'tools', label: 'ابزارها' },
-                  { id: 'article', label: 'بلاگ' }
-                ].map(filter => (
-                  <button 
-                    key={filter.id}
-                    onClick={() => { setActiveFilter(filter.id); setVisibleCount(12); }}
-                    className={`px-1.5 md:px-5 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[9px] sm:text-[10px] md:text-xs font-bold transition-all cursor-pointer font-sans border flex-1 md:flex-none text-center whitespace-nowrap ${
-                      activeFilter === filter.id 
-                        ? 'bg-white/[0.08] text-white border-white/[0.1] shadow-[inset_0_0_10px_rgba(255,255,255,0.05)] hover:bg-white/[0.12]' 
-                        : 'text-gray-400 border-transparent hover:text-white hover:bg-white/[0.04]'
-                    }`}
-                  >
-                    {filter.label}
-                  </button>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 animate-[fadeIn_0.4s_ease-out]">
+                {filteredItems.map((item) => (
+                  <ContentCard key={item.id} item={item} />
                 ))}
               </div>
-            </div>
-          </div>
+            )}
 
-          {filteredItems.length === 0 ? (
-            <div className="py-12 md:py-20 w-full flex items-center justify-center">
-              <EmptyState 
-                icon={activeFilter === 'all' ? 'search' : 'folder'}
-                title="محتوایی یافت نشد"
-                description="هنوز محتوایی در این بخش به این تخصیص داده نشده است."
-                actionText={activeFilter !== 'all' ? "نمایش همه موارد" : undefined}
-                onAction={() => setActiveFilter('all')}
-                color={activeTheme.text}
-              />
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 animate-[fadeIn_0.4s_ease-out]">
-              {filteredItems.map((item) => (
-                <ContentCard key={item.id} item={item} />
-              ))}
-            </div>
-          )}
+            {visibleCount < contents.length && filteredItems.length > 0 && (
+              <div className="flex justify-center pt-6 md:pt-8">
+                <button 
+                  onClick={() => setVisibleCount(prev => prev + 12)}
+                  className={`relative group bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)] text-white px-8 md:px-10 py-3 md:py-3.5 rounded-full font-bold flex items-center gap-2.5 hover:bg-white/[0.08] hover:border-white/[0.1] ${activeTheme.text} transition-all duration-300 cursor-pointer font-sans text-xs md:text-sm`}
+                >
+                  <span>بارگذاری موارد بیشتر</span>
+                  <Icon name="caretDown" className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-y-1 transition-transform" />
+                </button>
+              </div>
+            )}
+          </section>
 
-          {visibleCount < contents.length && filteredItems.length > 0 && (
-            <div className="flex justify-center pt-6 md:pt-8">
-              <button 
-                onClick={() => setVisibleCount(prev => prev + 12)}
-                className={`relative group bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)] text-white px-8 md:px-10 py-3 md:py-3.5 rounded-full font-bold flex items-center gap-2.5 hover:bg-white/[0.08] hover:border-white/[0.1] ${activeTheme.text} transition-all duration-300 cursor-pointer font-sans text-xs md:text-sm`}
-              >
-                <span>بارگذاری موارد بیشتر</span>
-                <Icon name="caretDown" className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-y-1 transition-transform" />
-              </button>
-            </div>
-          )}
-        </section>
-
-      </main>
-    </div>
+        </main>
+      </div>
+    </>
   );
 }

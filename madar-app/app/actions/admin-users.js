@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import { sendWelcomeNotificationToUser } from './notifications';
+import { getCurrentUserSessionAction } from './auth';
+import { checkUserPermission, parsePermissions } from '@/lib/rbac';
 
 export async function getAllUsersAction() {
   try {
@@ -15,7 +17,7 @@ export async function getAllUsersAction() {
         },
         _count: {
           select: {
-            downloads: true, // تعداد کل دفعات دانلود
+            downloads: true,
             favorites: true,
             comments: true 
           }
@@ -31,6 +33,11 @@ export async function getAllUsersAction() {
 
 export async function adminCreateUserAction(phone) {
   try {
+    const session = await getCurrentUserSessionAction();
+    if (!session.success || !checkUserPermission(session.user, 'USERS_CREATE')) {
+      return { success: false, error: 'شما مجوز افزودن کاربر جدید را ندارید.' };
+    }
+
     if (!phone || phone.length < 10) return { success: false, error: 'شماره موبایل نامعتبر است.' };
 
     const existing = await prisma.user.findUnique({ where: { phone } });
@@ -40,7 +47,6 @@ export async function adminCreateUserAction(phone) {
       data: { phone, status: 'ACTIVE' }
     });
 
-    // ارسال خودکار اعلان خوش‌آمدگویی به کاربر تازه ایجاد شده توسط ادمین
     await sendWelcomeNotificationToUser(user.id);
 
     revalidatePath('/portal-entry-99/users');
@@ -52,31 +58,53 @@ export async function adminCreateUserAction(phone) {
 
 export async function adminUpdateUserAction(id, data) {
   try {
-    const targetUser = await prisma.user.findUnique({ where: { id } });
-    if (targetUser?.isSuperAdmin) {
-       data.isAdmin = true; 
+    const session = await getCurrentUserSessionAction();
+    if (!session.success) return { success: false, error: 'عدم احراز هویت.' };
+
+    const canEditInfo = checkUserPermission(session.user, 'USERS_EDIT');
+    const canGrantAdmin = checkUserPermission(session.user, 'USERS_GRANT_ADMIN');
+
+    if (!canEditInfo && !canGrantAdmin) {
+      return { success: false, error: 'شما مجوز ویرایش اطلاعات کاربر را ندارید.' };
     }
 
-    const updateData = {
-      phone: data.phone,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      gender: data.gender,
-      birthYear: data.birthYear,
-      province: data.province,
-      city: data.city,
-      educationDegree: data.educationDegree,
-      major: data.major,
-      artResearchField: data.artResearchField,
-      cooperationInterests: data.cooperationInterests,
-      email: data.email,
-      
-      isAdmin: !!data.isAdmin,
-      adminPermissions: data.adminPermissions ? JSON.stringify(data.adminPermissions) : null,
-    };
+    const targetUser = await prisma.user.findUnique({ where: { id } });
+    if (!targetUser) return { success: false, error: 'کاربر یافت نشد.' };
 
-    if (data.newPassword && data.newPassword.length >= 6) {
-      updateData.password = await bcrypt.hash(data.newPassword, 10);
+    const updateData = {};
+
+    // ۱. اگر مجوز ویرایش اطلاعات فردی را دارد
+    if (canEditInfo) {
+      updateData.phone = data.phone;
+      updateData.firstName = data.firstName || null;
+      updateData.lastName = data.lastName || null;
+      updateData.gender = data.gender || null;
+      updateData.birthYear = data.birthYear || null;
+      updateData.province = data.province || null;
+      updateData.city = data.city || null;
+      updateData.educationDegree = data.educationDegree || null;
+      updateData.major = data.major || null;
+      updateData.artResearchField = data.artResearchField || null;
+      updateData.cooperationInterests = data.cooperationInterests || null;
+      updateData.email = data.email || null;
+
+      if (data.newPassword && data.newPassword.length >= 6) {
+        updateData.password = await bcrypt.hash(data.newPassword, 10);
+      }
+    }
+
+    // ۲. اگر مجوز تعیین سطح مدیریت را دارد و کاربر هدف مدیرکل نیست
+    if (canGrantAdmin && !targetUser.isSuperAdmin) {
+      const isAdminFlag = !!data.isAdmin;
+      const permsArray = isAdminFlag ? parsePermissions(data.adminPermissions) : [];
+      updateData.isAdmin = isAdminFlag;
+      updateData.adminPermissions = JSON.stringify(permsArray);
+
+      if (!canEditInfo && data.newPassword && data.newPassword.length >= 6) {
+        updateData.password = await bcrypt.hash(data.newPassword, 10);
+      }
+    } else if (targetUser.isSuperAdmin) {
+      updateData.isAdmin = true;
     }
 
     await prisma.user.update({
@@ -94,6 +122,11 @@ export async function adminUpdateUserAction(id, data) {
 
 export async function adminToggleUserStatusAction(id, currentStatus) {
   try {
+    const session = await getCurrentUserSessionAction();
+    if (!session.success || !checkUserPermission(session.user, 'USERS_BAN')) {
+      return { success: false, error: 'شما مجوز مسدودسازی یا فعال‌سازی حساب را ندارید.' };
+    }
+
     const targetUser = await prisma.user.findUnique({ where: { id } });
     if (targetUser?.isSuperAdmin) {
        return { success: false, error: 'مسدودسازی مدیر کل ارشد امکان‌پذیر نیست.' };
@@ -128,7 +161,6 @@ export async function getAdminUserDetailsAction(id) {
         downloads: { 
           include: { content: { select: { id: true, titleBase: true, titleHighlight: true, slug: true, type: true } } }
         },
-        // اضافه شدن واکشی دقیق اعلانات اختصاصی این کاربر
         notifications: {
           include: { notification: true },
           orderBy: { createdAt: 'desc' }

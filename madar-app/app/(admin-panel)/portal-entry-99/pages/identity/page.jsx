@@ -23,7 +23,7 @@ export default function IdentitySettingsPage() {
   // ==========================================
   // استیت‌ها و هوک‌های احراز هویت (Wait & Verify)
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
+  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -34,15 +34,15 @@ export default function IdentitySettingsPage() {
     if (isWorking) return;
 
     if (user) {
-      // فقط مدیران کل و کسانی که دسترسی تنظیمات دارند مجازند
-      setHasAccess(!!(user.isSuperAdmin || user.isAdmin)); 
+      // فقط مدیرانی که تیک ویرایش هویت سایت را دارند مجاز به ورود هستند
+      setHasAccess(user.isSuperAdmin || (can && can('IDENTITY_EDIT'))); 
     } else {
       const timer = setTimeout(() => {
         setHasAccess(false);
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [user, authIsLoading, authLoading, isFetching]);
+  }, [user, authIsLoading, authLoading, isFetching, can]);
 
   // ==========================================
   // استیت‌های محتوای صفحه
@@ -162,6 +162,8 @@ export default function IdentitySettingsPage() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!can('IDENTITY_EDIT')) return toast.error('شما مجوز تغییر و ذخیره هویت سایت را ندارید.');
+    
     setSaving(true);
 
     const headerSettingsObj = {

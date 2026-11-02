@@ -49,9 +49,15 @@ export default function AdminDossiersManager() {
   // ==========================================
   // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
+  const { user, can, canAny, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
+
+  // ==========================================
+  // ۲. استیت‌های محتوا و مدیریت تب‌ها
+  // ==========================================
+  const [activeTab, setActiveTab] = useState('HUB_SETTINGS'); 
+  const [dossiers, setDossiers] = useState([]);
 
   useEffect(() => { setIsMounted(true); }, []);
 
@@ -60,7 +66,18 @@ export default function AdminDossiersManager() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
+      // فقط مدیری مجاز به ورود است که حداقل یکی از مجوزهای منظومه (تنظیمات هاب یا مدیریت پرونده‌ها) را داشته باشد
+      const allowed = user.isSuperAdmin || (canAny && canAny(['HUB_SETTINGS', 'DOSSIER_EDIT', 'DOSSIER_CREATE', 'DOSSIER_DELETE']));
+      setHasAccess(!!allowed);
+
+      // تنظیم هوشمند تب فعال بر اساس مجوز مدیر
+      if (allowed && !user.isSuperAdmin && can) {
+        if (can('HUB_SETTINGS')) {
+          setActiveTab('HUB_SETTINGS');
+        } else {
+          setActiveTab('DOSSIER_LIST');
+        }
+      }
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -70,13 +87,7 @@ export default function AdminDossiersManager() {
         return () => clearTimeout(timer);
       }
     }
-  }, [user, authIsLoading, authLoading, isFetching]);
-
-  // ==========================================
-  // ۲. استیت‌های محتوا و مدیریت تب‌ها
-  // ==========================================
-  const [activeTab, setActiveTab] = useState('HUB_SETTINGS'); 
-  const [dossiers, setDossiers] = useState([]);
+  }, [user, authIsLoading, authLoading, isFetching, can, canAny]);
   const [isLoading, setIsLoading] = useState(true);
 
   // دیتابیس زنده (Live Data) برای جستجو
@@ -145,6 +156,7 @@ export default function AdminDossiersManager() {
   };
 
   const handleSaveHubSettings = async () => {
+    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز ویرایش تنظیمات هاب را ندارید.');
     setIsSavingHub(true);
     const res = await saveHubSettings(hubSettings);
     setIsSavingHub(false);
@@ -153,6 +165,10 @@ export default function AdminDossiersManager() {
   };
 
   const handleDragStart = (e, index) => {
+    if (!can('HUB_SETTINGS')) {
+      e.preventDefault();
+      return toast.error('شما مجوز تغییر چیدمان هاب را ندارید.');
+    }
     setDraggedItem(index);
     e.dataTransfer.effectAllowed = 'move';
     setTimeout(() => { e.target.style.opacity = '0.5'; }, 0);
@@ -160,7 +176,7 @@ export default function AdminDossiersManager() {
 
   const handleDragEnter = (e, index) => {
     e.preventDefault();
-    if (draggedItem === null || draggedItem === index) return;
+    if (!can('HUB_SETTINGS') || draggedItem === null || draggedItem === index) return;
     const newItems = [...dossiers];
     const draggedItemContent = newItems[draggedItem];
     newItems.splice(draggedItem, 1);
@@ -170,6 +186,7 @@ export default function AdminDossiersManager() {
   };
 
   const handleDragEnd = async (e) => {
+    if (!can('HUB_SETTINGS')) return;
     e.target.style.opacity = '1';
     setDraggedItem(null);
     const orderedIds = dossiers.map(d => d.id);
@@ -178,6 +195,7 @@ export default function AdminDossiersManager() {
   };
 
   const toggleDossierVisibility = async (id) => {
+    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز تغییر وضعیت نمایش در هاب را ندارید.');
     const d = dossiers.find(x => x.id === id);
     const updated = { ...d, isVisibleInHub: !d.isVisibleInHub };
     setDossiers(prev => prev.map(x => x.id === id ? updated : x));
@@ -186,6 +204,7 @@ export default function AdminDossiersManager() {
   };
 
   const toggleDossierLayout = async (id, layoutType) => {
+    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز تغییر ابعاد پرونده در هاب را ندارید.');
     const d = dossiers.find(x => x.id === id);
     if (d.layoutSize === layoutType) return;
     const updated = { ...d, layoutSize: layoutType };
@@ -195,6 +214,7 @@ export default function AdminDossiersManager() {
   };
 
   const confirmDelete = async () => {
+    if (!can('DOSSIER_DELETE')) return toast.error('شما مجوز حذف پرونده را ندارید.');
     const res = await deleteDossier(deleteModal.id);
     if (res.success) {
       setDossiers(prev => prev.filter(d => d.id !== deleteModal.id));
@@ -204,6 +224,9 @@ export default function AdminDossiersManager() {
   };
 
   const openEditor = (dossier = null) => {
+    if (dossier && !can('DOSSIER_EDIT')) return toast.error('شما مجوز ویرایش پرونده را ندارید.');
+    if (!dossier && !can('DOSSIER_CREATE')) return toast.error('شما مجوز ایجاد پرونده جدید را ندارید.');
+
     if (dossier) {
       setFormData({
         ...dossier,
@@ -234,6 +257,9 @@ export default function AdminDossiersManager() {
   };
 
   const handleSaveDossier = async () => {
+    if (!formData.id && !can('DOSSIER_CREATE')) return toast.error('شما مجوز ایجاد پرونده جدید را ندارید.');
+    if (formData.id && !can('DOSSIER_EDIT')) return toast.error('شما مجوز ویرایش پرونده را ندارید.');
+    
     if(!formData.title || !formData.slug) return toast.error('عنوان و اسلاگ الزامی است.');
     setIsSavingDossier(true);
     const res = await saveDossier(formData);
@@ -594,8 +620,12 @@ const renderEditorForm = () => {
           </div>
           
           <div className="flex bg-[#050810]/50 border border-white/5 shadow-inner p-1.5 rounded-2xl w-full lg:w-auto">
-            <button onClick={() => setActiveTab('HUB_SETTINGS')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'HUB_SETTINGS' ? 'bg-[#06b6d4]/20 text-[#06b6d4] shadow-inner border-[#06b6d4]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>تنظیمات هاب</button>
-            <button onClick={() => setActiveTab('DOSSIER_LIST')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'DOSSIER_LIST' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-inner border-[#8b5cf6]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>مدیریت پرونده‌ها</button>
+            {can('HUB_SETTINGS') && (
+              <button onClick={() => setActiveTab('HUB_SETTINGS')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'HUB_SETTINGS' ? 'bg-[#06b6d4]/20 text-[#06b6d4] shadow-inner border-[#06b6d4]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>تنظیمات هاب</button>
+            )}
+            {(can('DOSSIER_EDIT') || can('DOSSIER_CREATE') || can('DOSSIER_DELETE')) && (
+              <button onClick={() => setActiveTab('DOSSIER_LIST')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'DOSSIER_LIST' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-inner border-[#8b5cf6]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>مدیریت پرونده‌ها</button>
+            )}
           </div>
         </div>
       </motion.div>
@@ -603,7 +633,7 @@ const renderEditorForm = () => {
       {/* ======================================================= */}
       {/* تب اول: تنظیمات هاب */}
       <AnimatePresence mode="wait">
-        {activeTab === 'HUB_SETTINGS' && (
+        {activeTab === 'HUB_SETTINGS' && can('HUB_SETTINGS') && (
           <motion.div key="hub" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
             <div className="relative rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
               <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
@@ -668,7 +698,7 @@ const renderEditorForm = () => {
                 </div>
               </div>
               <div className="mt-6 flex justify-end relative z-10 border-t border-white/10 pt-4">
-                <button onClick={handleSaveHubSettings} disabled={isSavingHub} className="px-8 py-3.5 bg-[#06b6d4] hover:bg-[#0891b2] text-white font-bold text-sm rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all cursor-pointer disabled:opacity-50 hover:scale-105 active:scale-95 border border-transparent">
+                <button onClick={handleSaveHubSettings} disabled={isSavingHub || !can('HUB_SETTINGS')} className="px-8 py-3.5 bg-[#06b6d4] hover:bg-[#0891b2] text-white font-bold text-sm rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all cursor-pointer disabled:opacity-50 hover:scale-105 active:scale-95 border border-transparent">
                   {isSavingHub ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
                 </button>
               </div>
@@ -737,7 +767,7 @@ const renderEditorForm = () => {
       {/* تب دوم: لیست پرونده‌ها */}
       {/* ======================================================= */}
       <AnimatePresence mode="wait">
-        {activeTab === 'DOSSIER_LIST' && (
+        {activeTab === 'DOSSIER_LIST' && (can('DOSSIER_EDIT') || can('DOSSIER_CREATE') || can('DOSSIER_DELETE')) && (
           <motion.div key="dossiers" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden min-h-[500px] border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
             <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
             <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#8b5cf6] to-transparent opacity-90 pointer-events-none z-20" />
@@ -749,9 +779,11 @@ const renderEditorForm = () => {
                    <Icon name="search" className="absolute right-4 top-3.5 w-4 h-4 text-gray-400" />
                    <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="جستجوی عنوان..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl pr-12 pl-4 py-3 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" />
                 </div>
-                <button onClick={() => openEditor()} className="flex items-center justify-center gap-2 px-6 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)] transition-all cursor-pointer whitespace-nowrap border border-transparent">
-                  <Icon name="plus" className="w-4 h-4" /> پرونده جدید
-                </button>
+                {can('DOSSIER_CREATE') && (
+                  <button onClick={() => openEditor()} className="flex items-center justify-center gap-2 px-6 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)] transition-all cursor-pointer whitespace-nowrap border border-transparent">
+                    <Icon name="plus" className="w-4 h-4" /> پرونده جدید
+                  </button>
+                )}
               </div>
             </div>
 
@@ -774,8 +806,12 @@ const renderEditorForm = () => {
                           <td className="px-6 py-4 text-center"><div className="w-8 h-8 rounded-full mx-auto shadow-[inset_0_0_10px_rgba(255,255,255,0.2)] border border-transparent" style={{ backgroundColor: d.themeColor || '#06b6d4' }} /></td>
                           <td className="px-6 py-4 flex justify-center gap-2">
                             <Tooltip text="نمایش صفحه (فرانت‌اِند)"><Link href={`/c/${d.slug}`} target="_blank" className="p-2.5 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-white rounded-xl transition-colors cursor-pointer inline-block border border-transparent shadow-inner"><Icon name="arrowUpRight" className="w-4 h-4" /></Link></Tooltip>
-                            <Tooltip text="ویرایش پرونده"><button onClick={() => openEditor(d)} className="p-2.5 bg-[#8b5cf6]/10 text-[#8b5cf6] hover:bg-[#8b5cf6] hover:text-white rounded-xl transition-colors cursor-pointer border border-transparent shadow-inner"><Icon name="pencil" className="w-4 h-4" /></button></Tooltip>
-                            <Tooltip text="حذف دائمی"><button onClick={() => setDeleteModal({ isOpen: true, id: d.id, title: d.title })} className="p-2.5 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-colors cursor-pointer border border-transparent shadow-inner"><Icon name="trash" className="w-4 h-4" /></button></Tooltip>
+                            {can('DOSSIER_EDIT') && (
+                              <Tooltip text="ویرایش پرونده"><button onClick={() => openEditor(d)} className="p-2.5 bg-[#8b5cf6]/10 text-[#8b5cf6] hover:bg-[#8b5cf6] hover:text-white rounded-xl transition-colors cursor-pointer border border-transparent shadow-inner"><Icon name="pencil" className="w-4 h-4" /></button></Tooltip>
+                            )}
+                            {can('DOSSIER_DELETE') && (
+                              <Tooltip text="حذف دائمی"><button onClick={() => setDeleteModal({ isOpen: true, id: d.id, title: d.title })} className="p-2.5 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-colors cursor-pointer border border-transparent shadow-inner"><Icon name="trash" className="w-4 h-4" /></button></Tooltip>
+                            )}
                           </td>
                         </tr>
                       ))}

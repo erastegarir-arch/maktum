@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,7 +12,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   const pathname = usePathname();
   const router = useRouter();
   
-  const { user, can } = useAuth(); 
+  const { user, can, canAny, logout } = useAuth(); 
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState(null);
@@ -22,37 +22,64 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   // ========================================================
-  // آرایه منوها مجهز به سیستم سطوح دسترسی (RBAC)
+  // آرایه منوها مجهز به سیستم سطوح دسترسی دانه‌ریز (RBAC)
+  // منطبق با کلیدهای تعریف شده در lib/rbac.js
   // ========================================================
-  const ALL_MENU_ITEMS = [
-    { name: 'پیشخوان', href: '/portal-entry-99', icon: 'home', permission: null },
+  const ALL_MENU_ITEMS = useMemo(() => [
+    { name: 'پیشخوان', href: '/portal-entry-99', icon: 'home', requiredAny: null },
     {
       name: 'چیدمان',
       icon: 'layout',
-      permission: 'LAYOUT_MANAGE', 
+      requiredAny: ['IDENTITY_EDIT', 'HOMEPAGE_EDIT', 'PAGES_EDIT', 'ABOUT_EDIT', 'CAREER_EDIT', 'TERMS_EDIT'],
       subItems: [
-        { name: 'هویت', href: '/portal-entry-99/pages/identity' },
-        { name: 'صفحه اصلی', href: '/portal-entry-99/pages/home' },
-        { name: 'صفحات فرعی', href: '/portal-entry-99/pages/main-page' },
-        { name: 'درباره ما', href: '/portal-entry-99/pages/about-settings' },
-        { name: 'همکاری با ما', href: '/portal-entry-99/pages/collaboration-settings' },
-        { name: 'قوانین', href: '/portal-entry-99/pages/rules-settings' },
+        { name: 'هویت', href: '/portal-entry-99/pages/identity', permission: 'IDENTITY_EDIT' },
+        { name: 'صفحه اصلی', href: '/portal-entry-99/pages/home', permission: 'HOMEPAGE_EDIT' },
+        { name: 'صفحات فرعی', href: '/portal-entry-99/pages/main-page', permission: 'PAGES_EDIT' },
+        { name: 'درباره ما', href: '/portal-entry-99/pages/about-settings', permission: 'ABOUT_EDIT' },
+        { name: 'همکاری با ما', href: '/portal-entry-99/pages/collaboration-settings', permission: 'CAREER_EDIT' },
+        { name: 'قوانین', href: '/portal-entry-99/pages/rules-settings', permission: 'TERMS_EDIT' },
       ]
     },    
-    { name: 'کتابخانه رسانه', href: '/portal-entry-99/media', icon: 'image', permission: 'MEDIA_MANAGE' },    
-    { name: 'طبقه‌بندی', href: '/portal-entry-99/taxonomies', icon: 'foldertree', permission: 'TAXONOMY_MANAGE' },    
-    { name: 'محتوا', href: '/portal-entry-99/products', icon: 'browser', permission: 'CONTENT_MANAGE' },
-    { name: 'منظومه', href: '/portal-entry-99/dossiers', icon: 'dossiers', permission: 'DOSSIER_MANAGE' },    
-    { name: 'اعلانات', href: '/portal-entry-99/notifications', icon: 'bell', permission: 'NOTIF_MANAGE' },
-    { name: 'نظرات', href: '/portal-entry-99/comments', icon: 'chat', permission: 'COMMENT_MANAGE' },
-    { name: 'کاربران', href: '/portal-entry-99/users', icon: 'users', permission: 'USER_MANAGE' },
-  ];
+    // دیدن این ۴ بخش طبق rbac.js برای همه مدیران آزاد است و دکمه‌های داخلی آن‌ها کنترل می‌شود
+    { name: 'کتابخانه رسانه', href: '/portal-entry-99/media', icon: 'image', requiredAny: null },    
+    { name: 'طبقه‌بندی', href: '/portal-entry-99/taxonomies', icon: 'foldertree', requiredAny: null },    
+    { name: 'محتوا', href: '/portal-entry-99/products', icon: 'browser', requiredAny: null },
+    { name: 'منظومه', href: '/portal-entry-99/dossiers', icon: 'dossiers', requiredAny: ['HUB_SETTINGS', 'DOSSIER_EDIT', 'DOSSIER_CREATE', 'DOSSIER_DELETE'] },    
+    
+    // بخش‌هایی که ورود به آن‌ها نیازمند داشتن حداقل یکی از تیک‌های مربوطه است
+    { name: 'اعلانات', href: '/portal-entry-99/notifications', icon: 'bell', requiredAny: ['NOTIF_CREATE', 'NOTIF_DELETE'] },
+    { name: 'نظرات', href: '/portal-entry-99/comments', icon: 'chat', requiredAny: ['COMMENT_EDIT_REPLY', 'COMMENT_APPROVE_REJECT'] },
+    { name: 'کاربران', href: '/portal-entry-99/users', icon: 'users', requiredAny: ['USERS_VIEW', 'USERS_EXPORT', 'USERS_CREATE', 'USERS_EDIT', 'USERS_GRANT_ADMIN', 'USERS_BAN'] },
+  ], []);
 
-  const menuItems = ALL_MENU_ITEMS.filter(item => {
-    if (!item.permission) return true; 
-    if (can && can(item.permission)) return true; 
-    return false;
-  });
+  // فیلتر هوشمند منوها و زیرمنوها بر اساس دسترسی‌های کاربر
+  const menuItems = useMemo(() => {
+    if (!user) return [];
+
+    return ALL_MENU_ITEMS.reduce((acc, item) => {
+      // اگر آیتم زیرمنو دارد (مثل چیدمان)، فقط زیرمنوهای مجاز را نگه می‌داریم
+      if (item.subItems) {
+        const allowedSubs = item.subItems.filter(sub => !sub.permission || (can && can(sub.permission)));
+        if (allowedSubs.length > 0) {
+          acc.push({ ...item, subItems: allowedSubs });
+        }
+        return acc;
+      }
+
+      // اگر آیتم نیاز به مجوز خاصی ندارد (برای همه مدیران آزاد است)
+      if (!item.requiredAny || item.requiredAny.length === 0) {
+        acc.push(item);
+        return acc;
+      }
+
+      // بررسی داشتن حداقل یکی از مجوزهای مورد نیاز بخش
+      if (canAny && canAny(item.requiredAny)) {
+        acc.push(item);
+      }
+
+      return acc;
+    }, []);
+  }, [ALL_MENU_ITEMS, user, can, canAny]);
 
   useEffect(() => {
     if (isCollapsed) setOpenSubmenu(null);
@@ -63,10 +90,14 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
     setOpenSubmenu(openSubmenu === name ? null : name);
   };
 
-  const handleConfirmLogout = () => {
+  const handleConfirmLogout = async () => {
     setShowLogoutModal(false);
     toast.success('با موفقیت از حساب کاربری خارج شدید.');
-    router.push('/');
+    if (logout) {
+      await logout();
+    } else {
+      router.push('/');
+    }
   };
 
   // ========================================================
@@ -301,22 +332,18 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
             animate={{ opacity: 1, x: 0, scale: 1 }} 
             exit={{ opacity: 0, x: -10, scale: 0.95 }} 
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            // کلید اصلی حل مشکل: فورس کردنِ جهت به LTR برای جای‌گذاری صحیح پوینتر در سمت راستِ باکس
             dir="ltr"
             style={{ 
               position: 'fixed', 
               top: activeTooltip.top, 
-              // استفاده از لبه‌ی راست صفحه به عنوان لنگر
               right: activeTooltip.right, 
               transform: 'translateY(-50%)' 
             }}
             className="z-[9999] pointer-events-none hidden md:flex items-center"
           >
-            {/* بدنه اصلی تول‌تیپ (راست‌چین برای متن فارسی) */}
             <div dir="rtl" className="relative bg-[#070b14] text-gray-200 text-xs font-bold px-3.5 py-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/10 whitespace-nowrap z-10">
               {activeTooltip.text}
             </div>
-            {/* پوینتر (مثلث/لوزی) که دقیقاً به آیکون اشاره می‌کند و در داخلِ تول‌تیپِ شیشه‌ای ادغام شده است */}
             <div className="w-2.5 h-2.5 bg-[#070b14] border-t border-r border-white/10 rotate-45 -ml-1.5 z-0 drop-shadow-sm" />
           </motion.div>
         )}

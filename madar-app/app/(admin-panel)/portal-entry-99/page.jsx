@@ -295,8 +295,11 @@ function useDecryptionText(targetText, triggerKey, durationMs = 1000) {
 // ============================================================================
 // ۵. کامپوننت اصلی پیشخوان (کتیبه دیجیتال مدار)
 // ============================================================================
+import { useRouter } from 'next/navigation'; // این خط را به بالای فایل در کنار ایمپورت‌های react/next اضافه کنید
+
 export default function DashboardPage() {
-  const { user, isLoading, loading, isFetching } = useAuth();
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
   const cardRef = useRef(null);
   const [hasAccess, setHasAccess] = useState(null);
@@ -321,18 +324,25 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    const authIsLoading = isLoading || loading || isFetching;
-    if (authIsLoading) return;
+    if (authLoading) return;
 
     if (user) {
-      setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
-    } else {
-      const timer = setTimeout(() => {
+      // این صفحه برای هر کاربری که نقش مدیریت دارد (حتی بدون مجوز خاص) آزاد است
+      if (user.isAdmin || user.isSuperAdmin) {
+        setHasAccess(true);
+      } else {
+        // کاربر عادی است
         setHasAccess(false);
-      }, 1500);
-      return () => clearTimeout(timer);
+        router.replace('/'); // ریدایرکت مستقیم به صفحه اصلی سایت
+      }
+    } else if (typeof window !== 'undefined') {
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      if (!isLoggedIn) {
+        setHasAccess(false);
+        router.replace('/'); // ریدایرکت مستقیم به صفحه اصلی سایت
+      }
     }
-  }, [user, isLoading, loading, isFetching]);
+  }, [user, authLoading, router]);
 
   const activeDayOfYear = useMemo(() => {
     return (((realDayOfYear - 1 + selectedDayOffset) % 366) + 366) % 366 + 1;
@@ -359,19 +369,8 @@ export default function DashboardPage() {
   if (!mounted || hasAccess === null) return <AdminLoading />;
 
   if (hasAccess === false) {
-    return (
-      <div
-        className="fixed inset-0 w-full h-[100dvh] bg-[#050810] flex flex-col items-center justify-center px-4 text-center select-none font-sans overflow-hidden"
-        style={{ WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none' }}
-      >
-        <div className="relative w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mb-6 border border-rose-500/20 shadow-[inset_0_0_20px_rgba(244,63,94,0.15),0_0_30px_rgba(244,63,94,0.15)]">
-          <div className="absolute inset-0 rounded-full bg-rose-500/10 blur-xl animate-pulse pointer-events-none" />
-          <Icon name="lock" className="w-8 h-8 text-rose-500 relative z-10" />
-        </div>
-        <h2 className="text-xl sm:text-2xl font-black text-white mb-2 select-none">دسترسی مسدود است</h2>
-        <p className="text-sm sm:text-base text-gray-400 select-none">شما مجوز ورود به پنل مدیریت را ندارید.</p>
-      </div>
-    );
+    // چون در useEffect ریدایرکت انجام شده، اینجا فقط لودینگ نشان می‌دهیم تا صفحه اصلی سایت بارگذاری شود
+    return <AdminLoading />;
   }
 
   return (

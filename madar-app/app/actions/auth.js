@@ -5,6 +5,7 @@ import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import { sendWelcomeNotificationToUser } from './notifications';
+import { parsePermissions } from '@/lib/rbac';
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || 'MADAR_SUPER_SECRET_KEY_FOR_JWT_TOKEN');
 
@@ -15,17 +16,14 @@ export async function initMasterAdminAction(phone) {
   try {
     if (!phone || phone.length !== 11) return { success: false, error: 'شماره موبایل نامعتبر است.' };
 
-    // پیدا کردن اکانت شما یا ساخت آن در صورت عدم وجود
     let user = await prisma.user.findUnique({ where: { phone } });
     if (!user) {
       user = await prisma.user.create({
         data: { phone, status: 'ACTIVE' }
       });
-      // ارسال خودکار اعلان خوش‌آمدگویی
       await sendWelcomeNotificationToUser(user.id);
     }
 
-    // ارتقای اجباری اکانت شما به مدیر کل
     await prisma.user.update({
       where: { id: user.id },
       data: { isSuperAdmin: true, isAdmin: true }
@@ -48,17 +46,14 @@ export async function sendOtpAction(phone) {
     const existingUser = await prisma.user.findUnique({ where: { phone } });
     if (existingUser && existingUser.status === 'BANNED') return { success: false, error: 'BANNED' };
 
-    // جلوگیری از درخواست‌های مکرر (Rate Limiting ساده)
     const activeOtp = await prisma.otpCode.findUnique({ where: { phone } });
     if (activeOtp && activeOtp.expiresAt > new Date(Date.now() + 105 * 1000)) {
       return { success: false, error: 'لطفاً تا پایان تایمر قبلی صبر کنید.' };
     }
 
-    // ساخت کد ۶ رقمی
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 120 * 1000); // اعتبار ۲ دقیقه
+    const expiresAt = new Date(Date.now() + 120 * 1000);
 
-    // ذخیره یا آپدیت در دیتابیس
     await prisma.otpCode.upsert({
       where: { phone },
       update: { code, expiresAt, attempts: 0 },
@@ -95,7 +90,6 @@ export async function registerAction(phone, password, code) {
       data: { phone, password: hashedPassword, status: 'ACTIVE' }
     });
 
-    // ارسال خودکار اعلان خوش‌آمدگویی
     await sendWelcomeNotificationToUser(user.id);
 
     await prisma.otpCode.delete({ where: { phone } });
@@ -119,7 +113,6 @@ export async function loginWithPasswordAction(phone, password) {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     
-    // اگر لاگین مدیر بود و رمز اصلی را نداشت، رمز مدیریتی (دوم) را هم چک می‌کنیم
     let isAdminPasswordValid = false;
     if (!isPasswordValid && user.isAdmin && user.adminPassword) {
       isAdminPasswordValid = await bcrypt.compare(password, user.adminPassword);
@@ -150,15 +143,9 @@ export async function verifyOtpAction(phone, code) {
     }
 
     let user = await prisma.user.findUnique({ where: { phone } });
-    
-    // مدیران ارشد و پنل حتماً باید با رمز وارد شوند و ورود بدون رمز برایشان قفل است
-    if (user && (user.isAdmin || user.isSuperAdmin) && user.password) {
-        // برای راحتی شما فعلا این قفل را باز می‌گذاریم اما در سیستم‌های بانکی مدیران حق ورود با پیامک ندارند
-    }
 
     if (!user) {
       user = await prisma.user.create({ data: { phone, status: 'ACTIVE' } });
-      // ارسال خودکار اعلان خوش‌آمدگویی
       await sendWelcomeNotificationToUser(user.id);
     } else if (user.status === 'BANNED') {
       return { success: false, error: 'حساب کاربری شما مسدود است.' };
@@ -177,11 +164,14 @@ export async function verifyOtpAction(phone, code) {
 // ۵. متدهای کوکی
 // ==========================================
 async function createSession(user) {
+  const parsedPerms = parsePermissions(user.adminPermissions);
+
   const token = await new SignJWT({ 
     userId: user.id, 
     phone: user.phone, 
-    isAdmin: user.isAdmin,
-    isSuperAdmin: user.isSuperAdmin 
+    isAdmin: !!user.isAdmin,
+    isSuperAdmin: !!user.isSuperAdmin,
+    adminPermissions: parsedPerms
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -224,6 +214,9 @@ export async function getCurrentUserSessionAction() {
 
     if (!user || user.status === 'BANNED') return { success: false };
 
+    // تبدیل رشته JSON دیتابیس به آرایه استاندارد برای استفاده یکپارچه در کل کلاینت
+    user.adminPermissions = parsePermissions(user.adminPermissions);
+
     return { success: true, user };
   } catch (err) {
     return { success: false };
@@ -241,7 +234,8 @@ export async function getSessionUser() {
       phone: res.user.phone,
       role: res.user.roleId || null,
       isAdmin: res.user.isAdmin,
-      isSuperAdmin: res.user.isSuperAdmin
+      isSuperAdmin: res.user.isSuperAdmin,
+      adminPermissions: res.user.adminPermissions
     };
   }
   return null;

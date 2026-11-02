@@ -61,7 +61,7 @@ export default function AdminNotificationsPage() {
   // ==========================================
   // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can } = useAuth();
+  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can, canAny } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -72,7 +72,8 @@ export default function AdminNotificationsPage() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(!!(can('NOTIF_MANAGE') || user?.isSuperAdmin));
+      // بررسی اینکه کاربر حداقل یکی از مجوزهای اعلانات را داشته باشد
+      setHasAccess(!!(user?.isSuperAdmin || (canAny && canAny(['NOTIF_CREATE', 'NOTIF_DELETE']))));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -82,7 +83,7 @@ export default function AdminNotificationsPage() {
         return () => clearTimeout(timer);
       }
     }
-  }, [user, authIsLoading, authLoading, isFetching, can]);
+  }, [user, authIsLoading, authLoading, isFetching, canAny]);
 
   // ==========================================
   // ۲. استیت‌ها و دریافت اطلاعات
@@ -117,6 +118,7 @@ export default function AdminNotificationsPage() {
   const [deleteModalId, setDeleteModalId] = useState(null);
   
   const [viewersModalData, setViewersModalData] = useState(null);
+  const [livePreviewData, setLivePreviewData] = useState(null);
   const [viewersList, setViewersList] = useState([]);
   const [viewersPage, setViewersPage] = useState(1);
   const [viewersFilter, setViewersFilter] = useState('ALL'); 
@@ -184,6 +186,30 @@ export default function AdminNotificationsPage() {
     setIsLoadingViewers(false);
   };
 
+  const openViewersModal = (notif) => {
+    setViewersModalData(notif);
+    setViewersFilter('ALL');
+    loadViewers(notif.id, 1, 'ALL');
+  };
+
+  const openLivePreviewModal = (notif) => {
+    let parsedCta = [];
+    try {
+      parsedCta = typeof notif.ctaButtons === 'string' ? JSON.parse(notif.ctaButtons) : (notif.ctaButtons || []);
+      if (typeof parsedCta === 'string') parsedCta = JSON.parse(parsedCta); 
+    } catch {
+      parsedCta = [];
+    }
+    
+    setLivePreviewData({
+      ...notif,
+      themeColor: notif.themeColor || '#10b981',
+      iconUrl: notif.iconUrl || '',
+      coverUrl: notif.coverUrl || '',
+      ctaButtons: Array.isArray(parsedCta) ? parsedCta : []
+    });
+  };
+
   const addCtaButton = () => setCtaButtons(prev => [...prev, { id: Math.random().toString(36).substr(2, 9), label: '', url: '' }]);
   const updateCtaButton = (id, field, value) => setCtaButtons(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
   const removeCtaButton = (id) => setCtaButtons(prev => prev.filter(b => b.id !== id));
@@ -213,6 +239,7 @@ export default function AdminNotificationsPage() {
 
   const handleSaveAndDispatch = async (e) => {
     e.preventDefault();
+    if (!can('NOTIF_CREATE')) return toast.error('شما مجوز ارسال اعلان جدید را ندارید.');
     if (!title) return toast.error('درج عنوان اعلان الزامی است.');
 
     setIsSaving(true);
@@ -243,6 +270,7 @@ export default function AdminNotificationsPage() {
   };
 
   const openEditModal = (h) => {
+    if (!can('NOTIF_CREATE')) return toast.error('شما مجوز ویرایش اعلانات را ندارید.');
     let parsedCta = [];
     try {
       parsedCta = typeof h.ctaButtons === 'string' ? JSON.parse(h.ctaButtons) : (h.ctaButtons || []);
@@ -261,6 +289,7 @@ export default function AdminNotificationsPage() {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    if (!can('NOTIF_CREATE')) return toast.error('شما مجوز ویرایش اعلانات را ندارید.');
     if (!editModalData.title) return toast.error('عنوان نمی‌تواند خالی باشد.');
     
     setIsSaving(true);
@@ -277,6 +306,7 @@ export default function AdminNotificationsPage() {
   };
 
   const handleDeleteConfirm = async () => {
+    if (!can('NOTIF_DELETE')) return toast.error('شما مجوز حذف اعلانات را ندارید.');
     setIsSaving(true);
     const res = await deleteNotificationAction(deleteModalId);
     setIsSaving(false);
@@ -291,6 +321,7 @@ export default function AdminNotificationsPage() {
   };
 
   const toggleTemplateStatus = async (id, currentStatus) => {
+    if (!can('NOTIF_CREATE')) return toast.error('شما مجوز تغییر وضعیت این الگو را ندارید.');
     const res = await toggleNotificationTemplateStatusAction(id, currentStatus);
     if (res.success) {
       toast.success(res.message);
@@ -298,12 +329,6 @@ export default function AdminNotificationsPage() {
     } else {
       toast.error(res.error);
     }
-  };
-
-  const openViewersModal = (notif) => {
-    setViewersModalData(notif);
-    setViewersFilter('ALL');
-    loadViewers(notif.id, 1, 'ALL');
   };
 
   const filteredHistory = useMemo(() => {
@@ -511,6 +536,14 @@ export default function AdminNotificationsPage() {
                       {/* ستون ۵: عملیات (دقیقاً وسط‌چین) */}
                       <td className="px-4 py-3 rounded-l-xl border-y border-transparent group-hover:border-white/5 border-r-0">
                         <div className="flex items-center justify-center gap-2">
+                          
+                          {/* دکمه پیش‌نمایش برای همه مدیرانی که حق دیدن لیست را دارند مجاز است */}
+                          <Tooltip text="پیش‌نمایش اعلان">
+                            <button onClick={() => openLivePreviewModal(h)} className="p-1.5 bg-[#8b5cf6]/10 text-[#8b5cf6] hover:bg-[#8b5cf6] hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
+                              <Icon name="eye" className="w-4 h-4" />
+                            </button>
+                          </Tooltip>
+
                           {!h.isTemplate && (
                             <>
                               <Tooltip text="ریز بازدیدها">
@@ -518,18 +551,31 @@ export default function AdminNotificationsPage() {
                                   <Icon name="users" className="w-4 h-4" />
                                 </button>
                               </Tooltip>
-                              <Tooltip text="ویرایش اعلان">
-                                <button onClick={() => openEditModal(h)} className="p-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
-                                  <Icon name="pencil" className="w-4 h-4" />
-                                </button>
-                              </Tooltip>
+                              {can('NOTIF_CREATE') && (
+                                <Tooltip text="ویرایش اعلان">
+                                  <button onClick={() => openEditModal(h)} className="p-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
+                                    <Icon name="pencil" className="w-4 h-4" />
+                                  </button>
+                                </Tooltip>
+                              )}
                             </>
                           )}
-                          <Tooltip text="حذف کامل">
-                            <button onClick={() => setDeleteModalId(h.id)} className="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
-                              <Icon name="trash" className="w-4 h-4" />
-                            </button>
-                          </Tooltip>
+
+                          {h.isTemplate && can('NOTIF_CREATE') && (
+                             <Tooltip text="ویرایش قالب">
+                               <button onClick={() => openEditModal(h)} className="p-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
+                                 <Icon name="pencil" className="w-4 h-4" />
+                               </button>
+                             </Tooltip>
+                          )}
+
+                          {can('NOTIF_DELETE') && (
+                            <Tooltip text="حذف کامل">
+                              <button onClick={() => setDeleteModalId(h.id)} className="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
+                                <Icon name="trash" className="w-4 h-4" />
+                              </button>
+                            </Tooltip>
+                          )}
                         </div>
                       </td>
                       
@@ -695,7 +741,7 @@ export default function AdminNotificationsPage() {
                 <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2 border-b border-[#8b5cf6] pb-2 font-sans">
                   <Icon name="eye" className="w-5 h-5 text-[#8b5cf6]" /> پیش‌نمایش در پنل کاربر
                 </h3>
-                <button form="notificationForm" type="submit" disabled={isSaving} className="px-6 py-2.5 bg-gradient-to-l from-[#8b5cf6] to-indigo-500 hover:opacity-90 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2 font-sans border border-transparent">
+                <button form="notificationForm" type="submit" disabled={isSaving || !can('NOTIF_CREATE')} className="px-6 py-2.5 bg-gradient-to-l from-[#8b5cf6] to-indigo-500 hover:opacity-90 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2 font-sans border border-transparent">
                   {isSaving ? <Icon name="loading" className="w-4 h-4 animate-spin" /> : <Icon name="rocket" className="w-4 h-4" />}
                   {isSaving ? 'در حال اجرا...' : (activeTab === 'TEMPLATE' ? 'ذخیره خوش‌آمدگویی' : 'پخش اعلان')}
                 </button>
@@ -985,6 +1031,77 @@ export default function AdminNotificationsPage() {
                 </div>
               </motion.div>
             </motion.div>
+          </ModalPortal>
+        )}
+      </AnimatePresence>
+
+        {/* ۵. مودال پیش‌نمایش زنده اعلان (آنچه کاربر می‌بیند) */}
+      <AnimatePresence>
+        {livePreviewData && (
+          <ModalPortal>
+            <div className="fixed inset-0 z-[140000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md select-none font-sans">
+              <div className="absolute inset-0 cursor-pointer animate-[fadeIn_0.2s_ease-out]" onClick={() => setLivePreviewData(null)}></div>
+              
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                exit={{ opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()} 
+                className="relative w-full max-w-lg z-10"
+              >
+                <div className="absolute -top-12 left-0 right-0 flex justify-between items-center px-2">
+                  <span className="text-white text-sm font-bold opacity-80 flex items-center gap-2"><Icon name="eye" className="w-4 h-4"/> پیش‌نمایش کاربری</span>
+                  <button onClick={() => setLivePreviewData(null)} className="p-2 bg-white/10 hover:bg-rose-500 rounded-full text-white cursor-pointer transition-colors shadow-lg border border-white/10"><Icon name="close" className="w-4 h-4" /></button>
+                </div>
+
+                <div className="relative rounded-[2rem] p-4 sm:p-6 overflow-hidden bg-[#050810] border border-white/5 shadow-2xl group flex items-center justify-center min-h-[300px]">
+                    <motion.div 
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.4, 0.15] }} 
+                      transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} 
+                      className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-[45px] pointer-events-none" 
+                      style={{ backgroundColor: livePreviewData.themeColor }} 
+                    />
+                    <motion.div 
+                      animate={{ scale: [1.2, 1, 1.2], opacity: [0.1, 0.3, 0.1] }} 
+                      transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1 }} 
+                      className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full blur-[55px] pointer-events-none" 
+                      style={{ backgroundColor: livePreviewData.themeColor }} 
+                    />
+
+                    <div className="relative w-full z-10 bg-white/[0.03] backdrop-blur-2xl rounded-2xl p-5 border border-white/10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]">
+                      {livePreviewData.coverUrl && (
+                        <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 bg-black/50 shadow-inner">
+                          <img src={livePreviewData.coverUrl} alt="cover" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="flex gap-4 mb-4 items-center">
+                        {livePreviewData.iconUrl ? (
+                          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10 shadow-sm"><img src={livePreviewData.iconUrl} className="w-7 h-7 object-contain" /></div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10 shadow-sm"><Icon name="bell" className="w-6 h-6 text-gray-400" /></div>
+                        )}
+                        <div>
+                          <h4 className="font-bold text-base text-white mb-1.5 font-sans leading-tight select-text">{livePreviewData.title}</h4>
+                          <span className="text-[10px] text-gray-400 font-sans bg-white/5 px-2 py-0.5 rounded-full border border-white/5 select-none">لحظاتی پیش - خوانده نشده</span>
+                        </div>
+                      </div>
+                      <div className="rich-text text-sm text-gray-300 leading-loose font-light line-clamp-4 font-sans bg-black/20 p-3 rounded-xl border border-white/5 select-text">
+                        {livePreviewData.bodyHtml ? <div dangerouslySetInnerHTML={{ __html: livePreviewData.bodyHtml }} /> : ''}
+                      </div>
+                      
+                      {livePreviewData.ctaButtons && livePreviewData.ctaButtons.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-white/5">
+                          {livePreviewData.ctaButtons.map((btn, i) => (
+                            <span key={i} className="text-xs px-4 py-2 rounded-xl text-white font-bold font-sans shadow-md select-none cursor-default" style={{ backgroundColor: livePreviewData.themeColor, boxShadow: `0 4px 15px ${livePreviewData.themeColor}40` }}>
+                              {btn.label || 'دکمه اقدام'}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                </div>
+              </motion.div>
+            </div>
           </ModalPortal>
         )}
       </AnimatePresence>

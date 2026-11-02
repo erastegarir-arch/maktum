@@ -1,25 +1,41 @@
 import SingleBlogTemplate from '@/app/components/frontend/SingleBlogTemplate';
 import { getContentBySlug } from '@/app/actions/content';
-import { getSessionUser } from '@/app/actions/auth'; // <-- اضافه شد
+import { getSessionUser } from '@/app/actions/auth';
 import { notFound } from 'next/navigation';
 
-export default async function BlogPostPage({ params }) {
-  // ۱. دریافت اسلاگ از آدرس
+// ۱. تنظیم رسمی و مستقیم عنوان سئو و متا در سربرگ مرورگر
+export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  // رمزگشایی و تبدیل به کلمه فارسی امن
   const slug = decodeURIComponent(resolvedParams?.slug || '');
-
-  // ۲. دریافت اطلاعات مستقیم از دیتابیس
   const content = await getContentBySlug(slug, 'BLOG');
 
-  // ۳. بررسی سالم بودن دیتا و وضعیت انتشار
+  if (!content) {
+    return { title: 'مدار | مطلب یافت نشد' };
+  }
+
+  const title = `${content?.titleBase || ''} ${content?.titleHighlight || ''}`.trim();
+  const seoTitle = content?.metaTitle || content?.seoTitle || title;
+
+  return {
+    title: {
+      absolute: `مدار | ${seoTitle}`, // استفاده از absolute مانع از تکرار نام مدار می‌شود و ساختار دقیق را اعمال می‌کند
+    },
+    description: content?.metaDesc || content?.subtitle || '',
+  };
+}
+
+// ۲. رندر صفحه اصلی
+export default async function BlogPostPage({ params }) {
+  const resolvedParams = await params;
+  const slug = decodeURIComponent(resolvedParams?.slug || '');
+
+  const content = await getContentBySlug(slug, 'BLOG');
+
   if (!content || !content.id || content.status !== 'PUBLISHED') {
     notFound(); 
   }
 
-  // ۴. دریافت اطلاعات سشن کاربر (اگر لاگین باشد)
-  const currentUser = await getSessionUser(); // <-- اضافه شد
+  const currentUser = await getSessionUser();
 
-  // ۵. رندر صفحه با دیتا و وضعیت کاربر
-  return <SingleBlogTemplate data={content} type="BLOG" currentUser={currentUser} />; // <-- پراپ اضافه شد
+  return <SingleBlogTemplate data={content} type="BLOG" currentUser={currentUser} />;
 }

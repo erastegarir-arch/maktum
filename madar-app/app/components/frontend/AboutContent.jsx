@@ -366,7 +366,7 @@ export default function AboutContent({ pageData = {} }) {
                           }}
                         />
                       ) : (
-                        <Icon name="hash" className="w-5 h-5 md:w-6 md:h-6" />
+                        <Icon name="chatnotification" className="w-5 h-5 md:w-6 md:h-6" />
                       )}
                     </div>
                     <div className="w-full sm:w-auto text-center sm:text-right">
@@ -453,7 +453,7 @@ export default function AboutContent({ pageData = {} }) {
               </button>
 
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/[0.03] flex items-center justify-center text-[#10b981] mx-auto mb-4 md:mb-6 shadow-[inset_0_0_15px_rgba(16,185,129,0.1)] border border-white/[0.05]">
-                <Icon name="hash" className="w-6 h-6 md:w-8 md:h-8 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                <Icon name="chatnotification" className="w-6 h-6 md:w-8 md:h-8 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
               </div>
 
               <h3 className="text-lg md:text-xl font-bold text-white mb-2 drop-shadow-md">{socialConn.popupTitle || 'ارتباط با ما'}</h3>

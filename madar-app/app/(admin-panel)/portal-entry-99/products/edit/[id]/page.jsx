@@ -141,7 +141,8 @@ export default function EditContentPage() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(!!(can('CONTENT_MANAGE') || user?.isSuperAdmin));
+      // فقط مدیرانی که تیک ویرایش محتوا را دارند مجاز به ورود هستند
+      setHasAccess(user.isSuperAdmin || (can && can('CONTENT_EDIT')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -323,6 +324,8 @@ export default function EditContentPage() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    if (!can('CONTENT_EDIT')) return toast.error('شما مجوز ویرایش این محتوا را ندارید.');
+    
     if (!titleBase && !titleHighlight) return toast.error('حداقل یکی از بخش‌های عنوان باید وارد شود!');
     if (!slug) return toast.error('پیوند یکتا (Slug) الزامی است!');
     

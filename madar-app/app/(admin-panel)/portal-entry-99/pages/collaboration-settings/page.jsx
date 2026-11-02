@@ -62,7 +62,7 @@ export default function CollaborationSettingsPage() {
   // ==========================================
   // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
+  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -73,7 +73,8 @@ export default function CollaborationSettingsPage() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
+      // فقط مدیرانی که تیک ویرایش صفحه همکاری با ما را دارند مجاز به ورود هستند
+      setHasAccess(user.isSuperAdmin || (can && can('CAREER_EDIT')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -83,7 +84,7 @@ export default function CollaborationSettingsPage() {
         return () => clearTimeout(timer);
       }
     }
-  }, [user, authIsLoading, authLoading, isFetching]);
+  }, [user, authIsLoading, authLoading, isFetching, can]);
 
   // ==========================================
   // ۲. دریافت اطلاعات و تنظیمات استیت‌ها
@@ -115,6 +116,8 @@ export default function CollaborationSettingsPage() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!can('CAREER_EDIT')) return toast.error('شما مجوز تغییر و ذخیره اطلاعات این صفحه را ندارید.');
+    
     setSaving(true);
 
     const savePromise = saveSetting('collaboration_page_data', JSON.stringify(data), 'COLLABORATION_PAGE');

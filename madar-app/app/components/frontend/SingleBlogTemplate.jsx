@@ -110,10 +110,6 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  useEffect(() => {
-    const seoTitle = data?.seoTitle || title;
-    if (seoTitle) document.title = `مدار | ${seoTitle}`;
-  }, [data, title]);
 
   const showLoginToast = () => {
     toast((t) => (
@@ -187,21 +183,19 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
   const isCommentsEnabled = displaySettings.allowComments !== false && data?.allowComments !== false && displaySettings.showComments !== false;
 
   return (
-    // حذف رنگ سالید و اعمال شفافیت کامل برای عبور نورِ محیطی سایت
-    <div className={`relative min-h-screen flex flex-col scroll-smooth theme-${type.toLowerCase()}`}>
+    // اضافه شدن کلاس select-none برای جلوگیری از انتخاب متن در کل صفحه
+    <div className={`relative min-h-screen flex flex-col scroll-smooth select-none theme-${type.toLowerCase()}`}>
       
-      {/* حذف لایه تیره پس‌زمینه که نور سراسری را مسدود می‌کرد */}
 
       <ProgressBar />
 
       <main className="flex-grow w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 pb-0 md:pb-20 pt-0 sm:pt-6 relative">
         
-        {/* نوار شفاف‌تر بالای عکس در موبایل */}
         <div className="relative z-20 px-4 sm:px-0 pt-4 sm:pt-0 pb-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent md:bg-none [&_a]:!text-white/90 [&_a:hover]:!text-white [&_svg]:!text-white/60 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] max-w-4xl mx-auto">
           <Breadcrumbs items={[{ label: 'مدار', href: '/' }, parentBreadcrumb, { label: title || 'بدون عنوان' }]} />
         </div>
 
-        <div className="fixed top-0 inset-x-0 z-0 h-[45vh] md:relative md:top-auto md:inset-auto md:z-10 md:h-auto w-full md:aspect-video rounded-none md:rounded-[2.5rem] md:shadow-[0_10px_40px_rgba(0,0,0,0.5)] md:p-1 md:border border-transparent group pointer-events-none md:pointer-events-auto max-w-4xl mx-auto md:mt-4 md:mb-12">
+        <div className="fixed top-0 inset-x-0 z-0 h-[62vh] md:relative md:top-auto md:inset-auto md:z-10 md:h-auto w-full md:aspect-video rounded-none md:rounded-[2.5rem] md:shadow-[0_10px_40px_rgba(0,0,0,0.5)] md:p-1 md:border border-transparent group pointer-events-none md:pointer-events-auto max-w-4xl mx-auto md:mt-4 md:mb-12">
           <div className="hidden md:block absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10 rounded-[2.5rem]" />
           <div className={`hidden md:block absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
           <div className="absolute inset-0 w-full h-full md:rounded-[2.2rem] overflow-hidden bg-black/40 shadow-inner">
@@ -210,16 +204,26 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
               <img src={mainImage} alt={title} className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-700 group-hover:opacity-100" />
             </picture>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#05080f] to-transparent md:hidden pointer-events-none z-10" />
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#05080f] via-[#05080f]/60 to-transparent md:hidden pointer-events-none z-10" />
           <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#05080f] to-transparent md:hidden pointer-events-none z-10" />
         </div>
 
-        {/* اعمال گلس‌مورفیسم کامل به پنل اصلی محتوا (کلاس min-h-[150vh] حذف شد تا ارتفاع هوشمند شود) */}
-        <div className="relative z-10 bg-white/[0.01] backdrop-blur-2xl md:bg-white/[0.02] rounded-t-[2.5rem] md:rounded-[3rem] mt-[35vh] md:mt-0 px-5 pt-8 pb-20 md:pb-8 md:p-10 lg:p-12 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] border border-white/[0.05] md:shadow-[0_15px_50px_rgba(0,0,0,0.5)]">
-          <div className="max-w-4xl mx-auto">
+        <div className="relative w-full md:bg-transparent rounded-t-[2.5rem] md:rounded-none mt-[35vh] md:mt-0 flex flex-col justify-center">
             
-            <div className="mb-6 md:mb-8 text-right">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight mb-4 font-sans">
+          {/* لایه شیشه‌ای با عرض سراسری و حذف کشیدگی ۱۵۰ درصدی */}
+          <div className="absolute w-screen left-1/2 -translate-x-1/2 top-0 -bottom-32 bg-[#050810]/80 backdrop-blur-3xl rounded-t-[2.5rem] pointer-events-none z-[1] md:w-full md:left-auto md:translate-x-0 md:rounded-[3rem] md:bg-white/[0.02] md:bottom-0 [mask-image:linear-gradient(to_bottom,black_calc(100%-128px),transparent_100%)] md:[mask-image:none]" />
+
+          {/* لایه هاله‌های نوری کمکی برای موبایل */}
+          <div className="md:hidden absolute w-screen left-1/2 -translate-x-1/2 top-0 h-[420px] rounded-t-[2.5rem] overflow-hidden pointer-events-none z-[2] [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)]">
+            <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full blur-[70px] opacity-40" style={{ background: `radial-gradient(circle, ${currentTheme.glowBg.replace('0.15', '1')} 0%, transparent 70%)` }} />
+            <div className="absolute top-24 -left-16 w-60 h-60 rounded-full blur-[70px] opacity-30" style={{ background: 'radial-gradient(circle, #f59e0b 0%, transparent 70%)' }} />
+          </div>
+
+          <div className="relative w-full z-10 p-5 pt-8 pb-20 md:pb-8 md:p-10 lg:p-12 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] border border-white/[0.05] md:shadow-[0_15px_50px_rgba(0,0,0,0.5)] rounded-t-[2.5rem] md:rounded-[3rem]">
+            <div className="w-full max-w-4xl mx-auto">
+              
+              <div className="mb-6 md:mb-8 text-right">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight mb-4 font-sans">
                 {data?.titleBase} <span className={currentTheme.primaryText}>{data?.titleHighlight}</span>
               </h1>
               {data?.subtitle && (
@@ -268,14 +272,15 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
             )}
 
             {data?.lead && (
-              <div className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] bg-white/[0.03] backdrop-blur-2xl border border-white/[0.05] mb-10">
+              <div className="relative p-6 md:p-8 rounded-3xl overflow-hidden shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] bg-white/[0.03] backdrop-blur-2xl border border-white/[0.05] mb-10 select-none">
                 <p className="text-white text-base md:text-lg leading-loose font-bold text-justify relative z-10 font-sans">
                   {data.lead}
                 </p>
               </div>
             )}
 
-            <div className={`rich-text theme-${type.toLowerCase()} relative z-10 mb-12 [&_*]:!backdrop-blur-none [&_*]:!blur-none`}>
+            {/* اضافه شدن select-none و کلاس اجباری [&_*]:!select-none برای تمام تگ‌های داخل محتوای HTML */}
+            <div className={`rich-text theme-${type.toLowerCase()} relative z-10 mb-12 select-none [&_*]:!select-none [&_*]:!backdrop-blur-none [&_*]:!blur-none`}>
               <div dangerouslySetInnerHTML={{ __html: data?.body || '' }} />
             </div>
 
@@ -303,12 +308,16 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
                 </div>
                 <div className="flex flex-wrap gap-2 md:gap-3">
                   {authors.map((author, index) => {
-                    const authorImage = author?.imageUrl || author?.avatarUrl || null;
+                    const rawImage = author?.avatar || author?.image || author?.imageUrl || author?.avatarUrl || author?.creator?.avatar || author?.creator?.imageUrl || null;
+                    const authorImage = typeof rawImage === 'string' && rawImage.trim() !== ''
+                      ? (rawImage.startsWith('http') || rawImage.startsWith('/') || rawImage.startsWith('data:') ? rawImage.trim() : `/${rawImage.trim()}`)
+                      : null;
+                    
                     return (
                       <a key={index} href={`/t/${author.slug || author.name}`} className="inline-flex items-center gap-2 group cursor-pointer bg-white/5 hover:bg-white/10 border border-transparent shadow-inner transition-colors pr-1.5 pl-3 md:pl-4 py-1.5 rounded-full w-max">
                         <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-transparent shadow-inner shrink-0 relative bg-black/40 flex items-center justify-center">
                           {authorImage ? (
-                            <BlurImage src={authorImage} alt={author.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                            <img src={authorImage} alt={author.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                           ) : (
                             <Icon name="user" className="w-4 h-4 text-gray-500" />
                           )}
@@ -434,6 +443,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
 
           </div>
         </div>
+      </div>
 
       </main>
 

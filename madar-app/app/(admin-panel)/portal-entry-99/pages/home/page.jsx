@@ -44,7 +44,7 @@ export default function HomePageSettings() {
   // ==========================================
   // ۱. منطق احراز هویت بدون پرش (Wait & Verify)
   // ==========================================
-  const { user, isLoading: authIsLoading, loading: authLoading, isFetching } = useAuth();
+  const { user, isLoading: authIsLoading, loading: authLoading, isFetching, can } = useAuth();
   const [hasAccess, setHasAccess] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -55,7 +55,8 @@ export default function HomePageSettings() {
     if (isWorking) return;
 
     if (user) {
-      setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
+      // فقط مدیرانی که تیک ویرایش صفحه اصلی را دارند مجاز به ورود هستند
+      setHasAccess(user.isSuperAdmin || (can && can('HOMEPAGE_EDIT')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
@@ -65,7 +66,7 @@ export default function HomePageSettings() {
         return () => clearTimeout(timer);
       }
     }
-  }, [user, authIsLoading, authLoading, isFetching]);
+  }, [user, authIsLoading, authLoading, isFetching, can]);
 
   // ==========================================
   // ۲. استیت‌های محتوا
@@ -150,6 +151,8 @@ export default function HomePageSettings() {
   }, [hasAccess]);
 
   const handleSave = async () => {
+    if (!can('HOMEPAGE_EDIT')) return toast.error('شما مجوز ذخیره و تغییر چیدمان صفحه اصلی را ندارید.');
+    
     setSaving(true);
     try {
       await saveSetting('home_layout', JSON.stringify(layoutOrder), 'HOME');
