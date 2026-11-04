@@ -7,7 +7,7 @@ const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || 'MADAR_SUP
 export async function middleware(request) {
   const url = request.nextUrl;
 
-  // ۱. محافظت لایه اول از مسیرهای مدیریت (پنل ادمین)
+  // ۱. محافظت لایه اول از مسیرهای مدیریت اختصاصی (پنل ادمین)
   if (url.pathname.startsWith('/portal-entry-99')) {
     const token = request.cookies.get('madar_session')?.value;
 
@@ -23,12 +23,11 @@ export async function middleware(request) {
 
       // بررسی اینکه آیا کاربر مدیر است یا خیر
       if (!payload.isAdmin && !payload.isSuperAdmin) {
-        // کاربر عادی است و حق ورود به پنل را ندارد. پرتاب به صفحه اصلی.
-        return NextResponse.redirect(new URL('/', request.url));
+        // کاربر عادی است و حق ورود به پنل را ندارد. پرتاب به صفحه خطای ۴۰۳ (عدم دسترسی)
+        return NextResponse.redirect(new URL('/forbidden', request.url));
       }
 
       // اگر کاربر ادمین بود، اجازه عبور می‌دهیم. 
-      // لایه دوم (درون خود صفحات و اکشن‌ها) دسترسی‌های دانه‌ریز را کنترل خواهد کرد.
 
     } catch (err) {
       // توکن نامعتبر، دستکاری شده یا منقضی شده است
@@ -38,12 +37,14 @@ export async function middleware(request) {
     }
   }
 
-  // ۲. محافظت از داشبورد کاربری عادی (اختیاری - اگر مسیر داشبورد کاربران profile است)
+  // ۲. محافظت از داشبورد کاربری عادی
   if (url.pathname.startsWith('/profile') || url.pathname.startsWith('/dashboard')) {
     const token = request.cookies.get('madar_session')?.value;
+    
     if (!token) {
       return NextResponse.redirect(new URL('/', request.url));
     }
+    
     try {
       await jwtVerify(token, SECRET_KEY);
     } catch (err) {

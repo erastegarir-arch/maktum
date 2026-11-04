@@ -11,8 +11,7 @@ import {
   sendOtpAction, 
   verifyOtpAction, 
   loginWithPasswordAction, 
-  registerAction,
-  initMasterAdminAction
+  registerAction
 } from '@/app/actions/auth'; 
 
 const cn = (...inputs) => twMerge(clsx(inputs));
@@ -157,15 +156,6 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     }, 1500); // 1.5 ثانیه مکث برای دیده شدن تم سبز و سپس اقدام بعدی
   };
 
-  const makeMeSuperAdmin = async () => {
-    if (phone.length === 11) {
-      const toastId = toast.loading('در حال ارتقای حساب به مدیر کل ارشد...');
-      const res = await initMasterAdminAction(phone);
-      if (res.success) toast.success(res.message, { id: toastId, duration: 6000 });
-      else toast.error(res.error, { id: toastId });
-    }
-  };
-
   const handleMainSubmit = async () => {
     if (phone.length < 11 || !phone.startsWith('09')) {
       toast.error('شماره موبایل نامعتبر است. (مثال: ۰۹۱۲...)');
@@ -223,7 +213,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     setMockCode(res.mockCode); 
     setStep(2);
     setTimer(120);
-    toast.success(`کد پیامک شد (کد تست: ${toPersianDigits(res.mockCode)})`);
+    toast.success('کد ورود با موفقیت ارسال شد');
     setTimeout(() => otpRefs.current[0]?.focus(), 100);
   };
 
@@ -358,7 +348,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                       </div>
 
                       <div className="text-center mb-6">
-                        <h2 onDoubleClick={makeMeSuperAdmin} className="text-xl md:text-2xl font-bold text-white mb-1.5 font-sans cursor-default select-none">{view === 'login' ? 'به مدار خوش آمدید!' : 'عضویت در مدار'}</h2>
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-1.5 font-sans cursor-default select-none">{view === 'login' ? 'به مدار خوش آمدید!' : 'عضویت در مدار'}</h2>
                         <p className="text-xs md:text-sm text-gray-400 font-light font-sans">{view === 'login' ? 'اطلاعات کاربری خود را وارد کنید.' : 'با مدار به دنیای محتوا متصل شوید.'}</p>
                       </div>
 

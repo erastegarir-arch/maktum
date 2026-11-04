@@ -6,6 +6,7 @@ import Footer from '@/app/components/frontend/Footer';
 import { getSetting } from '@/app/actions/settings';
 import { getIcons } from '@/app/actions/icons';
 import AmbientBackground from '@/app/components/frontend/AmbientBackground';
+import Script from 'next/script';
 
 // تامین‌کننده تاریخ
 import { DateSettingsProvider } from '@/app/components/providers/DateSettingsContext';
@@ -107,6 +108,35 @@ export default async function RootLayout({ children }) {
       <body className="text-white min-h-screen flex flex-col antialiased relative selection:bg-cyan-500/30">
         <DateSettingsProvider>
           
+          {/* ۱. اسکریپت اصلی ایران آنالیتیکس */}
+          <Script
+            id="iran-analytics-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer=window.dataLayer||[];
+                function IRA(){dataLayer.push(arguments);}
+                IRA('js',new Date());
+                IRA('config','IRA-11D9HQ7');
+              `,
+            }}
+          />
+          {/* ۲. اسکریپت تگ ایران آنالیتیکس */}
+          <Script 
+            src="https://t.iran-analytics.ir/iratag/js?id=IRA-11D9HQ7" 
+            strategy="afterInteractive" 
+            async 
+          />
+
+          {/* ۳. اسکریپت گفتینو */}
+          <Script
+            id="goftino-widget"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `!function(){var i="sYy11k",a=window,d=document;function g(){var g=d.createElement("script"),s="https://www.goftino.com/widget/"+i,l=localStorage.getItem("goftino_"+i);g.async=!0,g.src=l?s+"?o="+l:s;d.getElementsByTagName("head")[0].appendChild(g);}"complete"===d.readyState?g():a.attachEvent?a.attachEvent("onload",g):a.addEventListener("load",g,!1);}();`,
+            }}
+          />
+
           {/* ۱. پس‌زمینه زنده در لایه صفر */}
           <AmbientBackground />
           

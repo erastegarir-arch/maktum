@@ -10,49 +10,44 @@ import { parsePermissions } from '@/lib/rbac';
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || 'MADAR_SUPER_SECRET_KEY_FOR_JWT_TOKEN');
 
 // ==========================================
-// ۰. راه‌اندازی اولین مدیرکل ارشد (Master Admin)
-// ==========================================
-export async function initMasterAdminAction(phone) {
-  try {
-    if (!phone || phone.length !== 11) return { success: false, error: 'شماره موبایل نامعتبر است.' };
-
-    let user = await prisma.user.findUnique({ where: { phone } });
-    if (!user) {
-      user = await prisma.user.create({
-        data: { phone, status: 'ACTIVE' }
-      });
-      await sendWelcomeNotificationToUser(user.id);
-    }
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { isSuperAdmin: true, isAdmin: true }
-    });
-
-    return { success: true, message: 'حساب شما با موفقیت به مدیر کل ارشد ارتقا یافت! حالا لاگین کنید.' };
-  } catch (error) {
-    console.error('Error in initMasterAdmin:', error);
-    return { success: false, error: 'خطای سرور' };
-  }
-}
-
-// ==========================================
-// ۱. بررسی شماره موبایل و ارسال کد تایید (OTP)
+// ۱. بررسی شماره موبایل و ارسال کد تایید واقعی (متد VerifyLookup کاوه‌نگار)
 // ==========================================
 export async function sendOtpAction(phone) {
   try {
     if (!phone || phone.length < 10) return { success: false, error: 'شماره موبایل نامعتبر است.' };
 
     const existingUser = await prisma.user.findUnique({ where: { phone } });
-    if (existingUser && existingUser.status === 'BANNED') return { success: false, error: 'BANNED' };
+    if (existingUser && existingUser.status === 'BANNED') return { success: false, error: 'حساب شما مسدود است.' };
 
     const activeOtp = await prisma.otpCode.findUnique({ where: { phone } });
     if (activeOtp && activeOtp.expiresAt > new Date(Date.now() + 105 * 1000)) {
-      return { success: false, error: 'لطفاً تا پایان تایمر قبلی صبر کنید.' };
+      return { success: false, error: 'لطفاً تا پایان تایمر صبر کنید.' };
     }
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 120 * 1000);
+
+    const apiKey = process.env.KAVENEGAR_API_KEY;
+
+    if (apiKey) {
+      // اصلاح مهم: استفاده از نام دقیق الگو (verifyPhone) به جای متن آن
+      const url = `https://api.kavenegar.com/v1/${apiKey}/verify/lookup.json?receptor=${phone}&token=${code}&template=verifyPhone`;
+      
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.return.status !== 200) {
+          console.error('Kavenegar API Error:', data.return.message);
+          return { success: false, error: 'خطا در سرویس پیامک. لطفاً دقایقی دیگر تلاش کنید.' };
+        }
+      } catch (err) {
+        console.error('Kavenegar Fetch Error:', err);
+        return { success: false, error: 'ارتباط با سرور پیامک برقرار نشد.' };
+      }
+    } else {
+      console.warn('هشدار: کلید کاوه‌نگار تنظیم نشده است. پیامک ارسال نشد.');
+    }
 
     await prisma.otpCode.upsert({
       where: { phone },
@@ -60,16 +55,15 @@ export async function sendOtpAction(phone) {
       create: { phone, code, expiresAt }
     });
 
-    console.log(`[شبیه‌ساز پیامک]: کد تایید برای شماره ${phone} برابر است با: ${code}`);
-
-    return { success: true, message: 'کد تایید ارسال شد.', mockCode: code }; 
+    return { success: true, message: 'کد تایید با موفقیت ارسال شد.' }; 
   } catch (error) {
-    return { success: false, error: 'خطای سرور در ارسال کد.' };
+    console.error('OTP Send Error:', error);
+    return { success: false, error: 'خطای سرور در ارتباط با سامانه پیامک.' };
   }
 }
 
 // ==========================================
-// ۲. ثبت‌نام کاربر جدید (با رمز عبور و پیامک)
+// ۲. ثبت‌نام کاربر جدید
 // ==========================================
 export async function registerAction(phone, password, code) {
   try {
@@ -91,7 +85,6 @@ export async function registerAction(phone, password, code) {
     });
 
     await sendWelcomeNotificationToUser(user.id);
-
     await prisma.otpCode.delete({ where: { phone } });
     await createSession(user);
 
@@ -214,9 +207,7 @@ export async function getCurrentUserSessionAction() {
 
     if (!user || user.status === 'BANNED') return { success: false };
 
-    // تبدیل رشته JSON دیتابیس به آرایه استاندارد برای استفاده یکپارچه در کل کلاینت
     user.adminPermissions = parsePermissions(user.adminPermissions);
-
     return { success: true, user };
   } catch (err) {
     return { success: false };
@@ -224,7 +215,7 @@ export async function getCurrentUserSessionAction() {
 }
 
 // ==========================================
-// توابع سازگاری برای فایل‌های قدیمی سایت
+// توابع سازگاری
 // ==========================================
 export async function getSessionUser() {
   const res = await getCurrentUserSessionAction();

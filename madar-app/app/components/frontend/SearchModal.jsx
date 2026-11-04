@@ -156,6 +156,19 @@ export default function SearchModal({ isOpen, onClose }) {
 
       if (response.success) {
         if (isLoadMore) {
+
+          // ارسال آمار جستجو به ایران آنالیتیکس
+        if (!isLoadMore && debouncedQuery && typeof window !== 'undefined' && window.ira && window.ira.search) {
+          try {
+            window.ira.search.track({
+              search_term: debouncedQuery,
+              search_category: 'all'
+            });
+          } catch (e) {
+            console.error('Analytics error:', e);
+          }
+        }
+
           setResults(prev => [...prev, ...response.data]);
           setPage(targetPage);
         } else {
