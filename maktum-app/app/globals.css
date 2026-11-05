@@ -1,0 +1,301 @@
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn[wght].woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================= */
+/* تنظیمات پایه (Body) */
+/* ========================================= */
+@layer base {
+  html {
+    background-color: #050810;
+    direction: rtl;
+  }
+  html, body {
+    @apply text-gray-100 overflow-x-hidden scroll-smooth;
+    min-height: 100vh;
+  }
+  body {
+    background-color: transparent !important;
+  }
+
+  body::after, body::before {
+    display: none !important;
+  }
+}
+
+/* ========================================= */
+/* کامپوننت‌ها و استایل‌های گلس‌مورفیسم خالص */
+/* ========================================= */
+@layer components {
+  /* افکت گلس برای کارت‌ها (بدون هیچ border جامد) */
+  .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-2xl rounded-3xl transition-all duration-300 shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_8px_30px_rgba(0,0,0,0.4)];
+  }
+
+  .hover-lift {
+    @apply transition-all duration-500 ease-out;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  /* ----------------------------------------- */
+  /* کلاس‌های داینامیک برای سیستم متن‌ساز (Rich Text) */
+  /* ----------------------------------------- */
+  
+  /* ۱. تعریف رنگ‌های داینامیک */
+  .theme-raw { --editor-color: #fbbf24; }      /* تم زرد */
+  .theme-produced { --editor-color: #f43f5e; } /* تم قرمز */
+  .theme-tool { --editor-color: #10b981; }     /* تم سبز */
+  .rich-text { --editor-color: #06b6d4; }      /* رنگ پیش‌فرض */
+
+  /* ۲. استایل‌های کلی باکس ادیتور */
+  .rich-text {
+    @apply text-gray-300 text-sm leading-loose font-light break-words text-justify;
+  }
+
+  /* ۳. بولد و کج */
+  .rich-text strong, .rich-text b { 
+    @apply font-bold text-white; 
+  }
+  .rich-text em, .rich-text i { 
+    @apply italic text-gray-400; 
+  }
+
+  /* ۴. خط زیر و خط‌خورده */
+  .rich-text u { 
+    @apply underline underline-offset-4 decoration-white/30; 
+  }
+  .rich-text s, .rich-text del { 
+    @apply line-through text-gray-600; 
+  }
+
+  /* ۵. هایلایت شیشه‌ای */
+  .rich-text mark {
+    background-color: var(--editor-color);
+    @apply text-[#0b0f19] px-1.5 py-0.5 rounded-md font-bold bg-opacity-80 backdrop-blur-sm;
+  }
+
+  /* ۶. کلمات لینک‌دار شده */
+  .rich-text a {
+    color: var(--editor-color);
+    @apply underline underline-offset-4 decoration-transparent transition-all duration-300 font-bold;
+  }
+  .rich-text a:hover {
+    text-decoration-color: var(--editor-color);
+    @apply opacity-80;
+  }
+
+  /* ۷. نقل‌قول گلس‌مورفی (بدون باگ و بدون ارور) */
+  .rich-text blockquote { 
+    border-right-width: 4px;
+    border-right-color: var(--editor-color);
+    border-left-width: 0;
+    @apply bg-white/5 pr-4 pl-4 py-3 my-6 rounded-l-2xl rounded-r-none italic text-gray-300 shadow-inner backdrop-blur-sm;
+  }
+
+  /* حالت هوشمند نقل‌قول برای متون انگلیسی (رفع باگ ارور CSS) */
+  .rich-text blockquote[dir="ltr"],
+  .rich-text [dir="ltr"] blockquote,
+  .rich-text blockquote[style*="text-align: left"],
+  .rich-text blockquote[style*="text-align:left"],
+  .rich-text [style*="text-align: left"] blockquote,
+  .rich-text [style*="text-align:left"] blockquote,
+  .rich-text blockquote[class*="left"],
+  .rich-text [class*="left"] blockquote {
+    border-right-width: 0 !important;
+    border-left-width: 4px !important;
+    border-left-color: var(--editor-color) !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 1rem !important;
+    border-bottom-right-radius: 1rem !important;
+    direction: ltr;
+  }
+
+  /* ۸. کدهای درون‌خطی و بلوک‌های کد (برنامه‌نویسی) شیشه‌ای */
+  .rich-text code {
+    @apply bg-white/5 backdrop-blur-md text-gray-300 px-1.5 py-0.5 rounded-md font-sans text-[13px] mx-0.5 inline-block shadow-inner;
+    direction: ltr !important;
+  }
+  .rich-text pre {
+    @apply bg-white/5 backdrop-blur-xl p-5 rounded-2xl my-6 overflow-x-auto shadow-inner;
+    direction: ltr !important;
+  }
+  .rich-text pre code {
+    @apply bg-transparent p-0 mx-0 text-sm text-gray-300 shadow-none block;
+  }
+
+  /* ۹. تیترهای داخل متن */
+  .rich-text h1, .rich-text h2, .rich-text h3, .rich-text h4, .rich-text h5, .rich-text h6 {
+    @apply text-white font-bold mb-4 mt-8 first:mt-0;
+  }
+  .rich-text h1 { @apply text-2xl; }
+  .rich-text h2 { @apply text-xl; }
+  .rich-text h3 { @apply text-lg; }
+  .rich-text h4, .rich-text h5, .rich-text h6 { @apply text-base; }
+
+  /* ۱۰. تصاویر و ویدیوهای تعبیه‌شده */
+  .rich-text img {
+    @apply max-w-full h-auto rounded-2xl mx-auto my-6 shadow-[0_10px_30px_rgba(0,0,0,0.5)];
+  }
+  .rich-text iframe {
+    @apply w-full rounded-2xl my-6 shadow-[0_10px_30px_rgba(0,0,0,0.5)] aspect-video;
+  }
+
+  /* ۱۱. استایل لیست‌ها */
+  .rich-text ol { 
+    @apply list-[persian] pr-6 my-4; 
+  }
+  .rich-text ul { 
+    @apply list-disc pr-6 my-4 marker:text-gray-500; 
+  }
+  .rich-text li { 
+    @apply mb-2 leading-loose; 
+  }
+  
+  .rich-text ol[dir="ltr"], .rich-text [dir="ltr"] ol, .rich-text [style*="text-align: left"] ol, .rich-text [style*="text-align:left"] ol, .rich-text [class*="left"] ol { 
+    @apply list-decimal pl-6 pr-0; 
+    direction: ltr;
+  }
+  .rich-text ul[dir="ltr"], .rich-text [dir="ltr"] ul, .rich-text [style*="text-align: left"] ul, .rich-text [style*="text-align:left"] ul, .rich-text [class*="left"] ul { 
+    @apply pl-6 pr-0; 
+    direction: ltr;
+  }
+}
+
+/* ========================================= */
+/* سیستم نوتیفیکیشن شیشه‌ای (Maktum Toast) */
+/* ========================================= */
+.maktum-toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.maktum-toast {
+    position: relative;
+    min-width: 300px;
+    max-width: 400px;
+    background: rgba(18, 18, 24, 0.4); /* شفاف‌تر برای حس شیشه‌ای بهتر */
+    backdrop-filter: blur(24px); /* بلور بیشتر */
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: #ffffff;
+    font-family: inherit;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    box-shadow: inset 0 0 20px rgba(255,255,255,0.02), 0 8px 32px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    pointer-events: auto;
+    transform: translateX(120%);
+    animation: toastSlideIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.maktum-toast.closing {
+    animation: toastSlideOut 0.3s ease-in forwards;
+}
+
+/* رنگ‌بندی داینامیک توست‌ها با خط نوری به جای بوردر */
+.maktum-toast::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 3px;
+}
+
+.maktum-toast.success::before { background: #00ff88; box-shadow: 0 0 10px #00ff88; }
+.maktum-toast.error::before { background: #ff0055; box-shadow: 0 0 10px #ff0055; }
+.maktum-toast.warning::before { background: #ffcc00; box-shadow: 0 0 10px #ffcc00; }
+.maktum-toast.info::before { background: #00d4ff; box-shadow: 0 0 10px #00d4ff; }
+
+.maktum-toast-content { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.maktum-toast-title { font-weight: 700; font-size: 0.95rem; letter-spacing: 0.5px; }
+.maktum-toast-message { font-size: 0.85rem; opacity: 0.85; line-height: 1.5; }
+.maktum-toast-close { background: transparent; border: none; color: rgba(255, 255, 255, 0.6); font-size: 1.2rem; cursor: pointer; padding: 0 0 0 12px; transition: color 0.2s; }
+.maktum-toast-close:hover { color: #ffffff; }
+
+.maktum-toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.5);
+    animation: toastProgress linear forwards;
+}
+
+.maktum-toast.success .maktum-toast-progress { background: #00ff88; }
+.maktum-toast.error .maktum-toast-progress { background: #ff0055; }
+.maktum-toast.warning .maktum-toast-progress { background: #ffcc00; }
+.maktum-toast.info .maktum-toast-progress { background: #00d4ff; }
+
+@keyframes toastSlideIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toastSlideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(120%); opacity: 0; }
+}
+
+@keyframes toastProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* ========================================= */
+/* اسکرول‌بار اختصاصی و باریک */
+/* ========================================= */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(6, 182, 212, 0.5); }
+
+/* ========================================= */
+/* سیستم رنگ‌های SVG */
+/* ========================================= */
+.svg-inherit-color svg { color: inherit !important; }
+.svg-inherit-color svg path, .svg-inherit-color svg rect, .svg-inherit-color svg circle, .svg-inherit-color svg polygon, .svg-inherit-color svg ellipse, .svg-inherit-color svg polyline, .svg-inherit-color svg line { fill: currentColor !important; }
+.svg-inherit-color svg [fill="none"], .svg-inherit-color svg [fill="transparent"], .svg-inherit-color svg [style*="fill: none"], .svg-inherit-color svg [style*="fill:none"], .svg-inherit-color svg [style*="fill: transparent"] { fill: none !important; }
+.svg-inherit-color svg [stroke]:not([fill]) { fill: none !important; }
+.svg-inherit-color svg [stroke]:not([stroke="none"]):not([stroke="transparent"]), .svg-inherit-color svg [style*="stroke:"]:not([style*="stroke: none"]):not([style*="stroke:none"]) { stroke: currentColor !important; }
+
+/* ========================================= */
+/* رنگ انتخاب متن */
+/* ========================================= */
+::selection { background-color: rgba(6, 182, 212, 0.35); color: #ffffff; }
+.theme-raw ::selection, .theme-raw::selection { background-color: rgba(251, 191, 36, 0.35) !important; color: #ffffff !important; }
+.theme-produced ::selection, .theme-produced::selection { background-color: rgba(244, 63, 94, 0.35) !important; color: #ffffff !important; }
+.theme-tool ::selection, .theme-tool::selection { background-color: rgba(16, 185, 129, 0.35) !important; color: #ffffff !important; }
+.theme-blog ::selection, .theme-blog::selection { background-color: rgba(168, 85, 247, 0.35) !important; color: #ffffff !important; }
+
+/* غیرفعال کردن انتخاب متن با موس در کل بدنه سایت */
+body {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* محافظت از فیلدهای ورودی و متون محتوایی برای جلوگیری از خرابی فرم‌ها */
+input, textarea, select, .rich-text, .select-text {
+  user-select: text;
+  -webkit-user-select: text;
+}
