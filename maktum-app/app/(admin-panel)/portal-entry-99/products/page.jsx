@@ -43,7 +43,7 @@ export default function ProductsListPage() {
     if (isWorking) return;
 
     if (user) {
-      // این صفحه برای تمام مدیران جهت مشاهده لیست باز است
+      // این صفحه برای تمام مسئولان جهت مشاهده فهرست باز است
       setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -57,7 +57,7 @@ export default function ProductsListPage() {
   }, [user, authIsLoading, authLoading, isFetching, can]);
 
   // ==========================================
-  // ۲. استیت‌ها و مدیریت داده‌ها
+  // ۲. استیت‌ها و مسئولیت داده‌ها
   // ==========================================
   const [contents, setContents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +75,7 @@ export default function ProductsListPage() {
       const data = await getContents({ search: searchQuery, type: filterType, status: filterStatus });
       setContents(Array.isArray(data) ? data : []);
     } catch {
-      toast.error('خطا در دریافت لیست محتواها.');
+      toast.error('خطا در دریافت فهرست محتواها.');
       setContents([]);
     }
     setIsLoading(false);
@@ -132,7 +132,7 @@ export default function ProductsListPage() {
   };
 
   // ==========================================
-  // ۳. کنترل رندر لودینگ و انسداد دسترسی
+  // ۳. نظارت رندر لودینگ و انسداد دسترسی
   // ==========================================
   if (!isMounted || hasAccess === null) return <AdminLoading />;
 
@@ -143,7 +143,7 @@ export default function ProductsListPage() {
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز لازم برای مدیریت و ویرایش محتوا را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -156,9 +156,9 @@ export default function ProductsListPage() {
         <div>
           <h1 className="text-2xl font-black text-white mb-1 flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] shadow-[0_0_10px_#10b981]"></span>
-            مدیریت محتوا
+            مسئولیت محتوا
           </h1>
-          <p className="text-sm text-gray-400 font-light">فهرست تمامی محتوا، فایل‌ها و مقالات پایگاه مکتوم.</p>
+          <p className="text-sm text-gray-400 font-light">فهرست تمامی محتوا، پرونده‌ها و مقالات پایگاه مکتوم.</p>
         </div>
         {can('CONTENT_CREATE') && (
           <Link 
@@ -170,7 +170,7 @@ export default function ProductsListPage() {
         )}
       </div>
 
-      {/* ۱. کارت‌های آمار سریع */}
+      {/* ۱. فیش‌های آمار سریع */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-[fadeIn_0.4s_ease-out]">
         
         <div className="relative rounded-3xl p-4 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] border border-transparent flex items-center justify-between overflow-hidden">
@@ -208,19 +208,19 @@ export default function ProductsListPage() {
 
       </div>
 
-      {/* ۲. نوار فیلتر و جستجو */}
+      {/* ۲. نوار جزئیات و کاوش */}
       <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent animate-[fadeIn_0.5s_ease-out] bg-[#0f172a]/40 backdrop-blur-2xl">
         <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
         <div className="p-5 flex flex-col md:flex-row items-center gap-4 relative z-10 bg-[#050810]/50 shadow-inner">
           
-          {/* باکس جستجو */}
+          {/* قاب کاوش */}
           <div className="relative flex-1 w-full">
             <Icon name="search" className="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <input 
               type="text" 
-              placeholder="جستجو در عنوان یا پیوند یکتا (Slug)..." 
+              placeholder="کاوش در عنوان یا پیوند یکتا (Slug)..." 
               value={searchQuery} 
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl pr-12 pl-4 py-3.5 text-sm text-white placeholder:text-gray-600 focus:border focus:border-[#10b981] outline-none transition-all font-sans select-text"
@@ -235,7 +235,7 @@ export default function ProductsListPage() {
             )}
           </div>
 
-          {/* فیلتر نوع محتوا */}
+          {/* صافی نوع محتوا */}
           <div className="w-full md:w-48 shrink-0">
             <select 
               value={filterType} 
@@ -250,7 +250,7 @@ export default function ProductsListPage() {
             </select>
           </div>
 
-          {/* فیلتر وضعیت */}
+          {/* صافی وضعیت */}
           <div className="w-full md:w-48 shrink-0">
             <select 
               value={filterStatus} 
@@ -377,7 +377,7 @@ export default function ProductsListPage() {
                               </a>
                               <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out] pointer-events-none">
                                 <div className="bg-[#0f172a]/95 text-white text-[10px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-bold font-sans border border-white/10">
-                                  مشاهده در سایت
+                                  مشاهده در سامانه
                                 </div>
                               </div>
                             </div>
@@ -426,7 +426,7 @@ export default function ProductsListPage() {
         </div>
       </div>
 
-      {/* پاپ‌آپ اختصاصی و شیشه‌ای تأیید حذف */}
+      {/* باز شونده‌ اختصاصی و شیشه‌ای تأیید حذف */}
       <AnimatePresence>
         {deleteModalItem && (
           <ModalPortal>

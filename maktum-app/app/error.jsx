@@ -8,9 +8,10 @@ export default function ServerError({ error, reset }) {
   const cardRef = useRef(null);
 
   useEffect(() => {
-    document.title = 'مکتوم | خطای سیستمی';
-    // لاگ کردن ارور برای رهگیری توسط برنامه‌نویس
-    console.error('Server Error Caught:', error);
+    document.title = 'مکتوم | خطای سامانه‌ای';
+    // سانسور امنیتی: چاپ کامل آبجکت ارور در مرورگر ممنوع است تا ساختار پایگاه داده لو نرود
+    // فقط پیام کوتاه خطا (یا در صورت خالی بودن، پیام دیفالت) لاگ می‌شود
+    console.error('Server Error Caught:', error?.message || 'Unknown internal error');
   }, [error]);
 
   const handleMouseMove = (e) => {
@@ -45,20 +46,18 @@ export default function ServerError({ error, reset }) {
 
           <div className="relative z-10 flex flex-col items-center">
             
-            {/* گرافیک چرخ‌دنده‌های در حال تعمیر */}
-            <div className="relative w-36 h-36 md:w-44 md:h-44 mb-6 md:mb-10 flex items-center justify-center">
-              <div className="absolute inset-0 bg-amber-500/10 blur-[30px] rounded-full animate-pulse" />
+            {/* گرافیک نماد ثابت و یکپارچه */}
+            <div className="relative mb-6 md:mb-10 flex items-center justify-center">
+              <div className="absolute inset-0 bg-amber-500/20 blur-[40px] rounded-full animate-pulse" />
               
-              <div className="absolute inset-4 md:inset-6 border-[2px] border-dotted border-amber-500/40 rounded-full animate-[spin_10s_linear_infinite_reverse]" />
-              
-              <div className="relative w-20 h-20 md:w-24 md:h-24 bg-white/[0.02] border border-white/[0.05] rounded-xl md:rounded-2xl backdrop-blur-md flex items-center justify-center shadow-[inset_0_0_15px_rgba(245,158,11,0.2),0_0_30px_rgba(245,158,11,0.3)] z-10 overflow-hidden">
-                <Icon name="setting" className="w-10 h-10 md:w-12 md:h-12 text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)] animate-[spin_4s_linear_infinite]" />
+              <div className="relative w-24 h-24 md:w-28 md:h-28 bg-white/[0.02] border border-amber-500/30 rounded-2xl md:rounded-3xl backdrop-blur-md flex items-center justify-center shadow-[inset_0_0_20px_rgba(245,158,11,0.15),0_0_40px_rgba(245,158,11,0.2)] z-10 overflow-hidden">
+                <Icon name="setting" className="w-12 h-12 md:w-14 md:h-14 text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.6)]" />
               </div>
             </div>
 
             <div className="text-center space-y-3 md:space-y-4 mb-6 md:mb-8 w-full">
               <div className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)] rounded-full text-[10px] md:text-xs font-bold text-amber-400 tracking-widest mb-1 md:mb-2 font-sans">
-                اختلال سیستمی
+                اختلال سامانه‌ای
               </div>
 
               <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-tight font-sans drop-shadow-md">
@@ -66,7 +65,7 @@ export default function ServerError({ error, reset }) {
               </h1>
               
               <p className="text-gray-300 text-sm md:text-base leading-relaxed font-light max-w-md mx-auto text-justify [text-align-last:center] font-sans">
-                یک خطای پیش‌بینی نشده در موتور پردازشی سرور رخ داده است. مهندسین سیستم به طور خودکار از این اختلال مطلع شدند. لطفاً لحظاتی دیگر مجدداً تلاش کنید.
+                یک خطای پیش‌بینی نشده در ساختار پردازشی پایگاه‌داده رخ داده است. مهندسین سامانه به طور خودکار از این اختلال مطلع شدند. لطفاً لحظاتی دیگر مجدداً تلاش کنید.
               </p>
             </div>
 

@@ -1,3 +1,18 @@
 User-Agent: *
-Disallow: /admin/
+# جلوگیری از ایندکس شدن درگاه مسئولیت و مسیرهای حساس سامانه
 Disallow: /portal-entry-99/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /api/upload/
+Disallow: /_next/
+
+# جلوگیری از ثبت نتایج کاوش سامانه در گوگل (برای جلوگیری از ایجاد صفحات تکراری و بی‌ارزش در سئو)
+Disallow: /*?search=
+Disallow: /*?keyword=
+
+# اجازه صریح برای ایندکس شدن عکس‌ها و پرونده‌های پابلیک (مهم برای سئوی تصاویر)
+Allow: /uploads/
+Allow: /images/
+
+# معرفی نقشه سامانه به موتورهای کاوش (اگر افزونه sitemap را نصب کرده‌ای، نشانیش این است)
+# Sitemap: https://maktum.ir/sitemap.xml

@@ -5,10 +5,10 @@ import { AuthProvider } from '@/app/hooks/useAuth';
 
 export const metadata = {
   title: {
-    template: 'پنل مکتوم | %s',
-    absolute: 'پنل مکتوم | پیشخوان',
+    template: 'درگاه مکتوم | %s',
+    absolute: 'درگاه مکتوم | پیشخوان',
   },
-  description: 'پنل مدیریت یکپارچه پایگاه مکتوم',
+  description: 'درگاه مسئولیت یکپارچه پایگاه مکتوم',
 };
 
 export default function AdminLayout({ children }) {
@@ -20,7 +20,7 @@ export default function AdminLayout({ children }) {
 
         {/* 
           راه حل سراسری: کانتینر اصلی به یک فضای یکپارچه اسکرول‌شونده تبدیل شد.
-          حالا هر پاپ‌آپی در هر صفحه‌ای باز شود، به صورت اتوماتیک هدر را می‌پوشاند.
+          حالا هر باز شونده‌ی در هر صفحه‌ای باز شود، به صورت خودکار هدر را می‌پوشاند.
         */}
         <div className="flex-1 h-screen overflow-y-auto bg-[#030712] relative custom-scrollbar">
           
@@ -29,7 +29,7 @@ export default function AdminLayout({ children }) {
             <AdminHeader />
           </div>
           
-          {/* محتوای داشبورد */}
+          {/* محتوای میزکار */}
           <main className="p-8 min-h-[calc(100vh-80px)]">
             {children}
           </main>

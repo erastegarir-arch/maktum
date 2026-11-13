@@ -84,7 +84,7 @@ const getDynamicStyle = (value) => ({
 });
 
 // ==========================================
-// کامپوننت تولتیپ هوشمند
+// کامپوننت پیام راهنما هوشمند
 // ==========================================
 const Tooltip = ({ children, text }) => {
   const [coords, setCoords] = useState(null);
@@ -127,7 +127,7 @@ const Tooltip = ({ children, text }) => {
 };
 
 // ==========================================
-// کامپوننت لیست کشویی شیشه‌ای اختصاصی
+// کامپوننت فهرست کشویی شیشه‌ای اختصاصی
 // ==========================================
 const CustomSelect = ({ value, onChange, options, placeholder, disabled = false }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -222,7 +222,7 @@ const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
 };
 
 // ==========================================
-// کامپوننت اصلی داشبورد کاربر
+// کامپوننت اصلی میزکار کاربر
 // ==========================================
 export default function UserDashboard({ initialUser }) {
   const router = useRouter();
@@ -325,18 +325,18 @@ export default function UserDashboard({ initialUser }) {
   };
 
   // ========================================================
-  // مخفی کردن قطعی و بی‌رحمانه تمام آیکون‌های هدر (سرچ و آدمک)
+  // مخفی کردن قطعی و بی‌رحمانه تمام نماد‌های هدر (کاوش و آدمک)
   // ========================================================
   useEffect(() => {
     const hideHeaderIcons = () => {
-      // انتخاب هر لینکی و دکمه‌ای که در صفحه هست
+      // انتخاب هر پیوندی و دکمه‌ای که در صفحه هست
       const candidates = document.querySelectorAll('a, button, div[role="button"]');
       
       candidates.forEach(el => {
-        // به المان‌های داخل داشبورد کاری نداریم تا پنل خراب نشود
+        // به المان‌های داخل میزکار کاری نداریم تا درگاه خراب نشود
         if (el.closest('aside') || el.closest('main') || el.closest('#dashboard-content') || el.closest('[role="dialog"]')) return;
 
-        // فقط دکمه‌های آیکونی کوچک (بدون متن) مخفی شوند تا لوگو و عناوین لینک‌دار حفظ شوند
+        // فقط دکمه‌های نمادی کوچک (بدون متن) مخفی شوند تا لوگو و عناوین پیوند‌دار حفظ شوند
         const rect = el.getBoundingClientRect();
         if (rect.top >= 0 && rect.top < 120 && rect.width < 55 && !el.textContent.trim()) {
           el.style.setProperty('display', 'none', 'important');
@@ -404,12 +404,12 @@ export default function UserDashboard({ initialUser }) {
     e.preventDefault();
 
     if (!formData.firstName?.trim()) {
-      toast.error('لطفاً حداقل «نام» خود را برای ثبت در پروفایل وارد کنید.');
+      toast.error('لطفاً حداقل «نام» خود را برای ثبت در نماگر وارد کنید.');
       return;
     }
 
     if (formData.email?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      toast.error('فرمت ایمیل وارد شده صحیح نیست (مثال: name@domain.com).');
+      toast.error('نشانی رایانامه وارد شده صحیح نیست (مثال: name@domain.com).');
       return;
     }
 
@@ -432,7 +432,7 @@ export default function UserDashboard({ initialUser }) {
     setIsSaving(false);
 
     if (res.success) {
-      toast.success(res.message || 'اطلاعات پروفایل با موفقیت ذخیره شد.');
+      toast.success(res.message || 'اطلاعات نماگر با موفقیت ذخیره شد.');
       router.refresh();
     } else {
       toast.error(res.error || 'خطا در ثبت اطلاعات. لطفاً مقادیر وارد شده را بررسی کنید.');
@@ -442,11 +442,11 @@ export default function UserDashboard({ initialUser }) {
   const handleSavePassword = async (e) => {
     e.preventDefault();
     if (passwordData.newPassword.length < 6) {
-      toast.error('رمز عبور جدید باید حداقل ۶ کاراکتر باشد.');
+      toast.error('گذرواژه جدید باید حداقل ۶ کاراکتر باشد.');
       return;
     }
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('تکرار رمز عبور جدید با رمز وارد شده مطابقت ندارد.');
+      toast.error('تکرار گذرواژه جدید با گذرواژه‌ وارد شده مطابقت ندارد.');
       return;
     }
     setIsSavingPassword(true);
@@ -503,10 +503,10 @@ export default function UserDashboard({ initialUser }) {
 
   const tabs = [
     { id: 'profile', label: 'مشخصات فردی', shortLabel: 'مشخصات', icon: 'idCard', accent: '#06b6d4', count: null },
-    { id: 'downloads', label: 'دانلودهای من', shortLabel: 'دانلودها', icon: 'download', accent: '#38bdf8', count: uniqueDownloads.length > 0 ? toPersianDigits(uniqueDownloads.length) : null },
+    { id: 'downloads', label: 'بارگیری‌های من', shortLabel: 'بارگیری‌ها', icon: 'download', accent: '#38bdf8', count: uniqueDownloads.length > 0 ? toPersianDigits(uniqueDownloads.length) : null },
     { id: 'favorites', label: 'علاقه‌مندی‌ها', shortLabel: 'علاقه‌مندی‌ها', icon: 'heart', accent: '#f43f5e', count: favorites.length > 0 ? toPersianDigits(favorites.length) : null },
     { id: 'notifications', label: 'اعلان‌ها و پیام‌ها', shortLabel: 'اعلان‌ها', icon: 'bell', accent: '#f59e0b', badge: unreadCount > 0 ? toPersianDigits(unreadCount) : null },
-    { id: 'security', label: 'تغییر رمز عبور', shortLabel: 'امنیت', icon: 'password', accent: '#10b981', count: null },
+    { id: 'security', label: 'تغییر گذرواژه', shortLabel: 'امنیت', icon: 'password', accent: '#10b981', count: null },
   ];
 
   const displayName = formData.firstName || formData.lastName
@@ -517,7 +517,7 @@ export default function UserDashboard({ initialUser }) {
     const isVisible = showPasswords[fieldKey];
     return (
       <div className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10">
-        <Tooltip text={isVisible ? "مخفی کردن رمز" : "مشاهده رمز"}>
+        <Tooltip text={isVisible ? "مخفی کردن گذرواژه" : "مشاهده گذرواژه"}>
           <button
             type="button"
             onClick={() => setShowPasswords(prev => ({ ...prev, [fieldKey]: !prev[fieldKey] }))}
@@ -547,10 +547,10 @@ export default function UserDashboard({ initialUser }) {
       </div>
 
       {/* ========================================================= */}
-      {/* استایل‌های جامع گلس‌مورفیسم تقویم و منوهای کشویی */}
+      {/* سبک‌های جامع گلس‌مورفیسم تقویم و منوهای کشویی */}
       {/* ========================================================= */}
       <style dangerouslySetInnerHTML={{__html: `
-        /* یک اطمینان اضافه برای مخفی کردن آیکون‌های هدر با CSS */
+        /* یک اطمینان اضافه برای مخفی کردن نماد‌های هدر با CSS */
         .z-50, .z-60 { display: none !important; }
 
         select option {
@@ -765,7 +765,7 @@ export default function UserDashboard({ initialUser }) {
 
                 <div className="hidden lg:block h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-1.5 w-full" />
 
-                <Tooltip text="خروج امن از سیستم">
+                <Tooltip text="خروج امن از سامانه">
                   <button 
                     onClick={() => setIsLogoutModalOpen(true)} 
                     className={cn(
@@ -779,7 +779,7 @@ export default function UserDashboard({ initialUser }) {
                       </div>
                       <span className="font-bold text-[9px] sm:text-[10px] lg:text-sm text-rose-400 group-hover/logout:text-rose-300 whitespace-nowrap transition-colors text-center lg:text-right drop-shadow-md">
                         <span className="lg:hidden block truncate">خروج</span>
-                        <span className="hidden lg:inline">خروج از سیستم</span>
+                        <span className="hidden lg:inline">خروج از سامانه</span>
                       </span>
                     </div>
                   </button>
@@ -789,7 +789,7 @@ export default function UserDashboard({ initialUser }) {
           </aside>
 
           {/* ========================================================= */}
-          {/* بخش اصلی محتوای داشبورد */}
+          {/* بخش اصلی محتوای میزکار */}
           {/* ========================================================= */}
           <div id="dashboard-content" className="flex-1 w-full relative z-10 min-w-0">
             <div 
@@ -826,19 +826,28 @@ export default function UserDashboard({ initialUser }) {
                           </div>
                         </div>
 
-                        <form onSubmit={handleSaveProfile} className="space-y-4 md:space-y-6">
+                        <form onSubmit={handleSaveProfile} noValidate className="space-y-4 md:space-y-6">
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                             <div className="grid grid-cols-2 gap-3 w-full">
-                              <div className="relative">
-                                <label className="text-[11px] md:text-xs text-rose-500 font-bold mb-1.5 md:mb-2 pl-1 flex items-center gap-1">
-                                  نام <span className="text-lg leading-none">*</span> <span className="text-[9px] font-normal hidden sm:inline">(الزامی)</span>
+                              <div className="relative group/input">
+                                <label className="text-[11px] md:text-xs text-rose-500 font-bold mb-1.5 md:mb-2 pl-1 flex items-center gap-1 justify-between">
+                                  <span>نام <span className="text-lg leading-none">*</span> <span className="text-[9px] font-normal hidden sm:inline">(الزامی)</span></span>
+                                  {/* نمایش شمارنده فقط در حالت hover یا focus درون کادر */}
+                                  <span className="text-[9px] font-normal opacity-0 group-focus-within/input:opacity-100 transition-opacity">
+                                    <span className={formData.firstName.length >= 50 ? 'text-rose-500' : 'text-gray-400'}>{toPersianDigits(formData.firstName.length)}</span><span className="text-gray-500 mx-0.5">/</span><span className="text-gray-500">{toPersianDigits(50)}</span>
+                                  </span>
                                 </label>
-                                <input name="firstName" value={formData.firstName} onChange={handleFormChange} type="text" className="w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-rose-500/30 shadow-[inset_0_0_10px_rgba(244,63,94,0.05)] hover:bg-white/[0.06] focus:border-rose-500 focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm outline-none transition-all font-sans select-text text-white" placeholder="نام خود را وارد کنید..." style={getDynamicStyle(formData.firstName)} />
+                                <input maxLength={50} name="firstName" value={formData.firstName} onChange={handleFormChange} type="text" className="w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-rose-500/30 shadow-[inset_0_0_10px_rgba(244,63,94,0.05)] hover:bg-white/[0.06] focus:border-rose-500 focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm outline-none transition-all font-sans select-text text-white" placeholder="نام خود را وارد کنید..." style={getDynamicStyle(formData.firstName)} />
                               </div>
-                              <div>
-                                <label className="block text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1">نام خانوادگی</label>
-                                <input name="lastName" value={formData.lastName} onChange={handleFormChange} type="text" className="w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm outline-none transition-all font-sans select-text text-white" placeholder="نام خانوادگی..." style={getDynamicStyle(formData.lastName)} />
+                              <div className="relative group/input">
+                                <label className="flex text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1 justify-between items-center">
+                                  <span>نام خانوادگی</span>
+                                  <span className="text-[9px] font-normal opacity-0 group-focus-within/input:opacity-100 transition-opacity">
+                                    <span className={formData.lastName.length >= 50 ? 'text-rose-500' : 'text-gray-400'}>{toPersianDigits(formData.lastName.length)}</span><span className="text-gray-500 mx-0.5">/</span><span className="text-gray-500">{toPersianDigits(50)}</span>
+                                  </span>
+                                </label>
+                                <input maxLength={50} name="lastName" value={formData.lastName} onChange={handleFormChange} type="text" className="w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm outline-none transition-all font-sans select-text text-white" placeholder="نام خانوادگی..." style={getDynamicStyle(formData.lastName)} />
                               </div>
                             </div>
                             
@@ -868,7 +877,8 @@ export default function UserDashboard({ initialUser }) {
                                       calendarPosition="bottom-left"
                                       fixMainPosition={true}
                                       offsetY={6}
-                                      editable={false}
+                                      readOnly={true} // قفل کردن امکان نوشتن دستی و تقلب در تقویم
+                                      editable={false} 
                                       containerStyle={{ width: "100%", height: "100%" }}
                                       inputClass={`w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm font-sans outline-none transition-all cursor-pointer select-text ${formData.birthYear ? 'text-white' : 'text-white/40'}`}
                                       placeholder="انتخاب تقویم..."
@@ -911,27 +921,47 @@ export default function UserDashboard({ initialUser }) {
                                    options={EDUCATION_DEGREES}
                                  />
                               </div>
-                              <div>
-                                <label className="block text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1">رشته تحصیلی</label>
-                                <input name="major" value={formData.major} onChange={handleFormChange} type="text" className="w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm outline-none transition-all font-sans select-text text-white" placeholder="مثال: ارتباطات" style={getDynamicStyle(formData.major)} />
+                              <div className="relative group/input">
+                                <label className="flex text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1 justify-between items-center">
+                                  <span>رشته تحصیلی</span>
+                                  <span className="text-[9px] font-normal opacity-0 group-focus-within/input:opacity-100 transition-opacity">
+                                    <span className={formData.major.length >= 100 ? 'text-rose-500' : 'text-gray-400'}>{toPersianDigits(formData.major.length)}</span><span className="text-gray-500 mx-0.5">/</span><span className="text-gray-500">{toPersianDigits(100)}</span>
+                                  </span>
+                                </label>
+                                <input maxLength={100} name="major" value={formData.major} onChange={handleFormChange} type="text" className="w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm outline-none transition-all font-sans select-text text-white" placeholder="مثال: ارتباطات" style={getDynamicStyle(formData.major)} />
                               </div>
                             </div>
                           </div>
                             
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-                            <div>
-                              <label className="block text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1">ایمیل</label>
-                              <input name="email" value={formData.email} onChange={handleFormChange} type="email" dir="ltr" className="w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm outline-none transition-all text-left font-sans select-text text-white" placeholder="example@email.com" style={getDynamicStyle(formData.email)} />
+                            <div className="relative group/input">
+                              <label className="flex text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1 justify-between items-center">
+                                <span>ایمیل</span>
+                                <span className="text-[9px] font-normal opacity-0 group-focus-within/input:opacity-100 transition-opacity">
+                                  <span className={formData.email.length >= 100 ? 'text-rose-500' : 'text-gray-400'}>{toPersianDigits(formData.email.length)}</span><span className="text-gray-500 mx-0.5">/</span><span className="text-gray-500">{toPersianDigits(100)}</span>
+                                </span>
+                              </label>
+                              <input maxLength={100} name="email" value={formData.email} onChange={handleFormChange} type="email" dir="ltr" className="w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm outline-none transition-all text-left font-sans select-text text-white" placeholder="example@email.com" style={getDynamicStyle(formData.email)} />
                             </div>
-                            <div>
-                              <label className="block text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1">حوزه فعالیت هنری/پژوهشی</label>
-                              <input name="artResearchField" value={formData.artResearchField} onChange={handleFormChange} type="text" className="w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm outline-none transition-all font-sans select-text text-white" placeholder="تخصص اصلی..." style={getDynamicStyle(formData.artResearchField)} />
+                            <div className="relative group/input">
+                              <label className="flex text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1 justify-between items-center">
+                                <span>حوزه فعالیت هنری/پژوهشی</span>
+                                <span className="text-[9px] font-normal opacity-0 group-focus-within/input:opacity-100 transition-opacity">
+                                  <span className={formData.artResearchField.length >= 150 ? 'text-rose-500' : 'text-gray-400'}>{toPersianDigits(formData.artResearchField.length)}</span><span className="text-gray-500 mx-0.5">/</span><span className="text-gray-500">{toPersianDigits(150)}</span>
+                                </span>
+                              </label>
+                              <input maxLength={150} name="artResearchField" value={formData.artResearchField} onChange={handleFormChange} type="text" className="w-full h-[45px] md:h-[52px] bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 text-xs md:text-sm outline-none transition-all font-sans select-text text-white" placeholder="تخصص اصلی..." style={getDynamicStyle(formData.artResearchField)} />
                             </div>
                           </div>
 
-                          <div>
-                            <label className="block text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1">زمینه‌های تمایل به همکاری با مکتوم</label>
-                            <textarea name="cooperationInterests" value={formData.cooperationInterests} onChange={handleFormChange} rows="3" className="w-full bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 py-3.5 md:py-4 text-xs md:text-sm outline-none transition-all resize-none text-justify font-sans select-text text-white" placeholder="علاقه‌مندی‌های همکاری..." style={getDynamicStyle(formData.cooperationInterests)}></textarea>
+                          <div className="relative group/input">
+                            <label className="flex text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1 justify-between items-center">
+                              <span>زمینه‌های تمایل به همکاری با مکتوم</span>
+                              <span className="text-[9px] font-normal opacity-0 group-focus-within/input:opacity-100 transition-opacity">
+                                <span className={formData.cooperationInterests.length >= 500 ? 'text-rose-500' : 'text-gray-400'}>{toPersianDigits(formData.cooperationInterests.length)}</span><span className="text-gray-500 mx-0.5">/</span><span className="text-gray-500">{toPersianDigits(500)}</span>
+                              </span>
+                            </label>
+                            <textarea maxLength={500} name="cooperationInterests" value={formData.cooperationInterests} onChange={handleFormChange} rows="3" className="w-full bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] hover:bg-white/[0.06] focus:border-[#06b6d4] focus:bg-white/[0.08] rounded-2xl px-4 py-3.5 md:py-4 text-xs md:text-sm outline-none transition-all resize-none text-justify font-sans select-text text-white break-words" placeholder="علاقه‌مندی‌های همکاری..." style={getDynamicStyle(formData.cooperationInterests)}></textarea>
                           </div>
 
                           <div className="flex justify-end pt-6 border-t border-white/5 mt-4">
@@ -947,7 +977,7 @@ export default function UserDashboard({ initialUser }) {
                     )}
 
                     {/* ========================================================= */}
-                    {/* ۲. تب امنیت و رمز عبور */}
+                    {/* ۲. تب امنیت و گذرواژه */}
                     {/* ========================================================= */}
                     {activeTab === 'security' && (
                       <div>
@@ -956,16 +986,16 @@ export default function UserDashboard({ initialUser }) {
                             <span className="w-10 h-10 rounded-[1rem] bg-white/[0.05] border border-white/[0.1] flex items-center justify-center text-emerald-400 shadow-[inset_0_0_10px_rgba(255,255,255,0.02)]">
                               <Icon name="password" className="w-5 h-5" />
                             </span>
-                            تغییر رمز عبور
+                            تغییر گذرواژه
                           </h2>
                           <div className="text-xs md:text-sm text-gray-300 mt-2 text-justify font-light">
-                            <p>رمز عبور خود را تنظیم کنید تا از این پس بتوانید بدون نیاز به پیامک یکبارمصرف و سریع‌تر وارد حساب کاربری خود شوید.</p>
+                            <p>گذرواژه خود را تنظیم کنید تا از این پس بتوانید بدون نیاز به پیامک یکبارمصرف و سریع‌تر وارد حساب کاربری خود شوید.</p>
                           </div>
                         </div>
 
                         <form onSubmit={handleSavePassword} className="space-y-4 md:space-y-6 max-w-xl mx-auto md:mx-0">
                           <div>
-                            <label className="block text-[11px] md:text-xs text-emerald-400 font-bold mb-1.5 md:mb-2 pl-1">رمز عبور فعلی <span className="text-gray-500 font-normal">(اگر قبلاً رمزی نداشته‌اید خالی بگذارید)</span></label>
+                            <label className="block text-[11px] md:text-xs text-emerald-400 font-bold mb-1.5 md:mb-2 pl-1">گذرواژه فعلی <span className="text-gray-500 font-normal">(اگر قبلاً گذرواژه‌‌ای نداشته‌اید خالی بگذارید)</span></label>
                             <div className="relative">
                               <input 
                                 name="oldPassword" 
@@ -983,7 +1013,7 @@ export default function UserDashboard({ initialUser }) {
                           
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 pt-2">
                             <div>
-                              <label className="block text-[11px] md:text-xs text-emerald-400 font-bold mb-1.5 md:mb-2 pl-1">رمز عبور جدید</label>
+                              <label className="block text-[11px] md:text-xs text-emerald-400 font-bold mb-1.5 md:mb-2 pl-1">گذرواژه جدید</label>
                               <div className="relative">
                                 <input 
                                   name="newPassword" 
@@ -1000,7 +1030,7 @@ export default function UserDashboard({ initialUser }) {
                             </div>
                             
                             <div>
-                              <label className="block text-[11px] md:text-xs text-emerald-400 font-bold mb-1.5 md:mb-2 pl-1">تکرار رمز عبور جدید</label>
+                              <label className="block text-[11px] md:text-xs text-emerald-400 font-bold mb-1.5 md:mb-2 pl-1">تکرار گذرواژه جدید</label>
                               <div className="relative">
                                 <input 
                                   name="confirmPassword" 
@@ -1009,7 +1039,7 @@ export default function UserDashboard({ initialUser }) {
                                   value={passwordData.confirmPassword} 
                                   onChange={handlePasswordFormChange} 
                                   className="w-full bg-emerald-500/[0.05] backdrop-blur-sm border border-emerald-500/10 shadow-[inset_0_0_10px_rgba(16,185,129,0.05)] hover:bg-emerald-500/10 focus:border-emerald-500 focus:bg-emerald-500/15 rounded-2xl px-4 py-3.5 md:py-4 pl-12 text-sm tracking-widest outline-none transition-all font-sans select-text text-white" 
-                                  placeholder="تکرار همان رمز" 
+                                  placeholder="تکرار همان گذرواژه‌" 
                                   style={getDynamicStyle(passwordData.confirmPassword)}
                                 />
                                 {renderEyeButton('confirm')}
@@ -1018,10 +1048,10 @@ export default function UserDashboard({ initialUser }) {
                           </div>
 
                           <div className="flex justify-end pt-6 border-t border-white/5 mt-4">
-                            <Tooltip text="ذخیره رمز عبور در پایگاه داده">
+                            <Tooltip text="ذخیره گذرواژه در پایگاه داده">
                               <button disabled={isSavingPassword || !passwordData.newPassword} type="submit" className="w-full md:w-auto relative group bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-3.5 md:py-4 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300 cursor-pointer disabled:opacity-50 border border-transparent text-sm">
                                 {isSavingPassword && <Icon name="loading" className="w-5 h-5 animate-spin" />}
-                                <span className="font-sans">{isSavingPassword ? 'در حال ثبت...' : 'تنظیم رمز عبور'}</span>
+                                <span className="font-sans">{isSavingPassword ? 'در حال ثبت...' : 'تنظیم گذرواژه'}</span>
                               </button>
                             </Tooltip>
                           </div>
@@ -1030,7 +1060,7 @@ export default function UserDashboard({ initialUser }) {
                     )}
 
                     {/* ========================================================= */}
-                    {/* ۳. تب دانلودها */}
+                    {/* ۳. تب بارگیری‌ها */}
                     {/* ========================================================= */}
                     {activeTab === 'downloads' && (
                       <div className="flex flex-col h-full animate-[fadeIn_0.3s_ease-out]">
@@ -1039,7 +1069,7 @@ export default function UserDashboard({ initialUser }) {
                             <span className="w-10 h-10 rounded-[1rem] bg-white/[0.05] border border-white/[0.1] flex items-center justify-center text-[#06b6d4] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)]">
                               <Icon name="download" className="w-5 h-5" />
                             </span>
-                            محتواهای دانلود شده
+                            محتواهای بارگیری شده
                           </h2>
                           <span className="text-xs font-bold text-[#06b6d4] bg-white/[0.05] border border-white/[0.1] px-3 py-1.5 rounded-full shadow-inner">
                             {toPersianDigits(uniqueDownloads.length)} اثر
@@ -1047,7 +1077,7 @@ export default function UserDashboard({ initialUser }) {
                         </div>
 
                         {uniqueDownloads.length === 0 ? (
-                          <EmptyState icon="download" title="هنوز فایلی دانلود نشده" description="مستندات و فایل‌هایی که دانلود می‌کنید در اینجا نمایش داده خواهند شد." color="text-[#06b6d4]" />
+                          <EmptyState icon="download" title="هنوز پرونده‌ای بارگیری نشده" description="مستندات و پرونده‌هایی که بارگیری می‌کنید در اینجا نمایش داده خواهند شد." color="text-[#06b6d4]" />
                         ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:max-h-[65vh] lg:overflow-y-auto custom-scrollbar pr-1 pb-4">
                             {uniqueDownloads.map((content) => {
@@ -1100,7 +1130,7 @@ export default function UserDashboard({ initialUser }) {
                         </div>
 
                         {favorites.length === 0 ? (
-                          <EmptyState icon="heart" title="لیست علاقه‌مندی‌ها خالی است" description="محتواهایی که نشان می‌کنید برای دسترسی سریع‌تر اینجا قرار می‌گیرند." color="text-rose-500" />
+                          <EmptyState icon="heart" title="فهرست علاقه‌مندی‌ها خالی است" description="محتواهایی که نشان می‌کنید برای دسترسی سریع‌تر اینجا قرار می‌گیرند." color="text-rose-500" />
                         ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:max-h-[65vh] lg:overflow-y-auto custom-scrollbar pr-1 pb-4">
                             {favorites.map((fav) => {
@@ -1157,7 +1187,7 @@ export default function UserDashboard({ initialUser }) {
                             اعلان‌ها و پیام‌ها
                           </h2>
                           <div className="text-xs md:text-sm text-gray-300 mt-2 text-justify font-light">
-                            <p>اطلاعیه‌های سیستمی، اخبار و پیام‌های اختصاصی خود را در این بخش مدیریت کنید.</p>
+                            <p>اطلاعیه‌های سامانه‌ای، اخبار و پیام‌های اختصاصی خود را در این بخش نظارت کنید.</p>
                           </div>
                         </div>
 
@@ -1174,7 +1204,7 @@ export default function UserDashboard({ initialUser }) {
                             <Icon name="loading" className="w-8 h-8 text-amber-500 animate-spin" />
                           </div>
                         ) : notifications.length === 0 ? (
-                          <EmptyState icon="bell" title="صندوق پیام خالی است" description="اطلاعیه‌های سیستم و پیام‌های دریافتی از مدیریت در این بخش قابل مشاهده است." color="text-amber-500" />
+                          <EmptyState icon="bell" title="صندوق پیام خالی است" description="اطلاعیه‌های سامانه و پیام‌های دریافتی از مسئولان در این بخش قابل مشاهده است." color="text-amber-500" />
                         ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 max-h-[65vh] overflow-y-auto overflow-x-hidden custom-scrollbar px-2 pb-6 pt-2 -mx-2">
                             {notifications.map(notif => {
@@ -1261,44 +1291,51 @@ export default function UserDashboard({ initialUser }) {
       </main>
 
       {/* ================================================================= */}
-      {/* پاپ‌آپ مشاهده جزئیات اعلان (Modal) */}
+      {/* باز شونده‌ مشاهده جزئیات اعلان (Modal) */}
       {/* ================================================================= */}
       <AnimatePresence>
         {selectedNotification && (
           <ModalPortal>
-            <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 font-sans select-none">
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer animate-[fadeIn_0.2s_ease-out]" onClick={() => setSelectedNotification(null)}></div>
+            <div role="dialog" aria-modal="true" className="fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 font-sans select-none">
+              {/* پس‌زمینه شیشه‌ای و بلر شده واقعی (بدون سیاه کردن کامل صفحه) */}
+              <div className="absolute inset-0 bg-[#0f172a]/35 backdrop-blur-xl cursor-pointer animate-[fadeIn_0.2s_ease-out]" onClick={() => setSelectedNotification(null)}></div>
               
               <motion.div 
                 initial={{ scale: 0.95, opacity: 0, y: 15 }} 
                 animate={{ scale: 1, opacity: 1, y: 0 }} 
                 exit={{ scale: 0.95, opacity: 0, y: 15 }} 
-                className="relative z-10 w-full max-w-lg flex flex-col max-h-[85vh] rounded-[2rem]" 
+                className="relative z-10 w-full max-w-lg flex flex-col max-h-[85vh] rounded-[2rem] overflow-hidden border border-white/20 bg-gradient-to-br from-white/[0.10] via-[#0f172a]/65 to-[#090d16]/75 backdrop-blur-3xl shadow-[0_25px_70px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.25),inset_0_0_25px_rgba(255,255,255,0.05)]" 
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* لایه پس‌زمینه و گلس‌مورفیسم کاملاً جدا از محتوا (حل قطعی باگ محو شدن دکمه در کروم/سافاری) */}
-                <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(255,255,255,0.02)] border border-white/[0.05] overflow-hidden pointer-events-none -z-10">
+                {/* هاله‌های نوری گلس‌مورفیسم در بالا و پایین کارت اعلان */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
                   <motion.div 
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.15, 0.3, 0.15] }} 
+                    animate={{ scale: [1, 1.35, 1], opacity: [0.22, 0.42, 0.22] }} 
                     transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} 
-                    className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[60px]" 
+                    className="absolute -top-10 -right-10 w-60 h-60 rounded-full blur-[55px]" 
+                    style={{ backgroundColor: selectedNotification.notification.themeColor || '#10b981' }} 
+                  />
+                  <motion.div 
+                    animate={{ scale: [1.2, 0.95, 1.2], opacity: [0.15, 0.32, 0.15] }} 
+                    transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1 }} 
+                    className="absolute -bottom-12 -left-12 w-64 h-64 rounded-full blur-[65px]" 
                     style={{ backgroundColor: selectedNotification.notification.themeColor || '#10b981' }} 
                   />
                 </div>
 
-                {/* دکمه بستن آزاد روی همه چیز قرار می‌گیرد و تابع translateZ برای رندر تضمینی لایه اضافه شده است */}
+                {/* دکمه بستن شیشه‌ای و همیشه ثابت (محافظت‌شده با role="dialog" در برابر مخفی شدن در اعلان‌های طولانی) */}
                 <button 
+                  type="button"
                   onClick={() => setSelectedNotification(null)} 
-                  className="absolute top-3 left-3 md:top-4 md:left-4 w-10 h-10 rounded-xl bg-[#080c16]/95 hover:bg-rose-500 flex items-center justify-center text-gray-200 hover:text-white transition-all cursor-pointer z-[99999] shadow-[0_4px_15px_rgba(0,0,0,0.8),inset_0_0_10px_rgba(255,255,255,0.05)] border border-white/10"
-                  style={{ transform: 'translateZ(100px)' }}
+                  className="absolute top-3.5 left-3.5 md:top-4 md:left-4 w-10 h-10 rounded-2xl bg-slate-900/65 hover:bg-rose-500 backdrop-blur-xl flex items-center justify-center text-white transition-all cursor-pointer z-[100] shadow-[0_8px_20px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.2)] border border-white/20"
                 >
                   <Icon name="close" className="w-5 h-5" />
                 </button>
 
                 {/* بخش محتوای اسکرول‌دار */}
-                <div className="overflow-y-auto custom-scrollbar relative z-10 rounded-[2rem]">
+                <div className="overflow-y-auto custom-scrollbar relative z-10 flex-1">
                   {selectedNotification.notification.coverUrl && (
-                    <div className="w-full aspect-video sm:aspect-[21/9] bg-black/40 relative shrink-0 border-b border-white/[0.05] shadow-inner">
+                    <div className="w-full aspect-video sm:aspect-[21/9] bg-white/[0.03] relative shrink-0 border-b border-white/15 shadow-inner">
                       <img src={selectedNotification.notification.coverUrl} alt="cover" className="w-full h-full object-cover" />
                     </div>
                   )}
@@ -1306,23 +1343,23 @@ export default function UserDashboard({ initialUser }) {
                   <div className="p-5 sm:p-8">
                     <div className="flex gap-3 md:gap-4 items-start mb-5 md:mb-6">
                       {selectedNotification.notification.iconUrl ? (
-                        <div className="w-14 h-14 rounded-[1.2rem] bg-white/[0.05] backdrop-blur-md border border-white/[0.1] shadow-inner flex items-center justify-center shrink-0">
+                        <div className="w-14 h-14 rounded-[1.2rem] bg-white/[0.08] backdrop-blur-xl border border-white/20 shadow-[inset_0_1px_10px_rgba(255,255,255,0.08)] flex items-center justify-center shrink-0">
                           <img src={selectedNotification.notification.iconUrl} className="w-8 h-8 object-contain" alt="icon" />
                         </div>
                       ) : (
-                        <div className="w-14 h-14 rounded-[1.2rem] bg-white/[0.05] backdrop-blur-md border border-white/[0.1] shadow-inner flex items-center justify-center shrink-0">
-                          <Icon name="bell" className="w-7 h-7 text-gray-300" />
+                        <div className="w-14 h-14 rounded-[1.2rem] bg-white/[0.08] backdrop-blur-xl border border-white/20 shadow-[inset_0_1px_10px_rgba(255,255,255,0.08)] flex items-center justify-center shrink-0">
+                          <Icon name="bell" className="w-7 h-7 text-gray-200" />
                         </div>
                       )}
-                      <div className="flex-1 pt-1">
+                      <div className="flex-1 pt-1 pl-10">
                         <h3 className="font-bold text-base md:text-xl text-white mb-2 font-sans leading-snug pr-2 drop-shadow-md select-text">{selectedNotification.notification.title}</h3>
-                        <span className="text-[9px] md:text-[11px] text-gray-300 font-sans block pr-2 bg-white/[0.05] backdrop-blur-md w-max px-3 py-1.5 rounded-xl border border-white/[0.1] shadow-inner select-text">
+                        <span className="text-[9px] md:text-[11px] text-gray-200 font-sans block pr-2 bg-white/[0.08] backdrop-blur-xl w-max px-3 py-1.5 rounded-xl border border-white/15 shadow-inner select-text">
                           {toPersianDigits(new Date(selectedNotification.notification.createdAt).toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }))}
                         </span>
                       </div>
                     </div>
 
-                    <div className="rich-text text-xs md:text-sm text-gray-200 leading-loose font-light font-sans text-justify mb-6 bg-white/[0.03] backdrop-blur-md p-6 rounded-2xl border border-white/[0.05] shadow-[inset_0_0_15px_rgba(255,255,255,0.01)] select-text">
+                    <div className="rich-text text-xs md:text-sm text-gray-100 leading-loose font-light font-sans text-justify mb-6 bg-white/[0.06] backdrop-blur-xl p-5 sm:p-6 rounded-2xl border border-white/15 shadow-[inset_0_1px_15px_rgba(255,255,255,0.04)] select-text">
                       <div dangerouslySetInnerHTML={{ __html: selectedNotification.notification.bodyHtml }} />
                     </div>
 
@@ -1334,7 +1371,7 @@ export default function UserDashboard({ initialUser }) {
                             href={btn.url} 
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 text-center text-xs px-6 py-4 rounded-xl text-white hover:brightness-110 transition-all font-bold font-sans shadow-[0_5px_15px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.4)] select-text"
+                            className="flex-1 text-center text-xs px-6 py-4 rounded-xl text-white hover:brightness-110 transition-all font-bold font-sans shadow-[0_5px_15px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.4)] border border-white/20 select-text"
                             style={{ backgroundColor: selectedNotification.notification.themeColor || '#10b981' }}
                           >
                             {btn.label}
@@ -1351,7 +1388,7 @@ export default function UserDashboard({ initialUser }) {
       </AnimatePresence>
 
       {/* ================================================================= */}
-      {/* پاپ‌آپ تایید خروج از حساب */}
+      {/* باز شونده‌ تایید خروج از حساب */}
       {/* ================================================================= */}
       <AnimatePresence>
         {isLogoutModalOpen && (
@@ -1377,7 +1414,7 @@ export default function UserDashboard({ initialUser }) {
       </AnimatePresence>
 
       {/* ================================================================= */}
-      {/* پاپ‌آپ تایید حذف علاقه‌مندی */}
+      {/* باز شونده‌ تایید حذف علاقه‌مندی */}
       {/* ================================================================= */}
       <AnimatePresence>
         {confirmDialog.isOpen && (
@@ -1390,7 +1427,7 @@ export default function UserDashboard({ initialUser }) {
                 <div className="flex flex-col items-center text-center mb-6 pt-2">
                   <div className="w-16 h-16 rounded-[1.2rem] bg-rose-500/10 border border-rose-500/20 shadow-[inset_0_0_15px_rgba(244,63,94,0.1)] flex items-center justify-center text-rose-400 mb-4"><Icon name="trash" className="w-8 h-8" /></div>
                   <h3 className="text-base md:text-lg font-bold text-white mb-2 font-sans">حذف از نشان‌شده‌ها</h3>
-                  <div className="rich-text text-[11px] md:text-xs text-gray-300 leading-relaxed text-center font-light font-sans"><p>آیا مطمئن هستید می‌خواهید این محتوا را از لیست علاقه‌مندی‌های خود حذف کنید؟</p></div>
+                  <div className="rich-text text-[11px] md:text-xs text-gray-300 leading-relaxed text-center font-light font-sans"><p>آیا مطمئن هستید می‌خواهید این محتوا را از فهرست علاقه‌مندی‌های خود حذف کنید؟</p></div>
                 </div>
                 <div className="flex items-center gap-2 md:gap-3">
                   <button onClick={() => setConfirmDialog({ isOpen: false, favId: null, contentId: null })} className="flex-1 bg-white/[0.03] hover:bg-white/[0.08] text-gray-300 py-3 md:py-3.5 rounded-xl text-xs md:text-sm font-bold transition-colors cursor-pointer font-sans border border-white/[0.05] shadow-inner">انصراف</button>

@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'مدیریت منظومه‌ها و پرونده‌ها',
+  title: 'مسئولیت منظومه‌ها و پرونده‌ها',
 };
 
 export default function DossiersLayout({ children }) {

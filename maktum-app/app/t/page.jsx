@@ -1,11 +1,12 @@
-// مسیر فایل: app/t/page.jsx
+// مسیر پرونده: app/t/page.jsx
 import { Suspense } from 'react';
 import ArchivesClientPage from '@/app/components/frontend/ArchivesClientPage';
 import { getAllTaxonomiesForArchive } from '@/app/actions/taxonomies';
-import { prisma } from '@/lib/prisma'; // اضافه شدن اتصال به دیتابیس
+import { prisma } from '@/lib/prisma'; // اضافه شدن اتصال به پایگاه داده
+import { constructPageMetadata } from '@/lib/seo';
 
 // ==========================================
-// ۱. تابع کمکی برای خواندن تنظیمات از دیتابیس
+// ۱. تابع کمکی برای خواندن تنظیمات از پایگاه داده
 // ==========================================
 async function getArchivePageSettings() {
   try {
@@ -28,42 +29,44 @@ async function getArchivePageSettings() {
       badge: mapped['archive_badge'] || "بایگانی مرجع مکتوم",
       title: mapped['archive_title'] || "کاوش در بایگانی مکتوم",
       highlightColor: mapped['archive_highlight'] || "text-[#3b82f6]",
-      description: mapped['archive_desc'] || "جستجو و فیلتر در میان هزاران دسته‌بندی، کلیدواژه، و نمایه پدیدآورندگان. مسیر خود را در پایگاه داده پیدا کنید."
+      description: mapped['archive_desc'] || "کاوش در میان هزاران دسته‌بندی، کلیدواژه، و نمایه پدیدآورندگان. مسیر خود را در پایگاه داده پیدا کنید."
     };
   } catch (error) {
-    // بازگرداندن مقادیر پیش‌فرض در صورت قطع ارتباط با دیتابیس
+    // بازگرداندن مقادیر پیش‌فرض در صورت قطع ارتباط با پایگاه داده
     return {
       badge: "بایگانی مرجع مکتوم",
       title: "کاوش در بایگانی مکتوم",
       highlightColor: "text-[#3b82f6]",
-      description: "جستجو و فیلتر در میان هزاران دسته‌بندی، کلیدواژه، و نمایه پدیدآورندگان. مسیر خود را در پایگاه داده پیدا کنید."
+      description: "کاوش در میان هزاران دسته‌بندی، کلیدواژه، و نمایه پدیدآورندگان. مسیر خود را در پایگاه داده پیدا کنید."
     };
   }
 }
 
 // ==========================================
-// ۲. تولید متادیتای سئو (اتوماتیک از دیتابیس)
+// ۲. تولید متادیتای سئو (خودکار از پایگاه داده)
 // ==========================================
 export async function generateMetadata() {
   const pageSettings = await getArchivePageSettings();
-  return {
-    title: pageSettings.title,
+  
+  return constructPageMetadata({
+    title: pageSettings.title || 'کاوش در بایگانی مکتوم',
     description: pageSettings.description,
-  };
+    path: '/t',
+  });
 }
 
 // ==========================================
 // ۳. کامپوننت اصلی سرور
 // ==========================================
 export default async function ArchiveIndexServerPage() {
-  // الف) دریافت تنظیمات متنی صفحه از دیتابیس (جایگزین مقادیر هاردکد شده)
+  // الف) دریافت تنظیمات متنی صفحه از پایگاه داده (جایگزین مقادیر هاردکد شده)
   const pageSettings = await getArchivePageSettings();
   
   // ب) دریافت تمامی دیتاهای ۳ گروه همراه با تعداد محتوایشان
   const data = await getAllTaxonomiesForArchive();
 
   return (
-    // Suspense برای مدیریت استفاده از useSearchParams در کامپوننت کلاینت الزامی است
+    // Suspense برای مسئولیت استفاده از useSearchParams در کامپوننت کلاینت الزامی است
     <Suspense fallback={<div className="min-h-screen bg-[#05080f] flex items-center justify-center"><p className="text-gray-500 font-sans">در حال بارگذاری...</p></div>}>
       <ArchivesClientPage 
         pageContent={{ hero: pageSettings }}

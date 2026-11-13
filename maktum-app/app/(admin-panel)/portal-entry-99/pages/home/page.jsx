@@ -25,7 +25,7 @@ const PALETTE = [
 // ماموریت و هیرو از اینجا حذف شده‌اند (هیرو فقط ثابت نمایش داده می‌شود)
 const DEFAULT_LAYOUT = [
   { id: 'news', label: 'نوار تازه‌ها', isActive: true },
-  { id: 'stats', label: 'آمار هولوگرافیک', isActive: true },
+  { id: 'stats', label: 'آمار', isActive: true },
   { id: 'countdown', label: 'شمارشگر معکوس', isActive: true },
   { id: 'dossiers', label: 'پرونده‌های باز', isActive: true },
   { id: 'radar', label: 'رادار موضوعی', isActive: true },
@@ -33,9 +33,9 @@ const DEFAULT_LAYOUT = [
   { id: 'raw', label: 'محتوای راش', isActive: true },
   { id: 'produced', label: 'محتوای تولیدی', isActive: true },
   { id: 'tools', label: 'ابزارهای کاربردی', isActive: true },
-  { id: 'timeline', label: 'تایم‌لاین افشاگری‌ها', isActive: true },
+  { id: 'timeline', label: 'خط زمانی', isActive: true },
   { id: 'investigators', label: 'پدیدآورندگان شاخص', isActive: true },
-  { id: 'cta', label: 'باکس ارسال سند (پورتال امن)', isActive: true },
+  { id: 'cta', label: 'قاب ارسال سند (پورتال امن)', isActive: true },
 ];
 
 export default function HomePageSettings() {
@@ -55,7 +55,7 @@ export default function HomePageSettings() {
     if (isWorking) return;
 
     if (user) {
-      // فقط مدیرانی که تیک ویرایش صفحه اصلی را دارند مجاز به ورود هستند
+      // فقط مسئولانی که تیک ویرایش صفحه اصلی را دارند مجاز به ورود هستند
       setHasAccess(user.isSuperAdmin || (can && can('HOMEPAGE_EDIT')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -210,7 +210,7 @@ export default function HomePageSettings() {
   };
 
   // ==========================================
-  // ۳. کنترل رندر لودینگ و انسداد دسترسی
+  // ۳. نظارت رندر لودینگ و انسداد دسترسی
   // ==========================================
   if (!isMounted || hasAccess === null || (hasAccess && loading)) return <AdminLoading />;
 
@@ -221,7 +221,7 @@ export default function HomePageSettings() {
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز ورود به این بخش از پنل را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -234,23 +234,23 @@ export default function HomePageSettings() {
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-90 pointer-events-none z-20" />
 
         <h1 className="text-2xl font-black text-white mb-2 flex items-center gap-3 relative z-10">
-          <Icon name="layout" className="w-6 h-6 text-cyan-400" /> مدیریت صفحه اصلی سایت
+          <Icon name="layout" className="w-6 h-6 text-cyan-400" /> مسئولیت صفحه اصلی سامانه
         </h1>
-        <p className="text-sm text-gray-400 font-light mb-6 relative z-10">کنترل کامل چیدمان، فعال/غیرفعال‌سازی بخش‌ها و تنظیم محتوای داینامیک صفحه اصلی.</p>
+        <p className="text-sm text-gray-400 font-light mb-6 relative z-10">نظارت کامل چیدمان، فعال/غیرفعال‌سازی بخش‌ها و تنظیم محتوای پویا صفحه اصلی.</p>
         
         <div className="flex flex-wrap gap-2 border-b border-white/10 pb-4 relative z-10">
           {[
             { key: 'LAYOUT', label: 'چیدمان' },
-            { key: 'HERO', label: 'هیرو اسلایدر' },
+            { key: 'HERO', label: 'پردک' },
             { key: 'NEWS', label: 'تازه‌ها' },
-            { key: 'STATS', label: 'آمار (۴ باکس)' },
+            { key: 'STATS', label: 'آمار (۴ قاب)' },
             { key: 'DOSSIERS', label: 'پرونده‌ها' },
             { key: 'RADAR', label: 'رادار موضوعی' },
             { key: 'CONTENT_TITLES', label: 'عناوین محتوا' },
-            { key: 'TIMELINE', label: 'تایم‌لاین' },
+            { key: 'TIMELINE', label: 'خط زمانی' },
             { key: 'COUNTDOWN', label: 'شمارشگر معکوس' },
             { key: 'INVESTIGATORS', label: 'پدیدآورندگان' },
-            { key: 'CTA', label: 'باکس انتهای صفحه' },
+            { key: 'CTA', label: 'قاب انتهای صفحه' },
             { key: 'SEO', label: 'تب مرورگر (سئو)' },
           ].map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all border border-transparent ${activeTab === tab.key ? 'bg-cyan-500/20 text-cyan-400 shadow-[inset_0_0_15px_rgba(6,182,212,0.2)] border-cyan-500/30' : 'bg-white/5 text-gray-400 hover:bg-white/10 shadow-inner'}`}>
@@ -261,18 +261,18 @@ export default function HomePageSettings() {
       </div>
 
       {/* ======================================================= */}
-      {/* 1. تب چیدمان داینامیک (Drag & Drop) */}
+      {/* 1. تب چیدمان پویا (Drag & Drop) */}
       {activeTab === 'LAYOUT' && (
         <div className="p-6 bg-[#050810]/50 rounded-3xl border border-white/5 space-y-6 shadow-inner">
           <p className="text-sm text-gray-300 leading-loose bg-black/40 p-4 rounded-xl border border-white/5 shadow-inner">
-            ترتیب بخش‌ها را در صفحه اصلی با کشیدن و رها کردن تغییر دهید. با دکمه سوییچ می‌توانید یک بخش را کاملاً مخفی کنید. محتوای ردیف‌ها اتوماتیک جدیدترین مطالب را نشان می‌دهند.
+            ترتیب بخش‌ها را در صفحه اصلی با کشیدن و رها کردن تغییر دهید. با دکمه سوییچ می‌توانید یک بخش را کاملاً مخفی کنید. محتوای ردیف‌ها خودکار جدیدترین مطالب را نشان می‌دهند.
           </p>
           
           <div className="space-y-4 max-w-3xl mx-auto">
             <div className="flex items-center justify-between p-4 bg-cyan-500/10 rounded-2xl border border-cyan-500/30 shadow-inner">
               <div className="flex items-center gap-3">
                 <Icon name="lockKey" className="w-5 h-5 text-cyan-500" />
-                <span className="text-sm font-bold text-cyan-400">هیرو اسلایدر (همیشه در بالا)</span>
+                <span className="text-sm font-bold text-cyan-400">پردک (همیشه در بالا)</span>
               </div>
               <span className="text-xs text-cyan-500 font-bold px-3 py-1 bg-cyan-500/10 rounded-full shadow-inner border border-cyan-500/20">نمایش ثابت</span>
             </div>
@@ -295,11 +295,11 @@ export default function HomePageSettings() {
       )}
 
       {/* ======================================================= */}
-      {/* 2. تب هیرو اسلایدر */}
+      {/* 2. تب پردک */}
       {activeTab === 'HERO' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center bg-[#050810]/50 p-4 rounded-2xl border border-white/5 shadow-inner">
-            <h2 className="text-lg font-bold text-cyan-400 pl-2">تنظیمات اسلایدر اصلی (هیرو)</h2>
+            <h2 className="text-lg font-bold text-cyan-400 pl-2">تنظیمات پردک</h2>
             <button onClick={() => setHeroSlides([{ id: Date.now(), preTitle: '', title: '', desc: '', btnText: '', btnLink: '', colorStart: '#ffffff', colorEnd: '#06b6d4', preTitleColor: PALETTE[10], btnColor: PALETTE[10], imgDesktop: '', imgMobile: '' }, ...heroSlides])} className="text-xs bg-cyan-500/20 text-cyan-400 px-4 py-2 rounded-lg font-bold hover:bg-cyan-500 hover:text-gray-900 transition-colors border border-transparent shadow-inner"><Icon name="plus" className="w-3.5 h-3.5" /></button>
           </div>
 
@@ -308,12 +308,12 @@ export default function HomePageSettings() {
               <Reorder.Item key={slide.id} value={slide} className="p-6 bg-[#050810]/50 rounded-3xl border border-white/5 space-y-6 shadow-xl cursor-grab active:cursor-grabbing">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4">
-                    <input type="text" placeholder="روتیتر (مثال: پژوهش برگزیده)" value={slide.preTitle || ''} onChange={e => updateItem(setHeroSlides, slide.id, 'preTitle', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-500 transition-all select-text shadow-inner" />
+                    <input type="text" placeholder="روعنوان (مثال: پژوهش برگزیده)" value={slide.preTitle || ''} onChange={e => updateItem(setHeroSlides, slide.id, 'preTitle', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-500 transition-all select-text shadow-inner" />
                     <input type="text" placeholder="عنوان اصلی (بزرگ)" value={slide.title || ''} onChange={e => updateItem(setHeroSlides, slide.id, 'title', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-500 font-black transition-all select-text shadow-inner" />
                     <textarea rows="3" placeholder="توضیحات زیر عنوان..." value={slide.desc || ''} onChange={e => updateItem(setHeroSlides, slide.id, 'desc', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-500 resize-none transition-all select-text shadow-inner" />
                     <div className="flex gap-3">
                       <input type="text" placeholder="متن دکمه" value={slide.btnText || ''} onChange={e => updateItem(setHeroSlides, slide.id, 'btnText', e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-500 transition-all select-text shadow-inner" />
-                      <input type="text" placeholder="لینک دکمه" value={slide.btnLink || ''} onChange={e => updateItem(setHeroSlides, slide.id, 'btnLink', e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-500 dir-ltr text-right transition-all select-text shadow-inner" />
+                      <input type="text" placeholder="پیوند دکمه" value={slide.btnLink || ''} onChange={e => updateItem(setHeroSlides, slide.id, 'btnLink', e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-cyan-500 dir-ltr text-right transition-all select-text shadow-inner" />
                     </div>
                   </div>
 
@@ -334,7 +334,7 @@ export default function HomePageSettings() {
                     
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 pt-2">
                       <div className="space-y-2">
-                        <span className="text-[10px] text-gray-400 font-bold">رنگ روتیتر (از پالت ۲۰ رنگ):</span>
+                        <span className="text-[10px] text-gray-400 font-bold">رنگ روعنوان (از پالت ۲۰ رنگ):</span>
                         <ColorPicker selected={slide.preTitleColor || PALETTE[10]} onChange={(c) => updateItem(setHeroSlides, slide.id, 'preTitleColor', c)} />
                       </div>
                       <div className="space-y-2">
@@ -393,7 +393,7 @@ export default function HomePageSettings() {
                 <div className="flex flex-wrap md:flex-nowrap gap-3 items-center">
                   <input type="text" placeholder="بخش رنگی (مثال: انتشار مستند)" value={news.tag || ''} onChange={e => updateItem(setNewsTicker, news.id, 'tag', e.target.value)} className="w-full md:w-1/4 bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-cyan-500 transition-all select-text shadow-inner" />
                   <input type="text" placeholder="بخش سفید (متن خبر)" value={news.text || ''} onChange={e => updateItem(setNewsTicker, news.id, 'text', e.target.value)} className="w-full md:flex-1 bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-cyan-500 transition-all select-text shadow-inner" />
-                  <input type="text" placeholder="لینک مقصد" value={news.link || ''} onChange={e => updateItem(setNewsTicker, news.id, 'link', e.target.value)} className="w-full md:w-1/4 bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none dir-ltr text-right focus:border-cyan-500 transition-all select-text shadow-inner" />
+                  <input type="text" placeholder="پیوند مقصد" value={news.link || ''} onChange={e => updateItem(setNewsTicker, news.id, 'link', e.target.value)} className="w-full md:w-1/4 bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none dir-ltr text-right focus:border-cyan-500 transition-all select-text shadow-inner" />
                   <button onClick={() => setDeletingItem({ type: 'news', id: news.id, title: news.text || 'خبر بی‌نام' })} className="p-3 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-lg transition-colors shrink-0 text-sm font-bold shadow-inner border border-transparent"><Icon name="trash" className="w-3.5 h-3.5" /></button>
                 </div>
                 <div className="flex items-center gap-3">
@@ -411,7 +411,7 @@ export default function HomePageSettings() {
       {activeTab === 'STATS' && (
         <div className="p-6 bg-[#050810]/50 rounded-3xl border border-white/5 space-y-6 shadow-inner">
           <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-4">
-            <h2 className="text-lg font-bold text-amber-400">باکس‌های آمار هولوگرافیک (حداکثر ۴ عدد)</h2>
+            <h2 className="text-lg font-bold text-amber-400">قاب‌های آمار (حداکثر ۴ عدد)</h2>
             <button onClick={() => setStats([...stats, { id: Date.now(), iconUrl: '', title: '', desc: '', color: PALETTE[4] }])} disabled={stats.length >= 4} className="text-xs bg-amber-500/20 text-amber-400 px-4 py-2 rounded-lg font-bold hover:bg-amber-500 hover:text-black disabled:opacity-50 shadow-inner border border-transparent"><Icon name="plus" className="w-3.5 h-3.5" /></button>
           </div>
           
@@ -426,23 +426,23 @@ export default function HomePageSettings() {
                         <button onClick={() => updateItem(setStats, stat.id, 'iconUrl', '')} className="absolute inset-0 bg-rose-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold cursor-pointer shadow-lg"><Icon name="trash" className="w-3.5 h-3.5" /></button>
                       </>
                     ) : (
-                      <button onClick={() => setMediaPickerTarget(`statIcon_${stat.id}`)} className="text-[10px] text-gray-400 hover:text-white cursor-pointer w-full h-full font-bold">انتخاب آیکون</button>
+                      <button onClick={() => setMediaPickerTarget(`statIcon_${stat.id}`)} className="text-[10px] text-gray-400 hover:text-white cursor-pointer w-full h-full font-bold">انتخاب نماد</button>
                     )}
                   </div>
 
                   <div className="flex-1 space-y-2">
-                    <input type="text" placeholder="عنوان باکس (مثال: بزرگترین آرشیو)" value={stat.title || ''} onChange={e => updateItem(setStats, stat.id, 'title', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none font-bold transition-all select-text shadow-inner focus:border-amber-500" />
+                    <input type="text" placeholder="عنوان قاب (مثال: بزرگترین پایگاه داده)" value={stat.title || ''} onChange={e => updateItem(setStats, stat.id, 'title', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none font-bold transition-all select-text shadow-inner focus:border-amber-500" />
                     <input type="text" placeholder="زیر عنوان (مثال: ۴ ترابایت سند)" value={stat.desc || ''} onChange={e => updateItem(setStats, stat.id, 'desc', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none transition-all select-text shadow-inner focus:border-amber-500" />
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3 border-t border-white/5 pt-4">
-                  <span className="text-[11px] text-gray-500 font-bold">رنگ باکس:</span>
+                  <span className="text-[11px] text-gray-500 font-bold">رنگ قاب:</span>
                   <ColorPicker selected={stat.color || PALETTE[4]} onChange={c => updateItem(setStats, stat.id, 'color', c)} />
                 </div>
                 
                 <div className="flex justify-end pt-2 border-t border-white/5">
-                  <button onClick={() => setDeletingItem({ type: 'stats', id: stat.id, title: stat.title || 'باکس بی‌نام' })} className="text-xs text-rose-500 bg-rose-500/10 hover:bg-rose-500 hover:text-white px-4 py-2 rounded-lg transition-colors font-bold shadow-inner border border-transparent"><Icon name="trash" className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => setDeletingItem({ type: 'stats', id: stat.id, title: stat.title || 'قاب بی‌نام' })} className="text-xs text-rose-500 bg-rose-500/10 hover:bg-rose-500 hover:text-white px-4 py-2 rounded-lg transition-colors font-bold shadow-inner border border-transparent"><Icon name="trash" className="w-3.5 h-3.5" /></button>
                 </div>
               </div>
             ))}
@@ -461,7 +461,7 @@ export default function HomePageSettings() {
           </div>
 
           <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-4">
-            <h2 className="text-lg font-bold text-indigo-400">باکس‌های پرونده‌های باز</h2>
+            <h2 className="text-lg font-bold text-indigo-400">قاب‌های پرونده‌های باز</h2>
             <button onClick={() => setDossiers([{ id: Date.now(), title: '', subtitle: '', color: PALETTE[15], link: '#' }, ...dossiers])} className="text-xs bg-indigo-500/20 text-indigo-400 px-4 py-2 rounded-lg font-bold hover:bg-indigo-500 hover:text-black border border-transparent shadow-inner"><Icon name="plus" className="w-3.5 h-3.5" /></button>
           </div>
           
@@ -473,7 +473,7 @@ export default function HomePageSettings() {
                 <div className="space-y-3">
                    <input type="text" placeholder="عنوان پرونده" value={dos.title || ''} onChange={e => updateItem(setDossiers, dos.id, 'title', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none font-bold focus:border-indigo-500 transition-all select-text shadow-inner" />
                    <input type="text" placeholder="زیر عنوان" value={dos.subtitle || ''} onChange={e => updateItem(setDossiers, dos.id, 'subtitle', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-indigo-500 transition-all select-text shadow-inner" />
-                   <input type="text" placeholder="لینک پرونده" value={dos.link || ''} onChange={e => updateItem(setDossiers, dos.id, 'link', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none dir-ltr text-right focus:border-indigo-500 transition-all select-text shadow-inner" />
+                   <input type="text" placeholder="پیوند پرونده" value={dos.link || ''} onChange={e => updateItem(setDossiers, dos.id, 'link', e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none dir-ltr text-right focus:border-indigo-500 transition-all select-text shadow-inner" />
                 </div>
                 <div>
                   <span className="text-[11px] text-gray-500 font-bold block mb-2">رنگ پرونده (انتخاب از پالت ۲۰ رنگ):</span>
@@ -508,7 +508,7 @@ export default function HomePageSettings() {
               <div key={topic.id} className="flex flex-col gap-4 bg-black/40 p-5 rounded-2xl border border-white/5 shadow-inner">
                 <div className="flex flex-wrap md:flex-nowrap gap-3 items-center">
                   <input type="text" placeholder="عنوان (مثال: #جنگ_سرد)" value={topic.name || ''} onChange={e => updateItem(setRadarTopics, topic.id, 'name', e.target.value)} className="w-full md:w-1/3 bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-cyan-500 font-bold transition-all select-text shadow-inner" />
-                  <input type="text" placeholder="لینک مقصد" value={topic.link || ''} onChange={e => updateItem(setRadarTopics, topic.id, 'link', e.target.value)} className="w-full md:flex-1 bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none dir-ltr text-right focus:border-cyan-500 transition-all select-text shadow-inner" />
+                  <input type="text" placeholder="پیوند مقصد" value={topic.link || ''} onChange={e => updateItem(setRadarTopics, topic.id, 'link', e.target.value)} className="w-full md:flex-1 bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none dir-ltr text-right focus:border-cyan-500 transition-all select-text shadow-inner" />
                   <button onClick={() => setDeletingItem({ type: 'radar', id: topic.id, title: topic.name || 'آیتم بی‌نام' })} className="p-3 bg-rose-500/10 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-colors text-sm font-bold shadow-inner border border-transparent"><Icon name="trash" className="w-3.5 h-3.5" /></button>
                 </div>
                 <div className="pt-2">
@@ -526,7 +526,7 @@ export default function HomePageSettings() {
       {activeTab === 'CONTENT_TITLES' && (
         <div className="p-6 bg-[#050810]/50 rounded-3xl border border-white/5 space-y-8 shadow-inner">
           <p className="text-sm text-gray-400 font-light mb-6 bg-black/40 p-4 rounded-xl border border-white/5 shadow-inner">
-            در این بخش می‌توانید عنوان و زیرتیتر مربوط به ۴ بخش محتوایی سایت (بلاگ، راش، تولیدی و ابزارها) را شخصی‌سازی کنید. محتوای این بخش‌ها مستقیماً از دیتابیس پست‌ها خوانده می‌شود.
+            در این بخش می‌توانید عنوان و زیرعنوان مربوط به ۴ بخش محتوایی سامانه (بلاگ، راش، تولیدی و ابزارها) را شخصی‌سازی کنید. محتوای این بخش‌ها مستقیماً از پایگاه داده پست‌ها خوانده می‌شود.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -534,28 +534,28 @@ export default function HomePageSettings() {
             <div className="bg-black/20 p-5 rounded-2xl border border-white/5 space-y-3 shadow-inner">
               <h3 className="text-sm font-bold text-amber-500 flex items-center gap-2"><Icon name="blog" className="w-4 h-4"/> بخش بلاگ</h3>
               <input type="text" placeholder="عنوان اصلی" value={contentConfig.blog.title} onChange={e => setContentConfig({...contentConfig, blog: {...contentConfig.blog, title: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-amber-500 transition-all select-text shadow-inner" />
-              <input type="text" placeholder="زیر تیتر" value={contentConfig.blog.subtitle} onChange={e => setContentConfig({...contentConfig, blog: {...contentConfig.blog, subtitle: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-amber-500 transition-all select-text shadow-inner" />
+              <input type="text" placeholder="زیر عنوان" value={contentConfig.blog.subtitle} onChange={e => setContentConfig({...contentConfig, blog: {...contentConfig.blog, subtitle: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-amber-500 transition-all select-text shadow-inner" />
             </div>
 
             {/* راش */}
             <div className="bg-black/20 p-5 rounded-2xl border border-white/5 space-y-3 shadow-inner">
               <h3 className="text-sm font-bold text-yellow-500 flex items-center gap-2"><Icon name="footage" className="w-4 h-4"/> بخش محتوای خام (راش)</h3>
               <input type="text" placeholder="عنوان اصلی" value={contentConfig.raw.title} onChange={e => setContentConfig({...contentConfig, raw: {...contentConfig.raw, title: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-yellow-500 transition-all select-text shadow-inner" />
-              <input type="text" placeholder="زیر تیتر" value={contentConfig.raw.subtitle} onChange={e => setContentConfig({...contentConfig, raw: {...contentConfig.raw, subtitle: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-yellow-500 transition-all select-text shadow-inner" />
+              <input type="text" placeholder="زیر عنوان" value={contentConfig.raw.subtitle} onChange={e => setContentConfig({...contentConfig, raw: {...contentConfig.raw, subtitle: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-yellow-500 transition-all select-text shadow-inner" />
             </div>
 
             {/* تولیدی */}
             <div className="bg-black/20 p-5 rounded-2xl border border-white/5 space-y-3 shadow-inner">
               <h3 className="text-sm font-bold text-rose-500 flex items-center gap-2"><Icon name="product" className="w-4 h-4"/> بخش محتوای تولیدی</h3>
               <input type="text" placeholder="عنوان اصلی" value={contentConfig.produced.title} onChange={e => setContentConfig({...contentConfig, produced: {...contentConfig.produced, title: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-rose-500 transition-all select-text shadow-inner" />
-              <input type="text" placeholder="زیر تیتر" value={contentConfig.produced.subtitle} onChange={e => setContentConfig({...contentConfig, produced: {...contentConfig.produced, subtitle: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-rose-500 transition-all select-text shadow-inner" />
+              <input type="text" placeholder="زیر عنوان" value={contentConfig.produced.subtitle} onChange={e => setContentConfig({...contentConfig, produced: {...contentConfig.produced, subtitle: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-rose-500 transition-all select-text shadow-inner" />
             </div>
 
             {/* ابزارها */}
             <div className="bg-black/20 p-5 rounded-2xl border border-white/5 space-y-3 shadow-inner">
               <h3 className="text-sm font-bold text-emerald-500 flex items-center gap-2"><Icon name="pen-nib" className="w-4 h-4"/> بخش ابزارهای کاربردی</h3>
               <input type="text" placeholder="عنوان اصلی" value={contentConfig.tools.title} onChange={e => setContentConfig({...contentConfig, tools: {...contentConfig.tools, title: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-emerald-500 transition-all select-text shadow-inner" />
-              <input type="text" placeholder="زیر تیتر" value={contentConfig.tools.subtitle} onChange={e => setContentConfig({...contentConfig, tools: {...contentConfig.tools, subtitle: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-emerald-500 transition-all select-text shadow-inner" />
+              <input type="text" placeholder="زیر عنوان" value={contentConfig.tools.subtitle} onChange={e => setContentConfig({...contentConfig, tools: {...contentConfig.tools, subtitle: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-emerald-500 transition-all select-text shadow-inner" />
             </div>
           </div>
         </div>
@@ -566,7 +566,7 @@ export default function HomePageSettings() {
       {activeTab === 'TIMELINE' && (
         <div className="p-6 bg-[#050810]/50 rounded-3xl border border-white/5 space-y-6 shadow-inner">
           <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-4">
-            <h2 className="text-lg font-bold text-amber-400">تایم‌لاین افشاگری‌ها</h2>
+            <h2 className="text-lg font-bold text-amber-400">خط زمانی</h2>
             <button onClick={() => setTimelineEvents([{ id: Date.now(), year: '', title: '', desc: '', color: PALETTE[4] }, ...timelineEvents])} className="text-xs bg-amber-500/20 text-amber-400 px-4 py-2 rounded-lg font-bold hover:bg-amber-500 hover:text-black border border-transparent shadow-inner"><Icon name="plus" className="w-3.5 h-3.5" /></button>
           </div>
           
@@ -602,12 +602,12 @@ export default function HomePageSettings() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/20 p-6 rounded-2xl border border-white/5 shadow-inner max-w-4xl mx-auto">
             <div className="space-y-2 md:col-span-2 bg-black/40 p-4 rounded-xl border border-rose-500/20 shadow-inner">
               <label className="text-sm text-rose-400 font-bold flex items-center gap-2"><Icon name="clock" className="w-4 h-4"/> تاریخ پایان</label>
-              <p className="text-[11px] text-gray-400 leading-loose">تاریخ دقیق را با فرمت میلادی به شکل <code className="bg-black/60 px-2 py-0.5 rounded text-cyan-400 border border-white/5">YYYY-MM-DDTHH:MM:SS</code> وارد کنید. مثال: <code>2026-12-31T23:59:59</code></p>
+              <p className="text-[11px] text-gray-400 leading-loose">تاریخ دقیق را با قالب میلادی به شکل <code className="bg-black/60 px-2 py-0.5 rounded text-cyan-400 border border-white/5">YYYY-MM-DDTHH:MM:SS</code> وارد کنید. مثال: <code>2026-12-31T23:59:59</code></p>
               <input type="text" value={countdown.targetDate || ''} onChange={e => setCountdown({...countdown, targetDate: e.target.value})} className="w-full bg-black/60 border border-white/5 rounded-xl p-3 text-base text-white outline-none dir-ltr text-left font-mono font-bold focus:border-rose-500 transition-all select-text shadow-inner" />
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] text-gray-400 font-bold">عنوان اصلی باکس</label>
+              <label className="text-[11px] text-gray-400 font-bold">عنوان اصلی قاب</label>
               <input type="text" value={countdown.title || ''} onChange={e => setCountdown({...countdown, title: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-rose-500 font-bold transition-all select-text shadow-inner" />
             </div>
 
@@ -622,7 +622,7 @@ export default function HomePageSettings() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] text-gray-400 font-bold">متن پیام تولتیپ در زمان قفل بودن</label>
+              <label className="text-[11px] text-gray-400 font-bold">متن پیام پیام راهنما در زمان قفل بودن</label>
               <input type="text" value={countdown.tooltip || ''} onChange={e => setCountdown({...countdown, tooltip: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-rose-500 transition-all select-text shadow-inner" />
             </div>
 
@@ -632,7 +632,7 @@ export default function HomePageSettings() {
             </div>
 
             <div className="space-y-2 pt-4 border-t border-white/5">
-              <label className="text-[11px] text-gray-400 font-bold">لینک مقصد پس از باز شدن</label>
+              <label className="text-[11px] text-gray-400 font-bold">پیوند مقصد پس از باز شدن</label>
               <input type="text" value={countdown.link || ''} onChange={e => setCountdown({...countdown, link: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none dir-ltr text-right focus:border-emerald-500 transition-all select-text shadow-inner" />
             </div>
           </div>
@@ -646,12 +646,12 @@ export default function HomePageSettings() {
           <h2 className="text-lg font-bold text-purple-400 border-b border-white/5 pb-4">پدیدآورندگان شاخص</h2>
           
           <div className="bg-black/20 p-6 rounded-2xl border border-white/5 shadow-inner space-y-4 max-w-4xl mx-auto">
-            <p className="text-xs text-gray-400">نام پدیدآورنده را جستجو کنید و برای افزودن به لیست روی آن کلیک کنید.</p>
+            <p className="text-xs text-gray-400">نام پدیدآورنده را کاوش کنید و برای افزودن به فهرست روی آن کلیک کنید.</p>
             <div className="relative">
               <Icon name="search" className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input 
                 type="text" 
-                placeholder="جستجو در دیتابیس..." 
+                placeholder="کاوش در پایگاه داده..." 
                 value={searchCreator || ''} 
                 onChange={e => setSearchCreator(e.target.value)} 
                 className="w-full bg-black/40 border border-white/5 rounded-xl py-4 pr-12 pl-4 text-sm text-white outline-none focus:border-purple-500 transition-colors shadow-inner select-text" 
@@ -692,18 +692,18 @@ export default function HomePageSettings() {
       )}
 
       {/* ======================================================= */}
-      {/* 11. تب باکس پورتال امن */}
+      {/* 11. تب قاب پورتال امن */}
       {activeTab === 'CTA' && (
         <div className="p-6 bg-[#050810]/50 rounded-3xl border border-white/5 space-y-6 shadow-inner">
-          <h2 className="text-lg font-bold text-cyan-400 border-b border-white/5 pb-4">باکس انتهای صفحه</h2>
+          <h2 className="text-lg font-bold text-cyan-400 border-b border-white/5 pb-4">قاب انتهای صفحه</h2>
           
           <div className="space-y-4 bg-black/20 p-6 md:p-8 rounded-2xl border border-white/5 shadow-inner max-w-3xl mx-auto">
-            <input type="text" placeholder="روتیتر" value={ctaBox.preTitle || ''} onChange={e => setCtaBox({...ctaBox, preTitle: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-4 text-sm text-white outline-none focus:border-cyan-500 font-bold transition-all select-text shadow-inner" />
+            <input type="text" placeholder="روعنوان" value={ctaBox.preTitle || ''} onChange={e => setCtaBox({...ctaBox, preTitle: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-4 text-sm text-white outline-none focus:border-cyan-500 font-bold transition-all select-text shadow-inner" />
             <input type="text" placeholder="عنوان اصلی" value={ctaBox.title || ''} onChange={e => setCtaBox({...ctaBox, title: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-4 text-xl font-black text-white outline-none focus:border-cyan-500 transition-all select-text shadow-inner" />
             <textarea rows="4" placeholder="متن توضیحات..." value={ctaBox.desc || ''} onChange={e => setCtaBox({...ctaBox, desc: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-4 text-sm text-white outline-none resize-none focus:border-cyan-500 leading-relaxed text-justify transition-all select-text shadow-inner" />
             <div className="flex flex-col md:flex-row gap-4 pt-2 border-t border-white/5">
               <input type="text" placeholder="متن دکمه" value={ctaBox.btnText || ''} onChange={e => setCtaBox({...ctaBox, btnText: e.target.value})} className="w-full md:w-1/3 bg-black/40 border border-white/5 rounded-xl p-4 text-sm text-white outline-none focus:border-cyan-500 font-bold transition-all select-text shadow-inner" />
-              <input type="text" placeholder="لینک دکمه (مثال: /submit)" value={ctaBox.btnLink || ''} onChange={e => setCtaBox({...ctaBox, btnLink: e.target.value})} className="w-full md:flex-1 bg-black/40 border border-white/5 rounded-xl p-4 text-sm text-white outline-none dir-ltr text-right focus:border-cyan-500 transition-all select-text shadow-inner" />
+              <input type="text" placeholder="پیوند دکمه (مثال: /submit)" value={ctaBox.btnLink || ''} onChange={e => setCtaBox({...ctaBox, btnLink: e.target.value})} className="w-full md:flex-1 bg-black/40 border border-white/5 rounded-xl p-4 text-sm text-white outline-none dir-ltr text-right focus:border-cyan-500 transition-all select-text shadow-inner" />
             </div>
           </div>
         </div>
@@ -720,11 +720,11 @@ export default function HomePageSettings() {
           
           <div className="space-y-6 bg-black/20 p-6 md:p-8 rounded-2xl border border-white/5 shadow-inner max-w-3xl mx-auto">
             <p className="text-xs text-gray-400 leading-loose bg-black/40 p-4 rounded-xl border border-fuchsia-500/20 shadow-inner">
-              این تنظیم <strong>کاملاً مجزا از تنظیمات کل سایت</strong> عمل می‌کند. عنوانی که در اینجا می‌نویسید، فقط در تب مرورگرِ کاربرانی که وارد صفحه اصلی (`/`) می‌شوند نمایش داده خواهد شد.
+              این تنظیم <strong>کاملاً مجزا از تنظیمات کل سامانه</strong> عمل می‌کند. عنوانی که در اینجا می‌نویسید، فقط در تب مرورگرِ کاربرانی که وارد صفحه اصلی (`/`) می‌شوند نمایش داده خواهد شد.
             </p>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-white pl-1">عنوان تب مرورگر (Meta Title)</label>
+              <label className="text-sm font-bold text-white pl-1">عنوان تب مرورگر</label>
               <input type="text" placeholder="مثال: شبکه مکتوم - کشف حقیقت" value={seoConfig.metaTitle || ''} onChange={e => setSeoConfig({...seoConfig, metaTitle: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-4 text-sm text-white outline-none focus:border-fuchsia-500 font-bold transition-all select-text shadow-inner" />
             </div>
           </div>
@@ -754,7 +754,7 @@ export default function HomePageSettings() {
               >
                 <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-90 pointer-events-none" />
                 <div className="p-4 border-b border-white/10 flex justify-between items-center bg-transparent shrink-0">
-                  <h3 className="text-white font-bold flex items-center gap-2"><Icon name="image" className="w-5 h-5 text-cyan-400" /> انتخاب فایل رسانه</h3>
+                  <h3 className="text-white font-bold flex items-center gap-2"><Icon name="image" className="w-5 h-5 text-cyan-400" /> انتخاب پرونده رسانه</h3>
                   <button onClick={() => setMediaPickerTarget(null)} className="p-1.5 text-gray-400 bg-white/5 hover:bg-rose-500 hover:text-white rounded-xl z-10 transition-colors border border-transparent shadow-inner">
                     <Icon name="close" className="w-5 h-5" />
                   </button>
@@ -778,7 +778,7 @@ export default function HomePageSettings() {
       </AnimatePresence>
 
       {/* ======================================================= */}
-      {/* پاپ‌آپ سراسری تایید حذف */}
+      {/* باز شونده‌ سراسری تایید حذف */}
       <AnimatePresence>
         {deletingItem && (
           <ModalPortal>

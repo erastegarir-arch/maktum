@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'مدیریت صفحه اصلی سایت',
+  title: 'مسئولیت صفحه اصلی سامانه',
 };
 
 export default function HomeSettingsLayout({ children }) {

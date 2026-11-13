@@ -1,4 +1,4 @@
-// مسیر فایل: app/components/providers/PageTransitionProvider.jsx
+// مسیر پرونده: app/components/providers/PageTransitionProvider.jsx
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 export default function PageTransitionProvider({ children }) {
   const pathname = usePathname();
 
-  // مسیرهایی که نمی‌خواهیم ترانزیشن داشته باشند (مثل پنل ادمین)
+  // مسیرهایی که نمی‌خواهیم ترانزیشن داشته باشند (مثل درگاه مسئول)
   const isExcluded = pathname?.startsWith('/admin') || pathname?.startsWith('/portal-entry-99');
 
   if (isExcluded) {

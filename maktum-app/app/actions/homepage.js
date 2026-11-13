@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-// ۱. دریافت لیست پدیدآورندگان برای انتخاب در پنل ادمین
+// ۱. دریافت فهرست پدیدآورندگان برای انتخاب در درگاه مسئول
 export async function getCreatorsList() {
   try {
     const creators = await prisma.taxonomy.findMany({
@@ -16,7 +16,7 @@ export async function getCreatorsList() {
   }
 }
 
-// ۲. دریافت لیست هشتگ‌ها و دسته‌بندی‌ها برای رادار موضوعی
+// ۲. دریافت فهرست هشتک‌ها و دسته‌بندی‌ها برای رادار موضوعی
 export async function getTagsList() {
   try {
     const tags = await prisma.taxonomy.findMany({
@@ -25,7 +25,7 @@ export async function getTagsList() {
     });
     return { success: true, data: tags };
   } catch (error) {
-    return { success: false, error: 'خطا در دریافت هشتگ‌ها' };
+    return { success: false, error: 'خطا در دریافت هشتک‌ها' };
   }
 }
 

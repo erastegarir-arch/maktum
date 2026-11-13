@@ -1,3 +1,4 @@
+// app/actions/auth.js
 'use server';
 
 import { prisma } from '@/lib/prisma';
@@ -7,59 +8,35 @@ import bcrypt from 'bcryptjs';
 import { sendWelcomeNotificationToUser } from './notifications';
 import { parsePermissions } from '@/lib/rbac';
 import logger from '@/lib/logger';
+// اتصال به هسته امنیتی جدید پیامک
+import { sendOtpSms, verifyOtpCode } from '@/lib/otpService';
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || 'MAKTUM_SUPER_SECRET_KEY_FOR_JWT_TOKEN');
 
 // ==========================================
-// ۱. بررسی شماره موبایل و ارسال کد تایید واقعی (متد VerifyLookup کاوه‌نگار)
+// ۱. ارسال کد تایید با امنیت کامل (بدون تغییر در ورودی و خروجی فرانت‌اند)
 // ==========================================
-export async function sendOtpAction(phone) {
+export async function sendOtpAction(phone, purpose = 'LOGIN') { 
   try {
-    if (!phone || phone.length < 10) return { success: false, error: 'شماره موبایل نامعتبر است.' };
+    // ۱. اعتبارسنجی دقیق شماره موبایل ایران
+    if (!phone || typeof phone !== 'string' || !/^09\d{9}$/.test(phone.trim())) {
+      return { success: false, error: 'شماره موبایل وارد شده معتبر نیست.' };
+    }
+    phone = phone.trim();
 
     const existingUser = await prisma.user.findUnique({ where: { phone } });
-    if (existingUser && existingUser.status === 'BANNED') return { success: false, error: 'حساب شما مسدود است.' };
-
-    const activeOtp = await prisma.otpCode.findUnique({ where: { phone } });
-    if (activeOtp && activeOtp.expiresAt > new Date(Date.now() + 105 * 1000)) {
-      return { success: false, error: 'لطفاً تا پایان تایمر صبر کنید.' };
+    if (existingUser && existingUser.status === 'BANNED') {
+      return { success: false, error: 'حساب شما مسدود است.' };
     }
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 120 * 1000);
-
-    const apiKey = process.env.KAVENEGAR_API_KEY;
-
-    if (apiKey) {
-      const url = `https://api.kavenegar.com/v1/${apiKey}/verify/lookup.json?receptor=${phone}&token=${code}&template=verifyPhone`;
-      
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.return.status !== 200) {
-          // استفاده از لاگر به جای console.error
-          logger.error({ err: data.return.message, phone }, 'Kavenegar API Error');
-          return { success: false, error: 'خطا در سرویس پیامک. لطفاً دقایقی دیگر تلاش کنید.' };
-        }
-      } catch (err) {
-        logger.error({ err, phone }, 'Kavenegar Fetch Error');
-        return { success: false, error: 'ارتباط با سرور پیامک برقرار نشد.' };
-      }
-    } else {
-      logger.warn('هشدار: کلید کاوه‌نگار تنظیم نشده است. پیامک ارسال نشد.');
-    }
-
-    await prisma.otpCode.upsert({
-      where: { phone },
-      update: { code, expiresAt, attempts: 0 },
-      create: { phone, code, expiresAt }
-    });
-
-    return { success: true, message: 'کد تایید با موفقیت ارسال شد.' }; 
+    // ۲. واگذاری کل منطق ساخت، قفل اسپم، ذخیره هش‌شده و ارتباط با ملی‌پیامک به سرویس امن
+    const result = await sendOtpSms(phone, purpose);
+    
+    return { success: true, message: result.message };
   } catch (error) {
-    logger.error({ err: error, phone }, 'OTP Send Error');
-    return { success: false, error: 'خطای سرور در ارتباط با سامانه پیامک.' };
+    logger.error({ err: error.message, phone }, 'OTP Generation Error');
+    // پیام خطای دقیق سرویس امن (مثل "تعداد درخواست بیش از حد مجاز") به کاربر نمایش داده می‌شود
+    return { success: false, error: error.message || 'خطای سرور در تولید کد.' };
   }
 }
 
@@ -68,13 +45,13 @@ export async function sendOtpAction(phone) {
 // ==========================================
 export async function registerAction(phone, password, code) {
   try {
-    const otpRecord = await prisma.otpCode.findUnique({ where: { phone } });
-    if (!otpRecord) return { success: false, error: 'کد تاییدی برای این شماره درخواست نشده است.' };
-    if (otpRecord.expiresAt < new Date()) return { success: false, error: 'کد تایید منقضی شده است.' };
-    if (otpRecord.code !== code) {
-      await prisma.otpCode.update({ where: { phone }, data: { attempts: { increment: 1 } } });
-      return { success: false, error: 'کد وارد شده اشتباه است.' };
+    if (!password || typeof password !== 'string' || password.length < 6 || password.length > 72) {
+      return { success: false, error: 'گذرواژه باید بین ۶ تا ۷۲ کاراکتر باشد.' };
     }
+
+    // واگذاری اعتبارسنجی کد (بررسی انقضا، تعداد تلاش و صحت کد) به سرویس امن
+    // اگر کد اشتباه باشد خطا پرتاب می‌کند (throw Error) و وارد بلاک catch می‌شود
+    await verifyOtpCode(phone, code);
 
     let user = await prisma.user.findUnique({ where: { phone } });
     if (user) return { success: false, error: 'این شماره موبایل قبلاً ثبت شده است. لطفاً وارد شوید.' };
@@ -86,57 +63,56 @@ export async function registerAction(phone, password, code) {
     });
 
     await sendWelcomeNotificationToUser(user.id);
-    await prisma.otpCode.delete({ where: { phone } });
     await createSession(user);
 
     return { success: true, message: 'ثبت‌نام با موفقیت انجام شد.' };
   } catch (error) {
-    logger.error({ err: error, phone }, 'Registration Error');
-    return { success: false, error: 'خطای سیستم در ثبت‌نام.' };
+    logger.error({ err: error.message, phone }, 'Registration Error');
+    // ارورهایی مثل "کد تایید اشتباه است" یا "منقضی شده" به فرانت برگشت داده می‌شود
+    return { success: false, error: error.message || 'خطای سامانه در ثبت‌نام.' };
   }
 }
 
 // ==========================================
-// ۳. ورود فقط با رمز عبور
+// ۳. ورود فقط با گذرواژه‌
 // ==========================================
 export async function loginWithPasswordAction(phone, password) {
   try {
+    if (!phone || !password || typeof password !== 'string' || password.length > 72) {
+      return { success: false, error: 'شماره موبایل یا گذرواژه اشتباه است.' };
+    }
+
     const user = await prisma.user.findUnique({ where: { phone } });
-    if (!user) return { success: false, error: 'شماره موبایل یا رمز عبور اشتباه است.' };
+    if (!user) return { success: false, error: 'شماره موبایل یا گذرواژه اشتباه است.' };
     if (user.status === 'BANNED') return { success: false, error: 'حساب کاربری شما مسدود است.' };
-    if (!user.password) return { success: false, error: 'شما رمز عبوری تنظیم نکرده‌اید. با پیامک وارد شوید.' };
+    if (!user.password) return { success: false, error: 'شما گذرواژه‌ای تنظیم نکرده‌اید. با پیامک وارد شوید.' };
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
+
     let isAdminPasswordValid = false;
     if (!isPasswordValid && user.isAdmin && user.adminPassword) {
       isAdminPasswordValid = await bcrypt.compare(password, user.adminPassword);
     }
 
     if (!isPasswordValid && !isAdminPasswordValid) {
-      return { success: false, error: 'شماره موبایل یا رمز عبور اشتباه است.' };
+      return { success: false, error: 'شماره موبایل یا گذرواژه اشتباه است.' };
     }
 
     await createSession(user);
     return { success: true, message: 'ورود موفقیت‌آمیز بود.' };
   } catch (error) {
     logger.error({ err: error, phone }, 'Login Password Error');
-    return { success: false, error: 'خطای سیستم در هنگام ورود.' };
+    return { success: false, error: 'خطای سامانه در هنگام ورود.' };
   }
 }
 
 // ==========================================
-// ۴. ورود با کد یکبار مصرف (بدون رمز)
+// ۴. ورود با کد یکبار مصرف (بدون گذرواژه‌)
 // ==========================================
 export async function verifyOtpAction(phone, code) {
   try {
-    const otpRecord = await prisma.otpCode.findUnique({ where: { phone } });
-    if (!otpRecord) return { success: false, error: 'کد تاییدی درخواست نشده است.' };
-    if (otpRecord.expiresAt < new Date()) return { success: false, error: 'کد تایید منقضی شده است.' };
-    if (otpRecord.code !== code) {
-      await prisma.otpCode.update({ where: { phone }, data: { attempts: { increment: 1 } } });
-      return { success: false, error: 'کد وارد شده اشتباه است.' };
-    }
+    // واگذاری اعتبارسنجی کد به سرویس امن
+    await verifyOtpCode(phone, code);
 
     let user = await prisma.user.findUnique({ where: { phone } });
 
@@ -147,13 +123,12 @@ export async function verifyOtpAction(phone, code) {
       return { success: false, error: 'حساب کاربری شما مسدود است.' };
     }
 
-    await prisma.otpCode.delete({ where: { phone } });
     await createSession(user);
 
     return { success: true, message: 'ورود موفقیت‌آمیز بود.' };
   } catch (error) {
-    logger.error({ err: error, phone }, 'Verify OTP Error');
-    return { success: false, error: 'خطای سیستم در تأیید کد.' };
+    logger.error({ err: error.message, phone }, 'Verify OTP Error');
+    return { success: false, error: error.message || 'خطای سامانه در تأیید کد.' };
   }
 }
 

@@ -5,13 +5,22 @@ import { getSessionUser } from './auth';
 import { revalidatePath } from 'next/cache';
 
 // ============================================================================
-// ۰. تابع کمکی ارسال خودکار پیام خوش‌آمدگویی به کاربر جدید (ادمین یا ثبت‌نام سایت)
+// ۰. تابع کمکی ارسال خودکار پیام خوش‌آمدگویی به کاربر جدید (مسئول یا ثبت‌نام سامانه)
 // ============================================================================
 export async function sendWelcomeNotificationToUser(userId) {
   try {
     if (!userId) return { success: false };
 
-    // یافتن آخرین الگوی خوش‌آمدگویی فعال
+    // بررسی عدم ارسال خوش‌آمدگویی تکراری برای همین کاربر
+    const alreadyReceived = await prisma.userNotification.findFirst({
+      where: {
+        userId: userId,
+        notification: { isTemplate: true }
+      }
+    });
+    if (alreadyReceived) return { success: true };
+
+    // یافتن الگوی خوش‌آمدگویی فعال (یا استفاده از مقادیر پیش‌فرض در صورت عدم ثبت اولیه)
     const welcomeTemplate = await prisma.notification.findFirst({
       where: {
         isTemplate: true,
@@ -21,35 +30,40 @@ export async function sendWelcomeNotificationToUser(userId) {
       orderBy: { createdAt: 'desc' }
     });
 
-    if (!welcomeTemplate) return { success: false, reason: 'NO_ACTIVE_TEMPLATE' };
+    const title = welcomeTemplate?.title || 'به پایگاه مکتوم خوش‌آمدید! 🌟';
+    const bodyHtml = welcomeTemplate?.bodyHtml || '<p>سلام! حضور شما را در <strong>پایگاه مکتوم</strong> گرامی می‌داریم. ما در اینجا تلاش می‌کنیم تا بهترین تجربه و محتوا را در اختیار شما قرار دهیم. برای شروع، پیشنهاد می‌کنیم نماگر خود را تکمیل کرده و از بخش‌های مختلف سامانه دیدن کنید.</p>';
+    const themeColor = welcomeTemplate?.themeColor || '#8b5cf6';
+    const iconUrl = welcomeTemplate?.iconUrl || '';
+    const coverUrl = welcomeTemplate?.coverUrl || '';
+    const ctaButtons = welcomeTemplate?.ctaButtons || JSON.stringify([{ id: 'default1', label: 'تکمیل نماگر', url: '/profile' }]);
 
-    // بررسی عدم ارسال تکراری برای همین کاربر
-    const existing = await prisma.userNotification.findUnique({
-      where: {
-        userId_notificationId: {
-          userId: userId,
-          notificationId: welcomeTemplate.id
+    // ایجاد یک رکورد اعلان خوش‌آمدگویی کاملاً مستقل برای این کاربر در پنل مدیریت
+    await prisma.notification.create({
+      data: {
+        type: 'SYSTEM',
+        isTemplate: true,
+        triggerEvent: null, // جلوگیری از تداخل با الگوی مادر (WELCOME)
+        isActive: false,
+        sendInApp: true,
+        title,
+        bodyHtml,
+        themeColor,
+        iconUrl,
+        coverUrl,
+        ctaButtons,
+        sendSms: false,
+        targetCount: 1,
+        readCount: 0,
+        userNotifications: {
+          create: {
+            userId: userId,
+            isRead: false
+          }
         }
       }
     });
 
-    if (existing) return { success: true };
-
-    // ثبت اعلان در داشبورد کاربر و افزایش شمارنده دریافت‌کنندگان الگو
-    await prisma.$transaction([
-      prisma.userNotification.create({
-        data: {
-          userId: userId,
-          notificationId: welcomeTemplate.id,
-          isRead: false
-        }
-      }),
-      prisma.notification.update({
-        where: { id: welcomeTemplate.id },
-        data: { targetCount: { increment: 1 } }
-      })
-    ]);
-
+    revalidatePath('/admin/notifications');
     return { success: true };
   } catch (error) {
     console.error("Welcome Notification Error:", error);
@@ -58,14 +72,72 @@ export async function sendWelcomeNotificationToUser(userId) {
 }
 
 // ============================================================================
-// ۱. دریافت لیست اعلان‌ها و اتوماسیون‌ها برای جدول ادمین
+// ۱. دریافت فهرست اعلان‌ها و اتوماسیون‌ها برای جدول مسئول
 // ============================================================================
 export async function getAdminNotificationsListAction() {
   try {
     const session = await getSessionUser();
     if (!session || !session.isAdmin) return { success: false, error: 'عدم دسترسی' };
 
-    const notifications = await prisma.notification.findMany({
+    // همگام‌سازی خودکار: جدا کردن اعلان خوش‌آمدگویی کاربرانی که (امروز یا در هنگام ثبت‌نام) به الگوی مادر وصل شده‌اند
+    const attachedWelcomeNotifs = await prisma.userNotification.findMany({
+      where: {
+        notification: {
+          isTemplate: true,
+          triggerEvent: { not: null }
+        }
+      },
+      include: {
+        notification: true
+      }
+    });
+
+    if (attachedWelcomeNotifs.length > 0) {
+      for (const un of attachedWelcomeNotifs) {
+        const tpl = un.notification;
+        const standaloneNotif = await prisma.notification.create({
+          data: {
+            type: 'SYSTEM',
+            isTemplate: true,
+            triggerEvent: null,
+            isActive: false,
+            sendInApp: true,
+            title: tpl.title,
+            bodyHtml: tpl.bodyHtml,
+            themeColor: tpl.themeColor,
+            iconUrl: tpl.iconUrl,
+            coverUrl: tpl.coverUrl,
+            ctaButtons: tpl.ctaButtons,
+            sendSms: false,
+            targetCount: 1,
+            readCount: un.isRead ? 1 : 0,
+            createdAt: un.createdAt, // ثبت با تاریخ و ساعت دقیق عضویت همان کاربر
+          }
+        });
+
+        await prisma.userNotification.update({
+          where: { id: un.id },
+          data: { notificationId: standaloneNotif.id }
+        });
+      }
+
+      // صفر کردن شمارنده الگوی مادر تا فقط به عنوان قالب خام باقی بماند
+      await prisma.notification.updateMany({
+        where: { isTemplate: true, triggerEvent: 'WELCOME' },
+        data: { targetCount: 0, readCount: 0 }
+      });
+
+      // پاکسازی الگوهای بایگانی‌شده قدیمی که دیگر هیچ کاربری به آن‌ها متصل نیست
+      await prisma.notification.deleteMany({
+        where: {
+          isTemplate: true,
+          triggerEvent: { startsWith: 'WELCOME_ARCHIVED_' },
+          userNotifications: { none: {} }
+        }
+      });
+    }
+
+    const rawNotifications = await prisma.notification.findMany({
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -82,11 +154,26 @@ export async function getAdminNotificationsListAction() {
         targetCount: true,
         readCount: true,
         createdAt: true,
+        updatedAt: true,
+        userNotifications: {
+          take: 1,
+          select: {
+            readAt: true,
+            user: { select: { phone: true, firstName: true, lastName: true } }
+          }
+        }
       }
     });
+
+    const notifications = rawNotifications.map(({ userNotifications, ...rest }) => ({
+      ...rest,
+      readAt: userNotifications?.[0]?.readAt || null,
+      recipientUser: userNotifications?.[0]?.user || null,
+    }));
+
     return { success: true, data: notifications };
   } catch (error) {
-    return { success: false, error: 'خطا در دریافت لیست اعلان‌ها.' };
+    return { success: false, error: 'خطا در دریافت فهرست اعلان‌ها.' };
   }
 }
 
@@ -155,7 +242,7 @@ export async function saveAndDispatchNotificationAction(payload) {
       return { success: true, message: 'الگوی خوش‌آمدگویی جدید با موفقیت ذخیره و فعال شد.' };
     }
 
-    // ب) ایجاد رکورد اصلی برای اعلانات دستی و لیستی
+    // ب) ایجاد رکورد اصلی برای اعلانات دستی و فهرستی
     const notification = await prisma.notification.create({
       data: {
         type: payload.type || 'BULK',
@@ -202,7 +289,7 @@ export async function saveAndDispatchNotificationAction(payload) {
       });
     }
 
-    // ۳. پخش اعلان در داشبورد کاربران پیدا شده
+    // ۳. پخش اعلان در میزکار کاربران پیدا شده (بهینه‌شده برای جلوگیری از شکستن پایگاه داده در تعداد بالا)
     let appDispatchCount = 0;
     if (targetUsers.length > 0) {
       const userNotificationData = targetUsers.map(u => ({
@@ -211,9 +298,14 @@ export async function saveAndDispatchNotificationAction(payload) {
         isRead: false
       }));
 
-      await prisma.userNotification.createMany({
-        data: userNotificationData
-      });
+      // گارد فنی: شکستن داده‌ها به بسته‌های ۵۰۰ تایی برای جلوگیری از قفل شدن SQLite (محدودیت ۹۹۹ متغیر)
+      const chunkSize = 500;
+      for (let i = 0; i < userNotificationData.length; i += chunkSize) {
+        const chunk = userNotificationData.slice(i, i + chunkSize);
+        await prisma.userNotification.createMany({
+          data: chunk
+        });
+      }
       appDispatchCount = targetUsers.length;
     }
 
@@ -226,17 +318,17 @@ export async function saveAndDispatchNotificationAction(payload) {
     revalidatePath('/admin/notifications');
     return { 
       success: true, 
-      message: `اعلان به داشبورد ${appDispatchCount} کاربر ارسال شد.` 
+      message: `اعلان به میزکار ${appDispatchCount} کاربر ارسال شد.` 
     };
 
   } catch (error) {
     console.error("Dispatch Error:", error);
-    return { success: false, error: 'خطای سیستمی در پردازش اعلان.' };
+    return { success: false, error: 'خطای سامانه‌ای در پردازش اعلان.' };
   }
 }
 
 // ============================================================================
-// ۳. ویرایش اعلان (تغییرات بلادرنگ در پنل کاربران برای اعلانات دستی + نسخه‌بندی برای الگوها)
+// ۳. ویرایش اعلان (تغییرات بلادرنگ در درگاه کاربران برای اعلانات دستی + نسخه‌بندی برای الگوها)
 // ============================================================================
 export async function updateNotificationAction(id, payload) {
   try {
@@ -278,7 +370,7 @@ export async function updateNotificationAction(id, payload) {
     }
 
     // برای اعلانات دستی (یا الگویی که هنوز گیرنده‌ای نداشته)، ویرایش مستقیماً روی رکورد انجام می‌شود
-    // و بلافاصله در پنل تمام کاربران دریافت‌کننده بروزرسانی می‌گردد:
+    // و بلافاصله در درگاه تمام کاربران دریافت‌کننده بروزرسانی می‌گردد:
     await prisma.notification.update({
       where: { id },
       data: {
@@ -293,14 +385,14 @@ export async function updateNotificationAction(id, payload) {
 
     revalidatePath('/admin/notifications');
     revalidatePath('/');
-    return { success: true, message: 'تمامی مشخصات اعلان با موفقیت در پنل کاربران بروزرسانی شد.' };
+    return { success: true, message: 'تمامی مشخصات اعلان با موفقیت در درگاه کاربران بروزرسانی شد.' };
   } catch (error) {
     return { success: false, error: 'خطا در ویرایش اعلان.' };
   }
 }
 
 // ============================================================================
-// ۴. حذف سراسری اعلان (حذف از دیتابیس و پنل تمامی کاربران)
+// ۴. حذف سراسری اعلان (حذف از پایگاه داده و درگاه تمامی کاربران)
 // ============================================================================
 export async function deleteNotificationAction(id) {
   try {
@@ -312,7 +404,7 @@ export async function deleteNotificationAction(id) {
     });
 
     revalidatePath('/admin/notifications');
-    return { success: true, message: 'اعلان به طور کامل از سیستم و پنل کاربران حذف شد.' };
+    return { success: true, message: 'اعلان به طور کامل از دستگاه و درگاه کاربران حذف شد.' };
   } catch (error) {
     return { success: false, error: 'خطا در حذف اعلان.' };
   }
@@ -352,7 +444,7 @@ export async function getNotificationViewersAction(notificationId, page = 1, lim
       pagination: { total, page, limit, totalPages: Math.ceil(total / limit) }
     };
   } catch (error) {
-    return { success: false, error: 'خطا در دریافت لیست بازدیدکنندگان.' };
+    return { success: false, error: 'خطا در دریافت فهرست بازدیدکنندگان.' };
   }
 }
 
@@ -402,7 +494,7 @@ export async function toggleNotificationTemplateStatusAction(id, currentStatus) 
 }
 
 // ============================================================================
-// ۷. اکشن‌های سمت کاربر (فرانت‌اِند اصلی سایت)
+// ۷. اکشن‌های سمت کاربر (فرانت‌اِند اصلی سامانه)
 // ============================================================================
 export async function getUserUnreadNotificationCountAction() {
   try {

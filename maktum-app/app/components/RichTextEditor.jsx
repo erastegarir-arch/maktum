@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { Extension } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
@@ -8,7 +8,6 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 
-// === اکستنشن‌های جدید اضافه شده ===
 import Link from '@tiptap/extension-link';
 import Highlight from '@tiptap/extension-highlight';
 import Superscript from '@tiptap/extension-superscript';
@@ -17,137 +16,52 @@ import Color from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Image from '@tiptap/extension-image'; 
 
-// ================= کامپوننت داخلی برای آیکون‌های ادیتور =================
+// ================= کامپوننت داخلی برای نماد‌های ویرایشگر =================
 const EditorIcon = ({ name, className = "w-4 h-4" }) => {
   const icons = {
-    bold: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" /><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
-      </svg>
-    ),
-    italic: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="19" y1="4" x2="10" y2="4" /><line x1="14" y1="20" x2="5" y2="20" /><line x1="15" y1="4" x2="9" y2="20" />
-      </svg>
-    ),
-    underline: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 4v6a6 6 0 0 0 12 0V4" /><line x1="4" y1="20" x2="20" y2="20" />
-      </svg>
-    ),
-    strike: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 4H9a3 3 0 0 0-2.83 4" /><path d="M14 12a4 4 0 0 1 0 8H6" /><line x1="4" y1="12" x2="20" y2="12" />
-      </svg>
-    ),
-    link: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-      </svg>
-    ),
-    highlight: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m9 11-6 6v3h9l3-3" /><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" />
-      </svg>
-    ),
-    textColor: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 20h16" /><path d="m15 16-3-8-3 8" /><path d="m10 13h4" />
-      </svg>
-    ),
-    superscript: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19L11 10" /><path d="M4 10L11 19" /><path d="M17 8c0-1.1.9-2 2-2s2 .9 2 2c0 2-4 2-4 4.5h5" />
-      </svg>
-    ),
-    subscript: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 14L11 5" /><path d="M4 5L11 14" /><path d="M17 15c0-1.1.9-2 2-2s2 .9 2 2c0 2-4 2-4 4.5h5" />
-      </svg>
-    ),
-    h2: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1" />
-      </svg>
-    ),
-    h3: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5a2 2 0 0 1-2 2" /><path d="M17 17.5c2 1.5 4 0 4-1.5a2 2 0 0 0-2-2" />
-      </svg>
-    ),
-    directionRtl: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10 15h8c2.21 0 4-1.79 4-4s-1.79-4-4-4H5l4 4m-4-4 4-4"/>
-      </svg>
-    ),
-    directionLtr: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 15H6c-2.21 0-4-1.79-4-4s1.79-4 4-4h13l-4 4m4-4-4-4"/>
-      </svg>
-    ),
-    alignRight: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="12" x2="9" y2="12" /><line x1="21" y1="18" x2="7" y2="18" />
-      </svg>
-    ),
-    alignCenter: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="6" x2="6" y2="6" /><line x1="21" y1="12" x2="3" y2="12" /><line x1="18" y1="18" x2="6" y2="18" />
-      </svg>
-    ),
-    alignLeft: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="21" y1="6" x2="3" y2="6" /><line x1="15" y1="12" x2="3" y2="12" /><line x1="17" y1="18" x2="3" y2="18" />
-      </svg>
-    ),
-    alignJustify: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
-      </svg>
-    ),
-    listBullets: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4" cy="6" r="2" fill="currentColor" /><circle cx="4" cy="12" r="2" fill="currentColor" /><circle cx="4" cy="18" r="2" fill="currentColor" />
-      </svg>
-    ),
-    listNumbers: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="10" y1="6" x2="21" y2="6" /><line x1="10" y1="12" x2="21" y2="12" /><line x1="10" y1="18" x2="21" y2="18" /><path d="M4 6h2v4H4" /><path d="M4 14h3v4H4" />
-      </svg>
-    ),
-    textBlockquote: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-      </svg>
-    ),
-    media: (
-      <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
-      </svg>
-    ),
+    bold: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" /><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" /></svg> ),
+    italic: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="4" x2="10" y2="4" /><line x1="14" y1="20" x2="5" y2="20" /><line x1="15" y1="4" x2="9" y2="20" /></svg> ),
+    underline: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4v6a6 6 0 0 0 12 0V4" /><line x1="4" y1="20" x2="20" y2="20" /></svg> ),
+    strike: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 4" /><path d="M14 12a4 4 0 0 1 0 8H6" /><line x1="4" y1="12" x2="20" y2="12" /></svg> ),
+    link: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg> ),
+    highlight: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 11-6 6v3h9l3-3" /><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" /></svg> ),
+    textColor: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16" /><path d="m15 16-3-8-3 8" /><path d="m10 13h4" /></svg> ),
+    superscript: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19L11 10" /><path d="M4 10L11 19" /><path d="M17 8c0-1.1.9-2 2-2s2 .9 2 2c0 2-4 2-4 4.5h5" /></svg> ),
+    subscript: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14L11 5" /><path d="M4 5L11 14" /><path d="M17 15c0-1.1.9-2 2-2s2 .9 2 2c0 2-4 2-4 4.5h5" /></svg> ),
+    h2: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1" /></svg> ),
+    h3: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h8" /><path d="M4 18V6" /><path d="M12 18V6" /><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5a2 2 0 0 1-2 2" /><path d="M17 17.5c2 1.5 4 0 4-1.5a2 2 0 0 0-2-2" /></svg> ),
+    directionRtl: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 15h8c2.21 0 4-1.79 4-4s-1.79-4-4-4H5l4 4m-4-4 4-4"/></svg> ),
+    directionLtr: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 15H6c-2.21 0-4-1.79-4-4s1.79-4 4-4h13l-4 4m4-4-4-4"/></svg> ),
+    alignRight: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6" /><line x1="21" y1="12" x2="9" y2="12" /><line x1="21" y1="18" x2="7" y2="18" /></svg> ),
+    alignCenter: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="6" /><line x1="21" y1="12" x2="3" y2="12" /><line x1="18" y1="18" x2="6" y2="18" /></svg> ),
+    alignLeft: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="6" x2="3" y2="6" /><line x1="15" y1="12" x2="3" y2="12" /><line x1="17" y1="18" x2="3" y2="18" /></svg> ),
+    alignJustify: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg> ),
+    listBullets: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4" cy="6" r="2" fill="currentColor" /><circle cx="4" cy="12" r="2" fill="currentColor" /><circle cx="4" cy="18" r="2" fill="currentColor" /></svg> ),
+    listNumbers: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="10" y1="6" x2="21" y2="6" /><line x1="10" y1="12" x2="21" y2="12" /><line x1="10" y1="18" x2="21" y2="18" /><path d="M4 6h2v4H4" /><path d="M4 14h3v4H4" /></svg> ),
+    textBlockquote: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg> ),
+    media: ( <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg> ),
   };
 
   return icons[name] || null;
 };
 
+// ================= تعریف Extension ها در خارج از کامپوننت =================
 const TextDirectionExtension = Extension.create({
-  name: 'textDirection',
+  name: 'customTextDirection', 
   addGlobalAttributes() {
-    return [
-      {
-        types: ['paragraph', 'heading', 'blockquote', 'orderedList', 'bulletList', 'listItem'],
-        attributes: {
-          dir: {
-            default: null,
-            parseHTML: element => element.getAttribute('dir'),
-            renderHTML: attributes => {
-              if (!attributes.dir) return {};
-              return { dir: attributes.dir };
-            },
+    return [{
+      types: ['paragraph', 'heading', 'blockquote', 'orderedList', 'bulletList', 'listItem'],
+      attributes: {
+        dir: {
+          default: null,
+          parseHTML: element => element.getAttribute('dir'),
+          renderHTML: attributes => {
+            if (!attributes.dir) return {};
+            return { dir: attributes.dir };
           },
         },
       },
-    ];
+    }];
   },
   addCommands() {
     return {
@@ -165,6 +79,42 @@ const TextDirectionExtension = Extension.create({
   },
 });
 
+// تولید آرایه افزونه‌ها در خارج از بدنه کامپوننت برای جلوگیری از Duplicate Tiptap
+const getEditorExtensions = (placeholderText) => [
+  StarterKit.configure({
+    bulletList: { keepMarks: true, keepAttributes: true },
+    orderedList: { keepMarks: true, keepAttributes: true },
+    heading: { levels: [2, 3] },
+    link: false,
+    underline: false,
+  }),
+  Underline,
+  TextAlign.configure({ 
+    types: ['heading', 'paragraph', 'blockquote', 'listItem', 'orderedList', 'bulletList'], 
+    alignments: ['left', 'center', 'right', 'justify'] 
+  }),
+  TextDirectionExtension,
+  Placeholder.configure({
+    placeholder: placeholderText,
+    emptyEditorClass: 'is-editor-empty',
+  }),
+  Link.configure({
+    openOnClick: false,
+    autolink: true,
+  }),
+  TextStyle,
+  Color,
+  Highlight.configure({ multicolor: true }),
+  Superscript,
+  Subscript,
+  Image.configure({
+    inline: true,
+    allowBase64: true,
+    HTMLAttributes: { class: 'editor-image rounded-2xl max-w-full h-auto my-4 shadow-lg' },
+  }),
+];
+
+// ================= کامپوننت اصلی =================
 export default function RichTextEditor({ 
   value, 
   onChange, 
@@ -173,42 +123,11 @@ export default function RichTextEditor({
   onOpenMedia 
 }) {
   
+  const extensions = useMemo(() => getEditorExtensions(placeholder), [placeholder]);
+
   const editor = useEditor({
     immediatelyRender: false,
-    extensions: [
-      StarterKit.configure({
-        bulletList: { keepMarks: true, keepAttributes: true },
-        orderedList: { keepMarks: true, keepAttributes: true },
-        heading: { levels: [2, 3] },
-      }),
-      Underline,
-      TextAlign.configure({ 
-        types: ['heading', 'paragraph', 'blockquote', 'listItem', 'orderedList', 'bulletList'], 
-        alignments: ['left', 'center', 'right', 'justify'] 
-      }),
-      TextDirectionExtension,
-      Placeholder.configure({
-        placeholder: placeholder,
-        emptyEditorClass: 'is-editor-empty',
-      }),
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-      }),
-      TextStyle,
-      Color,
-      Highlight.configure({ multicolor: true }),
-      Superscript,
-      Subscript,
-      // === افزونه پردازش تصویر اضافه شد ===
-      Image.configure({
-        inline: true,
-        allowBase64: true,
-        HTMLAttributes: {
-          class: 'editor-image rounded-2xl max-w-full h-auto my-4 shadow-lg',
-        },
-      }),
-    ],
+    extensions: extensions,
     content: value || '',
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
@@ -233,39 +152,63 @@ export default function RichTextEditor({
   const isRtl = currentDir === 'rtl';
   const isLtr = currentDir === 'ltr';
 
-  const ToolbarButton = ({ onClick, isActive, children, title, className = "" }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`relative min-w-[34px] h-[34px] px-2 rounded-xl transition-all duration-200 flex items-center justify-center font-sans text-xs cursor-pointer border border-transparent ${className} ${
-        isActive 
-          ? `${activeTheme.bg} text-white shadow-md scale-105 font-bold` 
-          : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-      }`}
-    >
-      {children}
-    </button>
-  );
+  // ================= کامپوننت دکمه نوار ابزار با پیام راهنما کاستوم =================
+  const ToolbarButton = ({ onClick, isActive, children, title, className = "" }) => {
+    const [showTooltip, setShowTooltip] = useState(false);
+
+    // استفاده از تم اکتیو یا در صورت عدم وجود (فقط پاس دادن رنگ متن)، ایجاد یک پس‌زمینه شیشه‌ای زیبا
+    const activeBgClass = activeTheme?.bg || 'bg-white/25';
+
+    return (
+      <div 
+        className="relative flex items-center justify-center"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <button
+          type="button"
+          onClick={onClick}
+          className={`relative min-w-[34px] h-[34px] px-2 rounded-xl transition-all duration-200 flex items-center justify-center font-sans text-xs cursor-pointer border ${className} ${
+            isActive 
+              ? `${activeBgClass} text-white border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.1)] scale-105 font-bold` 
+              : 'border-transparent bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+          }`}
+        >
+          {children}
+        </button>
+
+        {/* پیام راهنما در زیر دکمه با z-index بالا باز می‌شود تا کلیپ نشود */}
+        {showTooltip && title && (
+          <div className="absolute top-full mt-1.5 flex flex-col items-center justify-center z-[99999] pointer-events-none animate-[fadeIn_0.15s_ease-out]">
+            <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[5px] border-b-[#0f172a]/95"></div>
+            <div className="bg-[#0f172a]/95 backdrop-blur-md text-white text-[11px] py-1.5 px-3 rounded-lg shadow-2xl whitespace-nowrap font-bold font-sans border border-white/10">
+              {title}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const setLink = () => {
-    const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('آدرس لینک (URL) را وارد کنید:', previousUrl || '');
-    if (url === null) return;
-    if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      return;
-    }
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-  };
+  const previousUrl = editor.getAttributes('link').href;
+  const url = window.prompt('نشانی پیوند (URL) را وارد کنید:', previousUrl || '');
+  if (url === null) return;
+  if (url.trim() === '') {
+    editor.chain().focus().extendMarkRange('link').unsetLink().run();
+    return;
+  }
+  const cleanUrl = url.trim();
+  const finalUrl = /^(https?:\/\/|\/|#|mailto:|tel:)/i.test(cleanUrl) ? cleanUrl : `https://${cleanUrl}`;
+  editor.chain().focus().extendMarkRange('link').setLink({ href: finalUrl }).run();
+};
 
   return (
     <div className="w-full bg-[#080c16] rounded-2xl transition-all shadow-2xl flex flex-col font-sans relative GKEditorWrp">
       
-      {/* نوار ابزار چسبان */}
-      <div className="sticky -top-8 z-40 bg-[#0b0f19]/95 backdrop-blur-xl border-b border-white/5 p-2.5 flex flex-wrap gap-1.5 items-center shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] rounded-t-2xl GKEditorToolbar">
+      {/* نوار ابزار چسبان با z-index ارتقایافته */}
+      <div className="sticky -top-8 z-[60] bg-[#0b0f19]/95 backdrop-blur-xl border-b border-white/5 p-2.5 flex flex-wrap gap-1.5 items-center shadow-[0_15px_30px_-10px_rgba(0,0,0,0.5)] rounded-t-2xl GKEditorToolbar">
         
-        {/* ۱. فرمت‌های پایه متن */}
         <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive('bold')} title="بولد (ضخیم)">
           <EditorIcon name="bold"/>
         </ToolbarButton>
@@ -282,15 +225,15 @@ export default function RichTextEditor({
           <EditorIcon name="strike"/>
         </ToolbarButton>
 
-        <ToolbarButton onClick={setLink} isActive={editor.isActive('link')} title="افزودن / ویرایش لینک">
+        <ToolbarButton onClick={setLink} isActive={editor.isActive('link')} title="افزودن / ویرایش پیوند">
           <EditorIcon name="link"/>
         </ToolbarButton>
 
         <div className="w-px h-6 bg-white/10 mx-1.5"></div>
 
-        {/* ۲. رنگ و هایلایت متن */}
-        <div className="relative group flex" title="رنگ متن">
-          <ToolbarButton isActive={editor.isActive('textStyle')}>
+        {/* حذف title پیش‌فرض از div تا پیام راهنما تکراری مرورگر باز نشود */}
+        <div className="relative group flex">
+          <ToolbarButton isActive={editor.isActive('textStyle')} title="رنگ متن">
             <EditorIcon name="textColor"/>
             <input 
               type="color" 
@@ -302,8 +245,8 @@ export default function RichTextEditor({
           </ToolbarButton>
         </div>
 
-        <div className="relative group flex" title="هایلایت (پس‌زمینه متن)">
-          <ToolbarButton isActive={editor.isActive('highlight')}>
+        <div className="relative group flex">
+          <ToolbarButton isActive={editor.isActive('highlight')} title="پس‌زمینه متن">
             <EditorIcon name="highlight"/>
             <input 
               type="color" 
@@ -317,7 +260,6 @@ export default function RichTextEditor({
 
         <div className="w-px h-6 bg-white/10 mx-1.5"></div>
 
-        {/* ۳. توان و زیرنویس */}
         <ToolbarButton onClick={() => editor.chain().focus().toggleSuperscript().run()} isActive={editor.isActive('superscript')} title="توان (بالانویس)">
           <EditorIcon name="superscript"/>
         </ToolbarButton>
@@ -328,18 +270,16 @@ export default function RichTextEditor({
 
         <div className="w-px h-6 bg-white/10 mx-1.5"></div>
 
-        {/* ۴. تیترها */}
-        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive('heading', { level: 2 })} title="تیتر بزرگ (H2)">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive('heading', { level: 2 })} title="عنوان بزرگ (H2)">
           <EditorIcon name="h2"/>
         </ToolbarButton>
 
-        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} isActive={editor.isActive('heading', { level: 3 })} title="تیتر متوسط (H3)">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} isActive={editor.isActive('heading', { level: 3 })} title="عنوان متوسط (H3)">
           <EditorIcon name="h3"/>
         </ToolbarButton>
 
         <div className="w-px h-6 bg-white/10 mx-1.5"></div>
 
-        {/* ۵. جهت متن */}
         <ToolbarButton onClick={() => editor.chain().focus().setDirection('rtl').setTextAlign('right').run()} isActive={isRtl} title="راست‌چین (متن و اعداد فارسی)">
           <EditorIcon name="directionRtl"/>
         </ToolbarButton>
@@ -350,7 +290,6 @@ export default function RichTextEditor({
 
         <div className="w-px h-6 bg-white/10 mx-1.5"></div>
 
-        {/* ۶. ترازهای متنی */}
         <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} isActive={editor.isActive({ textAlign: 'right' })} title="تراز به راست">
           <EditorIcon name="alignRight"/>
         </ToolbarButton>
@@ -369,12 +308,11 @@ export default function RichTextEditor({
 
         <div className="w-px h-6 bg-white/10 mx-1.5"></div>
 
-        {/* ۷. لیست‌ها و نقل‌قول */}
-        <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive('bulletList')} title="لیست نقطه‌ای">
-          <EditorIcon name="listbullet"/>
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive('bulletList')} title="فهرست نقطه‌ای">
+          <EditorIcon name="listBullets"/> 
         </ToolbarButton>
 
-        <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive('orderedList')} title="لیست عددی">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive('orderedList')} title="فهرست عددی">
           <EditorIcon name="listNumbers"/>
         </ToolbarButton>
 
@@ -382,19 +320,37 @@ export default function RichTextEditor({
           <EditorIcon name="textBlockquote"/>
         </ToolbarButton>
 
-        {/* ۸. دکمه افزودن رسانه */}
         {onOpenMedia && (
           <>
             <div className="w-px h-6 bg-white/10 mx-1.5"></div>
-            <button 
-              type="button" 
-              onClick={() => onOpenMedia(editor)} 
-              className={`h-[34px] px-3.5 rounded-xl bg-white/5 text-gray-300 hover:${activeTheme.bg} hover:text-white border border-transparent transition-all flex items-center gap-2 cursor-pointer mr-auto shadow-inner GKEditorMediaBtn`}
-              title="انتخاب و درج تصویر، ویدیو یا صوت از کتابخانه رسانه"
+            <div 
+              className="relative flex items-center justify-center mr-auto"
+              onMouseEnter={(e) => {
+                const tooltip = e.currentTarget.querySelector('.custom-media-tooltip');
+                if(tooltip) tooltip.style.opacity = '1';
+              }}
+              onMouseLeave={(e) => {
+                const tooltip = e.currentTarget.querySelector('.custom-media-tooltip');
+                if(tooltip) tooltip.style.opacity = '0';
+              }}
             >
-              <EditorIcon name="media"/>
-              <span className="text-xs font-bold font-sans hidden sm:block">افزودن رسانه</span>
-            </button>
+              <button 
+                type="button" 
+                onClick={() => onOpenMedia(editor)} 
+                className={`h-[34px] px-3.5 rounded-xl bg-white/5 text-gray-300 hover:${activeTheme.bg} hover:text-white border border-transparent transition-all flex items-center gap-2 cursor-pointer shadow-inner GKEditorMediaBtn`}
+              >
+                <EditorIcon name="media"/>
+                <span className="text-xs font-bold font-sans hidden sm:block">افزودن رسانه</span>
+              </button>
+              
+              {/* پیام راهنما رسانه در زیر دکمه و با z-index بسیار بالا */}
+              <div className="custom-media-tooltip absolute top-full mt-1.5 flex flex-col items-center justify-center z-[99999] pointer-events-none opacity-0 transition-opacity duration-200">
+                <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[5px] border-b-[#0f172a]/95"></div>
+                <div className="bg-[#0f172a]/95 backdrop-blur-md text-white text-[11px] py-1.5 px-3 rounded-lg shadow-[0_20px_40px_rgba(0,0,0,0.8)] whitespace-nowrap font-bold font-sans border border-white/10">
+                  انتخاب تصویر، ویدیو یا صوت از کتابخانه
+                </div>
+              </div>
+            </div>
           </>
         )}
       </div>
@@ -402,7 +358,7 @@ export default function RichTextEditor({
       {/* ناحیه ویرایش متن */}
       <EditorContent editor={editor} className="font-sans flex-grow ProseMirror-content ProseMirror-base" />
 
-      {/* استایل‌های بخش ادیتور */}
+      {/* سبک‌های بخش ویرایشگر */}
       <style jsx global>{`
         .ProseMirror [style*="text-align: right"] { text-align: right !important; }
         .ProseMirror [style*="text-align: center"] { text-align: center !important; }
@@ -415,7 +371,7 @@ export default function RichTextEditor({
         .is-editor-empty:first-child::before {
           content: attr(data-placeholder);
           float: right;
-          color: #4b5563; /* رنگ مات‌تر برای Placeholder درون ادیتور */
+          color: #4b5563;
           pointer-events: none;
           height: 0;
           font-style: normal;
@@ -431,7 +387,6 @@ export default function RichTextEditor({
         .ProseMirror sup { vertical-align: super; font-size: 0.75em; line-height: 0; }
         .ProseMirror sub { vertical-align: sub; font-size: 0.75em; line-height: 0; }
         
-        /* استایل رندر تصاویر درون ادیتور */
         .ProseMirror img.editor-image {
           display: inline-block;
           max-width: 100%;

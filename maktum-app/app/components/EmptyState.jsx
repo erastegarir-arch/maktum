@@ -12,12 +12,12 @@ export default function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center p-6 md:p-12 text-center h-full min-h-[250px] md:min-h-[300px] animate-[fadeIn_0.4s_ease-out] w-full">
       
-      {/* افکت نوری و آیکون مرکزی */}
+      {/* افکت نوری و نماد مرکزی */}
       <div className="relative flex items-center justify-center mb-5 md:mb-6">
-        {/* هاله نور در پس‌زمینه آیکون */}
+        {/* هاله نور در پس‌زمینه نماد */}
         <div className={`absolute inset-0 blur-[30px] md:blur-[40px] opacity-20 bg-current ${color} pointer-events-none`}></div>
         
-        {/* باکس شیشه‌ای آیکون */}
+        {/* قاب شیشه‌ای نماد */}
         <div className={`relative z-10 w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[inset_0_0_15px_rgba(255,255,255,0.05),0_10px_30px_rgba(0,0,0,0.5)] flex items-center justify-center ${color}`}>
           <Icon name={icon} className="w-8 h-8 md:w-12 md:h-12 drop-shadow-md" />
         </div>

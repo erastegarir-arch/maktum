@@ -1,31 +1,30 @@
-import { getAllDossiers, getHubSettings } from '@/app/actions/dossier'; // اطمینان از مسیر صحیح اکشن‌ها
-import DossiersHubClientPage from './DossiersHubClientPage'; // فرض بر این است که فایل کلاینت در همین پوشه است
+import { getAllDossiers, getHubSettings } from '@/app/actions/dossier'; 
+import DossiersHubClientPage from './DossiersHubClientPage'; 
+import { constructPageMetadata } from '@/lib/seo'; // اتصال به موتور مرکزی سئو
 
 // ==========================================================
-// ۱. تولید متادیتای داینامیک برای تب مرورگر و سئو
-// ==========================================================
+// ۱. تولید متادیتای پویا و تگ‌های OpenGraph (سئو حرفه‌ای)
+// ==========================================
 export async function generateMetadata() {
-  // دریافت تنظیمات هاب برای تنظیم متادیتا (توسط Next.js به طور خودکار کش می‌شود تا سرعت افت نکند)
   const hubSettingsRes = await getHubSettings();
   const hubSettings = hubSettingsRes || {};
 
-  // اولویت‌بندی عنوان: اول عنوان سئو (اگر تعریف شده بود)، بعد عنوان داخل صفحه، بعد مقدار پیش‌فرض
   const finalTitle = hubSettings.seoTitle || hubSettings.title || 'منظومه‌های محتوایی مکتوم';
-  
-  // قرار دادن دقیق متن زیر عنوان به عنوان توضیحات متای گوگل (Meta Description)
-  const finalDescription = hubSettings.description || 'آرشیو جامع منظومه‌های محتوایی و پرونده‌های ویژه شبکه مکتوم';
+  const finalDescription = hubSettings.description || 'پایگاه داده جامع منظومه‌های محتوایی و پرونده‌های ویژه شبکه مکتوم';
 
-  return {
+  return constructPageMetadata({
     title: finalTitle,
     description: finalDescription,
-  };
+    path: '/c',
+    ogImage: hubSettings.bgDesktop || undefined,
+  });
 }
 
 // ==============================================================
 // ۲. سرور کامپوننت: دریافت اطلاعات هاب و ارسال به کلاینت کامپوننت
 // ==============================================================
 export default async function HubPage() {
-  // فراخوانی همزمان تنظیمات هاب و لیست پرونده‌ها از دیتابیس
+  // فراخوانی همزمان تنظیمات هاب و فهرست پرونده‌ها از پایگاه داده
   const [hubSettingsRes, dossiersRes] = await Promise.all([
     getHubSettings(),
     getAllDossiers()

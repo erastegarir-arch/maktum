@@ -10,7 +10,7 @@ datasource db {
 }
 
 // ------------------------------------------------
-// جدول تنظیمات هسته سایت
+// جدول تنظیمات هسته سامانه
 // ------------------------------------------------
 model Setting {
   id        String   @id @default(cuid())
@@ -18,10 +18,13 @@ model Setting {
   value     String
   group     String
   updatedAt DateTime @updatedAt
+
+  // ایندکس برای واکشی سریع تنظیمات یک گروه خاص
+  @@index([group])
 }
 
 // ------------------------------------------------
-// جدول مدیریت فایل‌ها و رسانه‌ها
+// جدول مسئولیت پرونده‌ها و رسانه‌ها
 // ------------------------------------------------
 model Media {
   id        String   @id @default(cuid())
@@ -33,10 +36,15 @@ model Media {
   altText   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // ایندکس‌های فیلترینگ کتابخانه رسانه در پنل مدیریت
+  @@index([fileType, createdAt(sort: Desc)])
+  @@index([mimeType])
+  @@index([createdAt(sort: Desc)])
 }
 
 // ------------------------------------------------
-// جدول کتابخانه آیکون‌های داینامیک
+// جدول کتابخانه نماد‌های پویا
 // ------------------------------------------------
 model IconLibrary {
   id        String   @id @default(cuid())
@@ -44,10 +52,13 @@ model IconLibrary {
   label     String?
   svgCode   String
   createdAt DateTime @default(now())
+
+  // ایندکس برای جستجوی سریع برچسب آیکون‌ها
+  @@index([label])
 }
 
 // ------------------------------------------------
-// جدول کدهای تایید یکبار مصرف (OTP)
+// جدول کدهای تایید یکبار مصرف (OTP) - موقت برای اعتبارسنجی زنده
 // ------------------------------------------------
 model OtpCode {
   id        String   @id @default(cuid())
@@ -56,31 +67,25 @@ model OtpCode {
   expiresAt DateTime // زمان انقضای کد
   attempts  Int      @default(0) // تعداد تلاش‌های ناموفق برای جلوگیری از بروت‌فورس
   createdAt DateTime @default(now())
+
+  // ایندکس برای پاکسازی سریع کدهای منقضی‌شده و بررسی نرخ درخواست
+  @@index([expiresAt])
+  @@index([createdAt])
 }
 
 // ------------------------------------------------
-// مدیریت کاربران و سطوح دسترسی (User Management & RBAC)
+// مسئولیت کاربران و سطوح دسترسی (User Management & RBAC)
 // ------------------------------------------------
-enum UserStatus {
-  ACTIVE // فعال
-  BANNED // مسدود شده توسط ادمین
-}
-
-enum Gender {
-  MALE
-  FEMALE
-}
-
 model User {
-  id       String     @id @default(cuid())
-  phone    String     @unique
-  password String?    // رمز عبور اصلی حساب کاربری (هش‌شده)
-  status   UserStatus @default(ACTIVE)
+  id       String  @id @default(cuid())
+  phone    String  @unique
+  password String? // گذرواژه اصلی حساب کاربری (هش‌شده)
+  status   String  @default("ACTIVE") // جایگزین enum UserStatus
 
-  // اطلاعات پروفایل (قابل ویرایش توسط کاربر)
+  // اطلاعات نماگر (قابل ویرایش توسط کاربر)
   firstName            String?
   lastName             String?
-  gender               Gender?
+  gender               String? // جایگزین enum Gender
   birthYear            String? // ذخیره تاریخ شمسی به صورت رشته
   province             String?
   city                 String?
@@ -90,42 +95,43 @@ model User {
   cooperationInterests String? // زمینه‌های تمایل به همکاری
   email                String?
 
-  // سیستم دسترسی چک‌لیستی (مدل تلگرامی) و امنیت مدیران
-  isSuperAdmin     Boolean @default(false) // مدیر کل ارشد (غیرقابل تغییر، محدودسازی یا مسدودسازی توسط هیچ مدیری)
-  isAdmin          Boolean @default(false) // فلگ تفکیک‌کننده مدیران از کاربران عادی برای فیلتر سریع
+  // نظام دسترسی فهرست بررسی و امنیت مسئولان
+  isSuperAdmin     Boolean @default(false) // مسئول کل ارشد (غیرقابل تغییر، محدودسازی یا مسدودسازی توسط هیچ مسئولی)
+  isAdmin          Boolean @default(false) // فلگ تفکیک‌کننده مسئولان از کاربران عادی برای صافی سریع
   adminPermissions String? // آرایه مجوزهای دانه‌ریز به صورت JSON String (مثال: ["CONTENT_CREATE", "CONTENT_EDIT"])
-  adminPassword    String? // رمز عبور دوم ویژه ورود و عملیات مدیریتی (هش‌شده)
+  adminPassword    String? // گذرواژه دوم ویژه ورود و عملیات مسئولیتی (هش‌شده)
 
   // روابط با سایر جداول
   favorites     Favorite[]
   downloads     DownloadHistory[]
   notifications UserNotification[]
   comments      Comment[] // ارتباط کاربر با نظراتش
-  searchLogs    SearchLog[] // تاریخچه سرچ‌های این کاربر
+  searchLogs    SearchLog[] // تاریخچه کاوش‌های این کاربر
 
   createdAt DateTime @default(now()) // تاریخ عضویت غیرقابل ویرایش
   updatedAt DateTime @updatedAt
+
+  // ایندکس‌های ترکیبی برای پنل مدیریت، احراز هویت و گزارش‌گیری
+  @@index([status, createdAt(sort: Desc)])
+  @@index([isAdmin, isSuperAdmin])
+  @@index([email])
+  @@index([province, city])
+  @@index([createdAt(sort: Desc)])
 }
 
 // ------------------------------------------------
-// سیستم جامع اعلان‌ها (Notifications)
+// نظام جامع اعلان‌ها (Notifications)
 // ------------------------------------------------
-enum NotificationType {
-  SYSTEM  // اعلان‌های خودکار سیستم (مثل خوشامدگویی)
-  BULK    // ارسال گروهی، فیلتردار یا دستی توسط ادمین
-  PRIVATE // پیام اختصاصی فقط برای یک شخص یا عده‌ای خاص
-}
-
 model Notification {
   id String @id @default(cuid())
 
   // تنظیمات کلان و اتوماسیون
-  type         NotificationType @default(BULK)
-  isTemplate   Boolean          @default(false)
-  triggerEvent String?          @unique
-  isActive     Boolean          @default(true)
+  type         String  @default("BULK") // جایگزین enum NotificationType
+  isTemplate   Boolean @default(false)
+  triggerEvent String? @unique
+  isActive     Boolean @default(true)
 
-  // ۱. محتوای درون‌سایتی (In-App Rich Payload)
+  // ۱. محتوای درون‌سامانه‌ای (In-App Rich Payload)
   sendInApp  Boolean @default(true)
   title      String?
   bodyHtml   String?
@@ -148,6 +154,10 @@ model Notification {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // ایندکس‌های فیلترینگ اعلان‌ها و قالب‌های سامانه‌ای
+  @@index([type, isActive, createdAt(sort: Desc)])
+  @@index([isTemplate, isActive])
 }
 
 model UserNotification {
@@ -165,10 +175,14 @@ model UserNotification {
   createdAt DateTime @default(now())
 
   @@unique([userId, notificationId])
+  // ایندکس حیاتی برای شمارش و نمایش اعلان‌های خوانده‌نشده کاربر در هدر سایت
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  // ایندکس کلید خارجی برای جلوگیری از قفل شدن جدول هنگام حذف یک Notification
+  @@index([notificationId])
 }
 
 // ------------------------------------------------
-// علاقه‌مندی‌ها و دانلودهای کاربر
+// علاقه‌مندی‌ها و بارگیری‌های کاربر
 // ------------------------------------------------
 model Favorite {
   id String @id @default(cuid())
@@ -182,6 +196,10 @@ model Favorite {
   createdAt DateTime @default(now())
 
   @@unique([userId, contentId])
+  // ایندکس برای فهرست علاقه‌مندی‌های کاربر به ترتیب جدیدترین
+  @@index([userId, createdAt(sort: Desc)])
+  // ایندکس کلید خارجی برای شمارش علاقه‌مندی‌های یک محتوا و Cascade Delete
+  @@index([contentId])
 }
 
 model DownloadHistory {
@@ -194,20 +212,23 @@ model DownloadHistory {
   contentId String
 
   downloadedAt DateTime @default(now())
+
+  // ایندکس بررسی اسپم دانلود (آیا کاربر اخیراً همین پرونده را دانلود کرده است؟)
+  @@index([userId, contentId, downloadedAt(sort: Desc)])
+  // ایندکس نمایش تاریخچه دانلود کاربر
+  @@index([userId, downloadedAt(sort: Desc)])
+  // ایندکس آمار دانلود هر محتوا و Cascade Delete
+  @@index([contentId, downloadedAt(sort: Desc)])
+  // ایندکس برای Cron Job پاکسازی لاگ‌های قدیمی
+  @@index([downloadedAt])
 }
 
 // ------------------------------------------------
 // تعریف انواع سرشاخه‌ها (Taxonomy Types)
 // ------------------------------------------------
-enum TaxonomyType {
-  CATEGORY // دسته‌بندی
-  HASHTAG  // هشتگ
-  CREATOR  // پدیدآورنده
-}
-
 model Taxonomy {
-  id   String       @id @default(cuid())
-  type TaxonomyType
+  id   String @id @default(cuid())
+  type String // جایگزین enum TaxonomyType
 
   name String
   slug String
@@ -230,22 +251,9 @@ model Taxonomy {
 
   @@unique([type, name])
   @@unique([type, slug])
-}
-
-// ------------------------------------------------
-// Enums محتوا و پرونده‌ها
-// ------------------------------------------------
-enum ContentType {
-  RAW      // محتوای خام
-  PRODUCED // محتوای تولیدی
-  TOOL     // ابزارها
-  BLOG     // بلاگ
-}
-
-enum ContentStatus {
-  DRAFT     // پیش‌نویس
-  PUBLISHED // منتشر شده
-  ARCHIVED  // بایگانی
+  // ایندکس برای جستجوی مستقیم با اسلاگ و فهرست‌بندی بر اساس نوع
+  @@index([slug])
+  @@index([type, createdAt(sort: Desc)])
 }
 
 // ================================================
@@ -291,15 +299,20 @@ model Dossier {
   tipBtnLink  String? @default("#")
   tipBtnIcon  String? @default("upload")
 
-  status      ContentStatus @default(DRAFT)
-  publishedAt DateTime?     @default(now())
-  viewCount   Int           @default(0)
+  status      String    @default("DRAFT") // جایگزین enum ContentStatus
+  publishedAt DateTime? @default(now())
+  viewCount   Int       @default(0)
 
   contents   Content[]  @relation("DossierContents")
   taxonomies Taxonomy[] @relation("DossierTaxonomies")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // ایندکس ترکیبی دقیق برای کوئری صفحه هاب پرونده‌ها
+  @@index([status, isVisibleInHub, orderIndex(sort: Asc), publishedAt(sort: Desc)])
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([viewCount(sort: Desc)])
 }
 
 // ------------------------------------------------
@@ -313,8 +326,8 @@ model Content {
   subtitle       String?
   slug           String  @unique
 
-  type   ContentType
-  status ContentStatus @default(DRAFT)
+  type   String // جایگزین enum ContentType
+  status String @default("DRAFT") // جایگزین enum ContentStatus
 
   coverDesktop String?
   coverMobile  String?
@@ -327,19 +340,19 @@ model Content {
   metaTitle String?
   metaDesc  String?
 
-  displaySettings Json?
+  displaySettings String? // جایگزین Json?
 
   body          String?
   allowComments Boolean @default(true)
 
   lead String?
 
-  formats        Json?
-  previews       Json?
-  previewGallery Json?
-  fileSpecs      Json?
-  changelog      Json?
-  downloadLinks  Json?
+  formats        String? // جایگزین Json?
+  previews       String? // جایگزین Json?
+  previewGallery String? // جایگزین Json?
+  fileSpecs      String? // جایگزین Json?
+  changelog      String? // جایگزین Json?
+  downloadLinks  String? // جایگزین Json?
 
   categories Taxonomy[] @relation("ContentCategories")
   creators   Taxonomy[] @relation("ContentCreators")
@@ -353,21 +366,23 @@ model Content {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // ایندکس‌های حیاتی برای صفحات آرشیو، فیلتر نوع محتوا، جدیدترین‌ها و پربازدیدترین‌ها
+  @@index([status, type, publishedAt(sort: Desc)])
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([status, viewCount(sort: Desc)])
+  @@index([type, status, viewCount(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@index([titleBase])
 }
 
 // ================================================
-// جداول سیستم تعاملات و نظرات
+// جداول ساختار تعاملات و نظرات
 // ================================================
-enum CommentStatus {
-  PENDING  // در انتظار تایید
-  APPROVED // تایید شده و قابل نمایش
-  REJECTED // رد شده
-}
-
 model Comment {
-  id     String        @id @default(cuid())
+  id     String @id @default(cuid())
   text   String
-  status CommentStatus @default(PENDING)
+  status String @default("PENDING") // جایگزین enum CommentStatus
 
   adminReply String?
 
@@ -379,10 +394,17 @@ model Comment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // ایندکس واکشی نظرات تاییدشده یک محتوا
+  @@index([contentId, status, createdAt(sort: Desc)])
+  // ایندکس پنل مدیریت برای بررسی نظرات در انتظار تایید (PENDING)
+  @@index([status, createdAt(sort: Desc)])
+  // ایندکس بررسی Rate Limit کاربر و نمایش نظرات کاربر در حساب کاربری
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 // ------------------------------------------------
-// جدول ذخیره آمار جستجوهای کاربران (Search Analytics)
+// جدول ذخیره آمار کاوش‌های کاربران (Search Analytics)
 // ------------------------------------------------
 model SearchLog {
   id           String   @id @default(cuid())
@@ -393,4 +415,30 @@ model SearchLog {
   user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   createdAt    DateTime @default(now())
+
+  // ایندکس‌های تحلیل عبارات پرتکرار، کاوش‌های بی‌نتیجه و جلوگیری از اسپم جستجو
+  @@index([keyword, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([resultsCount])
+  @@index([createdAt])
+}
+
+// ------------------------------------------------
+// جدول لاگ و تاریخچه کدهای تایید (برای روز مبادا و بررسی مسئول)
+// ------------------------------------------------
+model OtpLog {
+  id        String   @id @default(cuid())
+  phone     String   // شماره موبایل درخواست دهنده
+  code      String   // کد تولید شده (گذرواژهنگاری‌شده یا ماسک‌شده پس از مصرف)
+  purpose   String   // جایگزین enum OtpPurpose (REGISTER, LOGIN, FORGOT_PASSWORD)
+  isSuccess Boolean  @default(true) // آیا پیامک با موفقیت تحویل سامانه شد؟
+  isUsed    Boolean  @default(false) // آیا کاربر با این کد ورود/ثبت‌نام موفقی داشت؟
+  errorMsg  String?  // در صورت قطعی، خطای سامانه پیامک اینجا ذخیره می‌شود
+  
+  createdAt DateTime @default(now()) // زمان دقیق درخواست
+
+  // ایندکس بررسی Rate Limit شماره موبایل و گزارش‌گیری پنل مدیریت
+  @@index([phone, createdAt(sort: Desc)])
+  @@index([purpose, isSuccess, createdAt(sort: Desc)])
+  @@index([createdAt])
 }

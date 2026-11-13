@@ -17,7 +17,7 @@ import ModalPortal from '@/app/components/admin/ModalPortal';
 
 const cn = (...inputs) => twMerge(clsx(inputs));
 
-// تول‌تیپ بازنویسی شده منطبق بر تم تاریک و گلس‌مورفیک سایت (Deep Dark UI)
+// تول‌تیپ بازنویسی شده منطبق بر تم تاریک و گلس‌مورفیک سامانه (Deep Dark UI)
 function Tooltip({ text, children }) {
   if (!text) return children;
   return (
@@ -49,7 +49,7 @@ export default function TaxonomiesPage() {
     if (isWorking) return;
 
     if (user) {
-      // این صفحه برای تمام کسانی که نقش مدیر دارند باز است تا فقط ببینند.
+      // این صفحه برای تمام کسانی که نقش مسئول دارند باز است تا فقط ببینند.
       // بنابراین همین شرط کافیست، اما عملیات داخلش محدود می‌شود.
       setHasAccess(!!(user.isAdmin || user.isSuperAdmin));
     } else if (typeof window !== 'undefined') {
@@ -79,7 +79,7 @@ export default function TaxonomiesPage() {
   
   const [pageBadge, setPageBadge] = useState('بایگانی مرجع مکتوم');
   const [pageTitle, setPageTitle] = useState('کاوش در بایگانی مکتوم');
-  const [pageDesc, setPageDesc] = useState('جستجو و فیلتر در میان هزاران دسته‌بندی، کلیدواژه، و نمایه پدیدآورندگان.');
+  const [pageDesc, setPageDesc] = useState('کاوش در میان هزاران دسته‌بندی، کلیدواژه، و نمایه پدیدآورندگان.');
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -112,10 +112,10 @@ export default function TaxonomiesPage() {
       if (res.success) {
         setItems(res.data);
       } else {
-        toast.error('خطا در دریافت لیست اطلاعات!');
+        toast.error('خطا در دریافت فهرست اطلاعات!');
       }
     } catch (error) {
-      toast.error('خطا در برقراری ارتباط با دیتابیس!');
+      toast.error('خطا در برقراری ارتباط با پایگاه داده!');
     } finally {
       setLoading(false);
     }
@@ -131,7 +131,7 @@ export default function TaxonomiesPage() {
     setErrorMsg('');
   };
 
-  // آپدیتِ useEffect برای لود کردن اطلاعاتِ دیتابیس در زمان باز کردن تب تنظیمات
+  // به‌روزرسانیِ useEffect برای لود کردن اطلاعاتِ پایگاه داده در زمان باز کردن تب تنظیمات
   useEffect(() => {
     if (hasAccess) {
       if (activeTab !== 'SETTINGS') {
@@ -140,14 +140,14 @@ export default function TaxonomiesPage() {
         setSearchQuery('');
         setVisibleCount(10);
       } else {
-        // خواندن مقادیر واقعی از دیتابیس هنگام باز شدن تب تنظیمات
+        // خواندن مقادیر واقعی از پایگاه داده هنگام باز شدن تب تنظیمات
         const fetchSettings = async () => {
           setLoading(true);
           const res = await getArchiveSettingsAction();
           if (res.success && res.data) {
             setPageBadge(res.data.archive_badge || 'بایگانی مرجع مکتوم');
             setPageTitle(res.data.archive_title || 'کاوش در بایگانی مکتوم');
-            setPageDesc(res.data.archive_desc || 'جستجو و فیلتر در میان هزاران دسته‌بندی، کلیدواژه، و نمایه پدیدآورندگان.');
+            setPageDesc(res.data.archive_desc || 'کاوش در میان هزاران دسته‌بندی، کلیدواژه، و نمایه پدیدآورندگان.');
           }
           setLoading(false);
         };
@@ -159,7 +159,7 @@ export default function TaxonomiesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // کنترل دسترسی برای ثبت و ویرایش
+    // نظارت دسترسی برای ثبت و ویرایش
     if (editingId && !can('TAXONOMY_EDIT')) return toast.error('شما مجوز ویرایش این آیتم را ندارید.');
     if (!editingId && !can('TAXONOMY_CREATE')) return toast.error('شما مجوز ایجاد آیتم جدید را ندارید.');
 
@@ -222,7 +222,7 @@ export default function TaxonomiesPage() {
     setSubmitting(false);
     
     if (res.success) {
-      toast.success('تنظیمات صفحه طبقه‌بندی‌ها با موفقیت در دیتابیس ذخیره شد.');
+      toast.success('تنظیمات صفحه طبقه‌بندی‌ها با موفقیت در پایگاه داده ذخیره شد.');
     } else {
       toast.error(res.error || 'خطا در ذخیره تنظیمات');
     }
@@ -270,13 +270,13 @@ export default function TaxonomiesPage() {
 
   const getTabTitle = () => {
     if (activeTab === 'CATEGORY') return 'دسته‌بندی‌ها';
-    if (activeTab === 'HASHTAG') return 'هشتگ‌ها';
+    if (activeTab === 'HASHTAG') return 'هشتک‌ها';
     return 'پدیدآورندگان';
   };
 
   const getSingularTitle = () => {
     if (activeTab === 'CATEGORY') return 'دسته‌بندی';
-    if (activeTab === 'HASHTAG') return 'هشتگ';
+    if (activeTab === 'HASHTAG') return 'هشتک';
     return 'پدیدآورنده';
   };
 
@@ -287,7 +287,7 @@ export default function TaxonomiesPage() {
   const displayedItems = filteredItems.slice(0, visibleCount);
 
   // ==========================================
-  // ۳. کنترل رندر لودینگ و انسداد دسترسی
+  // ۳. نظارت رندر لودینگ و انسداد دسترسی
   // ==========================================
   if (!isMounted || hasAccess === null || (hasAccess && loading)) return <AdminLoading />;
 
@@ -298,7 +298,7 @@ export default function TaxonomiesPage() {
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز ورود به این بخش از پنل را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -318,17 +318,17 @@ export default function TaxonomiesPage() {
 
         <h1 className="text-2xl font-black text-white mb-2 flex items-center gap-3 relative z-10">
           <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] shadow-[0_0_10px_#10b981]"></span>
-          مدیریت طبقه‌بندی‌ها
+          مسئولیت طبقه‌بندی‌ها
         </h1>
-        <p className="text-sm text-gray-400 font-light relative z-10">مدیریت مستقل دسته‌بندی‌ها، هشتگ‌ها، پدیدآورندگان و ظاهر صفحه طبقه‌بندی‌ها</p>
+        <p className="text-sm text-gray-400 font-light relative z-10">مسئولیت مستقل دسته‌بندی‌ها، هشتک‌ها، پدیدآورندگان و ظاهر صفحه طبقه‌بندی‌ها</p>
         
         {/* تب‌ها */}
         <div className="flex flex-wrap gap-3 mt-6 border-b border-white/5 pb-4 relative z-10">
           {[
             { key: 'CATEGORY', label: 'دسته‌بندی‌ها', icon: 'folder' },
-            { key: 'HASHTAG', label: 'هشتگ‌ها', icon: 'hash' },
+            { key: 'HASHTAG', label: 'هشتک‌ها', icon: 'hash' },
             { key: 'CREATOR', label: 'پدیدآورندگان', icon: 'users' },
-            { key: 'SETTINGS', label: 'تنظیمات صفحه مرجع', icon: 'setting' },
+            { key: 'SETTINGS', label: 'تنظیمات صفحه اصلی', icon: 'setting' },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -350,7 +350,7 @@ export default function TaxonomiesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* ======================================================== */}
-        {/* حالت اول: فرم‌ها و لیست‌های مربوط به هشتگ/دسته/پدیدآورنده */}
+        {/* حالت اول: فرم‌ها و فهرست‌های مربوط به هشتک/دسته/پدیدآورنده */}
         {/* ======================================================== */}
         {activeTab !== 'SETTINGS' ? (
           <>
@@ -373,13 +373,13 @@ export default function TaxonomiesPage() {
                         type="text" 
                         value={name} 
                         onChange={handleNameChange} 
-                        placeholder={`مثال: ${activeTab === 'CREATOR' ? 'آنتونی گیدنز' : 'فلسفه'}`} 
+                        placeholder={`مثال: ${activeTab === 'CREATOR' ? 'علی محمدی' : 'فلسفه'}`} 
                         className="w-full bg-black/40 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] border border-white/5 transition-colors shadow-inner select-text font-sans" 
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs text-gray-300 pl-1">لینک انگلیسی (Slug)</label>
+                      <label className="text-xs text-gray-300 pl-1">پیوند</label>
                       <input 
                         type="text" 
                         value={slug} 
@@ -390,7 +390,7 @@ export default function TaxonomiesPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-xs text-gray-300 pl-1">روتیتر (باکس بالای عنوان)</label>
+                      <label className="text-xs text-gray-300 pl-1">روعنوان</label>
                       <input 
                         type="text" 
                         value={preTitle} 
@@ -402,10 +402,10 @@ export default function TaxonomiesPage() {
 
                     {activeTab === 'CREATOR' && (
                       <div className="space-y-2">
-                        <label className="text-xs text-gray-300 pl-1">تصویر پروفایل پدیدآورنده</label>
+                        <label className="text-xs text-gray-300 pl-1">تصویر نماگر پدیدآورنده</label>
                         {imageUrl ? (
                           <div className="flex items-center gap-3 p-3 bg-black/20 border border-white/5 rounded-xl shadow-inner">
-                            <img src={imageUrl} alt="تصویر پروفایل" className="w-12 h-12 object-cover rounded-lg shrink-0 border border-white/5" />
+                            <img src={imageUrl} alt="تصویر نماگر" className="w-12 h-12 object-cover rounded-lg shrink-0 border border-white/5" />
                             <div className="flex-1 min-w-0">
                               <p className="text-xs text-emerald-400 font-bold truncate">تصویر انتخاب شد</p>
                               <p className="text-[10px] text-gray-500 truncate dir-ltr text-right font-sans select-text">{imageUrl}</p>
@@ -482,7 +482,7 @@ export default function TaxonomiesPage() {
               </div>
             )}
 
-            {/* لیست موجودیت‌ها */}
+            {/* فهرست موجودیت‌ها */}
             <div className="lg:col-span-2 relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
               <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
               <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
@@ -491,7 +491,7 @@ export default function TaxonomiesPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-3">
                   <h2 className="text-lg font-bold text-white flex items-center gap-2 font-sans">
                     <Icon name="folder" className="w-5 h-5 text-[#10b981]" />
-                    لیست {getTabTitle()} ثبت‌شده
+                    فهرست {getTabTitle()} ثبت‌شده
                   </h2>
                   
                   <div className="relative">
@@ -503,7 +503,7 @@ export default function TaxonomiesPage() {
                         setSearchQuery(e.target.value);
                         setVisibleCount(10);
                       }}
-                      placeholder="جستجو..." 
+                      placeholder="کاوش..." 
                       className="bg-black/40 rounded-full py-2 pr-9 pl-4 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] border border-white/5 w-full sm:w-64 transition-all shadow-inner select-text font-sans"
                     />
                   </div>
@@ -601,13 +601,13 @@ export default function TaxonomiesPage() {
             <div className="p-8 space-y-6 relative z-10 bg-[#050810]/50 shadow-inner rounded-3xl">
               <h2 className="text-xl font-bold text-white border-b border-white/5 pb-4 flex items-center gap-3 font-sans">
                 <Icon name="layout" className="w-6 h-6 text-[#3b82f6]" />
-                ویرایش ظاهر صفحه طبقه‌بندی‌ها (دامنه /t)
+                ویرایش ظاهر صفحه طبقه‌بندی‌ها
               </h2>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <form onSubmit={handleSaveSettings} className="space-y-5">
                   <div className="space-y-1.5">
-                    <label className="text-sm font-bold text-gray-300 pl-1 font-sans">روتیتر</label>
+                    <label className="text-sm font-bold text-gray-300 pl-1 font-sans">روعنوان</label>
                     <input 
                       type="text" 
                       value={pageBadge} 
@@ -659,7 +659,7 @@ export default function TaxonomiesPage() {
                   <div className="relative z-10 flex flex-col items-center text-center space-y-4">
                     <span className="text-[10px] text-gray-500 px-3 py-1 rounded-full mb-2 font-sans">پیش‌نمایش ظاهر هدر</span>
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#3b82f6]/10 rounded-full text-xs font-bold text-[#3b82f6] tracking-widest shadow-inner border border-transparent select-none font-sans">
-                      {pageBadge || 'روتیتر'}
+                      {pageBadge || 'روعنوان'}
                     </div>
                     <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 drop-shadow-lg select-none font-sans">
                       <span className="text-[#3b82f6]">{pageTitle || 'عنوان'}</span>
@@ -722,7 +722,7 @@ export default function TaxonomiesPage() {
         )}
       </AnimatePresence>
 
-      {/* مدیا پیکر با استفاده از ModalPortal */}
+      {/* رسانه پیکر با استفاده از ModalPortal */}
       <AnimatePresence>
         {isMediaModalOpen && (
           <ModalPortal>

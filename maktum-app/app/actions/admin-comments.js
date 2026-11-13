@@ -2,8 +2,9 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { getSessionUser } from './auth';
 
-// ۱. دریافت تمام نظرات با فیلتر وضعیت
+// ۱. دریافت تمام نظرات با صافی وضعیت
 export async function getAdminCommentsAction(statusFilter = 'ALL') {
   try {
     const where = statusFilter !== 'ALL' ? { status: statusFilter } : {};
@@ -22,13 +23,18 @@ export async function getAdminCommentsAction(statusFilter = 'ALL') {
     return { success: true, data: comments };
   } catch (error) {
     console.error("Error fetching admin comments:", error);
-    return { success: false, error: 'خطا در دریافت لیست نظرات.' };
+    return { success: false, error: 'خطا در دریافت فهرست نظرات.' };
   }
 }
 
 // ۲. تغییر وضعیت نظر (تایید / رد)
 export async function updateCommentStatusAction(commentId, newStatus) {
   try {
+    const session = await getSessionUser(); 
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز. فقط مسئولان می‌توانند نظرات را بررسی کنند.' };
+    }
+
     if (!['PENDING', 'APPROVED', 'REJECTED'].includes(newStatus)) {
       return { success: false, error: 'وضعیت نامعتبر است.' };
     }
@@ -38,7 +44,7 @@ export async function updateCommentStatusAction(commentId, newStatus) {
       data: { status: newStatus }
     });
 
-    revalidatePath('/admin/comments'); // مسیر فرضی پنل ادمین
+    revalidatePath('/admin/comments'); // مسیر فرضی درگاه مسئول
     revalidatePath('/'); // رفرش صفحات فرانت‌اند
     return { success: true, message: `وضعیت نظر با موفقیت به ${newStatus === 'APPROVED' ? 'تایید شده' : 'رد شده'} تغییر یافت.` };
   } catch (error) {
@@ -47,29 +53,25 @@ export async function updateCommentStatusAction(commentId, newStatus) {
   }
 }
 
-// ۳. ثبت پاسخ ادمین و (در صورت نیاز) ویرایش متن کاربر
+// ۳. ثبت پاسخ مسئول و (در صورت نیاز) ویرایش متن کاربر
 export async function saveAdminReplyAction(commentId, adminReply, editedUserText, changeStatusToApproved = true) {
   try {
+    // گارد امنیتی: فقط مسئولان مجاز به ثبت پاسخ مسئول هستند
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز. فقط مسئولان می‌توانند پاسخ ثبت کنند.' };
+    }
+
     const updateData = {
       adminReply: adminReply || null,
       text: editedUserText // متن کاربر با ویرایش احتمالی جایگزین می‌شود
     };
-
-    // اگر ادمین تیک تایید همزمان را زده باشد، وضعیت را هم تغییر می‌دهیم
-    if (changeStatusToApproved) {
-      updateData.status = 'APPROVED';
-    }
-
-    await prisma.comment.update({
-      where: { id: commentId },
-      data: updateData
-    });
 
     revalidatePath('/admin/comments');
     revalidatePath('/');
     return { success: true, message: 'پاسخ شما با موفقیت ثبت شد.' };
   } catch (error) {
     console.error("Error saving admin reply:", error);
-    return { success: false, error: 'خطا در ثبت پاسخ ادمین.' };
+    return { success: false, error: 'خطا در ثبت پاسخ مسئول.' };
   }
 }

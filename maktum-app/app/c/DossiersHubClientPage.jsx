@@ -12,7 +12,7 @@ import Breadcrumbs from '@/app/components/Breadcrumbs';
 const FadingHero = ({ desktopImg, mobileImg }) => {
   if (!desktopImg && !mobileImg) return null;
 
-  // ترکیب ماسک вертикаلی (برای محو شدن ۱۰۰ درصدی قبل از رسیدن به انتهای باکس) و ماسک شعاعی (برای نرمی کناره‌ها)
+  // ترکیب ماسک вертикаلی (برای محو شدن ۱۰۰ درصدی قبل از رسیدن به انتهای قاب) و ماسک شعاعی (برای نرمی کناره‌ها)
   const maskStyle = {
     WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 45%, rgba(0,0,0,0) 95%), radial-gradient(ellipse 90% 80% at 50% 25%, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 95%)',
     WebkitMaskComposite: 'source-in',
@@ -41,7 +41,7 @@ const FadingHero = ({ desktopImg, mobileImg }) => {
   );
 };
 
-// کارت‌های نمایش منظومه‌ها
+// فیش‌های نمایش منظومه‌ها
 const DossierCard = ({ dossier, isVIP, index }) => {
   const cardRef = useRef(null);
 
@@ -65,7 +65,7 @@ const DossierCard = ({ dossier, isVIP, index }) => {
         href={`/c/${dossier.slug}`} 
         ref={cardRef} 
         onMouseMove={handleMouseMove} 
-        // اصلاح گلس مورفیسم: شفافیت بیشتر (bg-white/[0.02] و backdrop-blur-2xl) برای عبور نور از درون کارت‌ها
+        // اصلاح گلس مورفیسم: شفافیت بیشتر (bg-white/[0.02] و backdrop-blur-2xl) برای عبور نور از درون فیش‌ها
         className={`group relative flex flex-col rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transition-all duration-500 hover:-translate-y-1.5 border border-white/[0.05] bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_8px_30px_rgba(0,0,0,0.5)] ${isVIP ? 'h-[400px] md:h-[550px]' : 'h-[350px] md:h-[400px]'}`} 
         style={{ '--theme-glow': `rgba(${glowRGB}, 0.08)` }}
       >
@@ -124,7 +124,7 @@ export default function DossiersHubClientPage({ hubSettings = {}, dossiers = [] 
       <FadingHero desktopImg={hubSettings.bgDesktop} mobileImg={hubSettings.bgMobile} />
 
       {/* 
-        ================= ساختار استاندارد مطابق فایل الگو =================
+        ================= ساختار استاندارد مطابق پرونده الگو =================
         استفاده از کلاس‌های دقیقاً مشابه: space-y-6 md:space-y-12 pb-20 w-full relative z-10 pt-0
       */}
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 pb-20 w-full relative z-10 pt-0">
@@ -136,12 +136,12 @@ export default function DossiersHubClientPage({ hubSettings = {}, dossiers = [] 
         {/* کلاس‌های mt-6 md:mt-12 برای جلوگیری از دو برابر شدن فواصل با space-y حذف شدند */}
         <section className="relative z-10 max-w-3xl mx-auto flex flex-col items-center text-center group">
           
-          {/* آیکون با ابعاد و افکت‌های دقیقاً مطابق الگوی ارسالی (بدون چرخش) */}
+          {/* نماد با ابعاد و افکت‌های دقیقاً مطابق الگوی ارسالی (بدون چرخش) */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.5 }} 
             animate={{ opacity: 1, scale: 1 }} 
             transition={{ duration: 0.5 }} 
-            // گلس‌مورفیسم آیکون هیرو
+            // گلس‌مورفیسم نماد هیرو
             className="group/icon cursor-pointer w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] hover:border-white/20 flex items-center justify-center mb-4 md:mb-6 shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_10px_20px_rgba(0,0,0,0.5)] hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.05),0_10px_30px_rgba(0,0,0,0.7)] transition-all duration-300"
           >
             {isIconUrl ? (
@@ -168,7 +168,7 @@ export default function DossiersHubClientPage({ hubSettings = {}, dossiers = [] 
               animate={{ opacity: 1 }} 
               transition={{ duration: 0.8, delay: 0.2 }} 
               // اصلاح: تراز دقیق متن (text-justify و dir-rtl) و وسط‌چین شدن خط آخر (text-align-last:center)
-              // اصلاح: اضافه شدن پدینگ پایین (pb-10 md:pb-16) برای ایجاد فاصله عمیق‌تر با کارت‌های زیرین
+              // اصلاح: اضافه شدن پدینگ پایین (pb-10 md:pb-16) برای ایجاد فاصله عمیق‌تر با فیش‌های زیرین
               className="text-gray-300 text-xs md:text-sm lg:text-base leading-loose font-light text-justify w-full px-4 md:px-0 max-w-2xl mx-auto drop-shadow-md pb-10 md:pb-16 [text-align-last:center]"
               style={{ direction: 'rtl' }}
             >
@@ -177,8 +177,8 @@ export default function DossiersHubClientPage({ hubSettings = {}, dossiers = [] 
           )}
         </section>
 
-        {/* ================= شبکه نمایش کارت‌ها ================= */}
-        {/* اصلاح: اضافه شدن پدینگ بالا (pt-4 md:pt-8) به کانتینر کارت‌ها برای اطمینان از فاصله‌گذاری مناسب در همه دستگاه‌ها */}
+        {/* ================= شبکه نمایش فیش‌ها ================= */}
+        {/* اصلاح: اضافه شدن پدینگ بالا (pt-4 md:pt-8) به کانتینر فیش‌ها برای اطمینان از فاصله‌گذاری مناسب در همه دستگاه‌ها */}
         <section className="pt-4 md:pt-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8">
             {visibleDossiers.map((dossier, i) => (

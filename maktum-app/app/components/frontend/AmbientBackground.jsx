@@ -1,4 +1,4 @@
-// مسیر فایل: app/components/frontend/AmbientBackground.jsx
+// مسیر پرونده: app/components/frontend/AmbientBackground.jsx
 'use client';
 
 import { useMemo } from 'react';
@@ -17,28 +17,34 @@ const isExactOrSub = (path, base) => path === base || path.startsWith(`${base}/`
 const THEME_REGISTRY = [
   {
     id: 'home-page',
-    match: (p) => isExactOrSub(p, '/') || isExactOrSub(p, '/home'),
-    colors: ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#f43f5e', '#3b82f6'], // ۶ رنگ برای ۶ گوی
+    match: (p) => p === '/' || isExactOrSub(p, '/home'),
+    colors: ['#06b6d4', '#10b981', '#8b5cf6', '#f59e0b', '#3b82f6', '#ec4899'],
+  },
+  {
+    id: 'persian-guide',
+    match: (p) => isExactOrSub(p, '/persian-guide'),
+    // پالت اصیل ایرانی-اسلامی: فیروزه‌ای نیشابوری، زمردی، طلایی کهربایی، لاجوردی و ارغوانی
+    colors: ['#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#0ea5e9', '#14b8a6'],
   },
   {
     id: 'dashboard-profile',
     match: (p) => isExactOrSub(p, '/profile') || isExactOrSub(p, '/dashboard'),
-    colors: ['#06b6d4', '#d946ef', '#a855f7', '#3b82f6', '#ec4899', '#10b981'],
+    colors: ['#06b6d4', '#a855f7', '#3b82f6', '#10b981', '#d946ef', '#0ea5e9'],
   },
   {
     id: 'search',
     match: (p) => isExactOrSub(p, '/search'),
-    colors: ['#06b6d4', '#8b5cf6', '#10b981', '#f43f5e', '#3b82f6', '#ec4899'],
+    colors: ['#06b6d4', '#10b981', '#6366f1', '#8b5cf6', '#38bdf8', '#f59e0b'],
   },
   {
     id: 'error-500',
     match: (p) => isExactOrSub(p, '/500') || isExactOrSub(p, '/error'),
-    colors: ['#f43f5e', '#e11d48', '#9f1239', '#a855f7', '#fb7185', '#be123c'],
+    colors: ['#f43f5e', '#e11d48', '#9f1239', '#881337', '#fb7185', '#be123c'],
   },
   {
     id: 'error-403',
     match: (p) => isExactOrSub(p, '/403') || isExactOrSub(p, '/forbidden'),
-    colors: ['#d946ef', '#f43f5e', '#a21caf', '#701a75', '#be123c', '#9d174d'],
+    colors: ['#e11d48', '#d946ef', '#9d174d', '#701a75', '#f43f5e', '#a21caf'],
   },
   {
     id: 'error-404',
@@ -47,13 +53,13 @@ const THEME_REGISTRY = [
   },
   {
     id: 'dossiers-hub',
-    match: (p) => p === '/c' || p === '/collections', // هاب مرکزی باید دقیق مچ شود
-    colors: ['#06b6d4', '#a855f7', '#e2e8f0', '#38bdf8', '#8b5cf6', '#c084fc'],
+    match: (p) => p === '/c' || p === '/collections',
+    colors: ['#06b6d4', '#a855f7', '#38bdf8', '#8b5cf6', '#10b981', '#6366f1'],
   },
   {
     id: 'dossier-detail',
-    match: (p) => p.startsWith('/c/') || p.startsWith('/collections/'), // زیرمجموعه‌های هاب
-    colors: ['#06b6d4', '#1e3a8a', '#6366f1', '#94a3b8', '#38bdf8', '#818cf8'],
+    match: (p) => p.startsWith('/c/') || p.startsWith('/collections/'),
+    colors: ['#06b6d4', '#1e3a8a', '#6366f1', '#0ea5e9', '#38bdf8', '#818cf8'],
   },
   {
     id: 'taxonomy-archives',
@@ -63,32 +69,32 @@ const THEME_REGISTRY = [
   {
     id: 'rules',
     match: (p) => isExactOrSub(p, '/rules') || isExactOrSub(p, '/terms') || isExactOrSub(p, '/privacy'),
-    colors: ['#0ea5e9', '#6366f1', '#64748b', '#06b6d4', '#8b5cf6', '#3b82f6'],
+    colors: ['#0ea5e9', '#6366f1', '#06b6d4', '#3b82f6', '#8b5cf6', '#14b8a6'],
   },
   {
     id: 'collaboration',
-    match: (p) => isExactOrSub(p, '/collaboration'),
-    colors: ['#06b6d4', '#fbbf24', '#10b981', '#8b5cf6', '#f43f5e', '#3b82f6'],
+    match: (p) => isExactOrSub(p, '/collaboration') || isExactOrSub(p, '/cooperate'),
+    colors: ['#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#3b82f6', '#14b8a6'],
   },
   {
     id: 'auth',
     match: (p) => p.includes('/login') || p.includes('/auth'),
-    colors: ['#06b6d4', '#1e1b4b', '#38bdf8', '#10b981', '#0891b2', '#0f172a'],
+    colors: ['#06b6d4', '#1e1b4b', '#38bdf8', '#10b981', '#0891b2', '#3b82f6'],
   },
   {
     id: 'about',
     match: (p) => isExactOrSub(p, '/about'),
-    colors: ['#f59e0b', '#d97706', '#06b6d4', '#f8fafc', '#1e293b', '#fbbf24'],
+    colors: ['#f59e0b', '#06b6d4', '#10b981', '#a855f7', '#d97706', '#38bdf8'],
   },
   {
     id: 'produced',
-    match: (p) => isExactOrSub(p, '/p'), // تابع ما مشکل همپوشانی با /profile را حل می‌کند
+    match: (p) => isExactOrSub(p, '/p'),
     colors: ['#f43f5e', '#8b5cf6', '#06b6d4', '#e11d48', '#3b82f6', '#f59e0b'],
   },
   {
     id: 'raw',
     match: (p) => isExactOrSub(p, '/f'),
-    colors: ['#eab308', '#f59e0b', '#06b6d4', '#8b5cf6', '#10b981', '#d97706'],
+    colors: ['#f59e0b', '#eab308', '#06b6d4', '#10b981', '#8b5cf6', '#d97706'],
   },
   {
     id: 'tools',
@@ -119,7 +125,7 @@ const ORB_MATRIX = [
 export default function AmbientBackground() {
   const pathname = usePathname() || '/';
   
-  // بررسی دسترسی‌پذیری سیستم کاربر
+  // بررسی دسترسی‌پذیری دستگاه کاربر
   const shouldReduceMotion = useReducedMotion();
 
   const isExcluded = pathname.startsWith('/admin') || pathname.startsWith('/portal-entry-99');
@@ -162,7 +168,7 @@ export default function AmbientBackground() {
               }}
               className={`absolute rounded-full transform-gpu will-change-transform ${orb.pos}`}
               style={{
-                // جایگزین جادویی فیلتر Blur که با GPU رندر می‌شود
+                // جایگزین جادویی صافی Blur که با GPU رندر می‌شود
                 WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 40%, transparent 70%)',
                 maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 40%, transparent 70%)',
               }}

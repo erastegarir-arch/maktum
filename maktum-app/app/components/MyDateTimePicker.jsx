@@ -23,7 +23,7 @@ export default function MyDateTimePicker({ value, onChange, activeTheme, inputCl
         }
         placeholder="انتخاب تاریخ..."
       />
-      {/* آیکون تقویم در سمت چپ با رنگ تم پویا */}
+      {/* نماد تقویم در سمت چپ با رنگ تم پویا */}
       <Icon
         name="calendar"
         className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-colors ${activeTheme?.color || 'text-cyan-400'}`}

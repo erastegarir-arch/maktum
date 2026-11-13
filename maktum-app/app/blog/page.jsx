@@ -15,14 +15,14 @@ const THEME_BLOG = {
 };
 
 export default async function BlogFrontPage() {
-  // دریافت تنظیمات ذخیره شده از دیتابیس
+  // دریافت تنظیمات ذخیره شده از پایگاه داده
   const settingsData = await getSetting('blog_page_settings');
   const pageSettings = settingsData ? JSON.parse(settingsData) : { hero: {}, featuredList: [] };
 
-  // دریافت محتوا از دیتابیس
+  // دریافت محتوا از پایگاه داده
   const rawDataFromDB = await getContents({ type: 'BLOG', status: 'PUBLISHED', limit: 12 });
 
-  // مپ کردن داده‌ها برای تطابق با کامپوننت مشترک + لینک‌دهی به /blog/
+  // مپ کردن داده‌ها برای تطابق با کامپوننت مشترک + پیوند‌دهی به /blog/
   const archiveItems = (rawDataFromDB || []).map(item => ({
     id: item.id,
     title: `${item.titleBase || ''} ${item.titleHighlight || ''}`.trim() || 'بدون عنوان',

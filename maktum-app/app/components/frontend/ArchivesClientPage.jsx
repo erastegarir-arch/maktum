@@ -40,7 +40,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
 
   const [isLoading, setIsLoading] = useState(true);
 
-  // === مقادیر اولیه برای سیستم «نمایش بیشتر» ===
+  // === مقادیر اولیه برای سامانه «نمایش بیشتر» ===
   const INITIAL_HASHTAGS = 30;
   const INITIAL_CATEGORIES = 12;
   const INITIAL_CREATORS = 15;
@@ -56,7 +56,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
     return () => clearTimeout(timer);
   }, [activeTab]);
 
-  // ریست کردن تعداد نمایش با هر بار تغییر تب یا جستجو
+  // ریست کردن تعداد نمایش با هر بار تغییر تب یا کاوش
   useEffect(() => {
     setVisibleHashtags(INITIAL_HASHTAGS);
     setVisibleCategories(INITIAL_CATEGORIES);
@@ -71,12 +71,12 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
   };
 
   const getSearchPlaceholder = () => {
-    if (activeTab === 'hashtags') return "جستجو در هشتگ‌ها...";
-    if (activeTab === 'categories') return "جستجو در دسته‌‌بندی‌ها...";
-    return "جستجوی نام پدیدآورنده...";
+    if (activeTab === 'hashtags') return "کاوش در هشتک‌ها...";
+    if (activeTab === 'categories') return "کاوش در دسته‌‌بندی‌ها...";
+    return "کاوش نام پدیدآورنده...";
   };
 
-  // === فیلتر و مرتب‌سازی داده‌ها ===
+  // === صافی و مرتب‌سازی داده‌ها ===
   const filteredHashtags = useMemo(() => {
     let result = hashtags.filter(h => h.text.includes(searchQuery));
     if (hashtagSort === 'alpha') {
@@ -130,7 +130,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
 
         {/* ================= هدر صفحه ================= */}
         <section className="relative rounded-3xl p-6 md:p-12 overflow-hidden flex flex-col justify-center items-center text-center shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent animate-[fadeIn_0.5s_ease-out] group bg-white/[0.02] backdrop-blur-2xl">
-          {/* افکت گلس‌مورفیسم شفاف بدون تیرگی پس‌زمینه (استایل مشابه صفحه همکاری) */}
+          {/* افکت گلس‌مورفیسم شفاف بدون تیرگی پس‌زمینه (سبک مشابه صفحه همکاری) */}
           <div className="absolute inset-0 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#3b82f6] to-transparent opacity-90 pointer-events-none z-20" />
           
@@ -158,7 +158,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
           </div>
         </section>
 
-        {/* نوار تب‌ها و جستجو */}
+        {/* نوار تب‌ها و کاوش */}
         <div className="relative rounded-2xl md:rounded-3xl p-3 md:p-4 flex flex-col lg:flex-row gap-4 md:gap-6 justify-between items-center z-20 shadow-[0_8px_30px_rgba(0,0,0,0.5)] border border-transparent overflow-hidden">
           <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50 pointer-events-none z-20" />
@@ -169,7 +169,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
                 onClick={() => handleTabSwitch('hashtags')} 
                 className={`px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer border border-transparent font-sans ${activeTab === 'hashtags' ? 'bg-[#a855f7]/20 text-[#a855f7] shadow-[0_0_15px_rgba(168,85,247,0.15)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
               >
-                <Icon name="hash" className="w-3.5 h-3.5 md:w-4 md:h-4" /> هشتگ‌ها
+                <Icon name="hash" className="w-3.5 h-3.5 md:w-4 md:h-4" /> هشتک‌ها
               </button>
               <button 
                 onClick={() => handleTabSwitch('categories')} 
@@ -198,13 +198,13 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
           </div>
         </div>
 
-        {/* ================= پنل ۱: هشتگ‌ها ================= */}
+        {/* ================= درگاه ۱: هشتک‌ها ================= */}
         {activeTab === 'hashtags' && (
           <div className="animate-[slideUpFade_0.4s_ease-out]">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8 gap-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2 font-sans">
-                  <Icon name="trend" className="w-5 h-5 md:w-6 md:h-6 text-[#a855f7]" /> لیست هشتگ‌ها
+                  <Icon name="trend" className="w-5 h-5 md:w-6 md:h-6 text-[#a855f7]" /> فهرست هشتک‌ها
                 </h2>
               </div>
               
@@ -264,7 +264,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
           </div>
         )}
 
-        {/* ================= پنل ۲: دسته‌بندی‌ها ================= */}
+        {/* ================= درگاه ۲: دسته‌بندی‌ها ================= */}
         {activeTab === 'categories' && (
           <div className="animate-[slideUpFade_0.4s_ease-out]">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8 gap-4">
@@ -334,7 +334,7 @@ export default function ArchivesClientPage({ pageContent, hashtags = [], categor
           </div>
         )}
 
-        {/* ================= پنل ۳: پدیدآورندگان ================= */}
+        {/* ================= درگاه ۳: پدیدآورندگان ================= */}
         {activeTab === 'creators' && (
           <div className="animate-[slideUpFade_0.4s_ease-out]">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8 gap-4">

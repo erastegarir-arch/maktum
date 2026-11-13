@@ -8,7 +8,6 @@ import { searchArchive } from '@/app/actions/search';
 
 // ==========================================
 // هوک هوشمند تاخیر (Debounce)
-// جلوگیری از بمباران دیتابیس هنگام تایپ سریع
 // ==========================================
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -20,11 +19,38 @@ function useDebounce(value, delay) {
 }
 
 // ==========================================
+// تابع اصلاح مسیرهای اشتباه (اصلاح فوتیج و تولیدی)
+// ==========================================
+function getFixedUrl(url) {
+  if (!url) return '#';
+  if (url.startsWith('/raw/')) {
+    return url.replace(/^\/raw\//, '/f/');
+  }
+  if (url.startsWith('/produced/')) {
+    return url.replace(/^\/produced\//, '/p/');
+  }
+  return url;
+}
+
+// ==========================================
+// تابع دریافت نام نمایشی بر اساس نوع (حذف دسته‌بندی)
+// ==========================================
+function getLabelByType(type) {
+  switch (type) {
+    case 'BLOG': return 'مقالات بلاگ';
+    case 'RAW': return 'محتوای راش و خام';
+    case 'PRODUCED': return 'محتوای تولیدی';
+    case 'TOOL': return 'ابزارها';
+    case 'DOSSIER': return 'پرونده ویژه (منظومه‌ها)';
+    default: return 'سایر';
+  }
+}
+
+// ==========================================
 // اسکلتون لودینگ پیشرفته (Shimmer)
 // ==========================================
 const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
   return (
-    // اعمال گلس‌مورفیسم به اسکلتون
     <div className={`relative overflow-hidden bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] ${rounded} ${className}`}>
       <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_1.5s_infinite]" />
     </div>
@@ -33,17 +59,22 @@ const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
 
 const BentoSkeleton = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-[fadeIn_0.3s_ease-in]">
-      <div className="md:col-span-2 lg:col-span-2 row-span-2 h-[280px] md:h-[350px] relative rounded-[2rem] p-4 flex flex-col justify-end overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/[0.05]">
-        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] rounded-[2rem] pointer-events-none -z-10" />
+    // استفاده از grid-flow-row-dense برای پر کردن فضاهای خالی
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 animate-[fadeIn_0.3s_ease-in] auto-rows-[150px] md:auto-rows-[220px] grid-flow-row-dense">
+      <div className="col-span-2 row-span-1 md:col-span-2 md:row-span-2 relative rounded-[1.5rem] md:rounded-[2rem] p-3 md:p-4 flex flex-col justify-end overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/[0.05]">
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] rounded-[1.5rem] md:rounded-[2rem] pointer-events-none -z-10" />
         <BaseSkeleton className="absolute inset-0 w-full h-full" rounded="rounded-none" />
       </div>
-      <div className="col-span-1 h-[200px] md:h-[250px] relative rounded-[2rem] p-4 flex flex-col justify-end overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/[0.05]">
-        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] rounded-[2rem] pointer-events-none -z-10" />
+      <div className="col-span-1 row-span-1 relative rounded-[1.5rem] md:rounded-[2rem] p-3 md:p-4 flex flex-col justify-end overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/[0.05]">
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] rounded-[1.5rem] md:rounded-[2rem] pointer-events-none -z-10" />
         <BaseSkeleton className="absolute inset-0 w-full h-full" rounded="rounded-none" />
       </div>
-      <div className="col-span-1 h-[200px] md:h-[250px] relative rounded-[2rem] p-4 flex flex-col justify-end overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/[0.05]">
-        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] rounded-[2rem] pointer-events-none -z-10" />
+      <div className="col-span-1 row-span-1 relative rounded-[1.5rem] md:rounded-[2rem] p-3 md:p-4 flex flex-col justify-end overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/[0.05]">
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] rounded-[1.5rem] md:rounded-[2rem] pointer-events-none -z-10" />
+        <BaseSkeleton className="absolute inset-0 w-full h-full" rounded="rounded-none" />
+      </div>
+      <div className="hidden md:flex col-span-1 row-span-1 relative rounded-[1.5rem] md:rounded-[2rem] p-3 md:p-4 flex-col justify-end overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.3)] border border-white/[0.05]">
+        <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] rounded-[1.5rem] md:rounded-[2rem] pointer-events-none -z-10" />
         <BaseSkeleton className="absolute inset-0 w-full h-full" rounded="rounded-none" />
       </div>
     </div>
@@ -51,7 +82,7 @@ const BentoSkeleton = () => {
 };
 
 // ==========================================
-// آیکون مربوط به هر نوع محتوا
+// نماد مربوط به هر نوع محتوا
 // ==========================================
 function getIconByType(type) {
   switch (type) {
@@ -116,7 +147,7 @@ export default function SearchModal({ isOpen, onClose }) {
         setActiveIndex(prev => (prev - 1 + results.length) % results.length);
       } else if (e.key === 'Enter' && activeIndex >= 0) {
         e.preventDefault();
-        router.push(results[activeIndex].url);
+        router.push(getFixedUrl(results[activeIndex].url));
         onClose();
       }
     };
@@ -155,9 +186,6 @@ export default function SearchModal({ isOpen, onClose }) {
       });
 
       if (response.success) {
-        if (isLoadMore) {
-
-          // ارسال آمار جستجو به ایران آنالیتیکس
         if (!isLoadMore && debouncedQuery && typeof window !== 'undefined' && window.ira && window.ira.search) {
           try {
             window.ira.search.track({
@@ -169,6 +197,7 @@ export default function SearchModal({ isOpen, onClose }) {
           }
         }
 
+        if (isLoadMore) {
           setResults(prev => [...prev, ...response.data]);
           setPage(targetPage);
         } else {
@@ -197,38 +226,35 @@ export default function SearchModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#050810]/90 backdrop-blur-2xl flex justify-center pt-4 md:pt-16 px-4 pb-4 animate-[fadeIn_0.3s_ease-out] font-sans text-right select-none">
+    <div className="fixed inset-0 z-[100] bg-[#050810]/90 backdrop-blur-2xl flex justify-center pt-3 md:pt-10 px-2 md:px-4 pb-2 animate-[fadeIn_0.3s_ease-out] font-sans text-right select-none overflow-hidden">
       
       <div className="absolute inset-0 cursor-pointer" onClick={onClose}></div>
 
-      <div className="relative z-10 w-full max-w-6xl flex flex-col max-h-full animate-[scaleIn_0.3s_ease-out] mx-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="relative z-10 w-full max-w-6xl flex flex-col max-h-full animate-[scaleIn_0.3s_ease-out] mx-auto overflow-hidden" onClick={(e) => e.stopPropagation()}>
         
-        {/* اعمال گلس‌مورفیسم به باکس اصلی مودال جستجو */}
-        <div className="relative rounded-[2rem] md:rounded-[3rem] p-5 md:p-8 overflow-hidden shrink-0 shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/[0.05] group bg-white/[0.02] backdrop-blur-3xl">
+        {/* هدر کاوش */}
+        <div className="relative rounded-2xl md:rounded-[2.5rem] p-3 md:p-6 overflow-hidden shrink-0 shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/[0.05] group bg-white/[0.02] backdrop-blur-3xl">
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50 z-20 pointer-events-none" />
           <div className="absolute -top-32 -right-32 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] pointer-events-none -z-10"></div>
           <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] pointer-events-none -z-10"></div>
           
-          {/* ۱. دکمه بستن صفحه (به داخل باکس منتقل شد تا در هیچ مانیتوری بیرون نزند) */}
-          <div className="absolute top-5 left-5 md:top-8 md:left-8 z-30 group/close hidden md:block">
+          <div className="absolute top-4 left-4 md:top-6 md:left-6 z-30 group/close hidden md:block">
             <button 
               onClick={onClose} 
-              className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/[0.05] backdrop-blur-md border border-white/[0.1] shadow-[inset_0_0_10px_rgba(255,255,255,0.05)] flex items-center justify-center text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all cursor-pointer"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/[0.05] backdrop-blur-md border border-white/[0.1] shadow-[inset_0_0_10px_rgba(255,255,255,0.05)] flex items-center justify-center text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/30 transition-all cursor-pointer"
             >
-              <Icon name="close" className="w-5 h-5 md:w-6 md:h-6" />
+              <Icon name="close" className="w-4 h-4 md:w-5 md:h-5" />
             </button>
-            {/* ۲. تولتیپ سفارشی گلس‌مورفیسم هماهنگ با تم سایت (جایگزین title) */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-white/[0.05] backdrop-blur-xl border border-white/[0.1] text-gray-200 text-[10px] rounded-lg opacity-0 invisible group-hover/close:opacity-100 group-hover/close:visible transition-all whitespace-nowrap shadow-xl font-bold">
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-white/[0.05] backdrop-blur-xl border border-white/[0.1] text-gray-200 text-[9px] rounded opacity-0 invisible group-hover/close:opacity-100 group-hover/close:visible transition-all whitespace-nowrap shadow-xl font-bold">
               بستن (Esc)
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-center gap-4 relative z-10 md:pl-16">
+          <div className="flex flex-col md:flex-row md:items-center gap-3 relative z-10 md:pl-14">
             
-            {/* ۳. کادر جستجو (متمایز شده با پس‌زمینه شیشه‌ای مستقل برای مشخص بودن محل تایپ) */}
-            <div className="flex items-center gap-3 flex-1 bg-white/[0.04] backdrop-blur-md border border-white/[0.08] shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] rounded-2xl px-4 py-3 md:px-5 md:py-4 focus-within:bg-white/[0.07] focus-within:border-cyan-500/40 transition-all">
+            <div className="flex items-center gap-2 flex-1 bg-white/[0.04] backdrop-blur-md border border-white/[0.08] shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] rounded-xl md:rounded-2xl px-3 py-2 md:px-4 md:py-3 focus-within:bg-white/[0.07] focus-within:border-cyan-500/40 transition-all">
               <div className={query ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]" : "text-gray-500"}>
-                  <Icon name="search" className="w-6 h-6 md:w-8 md:h-8 transition-colors" />
+                  <Icon name="search" className="w-5 h-5 md:w-6 md:h-6 transition-colors" />
               </div>
               
               <input 
@@ -236,33 +262,30 @@ export default function SearchModal({ isOpen, onClose }) {
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="bg-transparent border-none outline-none text-white text-lg md:text-2xl w-full placeholder:text-gray-500 font-black font-sans tracking-wide" 
-                placeholder="در مکتوم جستجو کنید..." 
+                className="bg-transparent border-none outline-none text-white text-base md:text-xl w-full placeholder:text-gray-500 font-black font-sans tracking-wide" 
+                placeholder="در مکتوم کاوش کنید..." 
                 autoComplete="off" 
               />
 
               {query && (
-                <button onClick={() => setQuery('')} className="flex-shrink-0 flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-500/20 hover:bg-rose-500/80 text-gray-400 hover:text-white transition-all cursor-pointer shadow-inner">
-                  {/* ۴. تغییر آیکون پاک کردن نوشته (استفاده از آیکون بسیار کوچکتر در یک دایره توپر تا با بستن مودال اشتباه نشود) */}
-                  <Icon name="eraser" className="w-3.5 h-3.5 md:w-4 md:h-4" /> 
+                <button onClick={() => setQuery('')} className="flex-shrink-0 flex items-center justify-center w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-500/20 hover:bg-rose-500/80 text-gray-400 hover:text-white transition-all cursor-pointer shadow-inner">
+                  <Icon name="eraser" className="w-3 h-3" /> 
                 </button>
               )}
             </div>
 
             <div className="flex items-center gap-3 justify-between md:justify-end mt-1 md:mt-0">
-              {/* دکمه بستن مخصوص موبایل (در دسترس‌تر برای انگشت) */}
-              <button onClick={onClose} className="md:hidden flex items-center gap-2 text-xs font-bold text-gray-400 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 px-4 py-2.5 rounded-xl transition-colors">
-                <Icon name="close" className="w-4 h-4" /> بستن
+              <button onClick={onClose} className="md:hidden flex items-center gap-1.5 text-[10px] font-bold text-gray-400 bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 px-3 py-2 rounded-lg transition-colors">
+                <Icon name="close" className="w-3 h-3" /> بستن
               </button>
 
-              {/* تولتیپ راهنمای کیبورد (طراحی گلس‌مورفیسم هماهنگ با تم) */}
-              <div className="hidden lg:flex items-center gap-1.5 px-4 py-2.5 bg-white/[0.03] backdrop-blur-md border border-white/[0.1] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)] rounded-xl text-gray-300 font-mono text-[11px] font-bold">
-                <span className="bg-white/10 px-2 py-1 rounded shadow-inner">Ctrl</span> + <span className="bg-white/10 px-2 py-1 rounded shadow-inner">K</span>
+              <div className="hidden lg:flex items-center gap-1.5 px-3 py-2 bg-white/[0.03] backdrop-blur-md border border-white/[0.1] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)] rounded-lg text-gray-300 font-mono text-[10px] font-bold">
+                <span className="bg-white/10 px-1.5 py-0.5 rounded shadow-inner">Ctrl</span> + <span className="bg-white/10 px-1.5 py-0.5 rounded shadow-inner">K</span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 md:gap-3 mt-6 relative z-10">
+          <div className="flex flex-wrap gap-1.5 md:gap-2 mt-3 md:mt-4 relative z-10">
             {[
               { id: 'DOSSIER', label: 'منظومه‌ها', icon: 'dossiers', color: 'text-indigo-400' },
               { id: 'PRODUCED', label: 'محتوای تولیدی', icon: 'product', color: 'text-cyan-400' },
@@ -271,17 +294,16 @@ export default function SearchModal({ isOpen, onClose }) {
               { id: 'TOOL', label: 'ابزارها', icon: 'pen-nib', color: 'text-emerald-400' }
             ].map(filter => {
               const isActive = activeFilters.includes(filter.id);
-              // اعمال گلس‌مورفیسم به دکمه‌های فیلتر
               const btnClass = isActive 
-                ? "bg-white/[0.1] border-white/[0.2] text-white scale-105 shadow-[inset_0_0_10px_rgba(255,255,255,0.1)]" 
+                ? "bg-white/[0.1] border-white/[0.2] text-white scale-[1.02] shadow-[inset_0_0_10px_rgba(255,255,255,0.1)]" 
                 : "bg-white/[0.03] backdrop-blur-md border-white/[0.05] text-gray-400 hover:bg-white/[0.08] hover:text-white";
               
               return (
                 <button 
                   key={filter.id} onClick={() => toggleFilter(filter.id)}
-                  className={`px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold flex items-center gap-2 transition-all duration-300 cursor-pointer font-sans shadow-lg border ${btnClass}`}
+                  className={`px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold flex items-center gap-1.5 transition-all duration-300 cursor-pointer font-sans shadow border ${btnClass}`}
                 >
-                  <Icon name={filter.icon} className={`w-4 h-4 md:w-5 md:h-5 ${isActive ? filter.color : 'opacity-50'}`} /> 
+                  <Icon name={filter.icon} className={`w-3 h-3 md:w-4 md:h-4 ${isActive ? filter.color : 'opacity-50'}`} /> 
                   {filter.label}
                 </button>
               )
@@ -289,71 +311,76 @@ export default function SearchModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        <div className="mt-4 md:mt-6 flex-grow overflow-y-auto custom-scrollbar px-1 pb-10">
+        {/* ناحیه نتایج */}
+        <div className="mt-3 md:mt-4 flex-grow overflow-y-auto overflow-x-hidden custom-scrollbar px-1 pb-10">
             
           {query.trim().length < 2 && !isLoading ? (
-            /* حالت انتظار: طراحی شیک جایگزین کلمات پرجستجو */
-            <div className="animate-[fadeIn_0.3s_ease-out] flex flex-col items-center justify-center h-full min-h-[40vh] opacity-60">
-               <Icon name="search" className="w-16 h-16 md:w-20 md:h-20 text-gray-600 mb-6 animate-pulse" />
-               <p className="text-gray-400 text-sm md:text-base font-light tracking-wide text-center max-w-sm leading-relaxed">
-                 برای جستجو در آرشیو مکتوم، کلیدواژه یا عبارت مورد نظر خود را تایپ کنید...
+            <div className="animate-[fadeIn_0.3s_ease-out] flex flex-col items-center justify-center h-full min-h-[30vh] opacity-60">
+               <Icon name="search" className="w-12 h-12 md:w-16 md:h-16 text-gray-600 mb-4 animate-pulse" />
+               <p className="text-gray-400 text-xs md:text-sm font-light tracking-wide text-center max-w-sm leading-relaxed px-4">
+                 برای کاوش در بایگانی مکتوم، کلیدواژه یا عبارت مورد نظر خود را بنویسید کنید...
                </p>
             </div>
           ) : isLoading && page === 1 ? (
             <BentoSkeleton />
           ) : results.length === 0 && !isLoading ? (
-            <div className="relative rounded-[3rem] p-12 overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.4)] border border-white/[0.05] bg-white/[0.02] backdrop-blur-2xl flex flex-col items-center justify-center text-center">
-               <div className="w-32 h-32 mb-6 relative">
-                  <div className="absolute inset-0 bg-rose-500/20 rounded-full blur-2xl animate-pulse"></div>
+            <div className="relative rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.4)] border border-white/[0.05] bg-white/[0.02] backdrop-blur-2xl flex flex-col items-center justify-center text-center mx-2">
+               <div className="w-20 h-20 md:w-24 md:h-24 mb-4 relative">
+                  <div className="absolute inset-0 bg-rose-500/20 rounded-full blur-xl animate-pulse"></div>
                   <Icon name="folderSlash" className="w-full h-full text-rose-500 relative z-10" />
                </div>
-               <h3 className="text-xl md:text-2xl font-black text-white mb-3">محتوایی یافت نشد!</h3>
-               <p className="text-gray-400 max-w-lg mb-8 leading-loose text-sm font-light">
-                 متأسفانه برای عبارت <span className="text-rose-400 font-bold">«{query}»</span> با فیلترهای فعلی محتوایی وجود ندارد. لطفاً کلمه دیگری را جستجو کنید یا از طریق ارتباط با پشتیبانی سایت، درخواست خود را ثبت نمایید.
+               <h3 className="text-lg md:text-xl font-black text-white mb-2">محتوایی یافت نشد!</h3>
+               <p className="text-gray-400 max-w-lg mb-6 leading-loose text-xs md:text-sm font-light px-4">
+                 متأسفانه برای عبارت <span className="text-rose-400 font-bold">«{query}»</span> با جزئیات فعلی محتوایی وجود ندارد. لطفاً کلمه دیگری را کاوش کنید.
                </p>
-               <button onClick={() => setQuery('')} className="bg-white/[0.05] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.05] shadow-inner text-white px-8 py-3 rounded-xl font-bold transition-all cursor-pointer hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-                 پاک کردن متن و شروع مجدد
+               <button onClick={() => setQuery('')} className="bg-white/[0.05] hover:bg-white/[0.1] backdrop-blur-md border border-white/[0.05] shadow-inner text-white px-6 py-2.5 rounded-lg md:rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+                 شروع مجدد
                </button>
             </div>
           ) : (
             <div className="flex flex-col h-full animate-[fadeIn_0.3s_ease-in]">
-              <div className="flex flex-col md:flex-row justify-between md:items-end mb-6 shrink-0 bg-white/[0.03] backdrop-blur-md p-5 rounded-2xl border border-white/[0.05] shadow-inner">
-                <h4 className="text-sm md:text-base font-bold text-white flex items-center gap-2 mb-2 md:mb-0">
-                  <Icon name="layout" className="w-5 h-5 text-emerald-400" /> نتایج کشف شده برای «{query}»
+              <div className="flex flex-col md:flex-row justify-between md:items-end mb-4 shrink-0 bg-white/[0.03] backdrop-blur-md p-3 md:p-4 rounded-xl md:rounded-2xl border border-white/[0.05] shadow-inner mx-1">
+                <h4 className="text-xs md:text-sm font-bold text-white flex items-center gap-1.5 mb-2 md:mb-0">
+                  <Icon name="layout" className="w-4 h-4 text-emerald-400" /> نتایج کشف شده برای «{query}»
                 </h4>
-                <div className="flex items-center gap-3 text-xs text-gray-500 bg-white/[0.03] px-4 py-2 rounded-lg border border-white/[0.05] shadow-inner">
-                  <span className="hidden md:flex items-center gap-1.5 font-bold"><span className="bg-white/10 px-2 rounded font-mono text-[10px]">↑</span> <span className="bg-white/10 px-2 rounded font-mono text-[10px]">↓</span> اسکرول کیبورد</span>
+                <div className="flex items-center gap-2 text-[10px] text-gray-500 bg-white/[0.03] px-3 py-1.5 rounded-lg border border-white/[0.05] shadow-inner">
+                  <span className="hidden md:flex items-center gap-1 font-bold"><span className="bg-white/10 px-1.5 rounded font-mono text-[9px]">↑</span> <span className="bg-white/10 px-1.5 rounded font-mono text-[9px]">↓</span> اسکرول کیبورد</span>
                   <span className="hidden md:flex text-white/20">|</span>
-                  <span className="font-bold flex items-center gap-1.5"><span className="bg-white/10 px-2 rounded font-mono text-[10px]">Enter</span> ورود به سند</span>
+                  <span className="font-bold flex items-center gap-1"><span className="bg-white/10 px-1.5 rounded font-mono text-[9px]">Enter</span> ورود به سند</span>
                 </div>
               </div>
 
-              <div ref={resultsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6">
+              {/* شبکه گرید هوشمند با grid-flow-row-dense برای پر کردن خودکار جاهای خالی */}
+              <div ref={resultsRef} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 pb-6 mx-1 auto-rows-[150px] md:auto-rows-[220px] grid-flow-row-dense">
                 {results.map((item, index) => {
                   const isDossier = item.type === 'DOSSIER';
                   const isFocused = activeIndex === index;
                   const itemIcon = getIconByType(item.type);
                   
-                  const containerClass = "relative rounded-[2rem] group cursor-pointer flex flex-col justify-end p-5 overflow-hidden shadow-xl transition-all duration-500 border " +
-                    (isDossier ? "md:col-span-2 lg:col-span-2 row-span-2 h-[280px] md:h-[350px] " : "col-span-1 h-[200px] md:h-[250px] ") +
+                  // کانتینر بدون ارتفاع ثابت تنظیم شد، با col-span و row-span در گرید dense نظارت می‌شود
+                  const containerClass = "relative rounded-[1.5rem] md:rounded-[2rem] group cursor-pointer flex flex-col justify-end p-3 md:p-4 overflow-hidden shadow-xl transition-all duration-500 border w-full h-full " +
+                    (isDossier ? "col-span-2 row-span-1 md:col-span-2 md:row-span-2 " : "col-span-1 row-span-1 ") +
                     (isFocused ? "border-white/40 scale-[1.02] shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-10" : "border-white/[0.05] hover:border-white/20");
 
-                  const haloClass = "absolute inset-0 rounded-[2rem] pointer-events-none transition-all duration-500 -z-10 " + 
+                  const haloClass = "absolute inset-0 rounded-[1.5rem] md:rounded-[2rem] pointer-events-none transition-all duration-500 -z-10 " + 
                     (isFocused ? "opacity-100 scale-105" : "opacity-0 group-hover:opacity-100 group-hover:scale-105");
 
                   const imageClass = "w-full h-full object-cover transition-transform duration-[1.5s] ease-out " +
                     (isFocused ? "scale-110 opacity-100" : "opacity-60 group-hover:scale-105 group-hover:opacity-90");
 
-                  const titleClass = "font-black text-white mb-2 line-clamp-2 drop-shadow-md " + 
-                    (isDossier ? "text-lg md:text-2xl leading-tight" : "text-sm md:text-base");
+                  const titleClass = "font-black text-white mb-1.5 md:mb-2 line-clamp-2 drop-shadow-md " + 
+                    (isDossier ? "text-sm md:text-xl leading-tight" : "text-[11px] md:text-sm");
 
-                  const subtitleClass = "text-gray-200 font-medium line-clamp-2 text-justify drop-shadow-md mb-2 " + 
-                    (isDossier ? "text-xs md:text-sm leading-relaxed" : "text-[10px] md:text-xs");
+                  const subtitleClass = "text-gray-200 font-medium drop-shadow-md " + 
+                    (isDossier ? "line-clamp-2 text-[10px] md:text-xs leading-relaxed" : "line-clamp-1 md:line-clamp-2 text-[9px] md:text-[10px]");
                   
                   return (
                     <div 
                       key={`${item.type}-${item.id}`}
-                      onClick={() => { router.push(item.url); onClose(); }}
+                      onClick={() => { 
+                        router.push(getFixedUrl(item.url)); 
+                        onClose(); 
+                      }}
                       onMouseEnter={() => setActiveIndex(index)}
                       className={containerClass}
                     >
@@ -368,7 +395,7 @@ export default function SearchModal({ isOpen, onClose }) {
                         {item.image ? (
                           <BlurImage src={item.image} alt={item.title} className={imageClass} />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center opacity-10 bg-black/50"><Icon name="folder" className="w-24 h-24" /></div>
+                          <div className="w-full h-full flex items-center justify-center opacity-10 bg-black/50"><Icon name="folder" className="w-16 h-16 md:w-20 md:h-20" /></div>
                         )}
                       </div>
 
@@ -378,12 +405,12 @@ export default function SearchModal({ isOpen, onClose }) {
                       />
                       
                       <div className="relative z-20 mt-auto">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 shadow-inner" style={{ color: item.color }}>
-                            <Icon name={itemIcon} className="w-3.5 h-3.5" />
-                            {item.category}
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="flex items-center gap-1 md:gap-1.5 text-[9px] md:text-[11px] font-bold px-2 py-1 md:px-2.5 md:py-1.5 rounded-md md:rounded-lg bg-black/60 backdrop-blur-md border border-white/10 shadow-inner" style={{ color: item.color }}>
+                            <Icon name={itemIcon} className="w-3 h-3" />
+                            {getLabelByType(item.type)}
                           </span>
-                          {isFocused && <span className="text-[9px] text-gray-900 bg-white px-2 py-0.5 rounded font-bold animate-pulse shadow-[0_0_10px_white]">Enter</span>}
+                          {isFocused && <span className="text-[8px] md:text-[9px] text-gray-900 bg-white px-1.5 py-0.5 rounded font-bold animate-pulse shadow-[0_0_10px_white]">Enter</span>}
                         </div>
                         
                         <h3 className={titleClass}>{item.title}</h3>
@@ -398,13 +425,13 @@ export default function SearchModal({ isOpen, onClose }) {
               </div>
 
               {hasMore && (
-                <div className="flex justify-center pb-8 pt-4">
+                <div className="flex justify-center pb-6 md:pb-8 pt-2 md:pt-4">
                   <button 
                     onClick={() => performSearch(true)}
                     disabled={isLoading}
-                    className="flex items-center gap-2 px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-sm transition-all shadow-lg hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] cursor-pointer disabled:opacity-50 hover:-translate-y-1"
+                    className="flex items-center gap-1.5 md:gap-2 px-6 py-3 md:px-8 md:py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs md:text-sm transition-all shadow-lg hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] cursor-pointer disabled:opacity-50 hover:-translate-y-1"
                   >
-                    {isLoading ? <Icon name="loader" className="w-5 h-5 animate-spin text-cyan-400" /> : <Icon name="plus" className="w-5 h-5 text-cyan-400" />}
+                    {isLoading ? <Icon name="loader" className="w-4 h-4 md:w-5 md:h-5 animate-spin text-cyan-400" /> : <Icon name="plus" className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" />}
                     نمایش اسناد بیشتر
                   </button>
                 </div>

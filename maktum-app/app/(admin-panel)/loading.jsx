@@ -1,6 +1,6 @@
 export default function AdminLoading() {
   return (
-    // استایل‌های ریسپانسیو و فول‌اسکرین متناسب با فضای خالی زیر هدر پنل ادمین
+    // سبک‌های ریسپانسیو و فول‌اسکرین متناسب با فضای خالی زیر هدر درگاه مسئول
     <div className="w-full min-h-[calc(100vh-8rem)] flex items-center justify-center font-sans relative overflow-hidden p-4 select-none">
 
       {/* ۱. هاله‌های نوری پس‌زمینه (اتمسفریک تپنده برای برجسته کردن لودینگ) */}
@@ -25,7 +25,7 @@ export default function AdminLoading() {
           <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white shadow-[0_0_20px_4px_rgba(255,255,255,0.8)] animate-pulse" />
         </div>
 
-        {/* ۴. تایپوگرافی و نقطه‌های متحرک */}
+        {/* ۴. حروف‌نگاری و نقطه‌های متحرک */}
         <div className="flex flex-col items-center gap-3.5 mt-2">
           <h3 className="text-white font-bold text-xs md:text-sm tracking-widest drop-shadow-md">
             در حال پردازش

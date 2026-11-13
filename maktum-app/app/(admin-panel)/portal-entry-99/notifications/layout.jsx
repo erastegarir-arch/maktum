@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'مدیریت اعلانات',
+  title: 'مسئولیت اعلانات',
 };
 
 export default function NotificationsLayout({ children }) {

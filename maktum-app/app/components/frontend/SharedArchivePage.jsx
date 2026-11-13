@@ -178,7 +178,7 @@ export default function SharedArchivePage({
             onMouseMove={handleFeaturedMouseMove}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            // جایگزین کردن رنگ‌های مسدودکننده با استایل شیشه‌ای
+            // جایگزین کردن رنگ‌های مسدودکننده با سبک شیشه‌ای
             className={`relative rounded-3xl p-6 pb-12 md:p-12 overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-white/[0.05] transition-all duration-400 group bg-white/[0.02] backdrop-blur-2xl mt-6 md:mt-12`}
             style={{ '--theme-glow': `rgba(${activeTheme.glowRGB}, 0.06)` }}
           >
@@ -263,13 +263,13 @@ export default function SharedArchivePage({
         <section className="space-y-6 md:space-y-8">
           <div className="flex items-end justify-between border-b border-white/10 pb-4">
             <div>
-              <h2 className="text-xl md:text-2xl font-black text-white mb-1 font-sans">آرشیو محتوا</h2>
+              <h2 className="text-xl md:text-2xl font-black text-white mb-1 font-sans">پایگاه داده محتوا</h2>
               <p className="text-xs md:text-sm text-gray-400 font-light font-sans">تمامی محتوای بارگذاری شده در این بخش</p>
             </div>
           </div>
 
           {archiveItems.length === 0 ? (
-            // اعمال گلس‌مورفیسم به باکس یافت نشد
+            // اعمال گلس‌مورفیسم به قاب یافت نشد
             <div className="relative rounded-3xl p-8 md:p-10 overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.4)] border border-white/[0.05] bg-white/[0.02] backdrop-blur-2xl">
                <EmptyState 
                 icon="folder" 

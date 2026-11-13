@@ -17,7 +17,7 @@
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.5); /* رنگ سبز زمردی هماهنگ با پنل هنگام هاور */
+  background: rgba(16, 185, 129, 0.5); /* رنگ سبز زمردی هماهنگ با درگاه هنگام هاور */
 }
 
 @font-face {

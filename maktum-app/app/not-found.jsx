@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import Link from 'next/link';
-import Icon from './components/Icon'; // اتصال به فایل مرکزی آیکون‌ها
+import Icon from './components/Icon'; // اتصال به پرونده مرکزی نماد‌ها
 
 export default function NotFound() {
   const cardRef = useRef(null);
@@ -28,14 +28,14 @@ export default function NotFound() {
     // حذف رنگ ثابت bg-[#050810] تا پس‌زمینه شفاف باشد و گوی‌های نوری کاملاً مشخص شوند
     <div className="relative min-h-[100dvh] text-gray-100 font-sans flex flex-col justify-center items-center overflow-hidden select-none dir-rtl">
 
-      {/* ================== تایپوگرافی غول‌پیکر پس‌زمینه (اعداد فارسی) ================== */}
+      {/* ================== حروف‌نگاری غول‌پیکر پس‌زمینه (اعداد فارسی) ================== */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 mix-blend-screen flex items-center justify-center opacity-30 md:opacity-50">
         <span className="text-[55vw] md:text-[35vw] font-black text-transparent bg-clip-text bg-gradient-to-b from-white/10 to-transparent blur-[4px] md:blur-[6px] animate-[pulse_4s_ease-in-out_infinite] leading-none font-sans" dir="ltr">
           ۴۰۴
         </span>
       </div>
 
-      {/* ================== کارت شیشه‌ای اصلی ================== */}
+      {/* ================== فیش شیشه‌ای اصلی ================== */}
       <main className="relative z-10 w-full max-w-2xl px-4 py-8 md:py-12 flex flex-col justify-center items-center min-h-full">
         <div 
           ref={cardRef}
@@ -43,7 +43,7 @@ export default function NotFound() {
           // تنظیم دقیق گلس‌مورفیسم برای درخشش ملایم و عبور نور بدون تاریکی بیش از حد
           className="relative w-full rounded-[2rem] md:rounded-3xl bg-white/[0.03] backdrop-blur-3xl p-6 sm:p-8 md:p-14 shadow-[0_20px_60px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(255,255,255,0.03)] border border-white/[0.05] overflow-hidden group animate-[fadeIn_0.5s_ease-out]"
         >
-          {/* خط نئونی بالای کارت در هاور */}
+          {/* خط نئونی بالای فیش در هاور */}
           <div className="absolute top-0 inset-x-0 h-[2px] opacity-70 pointer-events-none z-20 bg-gradient-to-r from-transparent via-cyan-500 to-transparent group-hover:via-blue-400 transition-colors duration-700" />
 
           {/* لایه Spotlight تعاملی ماوس (فقط در دسکتاپ فعال است) */}
@@ -90,8 +90,8 @@ export default function NotFound() {
               </p>
             </div>
 
-            {/* ================== پنل تشخیص وضعیت (طراحی یک خطی در دسکتاپ طبق عکس) ================== */}
-            {/* حذف کادر دور باکس و استایل شیشه‌ای */}
+            {/* ================== درگاه تشخیص وضعیت (طراحی یک خطی در دسکتاپ طبق عکس) ================== */}
+            {/* حذف کادر دور قاب و سبک شیشه‌ای */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 md:gap-8 w-full max-w-lg mx-auto mb-8 md:mb-12 py-3 px-4 md:py-4">
               
               {/* بخش اول: وضعیت ردیابی */}
@@ -139,7 +139,7 @@ export default function NotFound() {
                 className="w-full sm:w-auto bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)] text-gray-300 px-6 md:px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/[0.08] hover:text-white transition-all duration-300 active:scale-95 cursor-pointer font-sans text-sm md:text-base group"
               >
                 <Icon name="search" className="w-4 h-4 md:w-5 md:h-5 text-gray-400 group-hover:text-white transition-colors" />
-                جستجو در آرشیو
+                کاوش در پایگاه داده
               </Link>
               
             </div>

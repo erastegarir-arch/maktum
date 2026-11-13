@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'هویت بصری و ساختار سایت',
+  title: 'هویت بصری و ساختار سامانه',
 };
 
 export default function IdentitySettingsLayout({ children }) {

@@ -1,24 +1,26 @@
-// مسیر: app/terms/layout.jsx
+import { getSetting } from '@/app/actions/settings';
+import { generateStaticPageSchema } from '@/lib/seo';
 
-import { getSetting } from '@/app/actions/settings'; // اکشن فراخوانی از دیتابیس
+export default async function CollaborateLayout({ children }) {
+  // دریافت اطلاعات برای تزریق در گراف دانش گوگل (اسکیما)
+  const seoTitle = await getSetting('collaborate_seo_title');
+  const pageTitle = await getSetting('collaborate_title');
+  
+  const schema = generateStaticPageSchema({
+    schemaType: 'ContactPage',
+    title: seoTitle || pageTitle || 'همکاری با ما',
+    description: 'درگاه رسمی ارتباط و همکاری با پلتفرم مکتوم.',
+    path: '/collaborate',
+    breadcrumbName: 'همکاری با ما',
+  });
 
-export async function generateMetadata() {
-  // ۱. دریافت اطلاعات این صفحه خاص از دیتابیس
-  const seoTitle = await getSetting('terms_seo_title'); // عنوان سئو (اگر در پنل فیلد مجزا دارد)
-  const pageTitle = await getSetting('terms_title');    // عنوان اصلی صفحه
-
-  // ۲. فرمول اولویت‌بندی شما: اول سئو، بعد عنوان اصلی، در نهایت یک مقدار پیش‌فرض امن
-  const finalTitle = seoTitle || pageTitle || 'همکاری با ما';
-
-  // ۳. ارسال به مرورگر (قالب Root Layout کلمه "مکتوم |" را خودکار اضافه می‌کند)
-  return {
-    title: finalTitle,
-    
-    // اگر متا دیسکریپشن هم داینامیک است می‌توانید اینجا اضافه کنید:
-    // description: await getSetting('terms_seo_description') || '',
-  };
-}
-
-export default function TermsLayout({ children }) {
-  return children;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      {children}
+    </>
+  );
 }

@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { getSessionUser } from './auth';
 
 // تابع کمکی برای ساخت Slug از روی نام (فارسی به انگلیسی و جایگزینی فاصله‌ها)
 function generateSlug(name) {
@@ -16,6 +17,11 @@ function generateSlug(name) {
 // ۱. ایجاد طبقه‌بندی جدید
 export async function createTaxonomy(data) {
   try {
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز.' };
+    }
+
     const finalSlug = data.slug && data.slug.trim() !== '' 
       ? generateSlug(data.slug) 
       : generateSlug(data.name);
@@ -28,7 +34,7 @@ export async function createTaxonomy(data) {
     });
 
     if (existing) {
-      return { success: false, error: 'این نام یا لینک قبلاً در این بخش ثبت شده است.' };
+      return { success: false, error: 'این نام یا پیوند قبلاً در این بخش ثبت شده است.' };
     }
 
     const newTaxonomy = await prisma.taxonomy.create({
@@ -47,11 +53,11 @@ export async function createTaxonomy(data) {
     revalidatePath('/portal-entry-99/taxonomies');
     return { success: true, data: newTaxonomy };
   } catch (error) {
-    return { success: false, error: 'خطا در ثبت اطلاعات در دیتابیس.' };
+    return { success: false, error: 'خطا در ثبت اطلاعات در پایگاه داده.' };
   }
 }
 
-// ۲. دریافت لیست طبقه‌بندی‌ها برای پنل ادمین
+// ۲. دریافت فهرست طبقه‌بندی‌ها برای درگاه مسئول
 export async function getTaxonomies(type) {
   try {
     const taxonomies = await prisma.taxonomy.findMany({
@@ -67,6 +73,11 @@ export async function getTaxonomies(type) {
 // ۳. حذف یک طبقه‌بندی
 export async function deleteTaxonomy(id) {
   try {
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز.' };
+    }
+
     await prisma.taxonomy.delete({ where: { id } });
     revalidatePath('/portal-entry-99/taxonomies');
     return { success: true };
@@ -78,6 +89,11 @@ export async function deleteTaxonomy(id) {
 // ۴. ویرایش طبقه‌بندی
 export async function updateTaxonomy(id, data) {
   try {
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز.' };
+    }
+
     const finalSlug = data.slug && data.slug.trim() !== '' 
       ? generateSlug(data.slug) 
       : generateSlug(data.name);
@@ -91,7 +107,7 @@ export async function updateTaxonomy(id, data) {
     });
 
     if (existing) {
-      return { success: false, error: 'این نام یا لینک قبلاً ثبت شده است.' };
+      return { success: false, error: 'این نام یا پیوند قبلاً ثبت شده است.' };
     }
 
     const updated = await prisma.taxonomy.update({
@@ -249,6 +265,11 @@ export async function getArchiveSettingsAction() {
 // ذخیره تنظیمات
 export async function saveArchiveSettingsAction(data) {
   try {
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز.' };
+    }
+
     const settingsToSave = [
       { key: 'archive_badge', value: data.badge },
       { key: 'archive_title', value: data.title },
@@ -264,6 +285,6 @@ export async function saveArchiveSettingsAction(data) {
     }
     return { success: true };
   } catch (error) {
-    return { success: false, error: 'خطا در ذخیره در دیتابیس' };
+    return { success: false, error: 'خطا در ذخیره در پایگاه داده' };
   }
 }

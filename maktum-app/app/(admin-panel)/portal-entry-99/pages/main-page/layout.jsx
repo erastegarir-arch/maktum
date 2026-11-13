@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'مدیریت صفحات فرعی سایت',
+  title: 'مسئولیت صفحات فرعی سامانه',
 };
 
 export default function MainPageSettingsLayout({ children }) {

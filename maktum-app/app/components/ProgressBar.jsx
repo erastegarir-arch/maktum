@@ -1,29 +1,24 @@
+// src/app/components/ProgressBar.jsx
 'use client';
-import { useState, useEffect } from 'react';
+
+import { motion, useScroll, useSpring } from 'framer-motion';
 
 export default function ProgressBar() {
-  const [scrollPercentage, setScrollPercentage] = useState(0);
+  const { scrollYProgress } = useScroll();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrolled = document.documentElement.scrollTop;
-      const maxScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const progress = maxScroll > 0 ? (scrolled / maxScroll) * 100 : 0;
-      setScrollPercentage(progress);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // تبدیل حرکت پله‌ای اسکرول موشواره به حرکت نرم و ابریشمی (60fps GPU)
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 110,
+    damping: 28,
+    mass: 0.35,
+    restDelta: 0.001,
+  });
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-1 md:h-1.5 z-[120] bg-white/[0.02] pointer-events-none backdrop-blur-sm">
-      <div 
-        className="h-full bg-gradient-to-r from-[#06b6d4] via-[#38bdf8] to-[#0ea5e9] shadow-[0_0_15px_rgba(6,182,212,0.9)] transition-all duration-150 ease-out rounded-r-full"
-        style={{ width: `${scrollPercentage}%` }}
-      />
-    </div>
+    <motion.div
+      aria-hidden="true"
+      style={{ scaleX }}
+      className="fixed top-0 inset-x-0 h-[3px] bg-gradient-to-l from-[#06b6d4] via-[#38bdf8] to-[#10b981] origin-right z-[100] shadow-[0_0_12px_rgba(6,182,212,0.9)] pointer-events-none transform-gpu will-change-transform"
+    />
   );
 }

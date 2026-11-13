@@ -2,15 +2,15 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
-// ✅ Import اکشن دریافت تنظیمات دیتابیس (اکشنی که در تصویر کدهایتان بود)
+// ✅ Import اکشن دریافت تنظیمات پایگاه داده (اکشنی که در تصویر کدهایتان بود)
 import { getSetting } from '@/app/actions/settings';
 
 // ۱. ایجاد کانتکست با مقدار اولیه (منفی یا null مهم نیست)
 const DateSettingsContext = createContext(null);
 
-// ۲. کامپوننت تأمین‌کننده (Provider) که ریشه سایت را در بر می‌گیرد
+// ۲. کامپوننت تأمین‌کننده (Provider) که ریشه سامانه را در بر می‌گیرد
 export function DateSettingsProvider({ children }) {
-  // ✅ راهکار بنیادین ضد Bilid سرور: استیت‌ها روی کلاینت مدیریت می‌شوند.
+  // ✅ راهکار بنیادین ضد Bilid سرور: استیت‌ها روی کلاینت مسئولیت می‌شوند.
   const [allowCommentsGlobally, setAllowCommentsGlobally] = useState(true);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
@@ -20,16 +20,16 @@ export function DateSettingsProvider({ children }) {
       try {
         // اجرای همزمان درخواست‌ها برای سرعت بیشتر
         const [commentsSetting] = await Promise.all([
-          getSetting('allow_comments_globally'), // مثلاً یک تنظیمات از دیتابیس
-          // getSetting('default_date_format'), // اگر فرمت هم تنظیماتی بود
+          getSetting('allow_comments_globally'), // مثلاً یک تنظیمات از پایگاه داده
+          // getSetting('default_date_format'), // اگر قالب هم تنظیماتی بود
         ]);
 
         if (commentsSetting !== null) setAllowCommentsGlobally(commentsSetting === 'true');
-        // if (dateFormatSetting) JALALI_CONFIG.inputFormat = dateFormatSetting; // آپدیت پیکربندی خام
+        // if (dateFormatSetting) JALALI_CONFIG.inputFormat = dateFormatSetting; // به‌روزرسانی پیکربندی خام
 
       } catch (error) {
-        console.error("خطا در دریافت تنظیمات سراسری تاریخ/کامنت:", error);
-        // در صورت خطا، مقادیر پیش‌فرض (true) باقی می‌مانند -> سایت داغون نمی‌شود.
+        console.error("خطا در دریافت تنظیمات سراسری تاریخ/نظرات:", error);
+        // در صورت خطا، مقادیر پیش‌فرض (true) باقی می‌مانند -> سامانه داغون نمی‌شود.
       } finally {
         setIsLoadingSettings(false);
       }
@@ -43,7 +43,7 @@ export function DateSettingsProvider({ children }) {
   const contextValue = {
     allowCommentsGlobally,
     isLoadingSettings,
-    // می‌توانید متدهای آپدیت تنظیمات (برای صفحه تنظیمات) را هم اینجا اضافه کنید
+    // می‌توانید متدهای به‌روزرسانی تنظیمات (برای صفحه تنظیمات) را هم اینجا اضافه کنید
     // setAllowCommentsGlobally, 
   };
 

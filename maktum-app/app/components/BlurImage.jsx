@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 export default function BlurImage({ src, alt, className = "", ...props }) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   return (
     <>
@@ -20,14 +21,20 @@ export default function BlurImage({ src, alt, className = "", ...props }) {
       
       {/* ۲. عکس اصلی */}
       <img
-        src={src}
-        alt={alt || 'تصویر مکتومم'}
+        // در صورت بروز خطا، تصویر دیفالت سامانه لود می‌شود
+        src={hasError ? '/images/placeholder-cover.jpg' : src}
+        alt={alt || 'تصویر مکتوم'}
         loading="lazy"
         onLoad={() => setIsLoaded(true)}
+        onError={() => {
+          setHasError(true);
+          setIsLoaded(true); // خاموش کردن افکت لودینگ در صورت خرابی عکس
+        }}
         className={`
           relative z-10
           ${className} 
           ${isLoaded ? 'blur-0 opacity-100' : 'blur-2xl opacity-0'}
+          ${hasError ? 'object-contain opacity-50 grayscale' : ''} 
         `}
         style={{ 
           transitionProperty: 'filter, opacity, transform',

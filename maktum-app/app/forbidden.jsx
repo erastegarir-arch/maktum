@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import Link from 'next/link';
-import Icon from './components/Icon'; // اتصال به فایل مرکزی آیکون‌ها
+import Icon from './components/Icon'; // اتصال به پرونده مرکزی نماد‌ها
 
 export default function ForbiddenAccess() {
   const cardRef = useRef(null);
@@ -28,7 +28,7 @@ export default function ForbiddenAccess() {
     // حذف رنگ ثابت bg-[#050810] تا پس‌زمینه شفاف باشد و گوی‌های نوری AmbientBackground کاملاً مشخص شوند
     <div className="relative min-h-[100dvh] text-gray-100 font-sans flex flex-col justify-center items-center overflow-hidden select-none dir-rtl">
 
-      {/* استایل‌های انیمیشن اختصاصی اسکنر امنیتی */}
+      {/* سبک‌های انیمیشن اختصاصی اسکنر امنیتی */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes laserScan {
           0% { top: 0%; opacity: 0; }
@@ -47,14 +47,14 @@ export default function ForbiddenAccess() {
         <div className="absolute inset-0 opacity-[0.02] bg-[repeating-linear-gradient(45deg,#fff_0px,#fff_2px,transparent_2px,transparent_12px)] pointer-events-none" />
       </div>
 
-      {/* ================== تایپوگرافی غول‌پیکر پس‌زمینه (اعداد فارسی) ================== */}
+      {/* ================== حروف‌نگاری غول‌پیکر پس‌زمینه (اعداد فارسی) ================== */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 mix-blend-screen flex items-center justify-center opacity-30 md:opacity-50">
         <span className="text-[55vw] md:text-[35vw] font-black text-transparent bg-clip-text bg-gradient-to-b from-white/10 to-transparent blur-[4px] md:blur-[6px] tracking-tighter font-sans" dir="ltr">
           ۴۰۳
         </span>
       </div>
 
-      {/* ================== کارت شیشه‌ای اصلی ================== */}
+      {/* ================== فیش شیشه‌ای اصلی ================== */}
       <main className="relative z-10 w-full max-w-2xl px-4 py-8 md:py-12 flex flex-col justify-center items-center min-h-full">
         <div 
           ref={cardRef}
@@ -62,7 +62,7 @@ export default function ForbiddenAccess() {
           // تنظیم دقیق گلس‌مورفیسم برای درخشش ملایم و عبور نورهای سرخابی
           className="relative w-full rounded-[2rem] md:rounded-3xl bg-white/[0.03] backdrop-blur-3xl p-6 sm:p-8 md:p-14 shadow-[0_20px_60px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(255,255,255,0.03)] border border-white/[0.05] overflow-hidden group animate-[scaleIn_0.5s_ease-out]"
         >
-          {/* خط نئونی بالای کارت در هاور */}
+          {/* خط نئونی بالای فیش در هاور */}
           <div className="absolute top-0 inset-x-0 h-[2px] opacity-70 pointer-events-none z-20 bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent group-hover:via-rose-500 transition-colors duration-700" />
 
           {/* لایه Spotlight تعاملی ماوس */}
@@ -70,26 +70,27 @@ export default function ForbiddenAccess() {
 
           <div className="relative z-10 flex flex-col items-center">
             
-            {/* ================== گرافیک خلاقانه: گاوصندوق و اسکنر ================== */}
-            <div className="relative w-36 h-36 md:w-44 md:h-44 mb-6 md:mb-10 flex items-center justify-center">
+            {/* ================== گرافیک خلاقانه و یکپارچه بدون چرخش ================== */}
+            <div className="relative mb-6 md:mb-10 flex items-center justify-center">
               {/* هاله نور پس‌زمینه قفل */}
-              <div className="absolute inset-0 bg-fuchsia-500/10 blur-[30px] md:blur-[40px] rounded-full animate-pulse" />
-              
-              {/* سپرهای امنیتی چرخشی */}
-              <div className="absolute inset-1 md:inset-2 border-[1.5px] md:border-2 border-dashed border-fuchsia-500/30 rounded-full animate-[spin_20s_linear_infinite]" />
-              <div className="absolute inset-4 md:inset-6 border border-rose-500/20 rounded-full" />
+              <div className="absolute inset-0 bg-fuchsia-500/20 blur-[40px] rounded-full animate-pulse" />
               
               {/* کادر مرکزی قفل با گلس‌مورفیسم */}
-              <div className="relative w-20 h-20 md:w-24 md:h-24 bg-white/[0.02] border border-white/[0.05] rounded-xl md:rounded-2xl backdrop-blur-md flex items-center justify-center shadow-[inset_0_0_15px_rgba(217,70,239,0.2),0_0_30px_rgba(217,70,239,0.3)] z-10 overflow-hidden">
-                <Icon name="lockKey" className="w-8 h-8 md:w-10 md:h-10 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] opacity-80" />
+              <div className="relative w-24 h-24 md:w-28 md:h-28 bg-white/[0.02] border border-fuchsia-500/30 rounded-2xl md:rounded-3xl backdrop-blur-md flex items-center justify-center shadow-[inset_0_0_20px_rgba(217,70,239,0.15),0_0_40px_rgba(217,70,239,0.2)] z-10 overflow-hidden">
+                <Icon name="lockKey" className="w-10 h-10 md:w-12 md:h-12 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] opacity-90 z-10" />
                 
-                {/* لیزر اسکنر */}
+                {/* لیزر اسکنر که بالا و پایین می‌رود (بدون چرخش) */}
                 <div className="absolute left-0 right-0 h-[2px] bg-rose-500 shadow-[0_0_15px_#f43f5e] animate-laser z-20" />
                 <div className="absolute left-0 right-0 h-6 md:h-8 bg-gradient-to-b from-transparent to-rose-500/20 animate-laser -mt-6 md:-mt-8 z-10" />
               </div>
 
-              {/* نشانگرهای وضعیت اطراف قفل */}
-              <div className="absolute top-3 right-3 md:top-4 md:right-4 w-1.5 h-1.5 md:w-2 md:h-2 bg-rose-500 rounded-full shadow-[0_0_10px_#f43f5e] animate-ping" />
+              {/* نشانگر وضعیت اخطار چسبیده به گوشه کادر */}
+              <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 z-20">
+                <span className="relative flex h-3 w-3 md:h-4 md:w-4">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 md:h-4 md:w-4 bg-rose-500 shadow-[0_0_10px_#f43f5e]"></span>
+                </span>
+              </div>
             </div>
 
             {/* ================== محتوای متنی کاربرپسند (جاستیفای و وسط‌چین) ================== */}
@@ -104,12 +105,12 @@ export default function ForbiddenAccess() {
               
               {/* کلاس text-justify همراه با [text-align-last:center] */}
               <p className="text-gray-300 text-sm md:text-base leading-relaxed font-light max-w-md mx-auto text-justify [text-align-last:center] font-sans">
-                پروفایل کاربری شما فاقد مجوزهای لازم (Clearance) برای ورود به این بخش از پایگاه داده مکتوم است. این محتوا برای سطح کاربری شما محدود شده است.
+                نماگر کاربری شما فاقد مجوزهای لازم (Clearance) برای ورود به این بخش از پایگاه داده مکتوم است. این محتوا برای سطح کاربری شما محدود شده است.
               </p>
             </div>
 
-            {/* ================== پنل تشخیص وضعیت (بازطراحی به صورت یک خط در دسکتاپ) ================== */}
-            {/* حذف کادر دور باکس و استایل شیشه‌ای */}
+            {/* ================== درگاه تشخیص وضعیت (بازطراحی به صورت یک خط در دسکتاپ) ================== */}
+            {/* حذف کادر دور قاب و سبک شیشه‌ای */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 md:gap-8 w-full max-w-lg mx-auto mb-8 md:mb-12 py-3 px-4 md:py-4">
               
               {/* بخش اول: وضعیت مجوز */}
@@ -159,7 +160,7 @@ export default function ForbiddenAccess() {
                 className="w-full sm:w-auto bg-white/[0.03] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.02)] text-gray-300 px-6 md:px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/[0.08] hover:text-white transition-all duration-300 active:scale-95 cursor-pointer font-sans text-sm md:text-base group"
               >
                 <Icon name="files" className="w-4 h-4 md:w-5 md:h-5 text-gray-400 group-hover:text-white transition-colors" />
-                بازگشت به آرشیو
+                بازگشت به پایگاه داده
               </Link>
               
             </div>

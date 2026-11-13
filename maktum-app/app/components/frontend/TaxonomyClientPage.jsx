@@ -1,4 +1,4 @@
-// مسیر فایل: app/components/frontend/TaxonomyClientPage.jsx
+// مسیر پرونده: app/components/frontend/TaxonomyClientPage.jsx
 'use client';
 
 import { useState, useRef, useMemo } from 'react';
@@ -16,7 +16,7 @@ const toPersianDigits = (num) => {
 };
 
 // ==========================================
-// ۲. دیکشنری تم‌های رنگی داینامیک
+// ۲. دیکشنری تم‌های رنگی پویا
 // ==========================================
 const TAXONOMY_THEMES = {
   CATEGORY: {
@@ -25,7 +25,7 @@ const TAXONOMY_THEMES = {
   },
   HASHTAG: {
     color: '#38bdf8', text: 'text-[#38bdf8]', bgSoft: 'bg-[#38bdf8]/10', borderSoft: 'border-[#38bdf8]/30', shadow: 'shadow-[0_0_10px_#38bdf8]', via: 'via-[#38bdf8]',
-    badgeLabel: 'هشتگ رسمی', parentLabel: 'هشتگ‌ها', icon: 'hash'
+    badgeLabel: 'هشتک رسمی', parentLabel: 'هشتک‌ها', icon: 'hash'
   },
   CREATOR: {
     color: '#a855f7', text: 'text-[#a855f7]', bgSoft: 'bg-[#a855f7]/10', borderSoft: 'border-[#a855f7]/30', shadow: 'shadow-[0_0_10px_#a855f7]', via: 'via-[#a855f7]',
@@ -41,7 +41,7 @@ const CONTENT_THEMES = {
 };
 
 // ==========================================
-// ۳. کامپوننت داخلی کارت محتوا (واکنش‌گرا)
+// ۳. کامپوننت داخلی فیش محتوا (واکنش‌گرا)
 // ==========================================
 const ContentCard = ({ item }) => {
   const cardRef = useRef(null);
@@ -135,7 +135,7 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
 
   return (
     <>
-      {/* تزریق استایل قطعی برای جلوگیری از انتخاب متن در تمامی لایه‌ها و متن‌های دیتابیس */}
+      {/* تزریق سبک قطعی برای جلوگیری از انتخاب متن در تمامی لایه‌ها و متن‌های پایگاه داده */}
       <style dangerouslySetInnerHTML={{ __html: `
         .strict-no-select, .strict-no-select * {
           -webkit-user-select: none !important;
@@ -159,7 +159,7 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
              ]} 
             /> 
               
-          {/* ================= هدر معرفی (باکس گلس‌مورفیک با هاله نور) ================= */}
+          {/* ================= هدر معرفی (قاب گلس‌مورفیک با هاله نور) ================= */}
           <section className="relative overflow-hidden p-6 md:p-12 group rounded-3xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] border border-white/[0.08] animate-[fadeIn_0.5s_ease-out] bg-white/[0.03] backdrop-blur-3xl">
             
             <div className="absolute inset-0 shadow-[inset_0_0_30px_rgba(255,255,255,0.03)] pointer-events-none -z-10" />
@@ -209,7 +209,7 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
             </div>
           </section>
 
-          {/* ================= گرید محتوا با فیلتر لمسی در موبایل ================= */}
+          {/* ================= گرید محتوا با جزئیات لمسی در موبایل ================= */}
           <section className="space-y-4 md:space-y-6">
             <div className="flex flex-col md:flex-row items-center justify-between border-b border-white/10 pb-4 gap-4">
               <div className="w-full text-center md:text-right">

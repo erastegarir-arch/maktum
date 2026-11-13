@@ -50,7 +50,7 @@ export default function ToastContainer() {
                             transition={{ duration: 0.2 }}
                             className="relative w-full overflow-hidden bg-white/[0.03] backdrop-blur-3xl border border-white/[0.08] shadow-[0_15px_40px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(255,255,255,0.02)] p-4 pr-12 rounded-2xl flex items-start pointer-events-auto"
                         >
-                            {/* آیکون نوع پیام */}
+                            {/* نماد نوع پیام */}
                             <div className="absolute right-4 top-4 text-xl" style={{ color: theme.color }}>
                                 <Icon name={theme.icon} className="w-6 h-6" />
                             </div>

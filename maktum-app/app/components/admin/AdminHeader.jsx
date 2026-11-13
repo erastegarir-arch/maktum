@@ -84,7 +84,7 @@ export default function AdminHeader() {
       <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent pointer-events-none -z-10" />
 
       {/* ========================================================= */}
-      {/* ۲. بخش راست: تایپوگرافی اصیل (بدون عنوان فرعی) */}
+      {/* ۲. بخش راست: ح اصیل (بدون عنوان فرعی) */}
       {/* ========================================================= */}
       <div className="relative z-10 flex items-center">
         {/* متن عربی با فونت اختصاصی، رنگ سبز خالص و افکت تنفس نوری */}
@@ -104,7 +104,7 @@ export default function AdminHeader() {
       <div className="relative z-10 flex items-center">
         <div className="flex items-center gap-2 md:gap-3 px-3 py-1.5 md:px-3.5 md:py-1.5 rounded-full bg-white/[0.02] border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] transition-all hover:bg-white/[0.04]">
           
-          {/* آیکون و ساعت */}
+          {/* نماد و ساعت */}
           <div className="flex items-center gap-1.5 text-emerald-400/90">
             <Icon name="clock" className="w-3.5 h-3.5 md:w-4 md:h-4 drop-shadow-sm" />
             <span 

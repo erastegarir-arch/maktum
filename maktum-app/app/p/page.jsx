@@ -20,7 +20,7 @@ export default async function ProducedContentFrontPage() {
 
   const rawDataFromDB = await getContents({ type: 'PRODUCED', status: 'PUBLISHED', limit: 12 });
 
-  // مپ کردن داده‌ها برای تطابق با کامپوننت مشترک + لینک‌دهی به /p/
+  // مپ کردن داده‌ها برای تطابق با کامپوننت مشترک + پیوند‌دهی به /p/
   const archiveItems = (rawDataFromDB || []).map(item => ({
     id: item.id,
     title: `${item.titleBase || ''} ${item.titleHighlight || ''}`.trim() || 'بدون عنوان',

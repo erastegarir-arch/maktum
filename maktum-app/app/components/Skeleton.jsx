@@ -10,7 +10,7 @@ export const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => {
   );
 };
 
-// ۲. کامپوننت اختصاصی کارت محتوا (شبیه‌ساز دقیق کارت‌های مکتومم)
+// ۲. کامپوننت اختصاصی فیش محتوا (شبیه‌ساز دقیق فیش‌های مدار)
 export const CardSkeleton = () => {
   return (
     <div className="flex flex-col p-4 rounded-3xl border border-white/[0.04] bg-white/[0.02] backdrop-blur-xl relative overflow-hidden h-full shadow-[0_8px_30px_rgba(0,0,0,0.4)]">
@@ -23,7 +23,7 @@ export const CardSkeleton = () => {
         <BaseSkeleton className="w-2/3 h-4 md:h-5" rounded="rounded-md md:rounded-lg" />
       </div>
       
-      {/* بخش متادیتا (پایین کارت) */}
+      {/* بخش متادیتا (پایین فیش) */}
       <div className="mt-auto pt-4 border-t border-white/[0.05] flex justify-between items-center">
         <BaseSkeleton className="w-20 md:w-24 h-3 md:h-4" rounded="rounded-full" />
         <BaseSkeleton className="w-10 md:w-12 h-3 md:h-4" rounded="rounded-full" />

@@ -165,12 +165,12 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
     if (view === 'register') {
       if (password.length < 6) {
-        toast.error('رمز عبور باید حداقل ۶ کاراکتر باشد.');
+        toast.error('گذرواژه باید حداقل ۶ کاراکتر باشد.');
         triggerError();
         return;
       }
       if (password !== confirmPassword) {
-        toast.error('تکرار رمز عبور مطابقت ندارد.');
+        toast.error('تکرار گذرواژه مطابقت ندارد.');
         triggerError();
         return;
       }
@@ -179,7 +179,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     else if (view === 'login') {
       if (loginType === 'password') {
         if (!password) {
-          toast.error('لطفاً رمز عبور را وارد کنید.');
+          toast.error('لطفاً گذرواژه را وارد کنید.');
           triggerError();
           return;
         }
@@ -280,7 +280,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 <Icon name="close" className="w-5 h-5" />
               </button>
 
-              {/* تولتیپ سفارشی هماهنگ با تم مکتوم */}
+              {/* پیام راهنما سفارشی هماهنگ با تم مکتوم */}
               <div className="pointer-events-none absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 opacity-0 scale-95 group-hover/close:opacity-100 group-hover/close:scale-100 transition-all duration-200 ease-out flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0b0f19]/90 backdrop-blur-md border border-white/10 shadow-[0_10px_25px_rgba(0,0,0,0.5)] whitespace-nowrap">
                 <span className="text-[11px] font-sans font-medium text-gray-300">بستن</span>
                 <span className="text-[9px] font-mono text-cyan-400/90 bg-white/[0.05] border border-white/10 px-1 py-0.5 rounded leading-none">Esc</span>
@@ -368,11 +368,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
                         {(view === 'register' || (view === 'login' && loginType === 'password')) && (
                           <div className="relative">
-                            {/* رمز عبور به صورت انگلیسی نگه داشته شده است */}
+                            {/* گذرواژه به صورت انگلیسی نگه داشته شده است */}
                             <input 
                               type={showPassword ? "text" : "password"} 
                               dir="ltr" 
-                              placeholder="رمز عبور" 
+                              placeholder="گذرواژه" 
                               value={password} 
                               onChange={(e) => setPassword(e.target.value)} 
                               disabled={isLoading} 
@@ -389,7 +389,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                             <input 
                               type={showPassword ? "text" : "password"} 
                               dir="ltr" 
-                              placeholder="تکرار رمز عبور" 
+                              placeholder="تکرار گذرواژه" 
                               value={confirmPassword} 
                               onChange={(e) => setConfirmPassword(e.target.value)} 
                               disabled={isLoading} 
@@ -401,16 +401,16 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                       </div>
 
                       <button onClick={handleMainSubmit} disabled={isLoading} className="w-full bg-[#06b6d4] border border-transparent shadow-[0_5px_20px_rgba(6,182,212,0.3)] text-gray-900 py-3.5 md:py-4 rounded-xl font-bold text-sm md:text-base hover:bg-[#0891b2] hover:shadow-[0_8px_25px_rgba(6,182,212,0.5)] transition-all disabled:opacity-50 cursor-pointer font-sans flex items-center justify-center gap-2">
-                        {isLoading ? <Icon name="loading" className="w-5 h-5 animate-spin" /> : view === 'register' ? 'تایید و دریافت پیامک' : (loginType === 'password' ? 'ورود به حساب' : 'دریافت رمز یکبار مصرف')}
+                        {isLoading ? <Icon name="loading" className="w-5 h-5 animate-spin" /> : view === 'register' ? 'تایید و دریافت پیامک' : (loginType === 'password' ? 'ورود به حساب' : 'دریافت گذرواژه‌ یکبار مصرف')}
                       </button>
 
                       {view === 'login' && (
                         <div className="mt-5 flex items-center justify-between text-[11px] md:text-xs text-cyan-400 font-sans font-bold">
                           <button onClick={() => setLoginType(loginType === 'password' ? 'otp' : 'password')} className="hover:text-white transition-colors cursor-pointer">
-                            {loginType === 'password' ? 'ورود با پیامک' : 'ورود با رمز عبور'}
+                            {loginType === 'password' ? 'ورود با پیامک' : 'ورود با گذرواژه'}
                           </button>
                           {loginType === 'password' && (
-                            <button onClick={() => setLoginType('otp')} className="hover:text-white transition-colors cursor-pointer text-gray-400">فراموشی رمز</button>
+                            <button onClick={() => setLoginType('otp')} className="hover:text-white transition-colors cursor-pointer text-gray-400">فراموشی گذرواژه‌</button>
                           )}
                         </div>
                       )}
@@ -467,7 +467,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                       <p className="text-xs md:text-sm text-gray-300 font-light font-sans mb-6 md:mb-8 leading-relaxed">با موفقیت وارد حساب کاربری خود شدید.</p>
                       <div className="flex items-center justify-center gap-2 md:gap-3 text-cyan-400 text-[11px] md:text-xs font-bold font-sans">
                         <Icon name="loading" className="w-4 h-4 animate-spin" />
-                        <span>در حال ورود به داشبورد...</span>
+                        <span>در حال ورود به میزکار...</span>
                       </div>
                     </motion.div>
                   )}

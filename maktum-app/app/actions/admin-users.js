@@ -27,7 +27,7 @@ export async function getAllUsersAction() {
     return { success: true, data: users };
   } catch (error) {
     console.error("Error fetching users:", error);
-    return { success: false, error: 'خطا در دریافت لیست کاربران.' };
+    return { success: false, error: 'خطا در دریافت فهرست کاربران.' };
   }
 }
 
@@ -41,7 +41,7 @@ export async function adminCreateUserAction(phone) {
     if (!phone || phone.length < 10) return { success: false, error: 'شماره موبایل نامعتبر است.' };
 
     const existing = await prisma.user.findUnique({ where: { phone } });
-    if (existing) return { success: false, error: 'این شماره موبایل قبلاً در سیستم ثبت شده است.' };
+    if (existing) return { success: false, error: 'این شماره موبایل قبلاً در سامانه ثبت شده است.' };
 
     const user = await prisma.user.create({
       data: { phone, status: 'ACTIVE' }
@@ -93,7 +93,7 @@ export async function adminUpdateUserAction(id, data) {
       }
     }
 
-    // ۲. اگر مجوز تعیین سطح مدیریت را دارد و کاربر هدف مدیرکل نیست
+    // ۲. اگر مجوز تعیین سطح مسئولیت را دارد و کاربر هدف مسئولکل نیست
     if (canGrantAdmin && !targetUser.isSuperAdmin) {
       const isAdminFlag = !!data.isAdmin;
       const permsArray = isAdminFlag ? parsePermissions(data.adminPermissions) : [];
@@ -129,7 +129,7 @@ export async function adminToggleUserStatusAction(id, currentStatus) {
 
     const targetUser = await prisma.user.findUnique({ where: { id } });
     if (targetUser?.isSuperAdmin) {
-       return { success: false, error: 'مسدودسازی مدیر کل ارشد امکان‌پذیر نیست.' };
+       return { success: false, error: 'مسدودسازی مسئول کل ارشد امکان‌پذیر نیست.' };
     }
 
     const newStatus = currentStatus === 'ACTIVE' ? 'BANNED' : 'ACTIVE';

@@ -116,7 +116,7 @@ function CustomAudioPlayer({ src, title }) {
           {isPlaying && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#06b6d4] opacity-75"></span>}
           <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", isPlaying ? 'bg-[#06b6d4]' : 'bg-gray-600')}></span>
         </span>
-        <h4 className="text-white font-bold truncate text-sm dir-rtl select-text">{title || 'فایل صوتی'}</h4>
+        <h4 className="text-white font-bold truncate text-sm dir-rtl select-text">{title || 'پرونده صوتی'}</h4>
       </div>
 
       <div className="relative w-full h-16 flex items-center justify-between gap-[2px]" dir="ltr">
@@ -195,7 +195,7 @@ function CustomAudioPlayer({ src, title }) {
             <input 
               type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} 
               className="w-16 h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" 
-              style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, #4b5563 ${(isMuted ? 0 : volume) * 100}%)` }}
+              style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) ${(isMuted ? 0 : volume) * 100}%)` }}
             />
           </div>
 
@@ -297,7 +297,7 @@ function CustomVideoPlayer({ src, mimeType, title }) {
           <input 
             type="range" min="0" max="100" value={progress} onChange={handleSeek}
             className="w-full h-1 appearance-none rounded-full cursor-pointer outline-none transition-all"
-            style={{ background: `linear-gradient(to right, #06b6d4 ${progress}%, #4b5563 ${progress}%)` }}
+            style={{ background: `linear-gradient(to right, #06b6d4 ${progress}%, rgba(255,255,255,0.2) ${progress}%)` }}
           />
         </div>
 
@@ -361,7 +361,7 @@ function CustomVideoPlayer({ src, mimeType, title }) {
               <input 
                 type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} 
                 className="w-16 h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" 
-                style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, #4b5563 ${(isMuted ? 0 : volume) * 100}%)` }}
+                style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) ${(isMuted ? 0 : volume) * 100}%)` }}
               />
             </div>
 
@@ -383,7 +383,7 @@ function CustomVideoPlayer({ src, mimeType, title }) {
 }
 
 // ==========================================
-// کامپوننت اصلی مدیریت و انتخابگر رسانه
+// کامپوننت اصلی مسئولیت و انتخابگر رسانه
 // ==========================================
 export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }) {
   // ==========================================
@@ -419,7 +419,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
     loadMedia();
   }, []);
 
-  // دیدن لیست رسانه‌ها برای همه مدیران پنل و در حالت Picker مجاز است
+  // دیدن فهرست رسانه‌ها برای همه مسئولان درگاه و در حالت Picker مجاز است
   useEffect(() => {
     if (isPickerMode) {
       setHasAccess(true);
@@ -468,7 +468,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
       const data = await getMedia();
       setMediaList(data || []);
     } catch (error) {
-      toast.error('خطا در دریافت رسانه‌ها از سرور');
+      toast.error('خطا در دریافت رسانه‌ها از پایگاه‌داده');
     } finally {
       setLoading(false);
     }
@@ -476,14 +476,14 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
 
   const handleFilesUpload = async (files) => {
     if (!canUpload) {
-      toast.error('شما مجوز آپلود فایل در کتابخانه رسانه را ندارید.');
+      toast.error('شما مجوز بارگذاری پرونده در کتابخانه رسانه را ندارید.');
       return;
     }
     if (!files || files.length === 0) return;
 
     setUploading(true);
     let hasError = false;
-    const toastId = toast.loading('در حال آپلود فایل‌ها...');
+    const toastId = toast.loading('در حال بارگذاری پرونده‌ها...');
 
     for (let i = 0; i < files.length; i++) {
       const formData = new FormData();
@@ -499,9 +499,9 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
     }
 
     if (hasError) {
-      toast.error('برخی فایل‌ها آپلود نشدند یا با خطا مواجه شدند.', { id: toastId });
+      toast.error('برخی پرونده‌ها بارگذاری نشدند یا با خطا مواجه شدند.', { id: toastId });
     } else {
-      toast.success('فایل‌ها با موفقیت آپلود شدند.', { id: toastId });
+      toast.success('پرونده‌ها با موفقیت بارگذاری شدند.', { id: toastId });
     }
     
     await loadMedia();
@@ -524,7 +524,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
     e.preventDefault();
     setIsDragging(false);
     if (!canUpload) {
-      toast.error('شما مجوز آپلود فایل را ندارید.');
+      toast.error('شما مجوز بارگذاری پرونده را ندارید.');
       return;
     }
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -536,7 +536,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
     if (!selectedMedia?.url) return;
     navigator.clipboard.writeText(selectedMedia.url);
     setCopied(true);
-    toast.success('لینک فایل کپی شد!');
+    toast.success('پیوند پرونده رونوشت شد!');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -566,7 +566,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
   };
   
   const requestRename = () => {
-    if (!canEdit) return toast.error('شما مجوز تغییر نام فایل را ندارید.');
+    if (!canEdit) return toast.error('شما مجوز تغییر نام پرونده را ندارید.');
     if (!editFileName || editFileName.trim() === '') return;
     setConfirmDialog({ isOpen: true, type: 'RENAME', payload: null });
   };
@@ -588,13 +588,13 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
             setEditTitle(res.newTitle);
             setMediaList(prev => prev.map(m => m.id === selectedMedia.id ? updatedMedia : m));
             setTimeout(() => setSaveStatus(''), 3000);
-            return 'نام فایل تغییر یافت.';
+            return 'نام پرونده تغییر یافت.';
           }
           throw new Error('خطا');
         },
         error: () => {
           setSaveStatus('خطا در تغییر نام!');
-          return 'خطا در تغییر نام فایل!';
+          return 'خطا در تغییر نام پرونده!';
         }
       }
     );
@@ -650,7 +650,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
 
     if (media.fileType === 'IMAGE' && isSvg) {
       return { 
-        label: 'آیکون', 
+        label: 'نماد', 
         icon: <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg> 
       };
     }
@@ -667,7 +667,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
   const TAB_ITEMS = [
     { label: 'همه', val: 'ALL' },
     { label: 'تصویر', val: 'IMAGE' },
-    { label: 'آیکون', val: 'ICON' },
+    { label: 'نماد', val: 'ICON' },
     { label: 'ویدیو', val: 'VIDEO' },
     { label: 'صوت', val: 'AUDIO' },
     { label: 'سند', val: 'DOCUMENT' },
@@ -692,7 +692,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز ورود به کتابخانه رسانه را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -705,11 +705,11 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
       className="max-w-7xl mx-auto space-y-6 pb-10 relative text-right font-sans select-none"
     >
       
-      {/* اورلی رها کردن فایل (فقط در صورت داشتن مجوز آپلود) */}
+      {/* اورلی رها کردن پرونده (فقط در صورت داشتن مجوز بارگذاری) */}
       {isDragging && canUpload && (
         <div className="fixed inset-0 z-25 bg-[#06b6d4]/20 backdrop-blur-md border-4 border-dashed border-[#06b6d4] rounded-3xl flex flex-col items-center justify-center gap-4 m-4 pointer-events-none animate-pulse">
           <Icon name="upload" className="w-16 h-16 text-[#06b6d4]" />
-          <p className="text-xl font-bold text-white">فایل‌ها را برای آپلود سریع رها کنید</p>
+          <p className="text-xl font-bold text-white">پرونده‌ها را برای بارگذاری سریع رها کنید</p>
         </div>
       )}
 
@@ -728,10 +728,10 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
             <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] shadow-[0_0_10px_#10b981]"></span>
             کتابخانه رسانه
           </h1>
-          <p className="text-sm text-gray-400 font-light">مدیریت فایل‌ها، تصاویر و ویدیوهای سایت</p>
+          <p className="text-sm text-gray-400 font-light">مسئولیت پرونده‌ها، تصاویر و ویدیوهای سامانه</p>
         </div>
         
-        {/* دکمه آپلود فقط برای دارندگان مجوز MEDIA_UPLOAD */}
+        {/* دکمه بارگذاری فقط برای دارندگان مجوز MEDIA_UPLOAD */}
         {canUpload && (
           <div className="relative z-10">
             <input 
@@ -746,13 +746,13 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
               disabled={uploading}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50 cursor-pointer border border-transparent"
             >
-              {uploading ? 'در حال آپلود...' : 'افزودن'}
+              {uploading ? 'در حال بارگذاری...' : 'افزودن'}
             </button>
           </div>
         )}
       </motion.div>
 
-      {/* تب‌ها و باکس سرچ */}
+      {/* تب‌ها و قاب کاوش */}
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
         <div className="flex flex-wrap gap-2 bg-[#050810]/50 p-2 rounded-2xl border border-white/5 shadow-inner">
           {TAB_ITEMS.map(tab => (
@@ -771,22 +771,22 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
           ))}
         </div>
 
-        {/* اینپوت سرچ */}
+        {/* اینپوت کاوش */}
         <div className="relative w-full sm:w-80">
           <Icon name="search" className="w-4 h-4 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2" />
           <input 
             type="text" 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="جستجوی نام یا آدرس..." 
+            placeholder="کاوش نام یا نشانی..." 
             className="w-full bg-black/40 rounded-xl py-3.5 pr-12 pl-4 text-sm text-white outline-none focus:border focus:border-[#06b6d4] border border-white/5 transition-all shadow-inner font-medium select-text"
           />
         </div>
       </div>
 
-      {/* گرید نمایش فایل‌ها */}
+      {/* جایگاه نمایش پرونده‌ها */}
       {loading ? (
-        <div className="text-center py-20 text-gray-400">در حال دریافت فایل‌ها از سرور...</div>
+        <div className="text-center py-20 text-gray-400">در حال دریافت پرونده‌ها از پایگاه‌داده...</div>
       ) : filteredMedia.length === 0 ? (
         <div className="relative rounded-3xl p-20 text-center shadow-[0_8px_30px_rgba(0,0,0,0.4)] overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-xl">
           <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
@@ -853,7 +853,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                 onClick={() => setVisibleCount(prev => prev + 24)}
                 className="px-8 py-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 shadow-inner text-sm font-bold text-white transition-all hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] cursor-pointer"
               >
-                نمایش بیشتر ({toPersianDigits(filteredMedia.length - visibleCount)} فایل دیگر)
+                نمایش بیشتر ({toPersianDigits(filteredMedia.length - visibleCount)} پرونده دیگر)
               </button>
             </div>
           )}
@@ -887,7 +887,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                   )}
 
                   {selectedMedia.fileType === 'AUDIO' && (
-                    <CustomAudioPlayer src={selectedMedia.url} title={editTitle || selectedMedia.title || 'فایل صوتی'} />
+                    <CustomAudioPlayer src={selectedMedia.url} title={editTitle || selectedMedia.title || 'پرونده صوتی'} />
                   )}
 
                   {selectedMedia.fileType === 'DOCUMENT' && (
@@ -898,7 +898,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                         <>
                           <Icon name="document" className="w-24 h-24 text-gray-500 drop-shadow-lg" />
                           <a href={selectedMedia.url} target="_blank" download className="bg-white/10 hover:bg-[#06b6d4] text-white px-6 py-2.5 rounded-xl text-sm transition-colors font-bold border border-transparent shadow-inner">
-                            دانلود فایل سند
+                            بارگیری سند
                           </a>
                         </>
                       )}
@@ -912,7 +912,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                       <div>
                         <h3 className="text-lg font-bold text-white select-text">جزئیات رسانه</h3>
                         <p className="text-xs text-gray-400 mt-1 select-text">
-                          آپلود: {toPersianDigits(selectedMedia.formattedDate)} ساعت 
+                          بارگذاری: {toPersianDigits(selectedMedia.formattedDate)} ساعت 
                           {toPersianDigits(new Date(selectedMedia.createdAt).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }))}
                         </p>
                       </div>
@@ -928,18 +928,18 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                           onClick={handleCopyUrl}
                           className="px-3 py-1 bg-white/10 hover:bg-[#06b6d4] hover:text-gray-950 text-white rounded-lg transition-colors font-sans text-xs cursor-pointer shrink-0 font-bold border border-transparent"
                         >
-                          {copied ? 'کپی شد!' : <Icon name="copy" className="w-3.5 h-3.5" />}
+                          {copied ? 'رونوشت شد!' : <Icon name="copy" className="w-3.5 h-3.5" />}
                         </button>
                       </div>
                       <p className="text-xs text-gray-300 select-text"><strong className="text-gray-500 select-none">Type:</strong> {selectedMedia.mimeType}</p>
                       <p className="text-xs text-gray-300 select-text"><strong className="text-gray-500 select-none">Size:</strong> {formatBytes(selectedMedia.size)}</p>
                     </div>
 
-                    {/* بخش تغییر نام اصلی فایل (فقط با مجوز MEDIA_EDIT) */}
+                    {/* بخش تغییر نام اصلی پرونده (فقط با مجوز MEDIA_EDIT) */}
                     {canEdit && (
                       <div className="space-y-2 p-4 bg-[#050810]/50 rounded-xl border border-[#06b6d4]/20 shadow-inner">
-                        <label className="block text-sm font-bold text-[#06b6d4]">تغییر نام اصلی فایل</label>
-                        <p className="text-[10px] text-gray-400 leading-tight">توجه: تغییر نام باعث تغییر لینک می‌شود.</p>
+                        <label className="block text-sm font-bold text-[#06b6d4]">تغییر نام اصلی پرونده</label>
+                        <p className="text-[10px] text-gray-400 leading-tight">توجه: تغییر نام باعث تغییر پیوند می‌شود.</p>
                         <div className="flex gap-2 mt-2">
                           <input type="text" value={editFileName} onChange={(e) => setEditFileName(e.target.value)} className="flex-1 bg-black/40 border border-white/5 rounded-lg p-2.5 text-sm text-white focus:border-[#06b6d4] dir-ltr font-sans outline-none shadow-inner select-text transition-all" />
                           <button onClick={requestRename} className="px-3 bg-[#06b6d4]/20 hover:bg-[#06b6d4] hover:text-gray-900 text-[#06b6d4] rounded-lg text-xs font-bold transition-colors cursor-pointer border border-transparent">اعمال نام</button>
@@ -948,7 +948,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                     )}
 
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300 pl-1">عنوان فایل</label>
+                      <label className="block text-sm font-medium text-gray-300 pl-1">عنوان پرونده</label>
                       <input 
                         type="text" 
                         value={editTitle} 
@@ -961,7 +961,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
 
                     <div className="space-y-2">
                       <label className="block text-sm font-medium text-gray-300 pl-1">
-                        متن جایگزین (Alt Text) <span className="text-xs text-rose-400">*سئو</span>
+                        متن جایگزین<span className="text-xs text-rose-400">*سئو</span>
                       </label>
                       <textarea 
                         rows="3" 
@@ -969,7 +969,7 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                         disabled={!canEdit}
                         onChange={(e) => setEditAlt(e.target.value)} 
                         className="w-full bg-black/40 rounded-xl p-3 text-sm text-white focus:border focus:border-[#06b6d4] border border-white/5 font-sans outline-none shadow-inner resize-none select-text transition-all disabled:opacity-60 disabled:cursor-not-allowed" 
-                        placeholder="توضیح تصویر/فایل..."
+                        placeholder="توضیح تصویر/پرونده..."
                       ></textarea>
                     </div>
                   </div>
@@ -1035,14 +1035,14 @@ export default function MediaLibraryPage({ onSelectMedia, isPickerMode = false }
                     </svg>
                   </div>
                   <h3 className="text-white font-bold text-lg select-text">
-                    {confirmDialog.type === 'DELETE' ? 'حذف رسانه' : 'تغییر نام فایل'}
+                    {confirmDialog.type === 'DELETE' ? 'حذف رسانه' : 'تغییر نام پرونده'}
                   </h3>
                 </div>
                 
                 <p className="text-sm text-gray-300 leading-relaxed font-light select-text">
                   {confirmDialog.type === 'DELETE' 
-                    ? 'آیا از حذف این رسانه مطمئن هستید؟ این عملیات غیرقابل بازگشت است و از روی سرور پاک می‌شود.' 
-                    : 'هشدار: تغییر نام باعث تغییر لینک فایل می‌شود. در صورتی که این فایل را قبلاً در مقاله‌ای استفاده کرده‌اید، نمایش آن دچار مشکل خواهد شد. مایل به ادامه هستید؟'}
+                    ? 'آیا از حذف این رسانه مطمئن هستید؟ این عملیات غیرقابل بازگشت است و از روی پایگاه‌داده پاک می‌شود.' 
+                    : 'هشدار: تغییر نام باعث تغییر پیوند پرونده می‌شود. در صورتی که این پرونده را قبلاً در مقاله‌ای استفاده کرده‌اید، نمایش آن دچار مشکل خواهد شد. مایل به ادامه هستید؟'}
                 </p>
                 
                 <div className="flex gap-3 pt-2">

@@ -47,8 +47,8 @@ export default function CollaborationContent({ pageData }) {
             
             <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
               
-              {/* آیکون هدر: گوشه‌گرد با پس‌زمینه تیره، هاله نورانی فیروزه‌ای و هاور بدون چرخش */}
-              <div className="group/icon cursor-pointer w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] bg-[#0b0f19] border border-white/5 hover:border-[#06b6d4]/40 flex items-center justify-center text-[#06b6d4] mb-4 md:mb-6 shadow-[inset_0_0_15px_rgba(6,182,212,0.1),0_0_20px_rgba(6,182,212,0.15)] hover:shadow-[inset_0_0_20px_rgba(6,182,212,0.25),0_0_30px_rgba(6,182,212,0.45)] hover:-translate-y-0.5 transition-all duration-300">
+              {/* نماد هدر: گوشه‌گرد با پس‌زمینه تیره، هاله نورانی فیروزه‌ای و هاور بدون چرخش */}
+              <div className="group/icon cursor-pointer w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] bg-white/[0.03] backdrop-blur-md border border-white/[0.05] hover:border-[#06b6d4]/40 flex items-center justify-center text-[#06b6d4] mb-4 md:mb-6 shadow-[inset_0_0_15px_rgba(6,182,212,0.1),0_0_20px_rgba(6,182,212,0.15)] hover:shadow-[inset_0_0_20px_rgba(6,182,212,0.25),0_0_30px_rgba(6,182,212,0.45)] hover:-translate-y-0.5 transition-all duration-300">
                 <Icon 
                   name={HERO_ICON} 
                   className="w-6 h-6 md:w-8 md:h-8 transition-transform duration-300 group-hover/icon:scale-110" 
@@ -87,10 +87,10 @@ export default function CollaborationContent({ pageData }) {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-30px" }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    // اعمال قانون جدید: استفاده از flex-col به جای flex-col-reverse برای قرار گرفتن آیکون در بالا
+                    // اعمال قانون جدید: استفاده از flex-col به جای flex-col-reverse برای قرار گرفتن نماد در بالا
                     className="relative rounded-2xl md:rounded-3xl p-4 md:p-8 flex flex-col items-center text-center group cursor-pointer overflow-hidden border border-transparent shadow-[0_8px_30px_rgba(0,0,0,0.4)]"
                   >
-                    {/* اصلاح گلس‌مورفیسم پس‌زمینه کارت (حذف تیرگی مسدودکننده نور) */}
+                    {/* اصلاح گلس‌مورفیسم پس‌زمینه فیش (حذف تیرگی مسدودکننده نور) */}
                     <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl rounded-2xl md:rounded-3xl pointer-events-none -z-10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] border border-white/[0.05]" />
 
                     <div 
@@ -107,7 +107,7 @@ export default function CollaborationContent({ pageData }) {
                       }}
                     />
                     
-                    {/* آیکون کارت - طبق استاندارد همیشه در بالای متن قرار می‌گیرد */}
+                    {/* نماد فیش - طبق استاندارد همیشه در بالای متن قرار می‌گیرد */}
                     <div 
                       className="w-10 h-10 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-3 md:mb-6 transition-all duration-300 group-hover:scale-110 shadow-inner"
                       style={{ backgroundColor: `${cardColor}1a`, color: cardColor, boxShadow: `0 0 10px ${cardColor}33` }}
@@ -120,7 +120,7 @@ export default function CollaborationContent({ pageData }) {
                         {option.title}
                       </h3>
                       
-                      {/* متن توضیحات کارت (جاستیفای و وسط‌چین) */}
+                      {/* متن توضیحات فیش (جاستیفای و وسط‌چین) */}
                       <div className="text-[10px] md:text-sm text-gray-400 leading-relaxed md:leading-loose font-light w-full text-justify [text-align-last:center]">
                         <p>{option.desc}</p>
                       </div>
@@ -143,7 +143,7 @@ export default function CollaborationContent({ pageData }) {
           >
             <div className="relative rounded-3xl p-6 md:p-16 flex flex-col items-center justify-center text-center group cursor-pointer overflow-hidden border border-transparent shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
               
-              {/* اصلاح گلس‌مورفیسم باکس نهایی */}
+              {/* اصلاح گلس‌مورفیسم قاب نهایی */}
               <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl rounded-3xl pointer-events-none -z-10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] border border-white/[0.05]" />
 
               <div 
@@ -161,7 +161,7 @@ export default function CollaborationContent({ pageData }) {
               />
               
               <div className="relative z-10 flex flex-col items-center w-full max-w-2xl">
-               {/* آیکون بخش پیشنهاد آزاد (بزرگ‌شدن کل کادر درجا بدون چرخش) */}
+               {/* نماد بخش پیشنهاد آزاد (بزرگ‌شدن کل کادر درجا بدون چرخش) */}
                 <div 
                   className="w-12 h-12 md:w-20 md:h-20 flex-shrink-0 rounded-2xl border flex items-center justify-center shadow-inner mb-4 md:mb-6 transition-all duration-300 group-hover:scale-110"
                   style={{ 
@@ -178,7 +178,7 @@ export default function CollaborationContent({ pageData }) {
                   {proposal.title}
                 </h3>
                 
-                {/* متن توضیحات باکس آخر (جاستیفای و وسط‌چین) */}
+                {/* متن توضیحات قاب آخر (جاستیفای و وسط‌چین) */}
                 <div className="text-xs md:text-base text-gray-300 leading-relaxed md:leading-loose font-light text-justify [text-align-last:center] w-full px-1">
                   {proposal.paragraphs?.map((p, idx) => <p key={idx}>{p}</p>)}
                 </div>

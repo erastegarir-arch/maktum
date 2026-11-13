@@ -6,9 +6,9 @@ import { getSessionUser } from './auth'; // <--- اضافه‌شده برای ب
 
 const safeJsonParse = (data) => {
   if (!data) return null;
-  if (typeof data === 'object') return data;
+  if (typeof data === 'string') return data;
   try {
-    return JSON.parse(data);
+    return JSON.stringify(data);
   } catch (e) {
     return null;
   }
@@ -55,6 +55,11 @@ export async function getContentById(id) {
 
 export async function createContent(formData) {
   try {
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز! شما مجوز انتشار محتوا را ندارید.' };
+    }
+
     const existingSlug = await prisma.content.findUnique({ where: { slug: formData.slug } });
     if (existingSlug) return { success: false, error: 'این پیوند یکتا (Slug) قبلاً استفاده شده است!' };
 
@@ -82,6 +87,7 @@ export async function createContent(formData) {
         changelog: safeJsonParse(formData.changelog),
         downloadLinks: safeJsonParse(formData.downloadLinks),
         previewGallery: safeJsonParse(formData.previewGallery),
+        // توجه: برای create از connect استفاده می‌شود
         categories: { connect: (formData.categoryIds || []).map(id => ({ id })) },
         creators: { connect: (formData.creatorIds || []).map(id => ({ id })) },
         tags: { connect: (formData.tagIds || []).map(id => ({ id })) }
@@ -98,6 +104,11 @@ export async function createContent(formData) {
 
 export async function updateContent(id, formData) {
   try {
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز! شما مجوز ویرایش این محتوا را ندارید.' };
+    }
+
     if (!id) return { success: false, error: 'شناسه محتوا مشخص نیست.' };
 
     const existingSlug = await prisma.content.findFirst({
@@ -131,6 +142,7 @@ export async function updateContent(id, formData) {
         changelog: safeJsonParse(formData.changelog),
         downloadLinks: safeJsonParse(formData.downloadLinks),
         previewGallery: safeJsonParse(formData.previewGallery),
+        // توجه: برای update از set استفاده می‌شود
         categories: { set: (formData.categoryIds || []).map(id => ({ id })) },
         creators: { set: (formData.creatorIds || []).map(id => ({ id })) },
         tags: { set: (formData.tagIds || []).map(id => ({ id })) }
@@ -148,6 +160,12 @@ export async function updateContent(id, formData) {
 
 export async function deleteContent(id) {
   try {
+    // گارد امنیتی: فقط مسئولان مجاز به حذف محتوا هستند
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز! شما مجوز حذف محتوا را ندارید.' };
+    }
+
     if (!id) return { success: false, error: 'شناسه محتوا مشخص نیست.' };
     await prisma.content.delete({ where: { id } });
     revalidatePath('/portal-entry-99/products');
@@ -172,7 +190,7 @@ export async function getTaxonomies() {
 // ======================================================================
 export async function getContentBySlug(slug, type = null) {
   try {
-    const session = await getSessionUser(); // خواندن کاربر لاگین شده
+    const session = await getSessionUser(); // خواندن کاربر وارد شده
 
     const where = { slug };
     if (type) where.type = type;
@@ -190,7 +208,7 @@ export async function getContentBySlug(slug, type = null) {
           where: { userId: session.userId },
           select: { id: true }
         } : false,
-        // واکشی نظرات تایید شده از دیتابیس به همراه مشخصات نویسنده
+        // واکشی نظرات تایید شده از پایگاه داده به همراه مشخصات نویسنده
         comments: {
           where: { status: 'APPROVED' },
           orderBy: { createdAt: 'desc' },
@@ -205,7 +223,7 @@ export async function getContentBySlug(slug, type = null) {
 
     const isFavoritedByMe = session && content.favoritedBy && content.favoritedBy.length > 0;
 
-    // مپ کردن نظرات دیتابیس به فرمتی که قالب فرانت‌اِند شما نیاز دارد
+    // مپ کردن نظرات پایگاه داده به قالبی که قالب فرانت‌اِند شما نیاز دارد
     const formattedComments = content.comments ? content.comments.map(c => ({
       id: c.id,
       user: c.user?.firstName || c.user?.lastName ? `${c.user.firstName || ''} ${c.user.lastName || ''}`.trim() : 'کاربر مکتوم',

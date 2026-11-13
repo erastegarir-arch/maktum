@@ -39,4 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-prisma/dev.db
+
+# database - مسدودسازی تمام پرونده‌های پایگاه داده برای جلوگیری از لو رفتن اطلاعات کاربران
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+prisma/*.db
+prisma/*.db-journal

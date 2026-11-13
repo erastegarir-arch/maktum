@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'مدیریت اعضا و کاربران',
+  title: 'مسئولیت اعضا و کاربران',
 };
 
 export default function UsersLayout({ children }) {

@@ -35,7 +35,7 @@ export default function AboutContent({ pageData = {} }) {
 
   return (
     // پدینگ بالا (pt) افزایش یافت تا فاصله بِرِدکرامب از هدر در هر دو حالت موبایل و دسکتاپ حفظ شود.
-    // space-y حذف شد تا فاصله‌ها به صورت دستی روی هر section کنترل شود (برای نصف کردن فاصله).
+    // space-y حذف شد تا فاصله‌ها به صورت دستی روی هر section نظارت شود (برای نصف کردن فاصله).
     // اضافه شدن کلاس select-none به تگ main برای جلوگیری از انتخاب متن در تمام صفحه
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 pb-20 w-full relative z-10 pt-0 select-none">
       
@@ -57,7 +57,7 @@ export default function AboutContent({ pageData = {} }) {
 
           <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
             
-            {/* آیکون هدر: گلس‌مورفیسم ملایم به جای رنگ ثابت تیره */}
+            {/* نماد هدر: گلس‌مورفیسم ملایم به جای رنگ ثابت تیره */}
             <div className="group/icon cursor-pointer w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] bg-white/[0.03] backdrop-blur-md border border-white/[0.05] hover:border-[#06b6d4]/40 flex items-center justify-center text-[#06b6d4] mb-4 md:mb-6 shadow-[inset_0_0_15px_rgba(6,182,212,0.1),0_0_20px_rgba(6,182,212,0.15)] hover:shadow-[inset_0_0_20px_rgba(6,182,212,0.25),0_0_30px_rgba(6,182,212,0.45)] hover:-translate-y-0.5 transition-all duration-300">
               <Icon 
                 name="solarsystem" 
@@ -218,14 +218,14 @@ export default function AboutContent({ pageData = {} }) {
               </div>
 
               <div className="relative z-20 flex items-center justify-center transition-transform duration-300 hover:scale-110 cursor-pointer">
-                <Icon name="allah" className="w-12 h-12 md:w-20 md:h-20 text-[#f59e0b] drop-shadow-[0_0_15px_rgba(245,158,11,0.7)]" />
+                <Icon name="iranmap" className="w-12 h-12 md:w-20 md:h-20 text-[#f59e0b] drop-shadow-[0_0_15px_rgba(245,158,11,0.7)]" />
               </div>
             </div>
           </div>
         </motion.section>
       )}
 
-      {/* ۵. ارکان فعالیت (کارت‌ها) */}
+      {/* ۵. ارکان فعالیت (فیش‌ها) */}
       {feats.enabled !== false && (
         <section className="mt-6 md:mt-12 space-y-5 md:space-y-8">
           <div className="text-center">
@@ -275,7 +275,7 @@ export default function AboutContent({ pageData = {} }) {
                   >
                     {feature.title}
                   </h3>
-                  {/* متن کارت‌ها (وسط‌چین و جاستیفای) */}
+                  {/* متن فیش‌ها (وسط‌چین و جاستیفای) */}
                   <p className="text-[10px] md:text-sm text-gray-400 leading-relaxed md:leading-loose font-light text-justify [text-align-last:center]">
                     {feature.desc}
                   </p>
@@ -387,7 +387,7 @@ export default function AboutContent({ pageData = {} }) {
                   <Icon name="location" className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div className="flex-1 pt-1 w-full text-center sm:text-right">
-                  <p className="text-[10px] md:text-xs text-gray-400 mb-1 md:mb-2">آدرس دفتر / مرکز</p>
+                  <p className="text-[10px] md:text-xs text-gray-400 mb-1 md:mb-2">نشانی دفتر / مرکز</p>
                   <p className="text-[11px] md:text-sm text-white font-sans leading-relaxed text-justify [text-align-last:center] sm:[text-align-last:right]">
                     {contactAddress}
                   </p>
@@ -434,7 +434,7 @@ export default function AboutContent({ pageData = {} }) {
         </motion.section>
       )}
 
-      {/* پاپ‌آپ شبکه‌های اجتماعی */}
+      {/* باز شونده‌ شبکه‌های اجتماعی */}
       <AnimatePresence>
         {isSocialPopupOpen && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#050810]/60 backdrop-blur-md" onClick={() => setIsSocialPopupOpen(false)}>

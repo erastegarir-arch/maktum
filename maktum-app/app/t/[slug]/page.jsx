@@ -1,8 +1,9 @@
 import TaxonomyClientPage from '@/app/components/frontend/TaxonomyClientPage';
 import { getTaxonomyBySlug, getContentsByTaxonomy } from '@/app/actions/taxonomies'; 
+import { constructPageMetadata, generateStaticPageSchema } from '@/lib/seo';
 
 // ==========================================
-// ۱. تولید متادیتای سئو (کاملاً داینامیک)
+// ۱. تولید متادیتای سئو (کاملاً پویا)
 // ==========================================
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
@@ -12,13 +13,15 @@ export async function generateMetadata({ params }) {
 
   if (!taxonomy) return {};
 
-  // ایجاد عنوان یکپارچه برای سئو (استفاده از name)
   const pageTitle = taxonomy.preTitle ? `${taxonomy.preTitle} | ${taxonomy.name}` : taxonomy.name;
+  const finalDesc = taxonomy.metaDesc || taxonomy.description || `پایگاه داده محتوای مرتبط با ${taxonomy.name}`;
 
-  return {
+  return constructPageMetadata({
     title: pageTitle, 
-    description: taxonomy.description || `آرشیو محتوای مرتبط با ${taxonomy.name}`,
-  };
+    description: finalDesc,
+    path: `/t/${decodedSlug}`,
+    ogImage: taxonomy.imageUrl || undefined,
+  });
 }
 
 // ==========================================
@@ -38,21 +41,36 @@ export default async function TaxonomyServerPage({ params }) {
   // استخراج تم رنگی متناسب با نوع بایگانی برای استفاده در AmbientBackground
   let themeColor = '#06b6d4'; // فیروزه‌ای پیش‌فرض
   if (taxonomy.type === 'CATEGORY') themeColor = '#10b981'; // سبز (دسته‌بندی)
-  else if (taxonomy.type === 'HASHTAG') themeColor = '#38bdf8'; // آبی روشن (هشتگ)
+  else if (taxonomy.type === 'HASHTAG') themeColor = '#38bdf8'; // آبی روشن (هشتک)
   else if (taxonomy.type === 'CREATOR') themeColor = '#a855f7'; // بنفش (پدیدآورنده)
 
   // اصلاح دیتای ارسالی به فرانت:
-  // بک‌اِند عنوان را در فیلد name ذخیره می‌کند، آن را به title مپ می‌کنیم تا باکس معرفی درست کار کند
+  // بک‌اِند عنوان را در فیلد name ذخیره می‌کند، آن را به title مپ می‌کنیم تا قاب معرفی درست کار کند
   const enhancedTaxonomy = {
     ...taxonomy,
     title: taxonomy.name, // رفع مشکل نشان داده نشدن عنوان
   };
 
+  // تولید اسکیمای پویا برای هر دسته‌بندی/هشتک
+  const schema = generateStaticPageSchema({
+    schemaType: 'CollectionPage',
+    title: enhancedTaxonomy.title,
+    description: taxonomy.metaDesc || taxonomy.description || `پایگاه داده محتوای مرتبط با ${taxonomy.name}`,
+    path: `/t/${decodedSlug}`,
+    breadcrumbName: enhancedTaxonomy.title,
+  });
+
   return (
-    <TaxonomyClientPage 
-      taxonomy={enhancedTaxonomy} 
-      contents={relatedContents || []} 
-      themeColor={themeColor} // پاس دادن کدرنگ به کامپوننت کلاینت
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <TaxonomyClientPage 
+        taxonomy={enhancedTaxonomy} 
+        contents={relatedContents || []} 
+        themeColor={themeColor} 
+      />
+    </>
   );
 }

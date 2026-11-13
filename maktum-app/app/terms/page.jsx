@@ -2,10 +2,27 @@ import Breadcrumbs from '@/app/components/Breadcrumbs';
 import ProgressBar from '@/app/components/ProgressBar';
 import RulesContent from '@/app/components/frontend/RulesContent';
 import { getSetting } from '@/app/actions/settings';
+import { constructPageMetadata } from '@/lib/seo'; // اضافه شدن تابع سئو
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;
+
+// تولید متادیتای پویا برای سئو صفحه قوانین
+export async function generateMetadata() {
+  const seoTitle = await getSetting('terms_seo_title'); 
+  const pageTitle = await getSetting('terms_title'); 
+  const seoDesc = await getSetting('terms_seo_description');
+
+  const finalTitle = seoTitle || pageTitle || 'قوانین و مقررات';
+  const finalDesc = seoDesc || 'شرایط و ضوابط بهره‌برداری غیرتجاری و رایگان از راش‌ها، فوتیج‌های خام و محتواهای پژوهشی منتشرشده در پلتفرم مکتوم.';
+
+  return constructPageMetadata({
+    title: finalTitle,
+    description: finalDesc,
+    path: '/terms',
+  });
+}
 
 export default async function RulesPage() {
   let storedData = null;

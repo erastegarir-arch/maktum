@@ -241,7 +241,7 @@ const SacredWatermark = ({ type, color }) => {
 };
 
 // ============================================================================
-// ۴. هوک افکت رمزگشایی (Decryption Reveal)
+// ۴. هوک افکت گذرواژه‌گشایی (Decryption Reveal)
 // ============================================================================
 const CIPHER_CHARS = ['ا', 'ل', 'م', 'ص', 'ر', 'ك', 'ه', 'ي', 'ع', 'ط', 'س', 'ح', 'ق', 'ن', 'ـ', '✦'];
 
@@ -295,7 +295,7 @@ function useDecryptionText(targetText, triggerKey, durationMs = 1000) {
 // ============================================================================
 // ۵. کامپوننت اصلی پیشخوان (کتیبه دیجیتال مکتوم)
 // ============================================================================
-import { useRouter } from 'next/navigation'; // این خط را به بالای فایل در کنار ایمپورت‌های react/next اضافه کنید
+import { useRouter } from 'next/navigation'; // این خط را به بالای پرونده در کنار ایمپورت‌های react/next اضافه کنید
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -327,19 +327,19 @@ export default function DashboardPage() {
     if (authLoading) return;
 
     if (user) {
-      // این صفحه برای هر کاربری که نقش مدیریت دارد (حتی بدون مجوز خاص) آزاد است
+      // این صفحه برای هر کاربری که نقش مسئولیت دارد (حتی بدون مجوز خاص) آزاد است
       if (user.isAdmin || user.isSuperAdmin) {
         setHasAccess(true);
       } else {
         // کاربر عادی است
         setHasAccess(false);
-        router.replace('/'); // ریدایرکت مستقیم به صفحه اصلی سایت
+        router.replace('/'); // ریدایرکت مستقیم به صفحه اصلی سامانه
       }
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
       if (!isLoggedIn) {
         setHasAccess(false);
-        router.replace('/'); // ریدایرکت مستقیم به صفحه اصلی سایت
+        router.replace('/'); // ریدایرکت مستقیم به صفحه اصلی سامانه
       }
     }
   }, [user, authLoading, router]);
@@ -369,7 +369,7 @@ export default function DashboardPage() {
   if (!mounted || hasAccess === null) return <AdminLoading />;
 
   if (hasAccess === false) {
-    // چون در useEffect ریدایرکت انجام شده، اینجا فقط لودینگ نشان می‌دهیم تا صفحه اصلی سایت بارگذاری شود
+    // چون در useEffect ریدایرکت انجام شده، اینجا فقط لودینگ نشان می‌دهیم تا صفحه اصلی سامانه بارگذاری شود
     return <AdminLoading />;
   }
 
@@ -401,7 +401,7 @@ export default function DashboardPage() {
               <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ backgroundColor: activeTheme.accentHex, boxShadow: `0 0 12px ${activeTheme.accentHex}` }} />
             </span>
             <span className="text-xs sm:text-sm font-bold text-gray-100 tracking-wide select-none">
-              سلام، {user?.firstName || 'مدیر گرامی'}
+              سلام، {user?.firstName || 'مسئول گرامی'}
             </span>
           </motion.div>
 
@@ -414,7 +414,7 @@ export default function DashboardPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.98, y: -10 }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
-              // این کارت تنها بخشی است که overflow-hidden دارد تا بردر نوری را گرد نگه دارد، اما سایه دراپ از بیرون آن تولید می‌شود و دیگر قطع نمی‌شود
+              // این فیش تنها بخشی است که overflow-hidden دارد تا بردر نوری را گرد نگه دارد، اما سایه دراپ از بیرون آن تولید می‌شود و دیگر قطع نمی‌شود
               className="group relative z-10 w-full h-[65vh] min-h-[380px] max-h-[550px] rounded-[1.75rem] sm:rounded-[2.5rem] p-[1.5px] overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.8)] shrink-0 select-none"
             >
               <motion.div
@@ -430,7 +430,7 @@ export default function DashboardPage() {
                 <div className="absolute top-0 inset-x-8 sm:inset-x-16 h-[1.5px] opacity-90 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${activeTheme.accentHex}, transparent)` }} />
                 <SacredWatermark type={activeTheme.watermark} color={activeTheme.accentHex} />
 
-                {/* === منطقه بالایی کارت (Header) === */}
+                {/* === منطقه بالایی فیش (Header) === */}
                 <div className="relative z-10 w-full flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-4 pb-3 sm:pb-4 border-b border-white/[0.08] text-xs shrink-0 select-none">
                   <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] shadow-inner">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: activeTheme.accentHex, boxShadow: `0 0 10px ${activeTheme.accentHex}` }} />
@@ -443,7 +443,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
-                {/* === منطقه میانی داینامیک (Middle Dynamic Content) === */}
+                {/* === منطقه میانی پویا (Middle Dynamic Content) === */}
                 <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center overflow-hidden py-2 sm:py-4 select-none">
                   <p
                     className={`quran-text select-none w-full px-2 sm:px-6 text-[clamp(1.1rem,3.5vw,2.5rem)] font-normal bg-gradient-to-r ${activeTheme.arabicGradient} bg-clip-text text-transparent transition-all duration-300 ${isDecrypting ? 'opacity-75 blur-[0.5px]' : 'opacity-100 blur-0'}`}
@@ -468,7 +468,7 @@ export default function DashboardPage() {
                   </motion.p>
                 </div>
 
-                {/* === منطقه پایینی کارت (Footer) === */}
+                {/* === منطقه پایینی فیش (Footer) === */}
                 <div className="relative z-10 w-full pt-3 sm:pt-4 border-t border-white/[0.07] flex items-center justify-center shrink-0 select-none">
                   <div className="inline-flex items-center gap-2.5 bg-[#050810]/60 px-4 py-1.5 sm:px-5 sm:py-2 rounded-xl border border-white/[0.07] shadow-[inset_0_2px_8px_rgba(0,0,0,0.6)]">
                     <span className="text-gray-400 text-[11px] sm:text-xs select-none">سوره مبارکه</span>
@@ -487,7 +487,7 @@ export default function DashboardPage() {
             <div className="inline-flex items-center gap-1.5 sm:gap-2 p-1.5 rounded-2xl bg-[#070b14]/70 backdrop-blur-2xl border border-white/[0.07] shadow-[0_10px_30px_rgba(0,0,0,0.5)] opacity-90 sm:opacity-55 hover:opacity-100 transition-all duration-300">
               <button type="button" onClick={() => setSelectedDayOffset((d) => d - 1)} className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.09] active:scale-95 text-xs text-gray-300 hover:text-white border border-white/5 cursor-pointer transition-all duration-200 select-none">روز قبل</button>
               {selectedDayOffset !== 0 && (
-                <button type="button" onClick={() => setSelectedDayOffset(0)} className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] active:scale-95 text-xs text-white font-bold border border-white/10 cursor-pointer transition-all duration-200 select-none" style={{ boxShadow: `0 0 15px -5px ${activeTheme.accentHex}` }}>بازگشت به امروز</button>
+                <button type="button" onClick={() => setSelectedDayOffset(0)} className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] active:scale-95 text-xs text-white font-bold border border-white/10 cursor-pointer transition-all duration-200 select-none" style={{ boxShadow: `0 0 15px -5px ${activeTheme.accentHex}` }}>امروز</button>
               )}
               <button type="button" onClick={() => setSelectedDayOffset((d) => d + 1)} className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.09] active:scale-95 text-xs text-gray-300 hover:text-white border border-white/5 cursor-pointer transition-all duration-200 select-none">روز بعد</button>
             </div>

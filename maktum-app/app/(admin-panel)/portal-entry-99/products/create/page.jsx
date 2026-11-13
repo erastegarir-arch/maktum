@@ -25,7 +25,7 @@ const THEMES = {
   BLOG: { color: 'text-[#b45309]', bg: 'bg-[#b45309]', border: 'border-[#b45309]', gradientVia: 'via-[#b45309]', hoverBg: 'hover:bg-[#b45309]', hoverBorder: 'hover:border-[#b45309]', glow: 'shadow-[0_0_15px_rgba(180,83,9,0.3)]' }
 };
 
-// ================= کامپوننت جستجوی پویا (Autocomplete/Select) =================
+// ================= کامپوننت کاوش پویا (Autocomplete/Select) =================
 const DynamicSelector = ({ options, selectedIds, onChange, placeholder, activeTheme, label }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -63,7 +63,7 @@ const DynamicSelector = ({ options, selectedIds, onChange, placeholder, activeTh
         </div>
       )}
 
-      {/* باکس سرچ */}
+      {/* قاب کاوش */}
       <div className="relative">
         <input
           type="text"
@@ -78,7 +78,7 @@ const DynamicSelector = ({ options, selectedIds, onChange, placeholder, activeTh
         />
         <Icon name="search" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-20" />
         
-        {/* لیست کشویی (Dropdown) */}
+        {/* فهرست کشویی (Dropdown) */}
         <AnimatePresence>
           {isOpen && query.trim() !== '' && (
             <motion.div 
@@ -126,7 +126,7 @@ export default function CreateContentPage() {
     if (isWorking) return;
 
     if (user) {
-      // فقط مدیرانی که تیک ایجاد محتوا را دارند مجاز به ورود هستند
+      // فقط مسئولانی که تیک ایجاد محتوا را دارند مجاز به ورود هستند
       setHasAccess(user.isSuperAdmin || (can && can('CONTENT_CREATE')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -140,7 +140,7 @@ export default function CreateContentPage() {
   }, [user, authIsLoading, authLoading, isFetching, can]);
 
   // ==========================================
-  // ۲. استیت‌های محتوا و مدیریت تب‌ها
+  // ۲. استیت‌های محتوا و مسئولیت تب‌ها
   // ==========================================
   const [isSaving, setIsSaving] = useState(false);
   const [taxonomies, setTaxonomies] = useState([]);
@@ -230,7 +230,7 @@ export default function CreateContentPage() {
     if (!can('CONTENT_CREATE')) return toast.error('شما مجوز ایجاد محتوای جدید را ندارید.');
     
     if (!titleBase && !titleHighlight) return toast.error('حداقل یکی از بخش‌های عنوان باید وارد شود!');
-    if (!slug) return toast.error('پیوند یکتا (Slug) الزامی است!');
+    if (!slug) return toast.error('پیوند یکتا الزامی است!');
     
     setIsSaving(true);
     
@@ -269,7 +269,7 @@ export default function CreateContentPage() {
   const tags = taxonomies.filter(t => t.type === 'HASHTAG');
 
   // ==========================================
-  // ۳. کنترل رندر لودینگ و انسداد دسترسی
+  // ۳. نظارت رندر لودینگ و انسداد دسترسی
   // ==========================================
   if (!isMounted || hasAccess === null) return <AdminLoading />;
 
@@ -280,7 +280,7 @@ export default function CreateContentPage() {
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز لازم برای ایجاد محتوا در پنل را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -337,7 +337,7 @@ export default function CreateContentPage() {
         {/* ================= ستون راست (اصلی) ================= */}
         <div className="lg:col-span-8 space-y-6">
           
-          {/* باکس اطلاعات پایه */}
+          {/* قاب اطلاعات پایه */}
           <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] group overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
             <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
             <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
@@ -365,7 +365,7 @@ export default function CreateContentPage() {
 
               <div className="space-y-2">
                 <label className="text-xs text-gray-300 font-bold flex items-center justify-between pl-1">
-                  <span>پیوند یکتا (Slug) انگلیسی</span>
+                  <span>پیوند یکتا</span>
                   <button type="button" className={`text-[10px] ${activeTheme.color} hover:underline font-bold cursor-pointer font-sans`} onClick={() => setSlug((titleBase + ' ' + titleHighlight).trim().replace(/\s+/g, '-').toLowerCase())}>تبدیل خودکار از عنوان</button>
                 </label>
                 <input type="text" value={slug} onChange={e => setSlug(e.target.value.toLowerCase())} placeholder="my-custom-content-slug" className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-white placeholder:text-gray-600 text-sm focus:border focus:bg-black/60 outline-none dir-ltr text-left transition-all font-sans select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'} />
@@ -373,29 +373,29 @@ export default function CreateContentPage() {
             </div>
           </div>
 
-          {/* باکس سئو */}
+          {/* قاب سئو */}
           <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] group overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
             <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
             <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
             <div className="p-6 md:p-8 space-y-5 relative z-10 bg-[#050810]/50 shadow-inner rounded-3xl">
               <h2 className="text-lg font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
-                <Icon name="search" className={`w-5 h-5 ${activeTheme.color}`} /> تنظیمات سئو (SEO Meta)
+                <Icon name="search" className={`w-5 h-5 ${activeTheme.color}`} /> تنظیمات سئو
               </h2>
               
               <div className="space-y-2">
-                <label className="text-xs text-gray-300 font-bold flex justify-between pl-1">عنوان سئو (Meta Title) <span className="font-sans text-[10px] text-gray-500">{metaTitle.length} / 60</span></label>
-                <input type="text" value={metaTitle} onChange={e => setMetaTitle(e.target.value)} placeholder="عنوان جذاب برای موتورهای جستجو..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-white placeholder:text-gray-600 text-sm focus:border focus:bg-black/60 outline-none transition-all font-sans select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'} />
+                <label className="text-xs text-gray-300 font-bold flex justify-between pl-1">عنوان سئو<span className="font-sans text-[10px] text-gray-500">{metaTitle.length} / 60</span></label>
+                <input type="text" value={metaTitle} onChange={e => setMetaTitle(e.target.value)} placeholder="عنوان جذاب برای موتورهای کاوش..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-white placeholder:text-gray-600 text-sm focus:border focus:bg-black/60 outline-none transition-all font-sans select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'} />
               </div>
               
               <div className="space-y-2">
-                <label className="text-xs text-gray-300 font-bold flex justify-between pl-1">توضیحات سئو (Meta Description) <span className="font-sans text-[10px] text-gray-500">{metaDesc.length} / 160</span></label>
+                <label className="text-xs text-gray-300 font-bold flex justify-between pl-1">توضیحات سئو<span className="font-sans text-[10px] text-gray-500">{metaDesc.length} / 160</span></label>
                 <textarea rows="3" value={metaDesc} onChange={e => setMetaDescription(e.target.value)} placeholder="چکیده‌ای که در نتایج گوگل نمایش داده می‌شود..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-white placeholder:text-gray-600 text-sm focus:border focus:bg-black/60 outline-none resize-none transition-all text-justify font-light select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'}></textarea>
               </div>
             </div>
           </div>
 
-          {/* باکس متن اصلی / ادیتور */}
+          {/* قاب متن اصلی / ویرایشگر */}
           <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] group overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
             <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
             <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
@@ -403,13 +403,13 @@ export default function CreateContentPage() {
             <div className="p-6 md:p-8 space-y-5 relative z-10 bg-[#050810]/50 shadow-inner rounded-3xl">
               <h2 className="text-lg font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
                 <Icon name="browser" className={`w-5 h-5 ${activeTheme.color}`} /> 
-                {type === 'BLOG' ? 'محتوای متنی مقاله' : 'توضیحات و معرفی (Editor)'}
+                {type === 'BLOG' ? 'محتوای متنی مقاله' : 'توضیحات و معرفی'}
               </h2>
 
               {type === 'BLOG' && (
                 <div className="space-y-2 mb-6">
-                  <label className="text-xs text-gray-300 font-bold pl-1">لید خبر / چکیده برجسته</label>
-                  <textarea rows="3" value={lead} onChange={e => setLead(e.target.value)} placeholder="پاراگراف جذابی که به عنوان مقدمه در ابتدای مقاله با استایل متفاوت نمایش داده می‌شود..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-4 text-white placeholder:text-gray-600 text-sm focus:border focus:bg-black/60 outline-none resize-none transition-all font-light text-justify select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'}></textarea>
+                  <label className="text-xs text-gray-300 font-bold pl-1">چکیده برجسته</label>
+                  <textarea rows="3" value={lead} onChange={e => setLead(e.target.value)} placeholder="بند جذابی که به عنوان مقدمه در ابتدای مقاله با سبک متفاوت نمایش داده می‌شود..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-4 text-white placeholder:text-gray-600 text-sm focus:border focus:bg-black/60 outline-none resize-none transition-all font-light text-justify select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'}></textarea>
                 </div>
               )}
 
@@ -443,7 +443,7 @@ export default function CreateContentPage() {
                       <h2 className="text-lg font-bold text-white flex items-center gap-2">
                         <Icon name="playCircle" className={`w-5 h-5 ${activeTheme.color}`} /> گالری پیش‌نمایش
                       </h2>
-                      <button type="button" onClick={() => addItem(setPreviewGallery, { type: 'video', url: '', desc: '' })} className={`text-xs bg-white/5 border border-transparent shadow-inner hover:bg-white/10 ${activeTheme.color} px-4 py-2.5 rounded-xl font-bold transition-colors cursor-pointer`}>+ افزودن مدیا</button>
+                      <button type="button" onClick={() => addItem(setPreviewGallery, { type: 'video', url: '', desc: '' })} className={`text-xs bg-white/5 border border-transparent shadow-inner hover:bg-white/10 ${activeTheme.color} px-4 py-2.5 rounded-xl font-bold transition-colors cursor-pointer`}>+ افزودن رسانه</button>
                     </div>
                     
                     <div className="space-y-4">
@@ -462,9 +462,9 @@ export default function CreateContentPage() {
                             </div>
                             
                             <div className="flex-1 space-y-1">
-                              <label className="text-[10px] text-gray-400 font-bold pl-1">لینک از کتابخانه رسانه</label>
+                              <label className="text-[10px] text-gray-400 font-bold pl-1">پیوند از کتابخانه رسانه</label>
                               <div className="flex items-center gap-2">
-                                <input type="text" value={item.url} readOnly placeholder="آدرس فایل..." className="w-full bg-black/60 border border-transparent shadow-inner rounded-lg p-2.5 text-xs text-gray-400 placeholder:text-gray-600 outline-none dir-ltr text-left font-sans select-text" />
+                                <input type="text" value={item.url} readOnly placeholder="نشانی پرونده..." className="w-full bg-black/60 border border-transparent shadow-inner rounded-lg p-2.5 text-xs text-gray-400 placeholder:text-gray-600 outline-none dir-ltr text-left font-sans select-text" />
                                 <button type="button" onClick={() => { setMediaPickerTarget('gallery'); setActiveGalleryIndex(item.id); }} className={`px-4 py-2.5 rounded-lg text-xs font-bold text-white transition-colors cursor-pointer ${activeTheme.bg} hover:brightness-110 shrink-0 border border-transparent`}>انتخاب</button>
                               </div>
                             </div>
@@ -477,7 +477,7 @@ export default function CreateContentPage() {
                   </div>
                 </div>
 
-                {/* اطلاعات فایل‌ها */}
+                {/* اطلاعات پرونده‌ها */}
                 <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] group overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
                   <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                   <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
@@ -485,7 +485,7 @@ export default function CreateContentPage() {
                   <div className="p-6 md:p-8 relative z-10 bg-[#050810]/50 shadow-inner rounded-3xl">
                     <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                       <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                        <Icon name="hardDrives" className={`w-5 h-5 ${activeTheme.color}`} /> مشخصات فایل‌ها
+                        <Icon name="hardDrives" className={`w-5 h-5 ${activeTheme.color}`} /> مشخصات پرونده‌ها
                       </h2>
                       <button type="button" onClick={() => addItem(setFileSpecs, { label: '', value: '', iconUrl: '' })} className={`text-xs bg-white/5 border border-transparent shadow-inner hover:bg-white/10 ${activeTheme.color} px-4 py-2.5 rounded-xl font-bold transition-colors cursor-pointer`}>+ افزودن مشخصه</button>
                     </div>
@@ -505,7 +505,7 @@ export default function CreateContentPage() {
                   </div>
                 </div>
 
-                {/* لینک‌های دانلود */}
+                {/* پیوند‌های بارگیری */}
                 <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] group overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
                   <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                   <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
@@ -513,9 +513,9 @@ export default function CreateContentPage() {
                   <div className="p-6 md:p-8 relative z-10 bg-[#050810]/50 shadow-inner rounded-3xl">
                     <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                       <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                        <Icon name="download" className={`w-5 h-5 ${activeTheme.color}`} /> فایل‌های اصلی (لینک دانلود)
+                        <Icon name="download" className={`w-5 h-5 ${activeTheme.color}`} /> پرونده‌های اصلی (پیوند بارگیری)
                       </h2>
-                      <button type="button" onClick={() => addItem(setDownloadLinks, { title: '', desc: '', format: '', url: '' })} className={`text-xs bg-white/5 border border-transparent shadow-inner hover:bg-white/10 ${activeTheme.color} px-4 py-2.5 rounded-xl font-bold transition-colors cursor-pointer`}>+ لینک جدید</button>
+                      <button type="button" onClick={() => addItem(setDownloadLinks, { title: '', desc: '', format: '', url: '' })} className={`text-xs bg-white/5 border border-transparent shadow-inner hover:bg-white/10 ${activeTheme.color} px-4 py-2.5 rounded-xl font-bold transition-colors cursor-pointer`}>+ پیوند جدید</button>
                     </div>
                     
                     <div className="space-y-4">
@@ -524,19 +524,19 @@ export default function CreateContentPage() {
                           <button type="button" onClick={() => removeItem(setDownloadLinks, dl.id)} className="absolute top-2 left-2 p-1.5 text-gray-500 hover:text-rose-500 transition-colors cursor-pointer"><Icon name="close" className="w-4 h-4" /></button>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-6">
-                            <input type="text" placeholder="عنوان فایل (مثال: مستند کامل)" value={dl.title} onChange={e => updateItem(setDownloadLinks, dl.id, 'title', e.target.value)} className="bg-black/60 border border-white/5 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-600 outline-none font-bold transition-all select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'} />
-                            <input type="text" placeholder="فرمت/کیفیت (مثال: MP4 - 1080p)" value={dl.format} onChange={e => updateItem(setDownloadLinks, dl.id, 'format', e.target.value)} className="bg-black/60 border border-white/5 rounded-lg p-2.5 text-xs text-white placeholder:text-gray-600 outline-none font-sans transition-all select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'} />
+                            <input type="text" placeholder="عنوان پرونده (مثال: مستند کامل)" value={dl.title} onChange={e => updateItem(setDownloadLinks, dl.id, 'title', e.target.value)} className="bg-black/60 border border-white/5 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-600 outline-none font-bold transition-all select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'} />
+                            <input type="text" placeholder="قالب/کیفیت (مثال: MP4 - 1080p)" value={dl.format} onChange={e => updateItem(setDownloadLinks, dl.id, 'format', e.target.value)} className="bg-black/60 border border-white/5 rounded-lg p-2.5 text-xs text-white placeholder:text-gray-600 outline-none font-sans transition-all select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'} />
                             <input type="text" placeholder="توضیحات (مثال: بدون حذفیات - مناسب پژوهش)" value={dl.desc} onChange={e => updateItem(setDownloadLinks, dl.id, 'desc', e.target.value)} className="col-span-1 md:col-span-2 bg-black/60 border border-white/5 rounded-lg p-2.5 text-xs text-white placeholder:text-gray-600 outline-none font-light transition-all select-text" style={{ '--tw-ring-color': activeTheme.color }} onFocus={e => e.target.style.borderColor = activeTheme.color} onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.05)'} />
-                            <input type="text" placeholder="لینک دانلود مستقیم (URL)" value={dl.url} onChange={e => updateItem(setDownloadLinks, dl.id, 'url', e.target.value)} className="col-span-1 md:col-span-2 bg-black/60 border border-white/5 rounded-lg p-3 text-xs text-blue-300 placeholder:text-gray-600 dir-ltr text-left outline-none font-sans shadow-inner focus:border-blue-400 transition-all select-text" />
+                            <input type="text" placeholder="پیوند بارگیری مستقیم" value={dl.url} onChange={e => updateItem(setDownloadLinks, dl.id, 'url', e.target.value)} className="col-span-1 md:col-span-2 bg-black/60 border border-white/5 rounded-lg p-3 text-xs text-blue-300 placeholder:text-gray-600 dir-ltr text-left outline-none font-sans shadow-inner focus:border-blue-400 transition-all select-text" />
                           </div>
                         </div>
                       ))}
-                      {downloadLinks.length === 0 && <p className="text-xs text-gray-500 text-center py-2 font-light">هیچ لینکی اضافه نشده است.</p>}
+                      {downloadLinks.length === 0 && <p className="text-xs text-gray-500 text-center py-2 font-light">هیچ پیوندی اضافه نشده است.</p>}
                     </div>
                   </div>
                 </div>
 
-                {/* تاریخچه آپدیت‌ها */}
+                {/* تاریخچه به‌روزرسانی‌ها */}
                 <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] group overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
                   <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                   <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
@@ -546,7 +546,7 @@ export default function CreateContentPage() {
                       <h2 className="text-lg font-bold text-white flex items-center gap-2">
                         <Icon name="update" className={`w-5 h-5 ${activeTheme.color}`} /> تاریخچه به‌روزرسانی‌ها
                       </h2>
-                      <button type="button" onClick={() => prependItem(setChangelog, { version: '', date: '', title: '', desc: '' })} className={`text-xs bg-white/5 border border-transparent shadow-inner hover:bg-white/10 ${activeTheme.color} px-4 py-2.5 rounded-xl font-bold transition-colors cursor-pointer`}>+ آپدیت جدید</button>
+                      <button type="button" onClick={() => prependItem(setChangelog, { version: '', date: '', title: '', desc: '' })} className={`text-xs bg-white/5 border border-transparent shadow-inner hover:bg-white/10 ${activeTheme.color} px-4 py-2.5 rounded-xl font-bold transition-colors cursor-pointer`}>+ به‌روزرسانی جدید</button>
                     </div>
                     
                     <div className="space-y-4 relative pl-4">
@@ -561,11 +561,11 @@ export default function CreateContentPage() {
                             <input type="text" placeholder="ورژن (مثال: v1.2)" value={log.version} onChange={e => updateItem(setChangelog, log.id, 'version', e.target.value)} className="bg-black/60 border border-white/5 shadow-inner focus:border-white/20 rounded-lg px-3 py-2 text-xs text-white placeholder:text-gray-600 outline-none font-sans text-center w-28 transition-all select-text" />
                             <input type="text" placeholder="تاریخ شمسی" value={log.date} onChange={e => updateItem(setChangelog, log.id, 'date', e.target.value)} className="bg-black/60 border border-white/5 rounded-lg px-3 py-2 text-xs text-white placeholder:text-gray-600 outline-none text-right font-sans transition-all focus:border-white/20 select-text shadow-inner" />
                           </div>
-                          <input type="text" placeholder="عنوان آپدیت (مهم)" value={log.title} onChange={e => updateItem(setChangelog, log.id, 'title', e.target.value)} className="w-full bg-black/60 border border-white/5 rounded-lg p-2.5 text-sm font-bold text-white placeholder:text-gray-600 outline-none mb-4 font-sans transition-all focus:border-white/20 select-text shadow-inner" />
-                          <textarea rows="3" placeholder="توضیحات تکمیلی... (هر خط با زدن دکمه Enter یک نقطه بولت در سایت محسوب می‌شود)" value={log.desc} onChange={e => updateItem(setChangelog, log.id, 'desc', e.target.value)} className="w-full bg-black/60 border border-white/5 rounded-lg p-2.5 text-xs text-white placeholder:text-gray-600 outline-none resize-none leading-relaxed font-light text-justify transition-all select-text shadow-inner focus:border-white/20"></textarea>
+                          <input type="text" placeholder="عنوان به‌روزرسانی (مهم)" value={log.title} onChange={e => updateItem(setChangelog, log.id, 'title', e.target.value)} className="w-full bg-black/60 border border-white/5 rounded-lg p-2.5 text-sm font-bold text-white placeholder:text-gray-600 outline-none mb-4 font-sans transition-all focus:border-white/20 select-text shadow-inner" />
+                          <textarea rows="3" placeholder="توضیحات تکمیلی... (هر خط با زدن دکمه Enter یک نقطه  در سامانه محسوب می‌شود)" value={log.desc} onChange={e => updateItem(setChangelog, log.id, 'desc', e.target.value)} className="w-full bg-black/60 border border-white/5 rounded-lg p-2.5 text-xs text-white placeholder:text-gray-600 outline-none resize-none leading-relaxed font-light text-justify transition-all select-text shadow-inner focus:border-white/20"></textarea>
                         </div>
                       ))}
-                      {changelog.length === 0 && <p className="text-xs text-gray-500 text-center py-2 font-light">هیچ آپدیتی ثبت نشده است.</p>}
+                      {changelog.length === 0 && <p className="text-xs text-gray-500 text-center py-2 font-light">هیچ به‌روزرسانیی ثبت نشده است.</p>}
                     </div>
                   </div>
                 </div>
@@ -597,7 +597,7 @@ export default function CreateContentPage() {
               {/* بخش تاریخ ایجاد و آخرین ویرایش */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full relative">
                 
-                {/* استایل‌های اختصاصی برای دارک‌مود تقویم و یکپارچگی پنل ماه‌ها و سال‌ها */}
+                {/* سبک‌های اختصاصی برای دارک‌مود تقویم و یکپارچگی درگاه ماه‌ها و سال‌ها */}
                 <style dangerouslySetInnerHTML={{__html: `
                   .rmdp-wrapper, .rmdp-month-picker, .rmdp-year-picker { background: #0b0f19 !important; border: 1px solid rgba(255,255,255,0.05) !important; }
                   .rmdp-wrapper { box-shadow: 0 15px 40px rgba(0,0,0,0.8) !important; border-radius: 16px !important; }
@@ -637,7 +637,7 @@ export default function CreateContentPage() {
 
               {/* تاگل‌های نمایش */}
               <div className="space-y-4 pt-5 border-t border-white/10">
-                <label className="text-[10px] text-[#06b6d4] uppercase font-bold mb-2 block">تاگل‌های نمایش در سایت</label>
+                <label className="text-[10px] text-[#06b6d4] uppercase font-bold mb-2 block">تاگل‌های نمایش در سامانه</label>
                 
                 <div className="bg-black/40 border border-white/5 shadow-inner rounded-2xl p-4 space-y-3">
                   {[
@@ -667,7 +667,7 @@ export default function CreateContentPage() {
                   
                   {type !== 'BLOG' && (
                     <label className="flex items-center justify-between cursor-pointer group/toggle border-t border-white/10 pt-3 mt-1 select-none">
-                      <span className="text-xs text-[#06b6d4] font-bold">لینک‌های دانلود فعال باشند؟</span>
+                      <span className="text-xs text-[#06b6d4] font-bold">پیوند‌های بارگیری فعال باشند؟</span>
                       <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-200 border border-transparent ${isDownloadActive ? `bg-[#06b6d4] shadow-md` : 'bg-black/60 shadow-inner'}`}>
                         {isDownloadActive && <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
                       </div>
@@ -748,7 +748,7 @@ export default function CreateContentPage() {
                 options={creators} 
                 selectedIds={selectedCreators} 
                 onChange={setSelectedCreators} 
-                placeholder="تایپ کنید (مثال: استاد...)"
+                placeholder="بنویسید (مثال: استاد...)"
                 activeTheme={activeTheme}
               />
 
@@ -759,18 +759,18 @@ export default function CreateContentPage() {
                 options={cats} 
                 selectedIds={selectedCategories} 
                 onChange={setSelectedCategories} 
-                placeholder="تایپ کنید (مثال: تاریخ...)"
+                placeholder="بنویسید (مثال: تاریخ...)"
                 activeTheme={activeTheme}
               />
 
               <div className="h-px bg-white/5 w-full" />
 
               <DynamicSelector 
-                label="هشتگ‌ها و برچسب‌ها"
+                label="هشتک‌ها و برچسب‌ها"
                 options={tags} 
                 selectedIds={selectedTags} 
                 onChange={setSelectedTags} 
-                placeholder="تایپ کنید (مثال: #معماری...)"
+                placeholder="بنویسید (مثال: #معماری...)"
                 activeTheme={activeTheme}
               />
 
@@ -779,7 +779,7 @@ export default function CreateContentPage() {
         </div>
       </div>
 
-      {/* پاپ آپ مودال کتابخانه رسانه */}
+      {/* باز شونده‌ مودال کتابخانه رسانه */}
       <AnimatePresence>
         {mediaPickerTarget && (
           <ModalPortal>
@@ -793,7 +793,7 @@ export default function CreateContentPage() {
                 <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${activeTheme.gradientVia} to-transparent opacity-90 pointer-events-none`} />
                 
                 <div className="p-4 border-b border-white/10 flex justify-between items-center bg-transparent relative z-20">
-                  <h3 className={`font-bold flex items-center gap-2 ${activeTheme.text}`}><Icon name="image" className="w-5 h-5" /> انتخاب فایل از رسانه</h3>
+                  <h3 className={`font-bold flex items-center gap-2 ${activeTheme.text}`}><Icon name="image" className="w-5 h-5" /> انتخاب پرونده از رسانه</h3>
                   <button type="button" onClick={() => setMediaPickerTarget(null)} className="p-2 text-gray-400 hover:text-rose-500 bg-white/5 hover:bg-white/10 rounded-xl transition-colors cursor-pointer border border-transparent shadow-inner">
                     <Icon name="close" className="w-4 h-4" />
                   </button>

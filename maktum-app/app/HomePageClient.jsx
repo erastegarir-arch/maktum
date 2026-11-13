@@ -5,8 +5,6 @@ import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSp
 import Link from 'next/link';
 import Icon from '@/app/components/Icon';
 import BlurImage from '@/app/components/BlurImage';
-import { getSetting } from '@/app/actions/settings';
-import { getCreatorsList, getLatestContents } from '@/app/actions/homepage';
 
 // ==========================================
 // توابع کمکی
@@ -97,9 +95,10 @@ const ScrollReveal = ({ children, delay = 0 }) => (
 // ==========================================
 // کامپوننت اصلی فرانت‌اند (کلاینت)
 // ==========================================
-export default function HomePageClient() {
-  const [data, setData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+export default function HomePageClient({ initialData }) {
+  // ✅ داده‌ها را مستقیماً از props می‌گیریم. نیازی به state و لودینگ نیست!
+  const data = initialData; 
+  const [isMounted, setIsMounted] = useState(false);
   
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -114,7 +113,7 @@ export default function HomePageClient() {
   const parallaxY2 = useTransform(scrollY, [0, 3000], [0, 300]);
   const parallaxY3 = useTransform(scrollY, [0, 3000], [0, -150]);
 
-  // === افکت موس جادویی (Magic Cursor) - فاز 3 ===
+  // === افکت موس جادویی (Magic Cursor) ===
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
   const springConfig = { damping: 25, stiffness: 120, mass: 0.5 };
@@ -135,12 +134,11 @@ export default function HomePageClient() {
   };
 
   useEffect(() => {
-    let isMounted = true;
+    setIsMounted(true); // این متغیر مشخص می‌کند که کامپوننت به درستی روی مرورگر مانت شده است
     if (typeof window !== 'undefined') {
       const checkDesktop = window.innerWidth >= 768;
       setIsDesktop(checkDesktop);
 
-      // اتصال مختصات موس برای نشانگر جادویی
       if (checkDesktop) {
         const moveCursor = (e) => {
           cursorX.set(e.clientX);
@@ -150,58 +148,7 @@ export default function HomePageClient() {
         return () => window.removeEventListener('mousemove', moveCursor);
       }
     }
-
-    async function fetchHomePageData() {
-      try {
-        const parseJSON = (str, fallback) => { try { return str ? JSON.parse(str) : fallback; } catch { return fallback; } };
-
-        const creatorsRes = await getCreatorsList();
-        const allCreators = creatorsRes.success ? creatorsRes.data : [];
-        const savedInvIds = parseJSON(await getSetting('home_investigators'), []);
-        const fullInvestigators = savedInvIds.map(id => allCreators.find(c => c.id === id)).filter(Boolean);
-
-        const contentsRes = await getLatestContents();
-        const allContents = contentsRes.success ? contentsRes.data : [];
-
-        const contentConfig = parseJSON(await getSetting('home_content_config'), {
-          blog: { title: 'آخرین مطالب بلاگ', subtitle: 'مقالات، گزارش‌ها و یادداشت‌های تحلیلی' },
-          raw: { title: 'محتوای راش و خام', subtitle: 'اسناد مکتوب، تصاویر و ویدیوها' },
-          produced: { title: 'محتوای تولیدی', subtitle: 'مستندهای اختصاصی و پادکست‌ها' },
-          tools: { title: 'ابزارهای کاربردی', subtitle: 'تسهیل در پژوهش با ابزارهای هوشمند' }
-        });
-
-        const fetchedData = {
-          layoutOrder: parseJSON(await getSetting('home_layout'), []),
-          heroSlides: parseJSON(await getSetting('home_hero'), []),
-          newsTicker: parseJSON(await getSetting('home_news'), []),
-          stats: parseJSON(await getSetting('home_stats'), []),
-          dossiersConfig: parseJSON(await getSetting('home_dossiers_config'), { title: 'پرونده‌های باز', subtitle: 'مجموعه اسناد، مقالات و ویدیوهای مرتبط با یک کلان‌موضوع' }),
-          dossiers: parseJSON(await getSetting('home_dossiers'), []),
-          radarConfig: parseJSON(await getSetting('home_radar_config'), { title: 'رادار موضوعی', subtitle: 'داغ‌ترین موضوعات در حال پیگیری' }),
-          radarTopics: parseJSON(await getSetting('home_radar'), []),
-          timelineEvents: parseJSON(await getSetting('home_timeline'), []),
-          countdown: parseJSON(await getSetting('home_countdown'), { targetDate: '', title: '', desc: '', lockedText: '', unlockedText: '', tooltip: '', link: '#' }),
-          investigators: fullInvestigators,
-          ctaBox: parseJSON(await getSetting('home_cta'), { preTitle: '', title: '', desc: '', btnText: '', btnLink: '#' }),
-          contentConfig: contentConfig,
-          blog: allContents.filter(c => c.type === 'BLOG').slice(0, 4),
-          raw: allContents.filter(c => c.type === 'RAW').slice(0, 4),
-          produced: allContents.filter(c => c.type === 'PRODUCED').slice(0, 4),
-          tools: allContents.filter(c => c.type === 'TOOL').slice(0, 4)
-        };
-
-        if (isMounted) {
-          setData(fetchedData);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error("خطا در دریافت تنظیمات:", error);
-        if (isMounted) setIsLoading(false);
-      }
-    }
-    fetchHomePageData();
-    return () => { isMounted = false; };
-  }, []);
+  }, [cursorX, cursorY]);
 
   useEffect(() => {
     if (!data || !data.countdown || !data.countdown.targetDate) {
@@ -233,16 +180,16 @@ export default function HomePageClient() {
     return () => clearInterval(interval);
   }, [data]);
 
-  if (isLoading || !data) return <HomePageSkeleton />;
-  const activeSections = data.layoutOrder.filter(s => s.isActive && s.id !== 'mission').map(s => s.id);
+  // جلوگیری از ارور Hydration: اسکلتون را فقط برای کسری از ثانیه (تا قبل از مانت شدن) نمایش بده
+  if (!isMounted) return <HomePageSkeleton />;
+
+  const activeSections = data?.layoutOrder?.filter(s => s.isActive && s.id !== 'mission').map(s => s.id) || [];
 
   const sectionsContent = {
-    // ---------------- نوار اخبار (اصلاح رنگ تازه‌ها به حالت اصلی) ----------------
     news: data.newsTicker && data.newsTicker.length > 0 ? (
       <ScrollReveal key="news">
         <section className="relative overflow-hidden bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_10px_30px_rgba(0,0,0,0.5)] py-2.5 md:py-3 md:rounded-2xl flex items-stretch md:mx-6 lg:mx-8">
           
-          {/* لیبل 'تازه‌ها' اصلاح شد: بازگشت به تیرگی استاندارد قبلی */}
           <div className="absolute right-0 top-0 bottom-0 z-40 flex items-center px-4 md:px-6 bg-[#050810]/80 backdrop-blur-md shadow-[-15px_0_25px_rgba(5,8,16,0.9)] border-l border-white/[0.05]">
             <span className="text-white font-bold text-[11px] md:text-sm flex items-center gap-2 whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-[#06b6d4] animate-pulse shadow-[0_0_8px_#06b6d4]"></span>
@@ -377,7 +324,7 @@ export default function HomePageClient() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between pb-4 gap-4">
             <div>
               <h2 className="text-xl md:text-3xl font-black text-white mb-2 flex items-center gap-2 md:gap-3">
-                <Icon name="clock" className="w-6 h-6 md:w-8 md:h-8 text-amber-400" /> تایم‌لاین افشاگری‌ها
+                <Icon name="clock" className="w-6 h-6 md:w-8 md:h-8 text-amber-400" /> خط‌زمانی
               </h2>
             </div>
           </div>
@@ -659,26 +606,21 @@ export default function HomePageClient() {
       </ScrollReveal>
     ) : null,
 
-    // ---------------- تولد دوباره باکس پورتال امن (Dynamic Flow) ----------------
     cta: data.ctaBox && data.ctaBox.title ? (
       <ScrollReveal key="cta">
         <section className="relative p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] overflow-hidden group shadow-[inset_0_0_20px_rgba(255,255,255,0.02),0_20px_50px_rgba(0,0,0,0.5)] border border-cyan-500/20 hover:border-cyan-400/40 bg-white/[0.02] backdrop-blur-3xl mx-4 sm:mx-6 lg:mx-8 transition-colors duration-500">
           
-          {/* پس‌زمینه زنده شبکه داده (Tech Grid) */}
           <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-10 mix-blend-overlay -z-10" />
           
-          {/* هاله‌های نوری تپنده و زنده در پس‌زمینه باکس */}
           <div className="absolute -top-20 -left-20 w-64 h-64 bg-cyan-600/20 rounded-full blur-[80px] group-hover:scale-150 transition-transform duration-1000 z-0 animate-[pulse_4s_ease-in-out_infinite]"></div>
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-600/20 rounded-full blur-[80px] group-hover:scale-150 transition-transform duration-1000 z-0 animate-[pulse_5s_ease-in-out_infinite_reverse]"></div>
           
-          {/* خط اسکنر لیزری که مدام از بالا به پایین باکس می‌رود */}
           <motion.div 
             animate={{ y: ["-100%", "250%"] }}
             transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
             className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent z-0 pointer-events-none"
           />
 
-          {/* ذرات جریان داده (Floating Data Particles) */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
             <motion.div animate={{ y: [0, -30, 0], opacity: [0.2, 0.6, 0.2] }} transition={{ duration: 4, repeat: Infinity }} className="absolute top-[20%] right-[15%] w-1 h-12 bg-cyan-400/50 rounded-full blur-[1px]" />
             <motion.div animate={{ y: [0, 40, 0], opacity: [0.1, 0.8, 0.1] }} transition={{ duration: 5, repeat: Infinity, delay: 1 }} className="absolute top-[60%] right-[30%] w-1.5 h-1.5 bg-cyan-300/80 rounded-full blur-[1px]" />
@@ -698,7 +640,6 @@ export default function HomePageClient() {
             </div>
 
             <div className="flex-none w-full sm:w-auto mt-4 lg:mt-0">
-              {/* دکمه پورتال با افکت فیزیکی هاور دقیقا منطبق بر شمارش معکوس */}
               <Link href={data.ctaBox.btnLink || '/submit'} target="_blank" rel="noopener noreferrer" className="relative overflow-hidden group/btn flex sm:inline-flex items-center justify-center px-8 md:px-10 py-4 md:py-5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-gray-900 font-black text-sm md:text-lg transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_50px_rgba(6,182,212,0.6)] w-full sm:w-auto hover:scale-105 active:scale-95 cursor-pointer">
                 <span className="relative z-10 flex items-center gap-2 md:gap-3">
                   {data.ctaBox.btnText} <Icon name="upload" className="w-5 h-5 md:w-6 md:h-6 animate-bounce" />
@@ -715,7 +656,6 @@ export default function HomePageClient() {
   return (
     <main dir="rtl" className="pt-0 !mt-0 max-w-[1400px] mx-auto space-y-16 md:space-y-24 pb-24 relative z-10 w-full font-sans text-right select-none">
       
-      {/* ========== نشانگر جادویی موس (Magic Cursor Glow) ========== */}
       {isDesktop && (
         <motion.div
           className="fixed top-0 left-0 w-[300px] h-[300px] bg-cyan-500/15 rounded-full pointer-events-none blur-[80px] z-0 mix-blend-screen"

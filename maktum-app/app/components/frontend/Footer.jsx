@@ -1,63 +1,94 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import Icon from '../Icon';
 
 const cn = (...inputs) => twMerge(clsx(inputs));
 
+// ایمن‌سازی نشانی‌های اینترنتی در برابر حملات XSS (پروتکل‌های مخرب)
+const sanitizeUrl = (url) => {
+  if (!url || typeof url !== 'string') return '#';
+  const trimmed = url.trim();
+  if (/^(javascript|data|vbscript):/i.test(trimmed)) return '#';
+  return trimmed;
+};
+
+// پاکسازی کدهای SVG از اسکریپت‌ها و رویدادهای درون‌خطی
+const sanitizeSvg = (svg) => {
+  if (!svg || typeof svg !== 'string') return '';
+  return svg
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '');
+};
+
 function SocialIconItem({ social, allIcons }) {
-  const isUrl = social.iconName && (social.iconName.includes('/') || social.iconName.startsWith('http'));
-  const iconSvg = !isUrl ? allIcons.find(i => i.name === social.iconName)?.svgCode : null;
+  const rawIcon = social?.iconName?.trim() || '';
+  const isUrl = rawIcon && (rawIcon.includes('/') || rawIcon.startsWith('http') || rawIcon.startsWith('.'));
+  const iconSvg = !isUrl && rawIcon ? allIcons.find(i => i.name === rawIcon)?.svgCode : null;
+
+  // اگر هیچ نمادی انتخاب نشده و عنوانی هم ندارد، المان ناقص رندر نشود
+  if (!isUrl && !iconSvg && !social?.tooltip) return null;
+
+  const safeHref = sanitizeUrl(social.url);
+  const hoverColor = social.hoverColor || '#06b6d4';
 
   return (
     <div className="relative group/tooltip flex items-center justify-center">
       <motion.div
-        whileHover={{ scale: 1.15, y: -2 }}
+        whileHover={{ scale: 1.12, y: -2 }}
         whileTap={{ scale: 0.95 }}
       >
         <Link
-          href={social.url || '#'}
+          href={safeHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="p-1.5 md:p-2.5 rounded-lg md:rounded-xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.05] shadow-[inset_0_0_10px_rgba(255,255,255,0.01)] text-white/50 hover:text-[var(--hover-color)] hover:bg-white/[0.06] hover:border-white/[0.1] hover:shadow-[0_0_15px_var(--hover-color-light)] flex items-center justify-center transition-all duration-300 cursor-pointer"
+          aria-label={social.tooltip || 'شبکه اجتماعی'}
+          className="p-1.5 md:p-2 rounded-lg md:rounded-xl bg-[#101d38]/35 backdrop-blur-md border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] text-white/60 hover:text-[var(--hover-color)] hover:bg-[#101d38]/60 hover:border-[var(--hover-color)]/40 hover:shadow-[0_4px_16px_var(--hover-color-light),inset_0_0_8px_var(--hover-color-soft)] flex items-center justify-center transition-all duration-300 cursor-pointer"
           style={{ 
-            '--hover-color': social.hoverColor || '#06b6d4',
-            '--hover-color-light': `${social.hoverColor || '#06b6d4'}40` 
+            '--hover-color': hoverColor,
+            '--hover-color-light': `${hoverColor}40`,
+            '--hover-color-soft': `${hoverColor}15`
           }}
         >
           {isUrl ? (
             <div 
-              className="w-3.5 h-3.5 md:w-5 md:h-5 transition-all duration-300"
+              className="w-3.5 h-3.5 md:w-4 md:h-4 transition-all duration-300"
               style={{
                 backgroundColor: 'currentColor',
-                WebkitMaskImage: `url(${social.iconName})`,
+                WebkitMaskImage: `url("${encodeURI(rawIcon)}")`,
                 WebkitMaskSize: 'contain',
                 WebkitMaskRepeat: 'no-repeat',
                 WebkitMaskPosition: 'center',
-                maskImage: `url(${social.iconName})`,
+                maskImage: `url("${encodeURI(rawIcon)}")`,
                 maskSize: 'contain',
                 maskRepeat: 'no-repeat',
                 maskPosition: 'center',
               }}
             />
           ) : iconSvg ? (
-            <div className="w-3.5 h-3.5 md:w-5 md:h-5 [&>svg]:w-full [&>svg]:h-full" dangerouslySetInnerHTML={{ __html: iconSvg }} />
+            <div 
+              className="w-3.5 h-3.5 md:w-4 md:h-4 [&>svg]:w-full [&>svg]:h-full" 
+              dangerouslySetInnerHTML={{ __html: sanitizeSvg(iconSvg) }} 
+            />
           ) : (
-            <Icon name="link" className="w-3.5 h-3.5 md:w-5 md:h-5" />
+            <span className="text-[9px] md:text-[11px] font-bold px-1.5 leading-none">
+              {social.tooltip}
+            </span>
           )}
         </Link>
       </motion.div>
 
+      {/* تولتیپ سرمه‌ای تیره گلس‌مورفیک با شفافیت کنترل‌شده */}
       {social.tooltip && (
-        <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-[99999] animate-[fadeIn_0.2s_ease-out]">
-          <div className="bg-[#050810]/95 border border-white/10 backdrop-blur-md text-white text-[9px] md:text-[11px] py-1 px-2 md:py-1.5 md:px-3 rounded-md md:rounded-lg shadow-2xl whitespace-nowrap font-sans font-bold">
+        <div className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 hidden group-hover/tooltip:flex flex-col items-center z-[99999] pointer-events-none animate-[fadeIn_0.18s_ease-out]">
+          <div className="relative overflow-hidden bg-[#0e1b33]/90 border border-white/[0.15] backdrop-blur-2xl backdrop-saturate-150 text-white text-[9px] md:text-[11px] py-1 px-2.5 md:py-1.5 md:px-3 rounded-xl shadow-[0_10px_28px_rgba(4,9,20,0.75),inset_0_1px_1px_rgba(255,255,255,0.18)] whitespace-nowrap max-w-[calc(100vw-24px)] truncate font-sans font-bold">
+            <span className="absolute top-0 inset-x-2 h-[1px] bg-gradient-to-r from-transparent via-[#06b6d4]/60 to-transparent pointer-events-none" />
             {social.tooltip}
           </div>
+          <div className="w-2 h-2 bg-[#0e1b33]/90 border-r border-b border-white/[0.15] rotate-45 -mt-1"></div>
         </div>
       )}
     </div>
@@ -67,135 +98,191 @@ function SocialIconItem({ social, allIcons }) {
 export default function Footer({ initialData }) {
   const pathname = usePathname();
 
-  if (pathname?.startsWith('/portal-entry-99')) {
+  if (pathname?.startsWith('/portal-entry-99') || pathname?.startsWith('/admin')) {
     return null;
   }
 
   const { 
-    allIcons = [], footerIcon = '', footerText = '', 
-    footerDesc = 'شبکه رسانه‌ای مکتوم؛ پلتفرم مستقل آرشیو و تبادل دانش.', 
+    allIcons = [], 
+    footerIcon = '', 
+    footerText = '', 
+    footerDesc = 'شبکه رسانه‌ای مکتوم؛ پلتفرم مستقل پایگاه داده و تبادل دانش.', 
     copyrightText = 'تمامی حقوق برای شبکه رسانه‌ای مکتوم محفوظ است.',
-    fastLinks = [], companionLinks = [], socialLinks = [],
-    enamad = {}, samandehi = {}, satra = {}
+    fastLinks = [], 
+    companionLinks = [], 
+    socialLinks = [],
+    enamad = {}, 
+    samandehi = {}, 
+    satra = {}
   } = initialData || {};
 
-  const isFooterIconUrl = footerIcon && (footerIcon.includes('/') || footerIcon.startsWith('http'));
-  const footerIconSvg = !isFooterIconUrl ? allIcons.find(i => i.name === footerIcon)?.svgCode : null;
+  const cleanFooterIcon = footerIcon?.trim() || '';
+  const isFooterIconUrl = cleanFooterIcon && (cleanFooterIcon.includes('/') || cleanFooterIcon.startsWith('http') || cleanFooterIcon.startsWith('.'));
+  const footerIconSvg = !isFooterIconUrl && cleanFooterIcon ? allIcons.find(i => i.name === cleanFooterIcon)?.svgCode : null;
+  const hasFooterIcon = Boolean(isFooterIconUrl || footerIconSvg);
+  const hasFooterText = Boolean(footerText && footerText.trim() !== '');
+  const hasBrandBlock = hasFooterIcon || hasFooterText;
 
   return (
     <motion.footer 
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.8 }}
-      // کلاس overflow-hidden حذف شد تا تولتیپ‌ها بدون مشکل نمایش داده شوند
-      className="w-full bg-white/[0.015] backdrop-blur-3xl text-gray-300 py-6 pb-24 md:py-12 md:pb-12 px-3 md:px-8 mt-auto relative z-10 font-sans select-none shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-white/[0.05]"
+      transition={{ duration: 0.6 }}
+      aria-label="پاورقی سامانه"
+      className="w-full bg-[#0b1426]/65 backdrop-blur-3xl backdrop-saturate-150 text-gray-300 pt-4 pb-24 md:pt-7 md:pb-5 px-3 md:px-8 mt-auto relative z-10 font-sans select-none shadow-[0_-12px_40px_rgba(4,9,20,0.5),inset_0_1px_1px_rgba(255,255,255,0.08)] border-t border-white/[0.08]"
     >
-      <div className="absolute inset-0 bg-[#050810]/70 pointer-events-none -z-10 shadow-[inset_0_0_20px_rgba(255,255,255,0.01)] overflow-hidden" />
-      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-80 pointer-events-none z-20" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.15)_0%,transparent_70%)] pointer-events-none -z-10 overflow-hidden"></div>
+      {/* پس‌زمینه سرمه‌ای تیره و گلس‌مورفیک (حذف کامل رنگ سیاه #050810) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#101d38]/55 via-[#0b1426]/75 to-[#081020]/85 pointer-events-none -z-10 overflow-hidden">
+        <div className="absolute -top-12 right-10 w-80 h-36 bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.16)_0%,transparent_70%)] pointer-events-none" />
+        <div className="absolute -top-12 left-1/3 w-72 h-32 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.11)_0%,transparent_70%)] pointer-events-none" />
+      </div>
+      <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-85 pointer-events-none z-20" />
 
-      {/* فاصله‌ها (gap) کاهش یافت تا بخش بالا به پایین نزدیک‌تر شود */}
-      <div className="max-w-7xl mx-auto flex flex-col gap-3 md:gap-5 relative z-10">
+      <div className="max-w-7xl mx-auto flex flex-col gap-3 md:gap-4 relative z-10">
         
-        {/* ردیف اول: لوگو و عنوان (در DOM اول است پس سمت راست می‌افتد) و متن (سمت چپ) */}
-        <div className="flex flex-row items-start justify-between gap-3 md:gap-6 w-full">
+        {/* ردیف اول: لوگو و عنوان در سمت راست، و متن توضیحات با عرض محدود و استاندارد در کنار آن */}
+        <div className="flex flex-row items-center md:items-start justify-start gap-2.5 md:gap-4 w-full">
           
-          {/* لوگو و عنوان - با چیدمان راست‌به‌چپ (لوگو سپس عنوان) */}
-          <Link href="/" className="flex items-center gap-2 md:gap-3 shrink-0 group cursor-pointer pl-1 md:pl-4">
-            {isFooterIconUrl ? (
-              <img src={footerIcon} alt="لوگوی فوتر" className="w-7 h-7 md:w-10 md:h-10 object-contain drop-shadow-[0_0_12px_rgba(6,182,212,0.5)] group-hover:scale-105 transition-transform duration-300" />
-            ) : footerIconSvg ? (
-              <div className="w-7 h-7 md:w-10 md:h-10 text-[#06b6d4] [&>svg]:w-full [&>svg]:h-full drop-shadow-[0_0_12px_rgba(6,182,212,0.5)] group-hover:scale-105 transition-transform duration-300" dangerouslySetInnerHTML={{ __html: footerIconSvg }} />
-            ) : footerIcon ? (
-              <Icon name={footerIcon} className="w-7 h-7 md:w-10 md:h-10 text-[#06b6d4] group-hover:scale-105 transition-transform duration-300" />
-            ) : null}
+          {hasBrandBlock && (
+            <Link 
+              href="/" 
+              aria-label={footerText || 'صفحه اصلی مکتوم'}
+              className="flex items-center gap-2 md:gap-2.5 shrink-0 group cursor-pointer"
+            >
+              {isFooterIconUrl ? (
+                <img 
+                  src={cleanFooterIcon} 
+                  alt={footerText || 'لوگوی مکتوم'} 
+                  loading="lazy"
+                  decoding="async"
+                  className="w-7 h-7 md:w-10 md:h-10 object-contain drop-shadow-[0_0_14px_rgba(6,182,212,0.5)] group-hover:scale-105 transition-transform duration-300" 
+                />
+              ) : footerIconSvg ? (
+                <div 
+                  className="w-7 h-7 md:w-10 md:h-10 text-[#06b6d4] [&>svg]:w-full [&>svg]:h-full drop-shadow-[0_0_14px_rgba(6,182,212,0.5)] group-hover:scale-105 transition-transform duration-300" 
+                  dangerouslySetInnerHTML={{ __html: sanitizeSvg(footerIconSvg) }} 
+                />
+              ) : null}
 
-            {footerText && (
-              <span className="text-white font-black text-sm md:text-xl tracking-wider group-hover:text-cyan-400 transition-colors">{footerText}</span>
-            )}
-          </Link>
+              {hasFooterText && (
+                <span className="text-white font-black text-sm md:text-xl tracking-wider group-hover:text-[#06b6d4] transition-colors duration-300 drop-shadow-sm">
+                  {footerText}
+                </span>
+              )}
+            </Link>
+          )}
 
-          {/* متن توضیحات */}
-          <div className="flex-1 mt-1 md:mt-2">
-            <p className="text-[9px] md:text-sm text-gray-400 font-light leading-[2] md:leading-relaxed text-justify w-full" style={{ textAlignLast: 'right' }}>
-              {footerDesc}
-            </p>
-          </div>
+          {/* متن توضیحات با عرض کنترل‌شده در دسکتاپ */}
+          {footerDesc && (
+            <div className="flex-1 md:flex-initial md:max-w-[540px] lg:max-w-[580px] my-auto">
+              <p 
+                className="text-[9px] md:text-[13px] text-gray-300/90 font-light leading-[1.85] md:leading-[1.9] text-justify w-full" 
+                style={{ textAlignLast: 'right' }}
+              >
+                {footerDesc}
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* خط جداکننده افقی ممتد حذف شد */}
-
-        {/* ردیف دوم: گرید 3 ستونه برای لینک‌ها و شبکه‌های اجتماعی */}
-        <div className="grid grid-cols-3 gap-2 md:gap-8 w-full">
+        {/* ردیف دوم: گرید ۳ ستونه برای پیوندها و شبکه‌های اجتماعی */}
+        <div className="grid grid-cols-3 gap-2 md:gap-8 w-full pt-0.5">
           
           {/* ستون‌های دسترسی سریع و همراهان */}
           {[
             { title: 'دسترسی سریع', links: fastLinks, color: '#06b6d4' },
             { title: 'همراهان', links: companionLinks, color: '#a855f7' }
           ].map((section, idx) => (
-            <div key={idx} className="col-span-1 space-y-2.5 md:space-y-4">
-              <div className="flex items-center justify-start gap-1.5 md:gap-2 pb-2 md:pb-3 border-b border-white/5">
-                <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full shadow-lg shrink-0" style={{ backgroundColor: section.color, boxShadow: `0 0 8px ${section.color}` }}></span>
-                <h3 className="text-white font-bold text-[10px] md:text-sm whitespace-nowrap">{section.title}</h3>
+            <div key={idx} className="col-span-1 space-y-2 md:space-y-2.5">
+              <div className="flex items-center justify-start gap-1.5 md:gap-2 pb-1.5 md:pb-2 relative">
+                <span 
+                  className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full shrink-0" 
+                  style={{ backgroundColor: section.color, boxShadow: `0 0 8px ${section.color}` }}
+                />
+                <h3 className="text-white font-bold text-[10px] md:text-xs whitespace-nowrap tracking-wide">
+                  {section.title}
+                </h3>
+                <div className="absolute bottom-0 inset-x-0 h-[1px] bg-gradient-to-l from-white/10 via-white/5 to-transparent" />
               </div>
-              <ul className="space-y-2 md:space-y-3">
-                {section.links.length > 0 ? (
-                  section.links.map((link) => (
-                    <motion.li 
-                      key={link.id} 
-                      whileHover={{ x: -3 }}
-                      className="flex items-center gap-1.5 md:gap-2 group/link relative w-fit"
-                    >
-                      <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full transition-transform duration-300 group-hover/link:scale-150 shrink-0" style={{ backgroundColor: section.color }}></span>
-                      <Link 
-                        href={link.url || '#'} 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-white transition-colors font-medium text-[9px] md:text-sm whitespace-nowrap"
-                      >
-                        {link.title}
-                      </Link>
 
-                      {link.tooltip && (
-                        <div className="absolute bottom-full mb-2 right-0 hidden group-hover/link:flex flex-col items-end z-[99999] animate-[fadeIn_0.2s_ease-out]">
-                          <div className="bg-[#050810]/95 border border-white/10 backdrop-blur-md text-white text-[9px] md:text-[11px] py-1 px-2 md:py-1.5 md:px-3 rounded-md md:rounded-lg shadow-2xl whitespace-nowrap font-sans font-bold">
-                            {link.tooltip}
+              <ul className="space-y-1.5 md:space-y-2">
+                {section.links.length > 0 ? (
+                  section.links.map((link, lIdx) => {
+                    const safeHref = sanitizeUrl(link.url);
+                    const isExternal = safeHref.startsWith('http');
+
+                    return (
+                      <motion.li 
+                        key={link.id || lIdx} 
+                        whileHover={{ x: -3 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                        className="flex items-center gap-1.5 md:gap-2 group/link relative w-fit"
+                      >
+                        <span 
+                          className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full transition-all duration-300 group-hover/link:scale-125 shrink-0" 
+                          style={{ backgroundColor: section.color, boxShadow: `0 0 6px ${section.color}80` }}
+                        />
+                        <Link 
+                          href={safeHref} 
+                          target={isExternal ? '_blank' : undefined}
+                          rel={isExternal ? 'noopener noreferrer' : undefined}
+                          className="text-gray-300/85 group-hover/link:text-white transition-colors duration-200 font-medium text-[9px] md:text-xs whitespace-nowrap"
+                        >
+                          {link.title}
+                        </Link>
+
+                        {/* تولتیپ سرمه‌ای تیره گلس‌مورفیک */}
+                        {link.tooltip && (
+                          <div className="absolute bottom-full mb-2 right-0 hidden group-hover/link:flex flex-col items-end z-[99999] pointer-events-none animate-[fadeIn_0.18s_ease-out]">
+                            <div className="relative overflow-hidden bg-[#0e1b33]/90 border border-white/[0.15] backdrop-blur-2xl backdrop-saturate-150 text-white text-[9px] md:text-[11px] py-1 px-2.5 md:py-1.5 md:px-3 rounded-xl shadow-[0_10px_28px_rgba(4,9,20,0.75),inset_0_1px_1px_rgba(255,255,255,0.18)] whitespace-nowrap max-w-[calc(100vw-24px)] truncate font-sans font-bold">
+                              <span className="absolute top-0 inset-x-2 h-[1px] bg-gradient-to-r from-transparent via-[#06b6d4]/60 to-transparent pointer-events-none" />
+                              {link.tooltip}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </motion.li>
-                  ))
+                        )}
+                      </motion.li>
+                    );
+                  })
                 ) : (
-                  <li className="text-gray-500 text-[9px] md:text-xs">بدون لینک</li>
+                  <li className="text-gray-400 text-[9px] md:text-xs">بدون پیوند</li>
                 )}
               </ul>
             </div>
           ))}
 
           {/* ستون شبکه‌های اجتماعی و مجوزها */}
-          <div className="col-span-1 space-y-2.5 md:space-y-4">
-            <div className="flex items-center justify-start gap-1.5 md:gap-2 pb-2 md:pb-3 border-b border-white/5">
-              <h3 className="text-white font-bold text-[10px] md:text-sm whitespace-nowrap">شبکه‌های اجتماعی</h3>
+          <div className="col-span-1 space-y-2 md:space-y-2.5">
+            <div className="flex items-center justify-start gap-1.5 md:gap-2 pb-1.5 md:pb-2 relative">
+              <h3 className="text-white font-bold text-[10px] md:text-xs whitespace-nowrap tracking-wide">
+                شبکه‌های اجتماعی
+              </h3>
+              <div className="absolute bottom-0 inset-x-0 h-[1px] bg-gradient-to-l from-white/10 via-white/5 to-transparent" />
             </div>
             
-            {/* آیکون‌های شبکه‌های اجتماعی با قابلیت شکستن خط (Wrap) */}
-            <div className="flex flex-wrap items-center justify-start gap-1.5 md:gap-2">
-              {socialLinks.map((social) => (
-                <SocialIconItem key={social.id} social={social} allIcons={allIcons} />
+            {/* نماد‌های شبکه‌های اجتماعی */}
+            <div className="flex flex-wrap items-center justify-start gap-1.5 md:gap-2 pt-0.5">
+              {socialLinks.map((social, sIdx) => (
+                <SocialIconItem key={social.id || sIdx} social={social} allIcons={allIcons} />
               ))}
             </div>
 
-            {/* مجوزها از چپ به راست قرار می‌گیرند (افزایش ۳۰ درصدی سایز در h-9 و h-16) */}
-            <div className="flex flex-wrap items-center justify-start gap-1.5 md:gap-3 pt-1 md:pt-2 dir-ltr">
+            {/* مجوزها از چپ به راست */}
+            <div className="flex flex-wrap items-center justify-start gap-1.5 md:gap-2.5 pt-1 dir-ltr">
               {[{data: enamad, name: 'اینماد'}, {data: samandehi, name: 'ساماندهی'}, {data: satra, name: 'ساترا'}].map((badge, idx) => (
-                <div key={idx} className="transition-opacity hover:opacity-80">
-                  {badge.data.type === 'code' && badge.data.code && (
-                    <div className="scale-90 md:scale-110 origin-left" dangerouslySetInnerHTML={{ __html: badge.data.code }} />
+                <div key={idx} className="transition-transform duration-300 hover:scale-105">
+                  {badge.data?.type === 'code' && badge.data?.code && (
+                    <div className="scale-90 md:scale-105 origin-left" dangerouslySetInnerHTML={{ __html: badge.data.code }} />
                   )}
-                  {badge.data.type === 'image' && badge.data.img && (
-                    <Link href={badge.data.url || '#'} target="_blank" rel="noopener noreferrer" className="block">
-                      <img src={badge.data.img} alt={badge.name} className="h-9 md:h-16 w-auto object-contain rounded-md" />
+                  {badge.data?.type === 'image' && badge.data?.img && (
+                    <Link href={sanitizeUrl(badge.data.url)} target="_blank" rel="noopener noreferrer" className="block">
+                      <img 
+                        src={badge.data.img} 
+                        alt={badge.name} 
+                        loading="lazy"
+                        decoding="async"
+                        className="h-9 md:h-14 w-auto object-contain rounded-lg bg-[#101d38]/30 p-1 border border-white/10" 
+                      />
                     </Link>
                   )}
                 </div>
@@ -206,9 +293,24 @@ export default function Footer({ initialData }) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto mt-6 md:mt-12 pt-4 md:pt-6 border-t border-white/5 text-center text-[8px] md:text-xs text-gray-500 font-light relative z-10">
-        {copyrightText}
-      </div>
+      {/* ردیف سوم: متن حق مالکیت (وقف‌نامه) وسط‌چین، جاستیفای، با عرض محدود و غیرقابل انتخاب با ماوس */}
+      {copyrightText && (
+        <div className="max-w-7xl mx-auto mt-3.5 md:mt-5 pt-2.5 md:pt-3.5 border-t border-white/[0.06] relative z-10 select-none pointer-events-none">
+          <p 
+            className="max-w-[290px] sm:max-w-md md:max-w-[510px] mx-auto text-[8px] md:text-[11px] text-gray-400/80 font-light leading-[1.8] md:leading-[1.9] text-justify [text-align-last:center] select-none"
+            style={{
+              textAlign: 'justify',
+              textAlignLast: 'center',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+              userSelect: 'none',
+            }}
+          >
+            {copyrightText}
+          </p>
+        </div>
+      )}
     </motion.footer>
   );
 }

@@ -1,0 +1,240 @@
+// lib/seo.js
+
+// نشانی پایه سامانه از متغیر محیطی خوانده می‌شود و در صورت نبود، دامنه اصلی قرار می‌گیرد
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://maktum.ir').replace(/\/$/, '');
+
+export const SITE_CONFIG = {
+  name: 'مکتوم',
+  alternateName: ['Maktum', 'پلتفرم مکتوم', 'پایگاه داده رسانه‌ای مکتوم'],
+  title: 'مکتوم | پایگاه داده باز محتوای رسانه‌ای، راش، مستند و پژوهش‌های تحلیلی',
+  description:
+    'پلتفرم غیرتجاری و باز مکتوم؛ مرجع تخصصی پایگاه داده، توزیع رایگان فوتیج و راش‌های ویدیویی (B-Roll)، مستندها، ابزارهای تولید محتوا، مقالات تحلیلی و پرونده‌های ویژه پژوهشی.',
+  locale: 'fa_IR',
+  language: 'fa-IR',
+  themeColor: '#050810',
+  logoUrl: `${SITE_URL}/images/logo.png`, // مسیر لوگوی اصلی در پوشه public
+  ogImageUrl: `${SITE_URL}/images/og-default.jpg`, // تصویر پیش‌فرض اشتراک‌گذاری (۱۲۰۰ در ۶۳۰ پیکسل)
+  socials: [
+    'https://t.me/MaktumHist',
+    // در صورت داشتن صفحات دیگر در شبکه‌های اجتماعی، پیوند آن‌ها را اینجا اضافه کنید
+  ],
+};
+
+/**
+ * تابع کمکی برای ساخت نشانی مطلق (Absolute URL) و استانداردسازی Canonical
+ */
+export function getAbsoluteUrl(path = '/') {
+  if (!path) return SITE_URL;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${SITE_URL}${cleanPath}`;
+}
+
+/**
+ * ۱. اسکیمای هسته مرکزی سامانه (Organization + WebSite + SearchAction + SiteNavigationElement)
+ * این گراف، هویت برند مکتوم را بدون نیاز به دفتر فیزیکی در Knowledge Graph گوگل ثبت می‌کند
+ * و باعث شکل‌گیری Sitelinks (زیرشاخه‌های سامانه در نتایج اول گوگل) می‌شود.
+ */
+export function generateCoreGraphSchema() {
+  const mainRoutes = [
+    { name: 'پرونده‌های ویژه (منظومه‌ها)', url: getAbsoluteUrl('/c') },
+    { name: 'پایگاه داده موضوعی و پدیدآورندگان', url: getAbsoluteUrl('/t') },
+    { name: 'درباره مکتوم', url: getAbsoluteUrl('/about') },
+    { name: 'همکاری با مکتوم', url: getAbsoluteUrl('/collaborate') },
+    { name: 'قوانین و مرامنامه', url: getAbsoluteUrl('/terms') },
+  ];
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      // الف) تعریف هویت سازمانی و برند مکتوم (Online-Only Organization)
+      {
+        '@type': ['Organization', 'ResearchOrganization'],
+        '@id': `${SITE_URL}/#organization`,
+        name: SITE_CONFIG.name,
+        alternateName: SITE_CONFIG.alternateName,
+        url: SITE_URL,
+        logo: {
+          '@type': 'ImageObject',
+          '@id': `${SITE_URL}/#logo`,
+          url: SITE_CONFIG.logoUrl,
+          contentUrl: SITE_CONFIG.logoUrl,
+          caption: SITE_CONFIG.name,
+          inLanguage: SITE_CONFIG.language,
+          width: 512,
+          height: 512,
+        },
+        image: { '@id': `${SITE_URL}/#logo` },
+        description: SITE_CONFIG.description,
+        sameAs: SITE_CONFIG.socials,
+        knowsAbout: [
+          'پایگاه داده ویدیویی و فوتیج خام',
+          'مستندسازی و پژوهش تاریخی',
+          'تولید محتوای رسانه‌ای',
+          'ابزارهای رسانه و دیجیتال',
+        ],
+        contactPoint: {
+          '@type': 'ContactPoint',
+          contactType: 'editorial and collaboration support',
+          url: getAbsoluteUrl('/collaborate'),
+          availableLanguage: ['Persian', 'fa'],
+        },
+      },
+
+      // ب) تعریف وب‌سامانه و فعال‌سازی قاب کاوش در نتایج گوگل (Sitelinks Search Box)
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_URL}/#website`,
+        url: SITE_URL,
+        name: SITE_CONFIG.name,
+        alternateName: SITE_CONFIG.alternateName,
+        description: SITE_CONFIG.description,
+        publisher: { '@id': `${SITE_URL}/#organization` },
+        inLanguage: SITE_CONFIG.language,
+        potentialAction: [
+          {
+            '@type': 'SearchAction',
+            target: {
+              '@type': 'EntryPoint',
+              urlTemplate: `${SITE_URL}/?search={search_term_string}`,
+            },
+            'query-input': 'required name=search_term_string',
+          },
+        ],
+      },
+
+      // ج) معرفی صریح ساختار منوی اصلی به گوگل برای تشکیل Sitelinks
+      {
+        '@type': 'ItemList',
+        '@id': `${SITE_URL}/#navigation`,
+        name: 'بخش‌های اصلی پلتفرم مکتوم',
+        itemListElement: mainRoutes.map((route, index) => ({
+          '@type': 'SiteNavigationElement',
+          position: index + 1,
+          name: route.name,
+          url: route.url,
+        })),
+      },
+    ],
+  };
+}
+
+/**
+ * ۲. تابع سازنده متادیتای استاندارد Next.js 16 برای صفحات ثابت و قطب‌ها
+ */
+export function constructPageMetadata({
+  title,
+  description,
+  path = '/',
+  ogImage = SITE_CONFIG.ogImageUrl,
+  type = 'website',
+  keywords = [],
+  noIndex = false,
+}) {
+  const canonicalUrl = getAbsoluteUrl(path);
+  const fullTitle = title ? `${title} | ${SITE_CONFIG.name}` : SITE_CONFIG.title;
+  const finalDesc = description || SITE_CONFIG.description;
+  const finalImage = getAbsoluteUrl(ogImage);
+
+  return {
+    title: title || { absolute: SITE_CONFIG.title },
+    description: finalDesc,
+    keywords: [
+      'مکتوم',
+      'پلتفرم مکتوم',
+      'بارگیری فوتیج رایگان',
+      'راش ویدیویی',
+      'پایگاه داده مستند',
+      ...keywords,
+    ],
+    alternates: {
+      canonical: canonicalUrl,
+      languages: {
+        'fa-IR': canonicalUrl,
+      },
+    },
+    openGraph: {
+      title: fullTitle,
+      description: finalDesc,
+      url: canonicalUrl,
+      siteName: SITE_CONFIG.name,
+      locale: SITE_CONFIG.locale,
+      type,
+      images: [
+        {
+          url: finalImage,
+          width: 1200,
+          height: 630,
+          alt: fullTitle,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: fullTitle,
+      description: finalDesc,
+      images: [finalImage],
+    },
+    robots: noIndex
+      ? { index: false, follow: false }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+          },
+        },
+  };
+}
+
+/**
+ * ۳. تابع سازنده اسکیمای صفحات هویتی (درباره ما، همکاری با ما، قوانین، قطب‌ها)
+ */
+export function generateStaticPageSchema({
+  schemaType = 'WebPage', // 'AboutPage' | 'ContactPage' | 'CollectionPage' | 'WebPage'
+  title,
+  description,
+  path,
+  breadcrumbName,
+}) {
+  const pageUrl = getAbsoluteUrl(path);
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': schemaType,
+        '@id': `${pageUrl}#webpage`,
+        url: pageUrl,
+        name: `${title} | ${SITE_CONFIG.name}`,
+        description: description || SITE_CONFIG.description,
+        isPartOf: { '@id': `${SITE_URL}/#website` },
+        about: { '@id': `${SITE_URL}/#organization` },
+        inLanguage: SITE_CONFIG.language,
+        breadcrumb: { '@id': `${pageUrl}#breadcrumb` },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${pageUrl}#breadcrumb`,
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'خانه',
+            item: SITE_URL,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: breadcrumbName || title,
+            item: pageUrl,
+          },
+        ],
+      },
+    ],
+  };
+}

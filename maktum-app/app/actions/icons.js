@@ -8,7 +8,7 @@ export async function getIcons() {
       orderBy: { createdAt: 'desc' },
     });
   } catch (error) {
-    console.error('خطا در دریافت آیکون‌ها:', error);
+    console.error('خطا در دریافت نماد‌ها:', error);
     return [];
   }
 }
@@ -19,13 +19,13 @@ export async function uploadIcon(formData) {
     const name = formData.get('name');
     const label = formData.get('label');
 
-    if (!file || !name) return { success: false, error: 'فایل و نام یکتا الزامی است' };
+    if (!file || !name) return { success: false, error: 'پرونده و نام یکتا الزامی است' };
     
     // خواندن کدهای خام SVG
     const svgText = await file.text();
     
     if (!svgText.includes('<svg')) {
-      return { success: false, error: 'فایل نامعتبر است. فقط فرمت SVG پشتیبانی می‌شود.' };
+      return { success: false, error: 'پرونده نامعتبر است. فقط قالب SVG پشتیبانی می‌شود.' };
     }
 
     // پاکسازی امنیتی اولیه (جلوگیری از کدهای مخرب)
@@ -42,7 +42,7 @@ export async function uploadIcon(formData) {
     return { success: true, icon: newIcon };
   } catch (error) {
     if (error.code === 'P2002') return { success: false, error: 'این نام انگلیسی (شناسه) قبلاً ثبت شده است.' };
-    return { success: false, error: 'خطا در ذخیره آیکون' };
+    return { success: false, error: 'خطا در ذخیره نماد' };
   }
 }
 

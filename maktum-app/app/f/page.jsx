@@ -20,7 +20,7 @@ export default async function RawContentFrontPage() {
 
   const rawDataFromDB = await getContents({ type: 'RAW', status: 'PUBLISHED', limit: 12 });
 
-  // مپ کردن داده‌ها برای تطابق با کامپوننت مشترک + لینک‌دهی به /f/
+  // مپ کردن داده‌ها برای تطابق با کامپوننت مشترک + پیوند‌دهی به /f/
   const archiveItems = (rawDataFromDB || []).map(item => ({
     id: item.id,
     title: `${item.titleBase || ''} ${item.titleHighlight || ''}`.trim() || 'بدون عنوان',

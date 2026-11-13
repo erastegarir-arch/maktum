@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import Icon from '../Icon';
+import Icon from '../Icon'; // مسیر را در صورت نیاز اصلاح کنید
 import { useAuth } from '@/app/hooks/useAuth'; 
 
 export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
@@ -22,8 +22,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   // ========================================================
-  // آرایه منوها مجهز به سیستم سطوح دسترسی دانه‌ریز (RBAC)
-  // منطبق با کلیدهای تعریف شده در lib/rbac.js
+  // آرایه منوها مجهز به دستگاه سطوح دسترسی دانه‌ریز (RBAC)
   // ========================================================
   const ALL_MENU_ITEMS = useMemo(() => [
     { name: 'پیشخوان', href: '/portal-entry-99', icon: 'home', requiredAny: null },
@@ -40,24 +39,23 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
         { name: 'قوانین', href: '/portal-entry-99/pages/rules-settings', permission: 'TERMS_EDIT' },
       ]
     },    
-    // دیدن این ۴ بخش طبق rbac.js برای همه مدیران آزاد است و دکمه‌های داخلی آن‌ها کنترل می‌شود
     { name: 'کتابخانه رسانه', href: '/portal-entry-99/media', icon: 'image', requiredAny: null },    
     { name: 'طبقه‌بندی', href: '/portal-entry-99/taxonomies', icon: 'foldertree', requiredAny: null },    
     { name: 'محتوا', href: '/portal-entry-99/products', icon: 'browser', requiredAny: null },
     { name: 'منظومه', href: '/portal-entry-99/dossiers', icon: 'dossiers', requiredAny: ['HUB_SETTINGS', 'DOSSIER_EDIT', 'DOSSIER_CREATE', 'DOSSIER_DELETE'] },    
-    
-    // بخش‌هایی که ورود به آن‌ها نیازمند داشتن حداقل یکی از تیک‌های مربوطه است
     { name: 'اعلانات', href: '/portal-entry-99/notifications', icon: 'bell', requiredAny: ['NOTIF_CREATE', 'NOTIF_DELETE'] },
-    { name: 'نظرات', href: '/portal-entry-99/comments', icon: 'chat', requiredAny: ['COMMENT_EDIT_REPLY', 'COMMENT_APPROVE_REJECT'] },
-    { name: 'کاربران', href: '/portal-entry-99/users', icon: 'users', requiredAny: ['USERS_VIEW', 'USERS_EXPORT', 'USERS_CREATE', 'USERS_EDIT', 'USERS_GRANT_ADMIN', 'USERS_BAN'] },
+    { name: 'نظرات', href: '/portal-entry-99/comments', icon: 'chat', requiredAny: ['COMMENT_EDIT_REPLY', 'COMMENT_APPROVE_REJECT'] },    
+    { name: 'کاربران', href: '/portal-entry-99/users', icon: 'users', requiredAny: ['USERS_VIEW', 'USERS_EXPORT', 'USERS_CREATE', 'USERS_EDIT', 'USERS_BAN'] },    
+    { name: 'تاریخچه پیامک‌ها', href: '/portal-entry-99/otp-logs', icon: 'message', requiredAny: ['OTP_LOGS_VIEW'] },
+    { name: ' فارسی‌نویسی', href: '/portal-entry-99/persian-guide', icon: 'persian', requiredAny: ['PERSIAN_GUIDE_EDIT'] },
   ], []);
 
-  // فیلتر هوشمند منوها و زیرمنوها بر اساس دسترسی‌های کاربر
+  // صافی هوشمند منوها و زیرمنوها بر اساس دسترسی‌های کاربر
   const menuItems = useMemo(() => {
     if (!user) return [];
 
     return ALL_MENU_ITEMS.reduce((acc, item) => {
-      // اگر آیتم زیرمنو دارد (مثل چیدمان)، فقط زیرمنوهای مجاز را نگه می‌داریم
+      // اگر آیتم فهرست دارد (مثل چیدمان)، فقط زیرفهرست‌های مجاز را نگه می‌داریم
       if (item.subItems) {
         const allowedSubs = item.subItems.filter(sub => !sub.permission || (can && can(sub.permission)));
         if (allowedSubs.length > 0) {
@@ -66,7 +64,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
         return acc;
       }
 
-      // اگر آیتم نیاز به مجوز خاصی ندارد (برای همه مدیران آزاد است)
+      // اگر آیتم نیاز به مجوز خاصی ندارد
       if (!item.requiredAny || item.requiredAny.length === 0) {
         acc.push(item);
         return acc;
@@ -100,9 +98,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
     }
   };
 
-  // ========================================================
-  // محاسبه دقیق تراز تول‌تیپ‌ها (اصلاح‌شده برای قرارگیری دقیق در سمت چپ سایدبار)
-  // ========================================================
+  // محاسبه دقیق تراز تول‌تیپ‌ها
   const showTooltip = (e, text, forceShow = false) => {
     if (window.innerWidth < 768) return; 
     if (!isCollapsed && !forceShow) return;
@@ -110,17 +106,14 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
     
     setActiveTooltip({
       text,
-      top: rect.top + rect.height / 2, // تراز عمودی: دقیقاً وسط دکمه
-      // با کسر کردن از پهنای کل صفحه، لبه‌ی راستِ تول‌تیپ را محاسبه می‌کنیم
-      right: window.innerWidth - rect.left + 12, // ۱۲ پیکسل فاصله از لبه چپِ دکمه به سمت داخلِ سایت
+      top: rect.top + rect.height / 2, 
+      right: window.innerWidth - rect.left + 12, 
     });
   };
 
   const hideTooltip = () => setActiveTooltip(null);
 
-  // ========================================================
   // موتور رندر آیتم‌های منو
-  // ========================================================
   const renderMenuItems = (forMobile = false) => (
     <div className="flex-1 overflow-y-auto py-5 px-3 space-y-2 custom-scrollbar relative z-10 w-full">
       {menuItems.map((item) => {
@@ -205,9 +198,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
 
   return (
     <>
-      {/* ======================================================== */}
-      {/* ۱. سایدبار دسکتاپ */}
-      {/* ======================================================== */}
+      {/* سایدبار دسکتاپ */}
       <motion.aside 
         initial={false}
         animate={{ width: isCollapsed ? 84 : 260 }}
@@ -223,14 +214,14 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
                 initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}
                 className="text-base font-black text-white tracking-wide truncate"
               >
-                پنل مدیریت <span className="text-[#10b981]">مکتومم</span>
+                درگاه مسئولیت <span className="text-[#10b981]">مکتوم</span>
               </motion.h1>
             )}
           </AnimatePresence>
           
           <button 
             onClick={() => { setIsCollapsed(!isCollapsed); hideTooltip(); }}
-            onMouseEnter={(e) => showTooltip(e, isCollapsed ? 'گسترش منو' : 'جمع کردن منو', true)}
+            onMouseEnter={(e) => showTooltip(e, isCollapsed ? 'گسترش فهرست' : 'جمع‌کردن فهرست', true)}
             onMouseLeave={hideTooltip}
             className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-gray-400 hover:text-white transition-all mr-auto cursor-pointer flex items-center justify-center shrink-0 border border-white/5"
           >
@@ -240,10 +231,21 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
 
         {renderMenuItems(false)}
 
-        <div className="p-4 shrink-0 relative z-10 border-t border-white/[0.04] bg-gradient-to-t from-black/20 to-transparent">
+        <div className="p-4 shrink-0 flex flex-col gap-2 relative z-10 border-t border-white/[0.04] bg-gradient-to-t from-black/20 to-transparent">
+          <Link 
+            href="/"
+            target="_blank"
+            onMouseEnter={(e) => showTooltip(e, 'مشاهده سامانه')} 
+            onMouseLeave={hideTooltip}
+            className="w-full flex items-center justify-center gap-3 px-3 py-3 rounded-2xl bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981] hover:text-white transition-all font-bold text-sm cursor-pointer group shadow-inner border border-[#10b981]/20 hover:border-transparent"
+          >
+            <Icon name="arrowUpRight" className="w-5 h-5 fill-current shrink-0 group-hover:scale-110 transition-transform duration-300" />
+            {!isCollapsed && <span>مشاهده سامانه</span>}
+          </Link>
+
           <button 
             onClick={() => { hideTooltip(); setShowLogoutModal(true); }}
-            onMouseEnter={(e) => showTooltip(e, 'خروج از سیستم')} onMouseLeave={hideTooltip}
+            onMouseEnter={(e) => showTooltip(e, 'خروج از دستگاه')} onMouseLeave={hideTooltip}
             className="w-full flex items-center justify-center gap-3 px-3 py-3 rounded-2xl bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white transition-all font-bold text-sm cursor-pointer group shadow-inner border border-rose-500/20 hover:border-transparent"
           >
             <Icon name="logout" className="w-5 h-5 fill-current shrink-0 group-hover:-translate-x-1 transition-transform duration-300" />
@@ -252,9 +254,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
         </div>
       </motion.aside>
 
-      {/* ======================================================== */}
-      {/* ۲. نوار ناوبری چسبان پایین (موبایل) */}
-      {/* ======================================================== */}
+      {/* نوار ناوبری موبایل */}
       <div className="md:hidden fixed bottom-0 inset-x-0 h-16 z-40 bg-[#050810]/85 backdrop-blur-3xl border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] flex items-center justify-around px-2 pb-safe font-sans">
         {[
           { name: 'پیشخوان', href: '/portal-entry-99', icon: 'home' },
@@ -277,13 +277,11 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
           <div className="text-gray-500 group-hover:text-gray-300 transition-all duration-300">
             <Icon name="menu" className="w-[22px] h-[22px]" />
           </div>
-          <span className="text-[9px] font-bold text-gray-500 group-hover:text-gray-300 transition-colors">منو کامل</span>
+          <span className="text-[9px] font-bold text-gray-500 group-hover:text-gray-300 transition-colors">فهرست کامل</span>
         </button>
       </div>
 
-      {/* ======================================================== */}
-      {/* ۳. کشوی منوی کامل موبایل */}
-      {/* ======================================================== */}
+      {/* کشوی منوی موبایل */}
       <AnimatePresence>
         {isMobileDrawerOpen && (
           <>
@@ -308,7 +306,17 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
 
               {renderMenuItems(true)}
 
-              <div className="p-6 border-t border-white/[0.04] shrink-0 pb-safe bg-gradient-to-t from-black/20 to-transparent">
+              <div className="p-6 flex flex-col gap-3 border-t border-white/[0.04] shrink-0 pb-safe bg-gradient-to-t from-black/20 to-transparent">
+                <Link 
+                  href="/"
+                  target="_blank"
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className="w-full flex items-center justify-center gap-3 px-3 py-3.5 rounded-2xl bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981] hover:text-white transition-all font-bold text-sm cursor-pointer border border-[#10b981]/20"
+                >
+                  <Icon name="arrowUpRight" className="w-5 h-5 fill-current shrink-0" />
+                  <span>مشاهده سامانه</span>
+                </Link>
+
                 <button 
                   onClick={() => { setIsMobileDrawerOpen(false); setShowLogoutModal(true); }}
                   className="w-full flex items-center justify-center gap-3 px-3 py-3.5 rounded-2xl bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white transition-all font-bold text-sm cursor-pointer border border-rose-500/20"
@@ -322,9 +330,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
         )}
       </AnimatePresence>
 
-      {/* ======================================================== */}
-      {/* Tooltip (اصلاح شده برای قرارگیری دقیق در سمت چپ و داخل سایت) */}
-      {/* ======================================================== */}
+      {/* Tooltip */}
       <AnimatePresence>
         {activeTooltip && (
           <motion.div
@@ -333,12 +339,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
             exit={{ opacity: 0, x: -10, scale: 0.95 }} 
             transition={{ duration: 0.15, ease: 'easeOut' }}
             dir="ltr"
-            style={{ 
-              position: 'fixed', 
-              top: activeTooltip.top, 
-              right: activeTooltip.right, 
-              transform: 'translateY(-50%)' 
-            }}
+            style={{ position: 'fixed', top: activeTooltip.top, right: activeTooltip.right, transform: 'translateY(-50%)' }}
             className="z-[9999] pointer-events-none hidden md:flex items-center"
           >
             <div dir="rtl" className="relative bg-[#070b14] text-gray-200 text-xs font-bold px-3.5 py-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/10 whitespace-nowrap z-10">
@@ -349,9 +350,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
         )}
       </AnimatePresence>
 
-      {/* ======================================================== */}
-      {/* پاپ‌آپ (مودال) تأیید خروج سراسری */}
-      {/* ======================================================== */}
+      {/* مودال خروج */}
       <AnimatePresence>
         {showLogoutModal && (
           <motion.div 
@@ -370,18 +369,14 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
                 <Icon name="logout" className="w-8 h-8" />
               </div>
 
-              <h3 className="text-xl font-black text-white mb-2">تأیید خروج از سیستم</h3>
+              <h3 className="text-xl font-black text-white mb-2">تأیید خروج از دستگاه</h3>
               <p className="text-sm text-gray-400 font-light mb-8 leading-relaxed">
-                آیا برای خروج از پنل مدیریت <span className="text-[#10b981] font-bold">مکتوم</span> مطمئن هستید؟ برای ورود مجدد به رمز عبور نیاز خواهید داشت.
+                آیا برای خروج از درگاه مسئولیت <span className="text-[#10b981] font-bold">مکتوم</span> مطمئن هستید؟ برای ورود مجدد به گذرواژه نیاز خواهید داشت.
               </p>
 
               <div className="flex items-center gap-3">
-                <button onClick={handleConfirmLogout} className="flex-1 py-3.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-[0_0_20px_rgba(244,63,94,0.4)] transition-all cursor-pointer">
-                  بله، خروج
-                </button>
-                <button onClick={() => setShowLogoutModal(false)} className="flex-1 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white font-bold text-sm transition-all cursor-pointer border border-white/10">
-                  انصراف
-                </button>
+                <button onClick={handleConfirmLogout} className="flex-1 py-3.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-[0_0_20px_rgba(244,63,94,0.4)] transition-all cursor-pointer">بله، خروج</button>
+                <button onClick={() => setShowLogoutModal(false)} className="flex-1 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white font-bold text-sm transition-all cursor-pointer border border-white/10">انصراف</button>
               </div>
             </motion.div>
           </motion.div>

@@ -49,7 +49,7 @@ const FadingHero = ({ desktopImg, mobileImg }) => {
   );
 };
 
-// کارت‌های محتوا
+// فیش‌های محتوا
 const ContentCard = ({ content, index }) => {
   const cardRef = useRef(null);
   const typeConfig = getContentTypeConfig(content.type);
@@ -73,7 +73,7 @@ const ContentCard = ({ content, index }) => {
         initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }} 
         ref={cardRef}
         onMouseMove={handleMouseMove}
-        // اعمال گلس‌مورفیسم شفاف روی کارت‌ها
+        // اعمال گلس‌مورفیسم شفاف روی فیش‌ها
         className="group relative aspect-square md:aspect-video rounded-[1.5rem] md:rounded-[2rem] overflow-hidden cursor-pointer shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_8px_30px_rgba(0,0,0,0.5)] border border-white/[0.05] bg-white/[0.02] backdrop-blur-2xl transition-all duration-500 hover:-translate-y-1.5"
         style={{ '--theme-glow': `rgba(${hexToRgb(typeConfig.hex)}, 0.08)` }}
       >
@@ -121,7 +121,7 @@ export default function DossierDetailClientPage({ dossier }) {
     // حذف bg-[#050810] برای شفافیت کامل نسبت به لایه نوری AmbientBackground
     <div dir="rtl" className="min-h-screen text-white font-sans text-right overflow-hidden relative select-none selection:bg-cyan-500/30 flex flex-col">
       
-      {/* کاور پس‌زمینه (استایل مشابه صفحه Hub) */}
+      {/* کاور پس‌زمینه (سبک مشابه صفحه Hub) */}
       <FadingHero desktopImg={data.coverDesktop} mobileImg={data.coverMobile} />
 
       {/* 
@@ -180,7 +180,7 @@ export default function DossierDetailClientPage({ dossier }) {
           )}
         </section>
 
-        {/* رادار موضوعی (هشتگ‌ها) */}
+        {/* رادار موضوعی (هشتک‌ها) */}
         {data.showRadar && data.topics?.length > 0 && (
           <motion.section 
             initial={{ opacity: 0, y: 40 }} 
@@ -240,7 +240,7 @@ export default function DossierDetailClientPage({ dossier }) {
                 <h3 className="text-xl md:text-3xl font-black font-sans">محتوای پرونده</h3>
               </div>
               
-              {/* تب‌های فیلتر با مخفی‌کننده اسکرول بار برای موبایل */}
+              {/* تب‌های صافی با مخفی‌کننده اسکرول بار برای موبایل */}
               <div className="flex gap-2 bg-white/[0.02] backdrop-blur-md shadow-[inset_0_0_15px_rgba(255,255,255,0.01)] p-1.5 rounded-2xl border border-white/[0.05] overflow-x-auto w-full md:w-auto pb-2 md:pb-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {['همه', 'فوتیج و راش', 'محتوای تولیدی', 'ابزارها', 'بلاگ'].map((cat, i) => (
                   <button key={i} onClick={() => { setActiveFilter(cat); setVisibleCount(6); }} className={`px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-colors whitespace-nowrap font-sans border ${activeFilter === cat ? 'bg-white/[0.08] text-white shadow-md border-white/[0.1]' : 'bg-transparent border-transparent text-gray-400 hover:text-white hover:bg-white/[0.05]'}`}>{cat}</button>
@@ -272,7 +272,7 @@ export default function DossierDetailClientPage({ dossier }) {
           </section>
         )}
 
-        {/* باکس اقدام (CTA) */}
+        {/* قاب اقدام (CTA) */}
         {data.showTipLine && (
           <motion.section initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="relative bg-white/[0.02] backdrop-blur-3xl rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 border border-white/[0.05] overflow-hidden text-center flex flex-col items-center shadow-[0_30px_60px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.02)] group">
             <div className="absolute top-0 inset-x-0 h-[2px] opacity-50 bg-gradient-to-r from-transparent via-emerald-500 to-transparent pointer-events-none z-20" />

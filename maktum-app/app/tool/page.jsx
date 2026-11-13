@@ -20,7 +20,7 @@ export default async function ToolsFrontPage() {
 
   const rawDataFromDB = await getContents({ type: 'TOOL', status: 'PUBLISHED', limit: 12 });
 
-  // مپ کردن داده‌ها برای تطابق با کامپوننت مشترک + لینک‌دهی به /tool/
+  // مپ کردن داده‌ها برای تطابق با کامپوننت مشترک + پیوند‌دهی به /tool/
   const archiveItems = (rawDataFromDB || []).map(item => ({
     id: item.id,
     title: `${item.titleBase || ''} ${item.titleHighlight || ''}`.trim() || 'بدون عنوان',

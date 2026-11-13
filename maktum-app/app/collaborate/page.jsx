@@ -1,9 +1,24 @@
 import { getSetting } from '@/app/actions/settings';
 import CollaborationContent from '../components/frontend/CollaborationContent';
+import { constructPageMetadata } from '@/lib/seo'; // اضافه شدن تابع سئو
+import ProgressBar from '@/app/components/ProgressBar';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 export const revalidate = 0;
+
+// تولید متادیتای پویا برای سئو صفحه همکاری با ما
+export async function generateMetadata() {
+  const seoTitle = await getSetting('collaborate_seo_title');
+  const pageTitle = await getSetting('collaborate_title');
+  const seoDesc = await getSetting('collaborate_seo_desc');
+
+  return constructPageMetadata({
+    title: seoTitle || pageTitle || 'همکاری با ما',
+    description: seoDesc || 'دعوت به همکاری با مستندسازان، پژوهشگران، تدوین‌گران و تولیدکنندگان محتوا در پلتفرم باز مکتوم جهت گسترش پایگاه داده رسانه‌ای.',
+    path: '/collaborate',
+  });
+}
 
 export default async function CollaborationPage() {
   const storedData = await getSetting('collaboration_page_data');
@@ -12,7 +27,7 @@ export default async function CollaborationPage() {
     return (
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
         <p className="text-gray-400 font-sans">
-          اطلاعاتی یافت نشد. لطفاً در پنل تنظیمات همکاری با ما، اطلاعات را یک‌بار ذخیره کنید.
+          اطلاعاتی یافت نشد. لطفاً در درگاه تنظیمات همکاری با ما، اطلاعات را یک‌بار ذخیره کنید.
         </p>
       </main>
     );
@@ -22,8 +37,13 @@ export default async function CollaborationPage() {
   try {
     pageData = JSON.parse(storedData);
   } catch (e) {
-    return <div className="text-white text-center py-20">خطا در پردازش اطلاعات از دیتابیس</div>;
+    return <div className="text-white text-center py-20">خطا در پردازش اطلاعات از پایگاه داده</div>;
   }
 
-  return <CollaborationContent pageData={pageData} />;
+  return (
+    <>
+      <ProgressBar />
+      <CollaborationContent pageData={pageData} />
+    </>
+  );
 }

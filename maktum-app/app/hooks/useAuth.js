@@ -43,12 +43,12 @@ export function AuthProvider({ children, initialUser = null }) {
     }
   }, []);
 
-  // بررسی داشتن یک تیک خاص در چک‌لیست مدیریتی
+  // بررسی داشتن یک تیک خاص در فهرست بررسی مسئولیتی
   const can = useCallback((permissionId) => {
     return checkUserPermission(user, permissionId);
   }, [user]);
 
-  // بررسی داشتن حداقل یکی از تیک‌های لیست‌شده
+  // بررسی داشتن حداقل یکی از تیک‌های فهرست‌شده
   const canAny = useCallback((permissionIds = []) => {
     return checkUserAnyPermission(user, permissionIds);
   }, [user]);
@@ -73,7 +73,7 @@ export function AuthProvider({ children, initialUser = null }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   
-  // اگر کامپوننتی بیرون از AuthProvider بود، به صورت مستقل هم کار کند و ارور ندهد
+  // اگر کامپوننتی بیرون از AuthProvider بود، به صورت مستقل هم کار کند و خطا ندهد
   const [standaloneUser, setStandaloneUser] = useState(null);
   const [standaloneLoading, setStandaloneLoading] = useState(true);
 

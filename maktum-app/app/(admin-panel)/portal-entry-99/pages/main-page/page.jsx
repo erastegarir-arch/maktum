@@ -16,7 +16,7 @@ import ModalPortal from '@/app/components/admin/ModalPortal';
 
 const cn = (...inputs) => twMerge(clsx(inputs));
 
-// ================= پیکربندی سربرگ‌ها و کلیدهای دیتابیس =================
+// ================= پیکربندی سربرگ‌ها و کلیدهای پایگاه داده =================
 const TABS = [
   { id: 'RAW', label: 'محتوای خام', color: '#fbbf24', bg: 'bg-[#fbbf24]', hover: 'hover:bg-[#fbbf24]', text: 'text-[#fbbf24]', border: 'border-[#fbbf24]', glow: 'shadow-[0_0_15px_rgba(251,191,36,0.3)]', key: 'raw_page_settings' },
   { id: 'PRODUCED', label: 'محتوای تولیدی', color: '#f43f5e', bg: 'bg-[#f43f5e]', hover: 'hover:bg-[#f43f5e]', text: 'text-[#f43f5e]', border: 'border-[#f43f5e]', glow: 'shadow-[0_0_15px_rgba(244,63,94,0.3)]', key: 'produced_page_settings' },
@@ -42,7 +42,7 @@ export default function MainPagesManager() {
     if (isWorking) return;
 
     if (user) {
-      // فقط مدیرانی که تیک ویرایش صفحات فرعی را دارند مجاز به ورود هستند
+      // فقط مسئولانی که تیک ویرایش صفحات فرعی را دارند مجاز به ورود هستند
       setHasAccess(user.isSuperAdmin || (can && can('PAGES_EDIT')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -100,7 +100,7 @@ export default function MainPagesManager() {
   const activeTheme = TABS.find(t => t.id === activeTab);
   const currentData = pagesData[activeTab];
 
-  // ================= توابع آپدیت استیت =================
+  // ================= توابع به‌روزرسانی استیت =================
   const updateHero = (field, value) => {
     setPagesData(prev => ({ ...prev, [activeTab]: { ...prev[activeTab], hero: { ...prev[activeTab].hero, [field]: value } } }));
   };
@@ -147,7 +147,7 @@ export default function MainPagesManager() {
   };
 
   // ==========================================
-  // ۳. کنترل رندر لودینگ و انسداد دسترسی
+  // ۳. نظارت رندر لودینگ و انسداد دسترسی
   // ==========================================
   if (!isMounted || hasAccess === null || (hasAccess && isLoading)) return <AdminLoading />;
 
@@ -158,7 +158,7 @@ export default function MainPagesManager() {
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز ورود به این بخش از پنل را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -172,9 +172,9 @@ export default function MainPagesManager() {
         <div>
           <h1 className="text-2xl font-black text-white mb-2 flex items-center gap-3">
             <span className={`w-2.5 h-2.5 rounded-full ${activeTheme.bg} transition-colors duration-500 shadow-[0_0_10px_currentColor]`} style={{ color: activeTheme.color }}></span>
-            مدیریت صفحات فرعی
+            مسئولیت صفحات فرعی
           </h1>
-          <p className="text-sm text-gray-400 font-light">باکس معرفی، اسلایدر محتوای منتخب و سئوی هر ۴ صفحه اصلی را از اینجا مدیریت کنید.</p>
+          <p className="text-sm text-gray-400 font-light">قاب معرفی، اسلایدر محتوای منتخب و سئوی هر ۴ صفحه اصلی را از اینجا نظارت کنید.</p>
         </div>
 
         {/* سربرگ‌ها (Tabs) */}
@@ -208,18 +208,18 @@ export default function MainPagesManager() {
           transition={{ duration: 0.3 }}
           className="space-y-8"
         >
-          {/* ================= ۱. باکس معرفی (Hero) ================= */}
+          {/* ================= ۱. قاب معرفی (Hero) ================= */}
           <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] group overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-xl">
             <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
             
             <div className="p-6 md:p-8 space-y-6 relative z-10">
               <h2 className={`text-lg font-bold ${activeTheme.text} flex items-center gap-2 border-b border-white/10 pb-3`}>
-                <Icon name="star" className="w-5 h-5" /> باکس معرفی
+                <Icon name="star" className="w-5 h-5" /> قاب معرفی
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#050810]/50 p-6 rounded-2xl border border-white/5 shadow-inner">
                 <div className="space-y-2">
-                  <label className="text-xs text-gray-300 font-bold pl-1">رو تیتر</label>
+                  <label className="text-xs text-gray-300 font-bold pl-1">رو عنوان</label>
                   <input 
                     type="text" 
                     value={currentData.hero.badge} 
@@ -327,7 +327,7 @@ export default function MainPagesManager() {
                         {/* فیلدهای متنی */}
                         <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <label className="text-[11px] text-gray-300 font-bold pl-1">بج (بالای تیتر)</label>
+                            <label className="text-[11px] text-gray-300 font-bold pl-1">روعنوان</label>
                             <input 
                               type="text" 
                               value={slide.badge} 
@@ -355,7 +355,7 @@ export default function MainPagesManager() {
                           </div>
 
                           <div className="space-y-2 md:col-span-2">
-                            <label className="text-[11px] text-gray-300 font-bold pl-1">توضیحات (زیر تیتر)</label>
+                            <label className="text-[11px] text-gray-300 font-bold pl-1">زیر عنوان</label>
                             <textarea 
                               rows="2" 
                               value={slide.description} 
@@ -369,7 +369,7 @@ export default function MainPagesManager() {
                           </div>
 
                           <div className="space-y-2">
-                            <label className="text-[11px] text-gray-300 font-bold pl-1">متن دکمه لینک‌دار</label>
+                            <label className="text-[11px] text-gray-300 font-bold pl-1">متن دکمه پیوند‌دار</label>
                             <input 
                               type="text" 
                               value={slide.btnText} 
@@ -383,7 +383,7 @@ export default function MainPagesManager() {
                           </div>
 
                           <div className="space-y-2">
-                            <label className="text-[11px] text-gray-300 font-bold pl-1">آدرس لینک (URL)</label>
+                            <label className="text-[11px] text-gray-300 font-bold pl-1">نشانی پیوند</label>
                             <input 
                               type="text" 
                               value={slide.btnUrl} 
@@ -415,7 +415,7 @@ export default function MainPagesManager() {
 
               <div className="bg-[#050810]/50 p-6 rounded-2xl border border-white/5 shadow-inner space-y-6">
                 <div className="space-y-2">
-                  <label className="text-xs text-gray-300 font-bold flex justify-between pl-1">عنوان سئو (برای تب مرورگر و گوگل)</label>
+                  <label className="text-xs text-gray-300 font-bold flex justify-between pl-1">عنوان سئو</label>
                   <input 
                     type="text" 
                     value={currentData.seo.title} 
@@ -426,11 +426,11 @@ export default function MainPagesManager() {
                     onFocus={(e) => e.target.style.borderColor = activeTheme.color}
                     onBlur={(e) => e.target.style.borderColor = 'transparent'}
                   />
-                  <p className="text-[10px] text-gray-500 pl-1">اگر این فیلد خالی باشد، سیستم به طور خودکار از عنوان سایت در تب مرورگر استفاده می‌کند.</p>
+                  <p className="text-[10px] text-gray-500 pl-1">اگر این بخش خالی باشد، سامانه به طور خودکار از عنوان سامانه در تب مرورگر استفاده می‌کند.</p>
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-xs text-gray-300 font-bold pl-1">توضیحات سئو (Meta Description)</label>
+                  <label className="text-xs text-gray-300 font-bold pl-1">توضیحات سئو</label>
                   <textarea 
                     rows="3" 
                     value={currentData.seo.description} 
@@ -460,7 +460,7 @@ export default function MainPagesManager() {
         </motion.div>
       </AnimatePresence>
 
-      {/* پاپ آپ مودال کتابخانه رسانه برای اسلایدر */}
+      {/* باز شونده‌ مودال کتابخانه رسانه برای اسلایدر */}
       <AnimatePresence>
         {mediaPickerTarget && (
           <ModalPortal>

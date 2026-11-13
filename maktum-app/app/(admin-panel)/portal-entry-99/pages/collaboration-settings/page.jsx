@@ -15,7 +15,7 @@ import AdminLoading from '@/app/(admin-panel)/loading';
 
 const cn = (...inputs) => twMerge(clsx(inputs));
 
-// داده‌های اولیه بدون اطلاعات آیکون
+// داده‌های اولیه بدون اطلاعات نماد
 const defaultPageData = {
   hero: {
     enabled: true,
@@ -26,7 +26,7 @@ const defaultPageData = {
     ]
   },
   collaborationOptions: [
-    { enabled: true, title: "ارسال محتوای خام", desc: "ارسال عکس، فیلم و راش‌های صوتی جهت عرضه در سایت و استفاده دیگر پژوهشگران در راستای رشد و تبیین ارزش‌های انقلاب اسلامی.", color: "#fbbf24" },
+    { enabled: true, title: "ارسال محتوای خام", desc: "ارسال عکس، فیلم و راش‌های صوتی جهت عرضه در سامانه و استفاده دیگر پژوهشگران در راستای رشد و تبیین ارزش‌های انقلاب اسلامی.", color: "#fbbf24" },
     { enabled: true, title: "محتوای تولیدی", desc: "آیا محتوایی با استفاده از راش‌های مکتوم تولید کرده‌اید؟ یا محتوای باکیفیتی دارید که راضی به انتشار رایگان آن هستید؟ ما در دیده شدن آن کمک می‌کنیم.", color: "#f43f5e" },
     { enabled: true, title: "شبکه توزیع و نشر", desc: "اگر در انتشار و وایرال کردن محتوای تولید شده در شبکه‌های اجتماعی توانمندی دارید و می‌توانید صدای پلتفرم مکتوم را به گوش مخاطبان بیشتری برسانید.", color: "#06b6d4" },
     { enabled: true, title: "پیوستن به شبکه فعالان", desc: "اگر توانایی در عرصه‌های مختلف رسانه‌ای دارید (تدوین، گرافیک، پژوهش و...) فرم رزومه را تکمیل کنید تا در صورت وجود پروژه به شما اطلاع دهیم.", color: "#10b981" },
@@ -46,7 +46,7 @@ const defaultPageData = {
 const SectionToggle = ({ checked, onChange, colorClass = "bg-[#06b6d4]" }) => (
   <label className="flex items-center cursor-pointer gap-2 select-none">
     <span className={cn("text-xs font-bold transition-colors", checked !== false ? 'text-white' : 'text-gray-500')}>
-      {checked !== false ? 'نمایش در سایت' : 'مخفی در سایت'}
+      {checked !== false ? 'نمایش در سامانه' : 'مخفی در سامانه'}
     </span>
     <div className="relative">
       <input type="checkbox" className="sr-only" checked={checked !== false} onChange={e => onChange(e.target.checked)} />
@@ -73,7 +73,7 @@ export default function CollaborationSettingsPage() {
     if (isWorking) return;
 
     if (user) {
-      // فقط مدیرانی که تیک ویرایش صفحه همکاری با ما را دارند مجاز به ورود هستند
+      // فقط مسئولانی که تیک ویرایش صفحه همکاری با ما را دارند مجاز به ورود هستند
       setHasAccess(user.isSuperAdmin || (can && can('CAREER_EDIT')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -137,7 +137,7 @@ export default function CollaborationSettingsPage() {
         },
         error: () => {
           setSaving(false);
-          return 'خطا در برقراری ارتباط با دیتابیس!';
+          return 'خطا در برقراری ارتباط با پایگاه داده!';
         }
       }
     );
@@ -168,7 +168,7 @@ export default function CollaborationSettingsPage() {
   };
 
   // ==========================================
-  // ۳. کنترل رندر لودینگ سراسری و مسدودی
+  // ۳. نظارت رندر لودینگ سراسری و مسدودی
   // ==========================================
   if (!isMounted || hasAccess === null || (hasAccess && loading)) return <AdminLoading />;
 
@@ -179,7 +179,7 @@ export default function CollaborationSettingsPage() {
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز ورود به این بخش از پنل را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -191,7 +191,7 @@ export default function CollaborationSettingsPage() {
           <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] shadow-[0_0_10px_#10b981]"></span>
           تنظیمات صفحه همکاری با ما
         </h1>
-        <p className="text-sm text-gray-400 font-light">آیکون‌های صفحه ثابت هستند، در اینجا متون، رنگ تم و وضعیت نمایش را مدیریت کنید.</p>
+        <p className="text-sm text-gray-400 font-light">نماد‌های صفحه ثابت هستند، در اینجا متون، رنگ زمینه و وضعیت نمایش را نظارت کنید.</p>
       </div>
 
       <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
@@ -209,18 +209,18 @@ export default function CollaborationSettingsPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-xs text-gray-300 font-bold pl-1">متن خاکستری (بج)</label>
+                <label className="text-xs text-gray-300 font-bold pl-1">متن خاکستری</label>
                 <input type="text" value={data.hero.badge || ''} onChange={e => setData(prev => ({ ...prev, hero: { ...prev.hero, badge: e.target.value } }))} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-sm text-white placeholder:text-gray-600 focus:border focus:border-[#06b6d4] transition-all outline-none select-text" />
               </div>
               <div className="space-y-2">
-                <label className="text-xs text-gray-300 font-bold pl-1">کلمه رنگی (هایلایت)</label>
+                <label className="text-xs text-gray-300 font-bold pl-1">کلمه رنگی</label>
                 <input type="text" value={data.hero.highlight || ''} onChange={e => setData(prev => ({ ...prev, hero: { ...prev.hero, highlight: e.target.value } }))} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-sm text-white placeholder:text-gray-600 focus:border focus:border-[#06b6d4] transition-all outline-none select-text" />
               </div>
             </div>
 
             <div className="space-y-3 pt-2">
               <div className="flex justify-between items-center">
-                <label className="text-xs text-gray-300 font-bold pl-1">پاراگراف‌های توضیحات</label>
+                <label className="text-xs text-gray-300 font-bold pl-1">بند‌های توضیحات</label>
                 <button type="button" onClick={() => setData(prev => ({...prev, hero: {...prev.hero, paragraphs: [...prev.hero.paragraphs, ""]}}))} className="text-xs bg-white/5 border border-transparent shadow-inner text-[#06b6d4] px-3 py-1.5 rounded-lg hover:bg-[#06b6d4]/10 transition-colors cursor-pointer font-bold"><Icon name="plus" className="w-3.5 h-3.5" /></button>
               </div>
               {(data.hero.paragraphs || []).map((p, i) => (
@@ -232,20 +232,20 @@ export default function CollaborationSettingsPage() {
             </div>
           </div>
 
-          {/* ۲. کارت‌های همکاری */}
+          {/* ۲. فیش‌های همکاری */}
           <div className="space-y-4 p-6 bg-[#050810]/50 shadow-inner rounded-2xl border border-white/5">
             <div className="flex justify-between items-center border-b border-white/10 pb-3">
-              <h2 className="text-lg font-bold text-white">۲. کارت‌های گزینه‌های همکاری</h2>
+              <h2 className="text-lg font-bold text-white">۲. فیش‌های گزینه‌های همکاری</h2>
             </div>
 
             <div className="space-y-4 pt-2">
               {data.collaborationOptions.map((item, idx) => (
                 <div key={idx} className={cn("p-5 bg-black/20 border border-transparent shadow-inner rounded-xl space-y-4 relative transition-colors", item.enabled !== false ? 'border-white/5' : 'border-rose-500/30 opacity-60')}>
                   <div className="flex justify-between mb-2">
-                    <span className="text-xs text-gray-400 font-bold select-text">کارت {idx + 1}</span>
+                    <span className="text-xs text-gray-400 font-bold select-text">فیش {idx + 1}</span>
                     
                     <label className="flex items-center cursor-pointer gap-2 select-none">
-                      <span className="text-[10px] text-gray-400 font-bold transition-colors">نمایش کارت</span>
+                      <span className="text-[10px] text-gray-400 font-bold transition-colors">نمایش فیش</span>
                       <div className="relative">
                         <input type="checkbox" className="sr-only" checked={item.enabled !== false} onChange={e => handleOptionChange(idx, 'enabled', e.target.checked)} />
                         <div className={cn("block w-8 h-4 rounded-full transition-colors border border-transparent shadow-inner", item.enabled !== false ? 'bg-emerald-500' : 'bg-black/50 border-white/10')}></div>
@@ -256,11 +256,11 @@ export default function CollaborationSettingsPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[11px] text-gray-400 font-bold block mb-2 pl-1">عنوان کارت</label>
+                      <label className="text-[11px] text-gray-400 font-bold block mb-2 pl-1">عنوان فیش</label>
                       <input type="text" value={item.title || ''} onChange={e => handleOptionChange(idx, 'title', e.target.value)} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-lg p-2.5 text-sm text-white placeholder:text-gray-600 focus:border focus:border-[#06b6d4] transition-all outline-none select-text" />
                     </div>
                     <div>
-                      <label className="text-[11px] text-gray-400 font-bold block mb-2 pl-1">رنگ تم (هاور و سایه)</label>
+                      <label className="text-[11px] text-gray-400 font-bold block mb-2 pl-1">رنگ زمینه</label>
                       <div className="flex gap-2 items-center bg-black/40 border border-white/5 shadow-inner p-1.5 rounded-lg">
                         <input type="color" value={item.color || '#06b6d4'} onChange={e => handleOptionChange(idx, 'color', e.target.value)} className="w-8 h-8 rounded border-0 bg-transparent cursor-pointer" />
                         <input type="text" value={item.color || '#06b6d4'} onChange={e => handleOptionChange(idx, 'color', e.target.value)} className="flex-1 bg-transparent rounded-lg p-2 text-xs text-white dir-ltr text-center uppercase outline-none font-sans select-text" />
@@ -290,7 +290,7 @@ export default function CollaborationSettingsPage() {
                 <input type="text" value={data.proposal.title || ''} onChange={e => setData(prev => ({ ...prev, proposal: { ...prev.proposal, title: e.target.value } }))} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-sm text-white placeholder:text-gray-600 focus:border focus:border-[#fbbf24] transition-all outline-none select-text" />
               </div>
               <div>
-                <label className="text-xs text-gray-300 font-bold block mb-2 pl-1">رنگ تم بخش</label>
+                <label className="text-xs text-gray-300 font-bold block mb-2 pl-1">رنگ زمینه بخش</label>
                 <div className="flex gap-2 items-center bg-black/40 border border-white/5 shadow-inner p-1.5 rounded-lg mt-0.5">
                   <input type="color" value={data.proposal.color || '#fbbf24'} onChange={e => setData(prev => ({ ...prev, proposal: { ...prev.proposal, color: e.target.value } }))} className="w-8 h-8 rounded border-0 bg-transparent cursor-pointer" />
                   <input type="text" value={data.proposal.color || '#fbbf24'} onChange={e => setData(prev => ({ ...prev, proposal: { ...prev.proposal, color: e.target.value } }))} className="flex-1 bg-transparent rounded-xl p-2 text-xs text-white dir-ltr text-center uppercase outline-none font-sans select-text" />
@@ -300,7 +300,7 @@ export default function CollaborationSettingsPage() {
 
             <div className="space-y-3 pt-2">
               <div className="flex justify-between items-center">
-                <label className="text-xs text-gray-300 font-bold pl-1">پاراگراف‌های توضیحات</label>
+                <label className="text-xs text-gray-300 font-bold pl-1">بند‌های توضیحات</label>
                 <button type="button" onClick={() => setData(prev => ({...prev, proposal: {...prev.proposal, paragraphs: [...prev.proposal.paragraphs, ""]}}))} className="text-xs bg-white/5 border border-transparent shadow-inner text-[#fbbf24] px-3 py-1.5 rounded-lg hover:bg-white/10 cursor-pointer transition-colors font-bold"><Icon name="plus" className="w-3.5 h-3.5" /></button>
               </div>
               {(data.proposal.paragraphs || []).map((p, i) => (

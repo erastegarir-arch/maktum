@@ -54,7 +54,7 @@ export default function AdminDossiersManager() {
   const [isMounted, setIsMounted] = useState(false);
 
   // ==========================================
-  // ۲. استیت‌های محتوا و مدیریت تب‌ها
+  // ۲. استیت‌های محتوا و مسئولیت تب‌ها
   // ==========================================
   const [activeTab, setActiveTab] = useState('HUB_SETTINGS'); 
   const [dossiers, setDossiers] = useState([]);
@@ -66,11 +66,11 @@ export default function AdminDossiersManager() {
     if (isWorking) return;
 
     if (user) {
-      // فقط مدیری مجاز به ورود است که حداقل یکی از مجوزهای منظومه (تنظیمات هاب یا مدیریت پرونده‌ها) را داشته باشد
+      // فقط مسئولی مجاز به ورود است که حداقل یکی از مجوزهای منظومه (تنظیمات قطب یا مسئولیت پرونده‌ها) را داشته باشد
       const allowed = user.isSuperAdmin || (canAny && canAny(['HUB_SETTINGS', 'DOSSIER_EDIT', 'DOSSIER_CREATE', 'DOSSIER_DELETE']));
       setHasAccess(!!allowed);
 
-      // تنظیم هوشمند تب فعال بر اساس مجوز مدیر
+      // تنظیم هوشمند تب فعال بر اساس مجوز مسئول
       if (allowed && !user.isSuperAdmin && can) {
         if (can('HUB_SETTINGS')) {
           setActiveTab('HUB_SETTINGS');
@@ -90,11 +90,11 @@ export default function AdminDossiersManager() {
   }, [user, authIsLoading, authLoading, isFetching, can, canAny]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // دیتابیس زنده (Live Data) برای جستجو
+  // پایگاه داده زنده (Live Data) برای کاوش
   const [allTaxonomies, setAllTaxonomies] = useState([]);
   const [allContents, setAllContents] = useState([]);
 
-  // استیت‌های تب هاب
+  // استیت‌های تب قطب
   const [hubSettings, setHubSettings] = useState({ 
     title: '', description: '', metaTitle: '', metaDesc: '',
     icon: '', bgDesktop: '', bgMobile: '', titleGradientStart: '#ffffff', titleGradientEnd: '#ffffff'
@@ -102,7 +102,7 @@ export default function AdminDossiersManager() {
   const [isSavingHub, setIsSavingHub] = useState(false);
   const [draggedItem, setDraggedItem] = useState(null);
 
-  // استیت‌های لیست پرونده‌ها
+  // استیت‌های فهرست پرونده‌ها
   const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(5);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, title: '' });
@@ -127,7 +127,7 @@ export default function AdminDossiersManager() {
     titleGradientStart: '#ffffff', titleGradientEnd: '#ffffff', preTitleColor: '#a3a3a3', descColor: '#d1d5db',
     showRadar: true, radarTitle: 'رادار موضوعی پرونده', selectedTopics: [],
     showCreators: true, creatorsTitle: 'اشخاص و پدیدآورندگان مرتبط', selectedCreators: [],
-    selectedContents: [], showTipLine: true, tipPreTitle: 'باکس اقدام', 
+    selectedContents: [], showTipLine: true, tipPreTitle: 'قاب اقدام', 
     tipTitle: 'سندی در دست دارید؟', tipDesc: '', tipBtnText: 'ارسال سند', tipBtnLink: '#', tipBtnIcon: 'upload',
     layoutSize: 'STANDARD'
   });
@@ -149,25 +149,25 @@ export default function AdminDossiersManager() {
       if (contRes) setAllContents(contRes);
       if (mediaRes) setMediaItems(mediaRes);
     } catch (error) {
-      toast.error('خطا در دریافت اطلاعات دیتابیس');
+      toast.error('خطا در دریافت اطلاعات پایگاه داده');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSaveHubSettings = async () => {
-    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز ویرایش تنظیمات هاب را ندارید.');
+    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز ویرایش تنظیمات قطب را ندارید.');
     setIsSavingHub(true);
     const res = await saveHubSettings(hubSettings);
     setIsSavingHub(false);
-    if(res.success) toast.success('تنظیمات صفحه هاب با موفقیت ذخیره شد.');
+    if(res.success) toast.success('تنظیمات صفحه قطب با موفقیت ذخیره شد.');
     else toast.error('خطا در ذخیره تنظیمات');
   };
 
   const handleDragStart = (e, index) => {
     if (!can('HUB_SETTINGS')) {
       e.preventDefault();
-      return toast.error('شما مجوز تغییر چیدمان هاب را ندارید.');
+      return toast.error('شما مجوز تغییر چیدمان قطب را ندارید.');
     }
     setDraggedItem(index);
     e.dataTransfer.effectAllowed = 'move';
@@ -195,7 +195,7 @@ export default function AdminDossiersManager() {
   };
 
   const toggleDossierVisibility = async (id) => {
-    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز تغییر وضعیت نمایش در هاب را ندارید.');
+    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز تغییر وضعیت نمایش در قطب را ندارید.');
     const d = dossiers.find(x => x.id === id);
     const updated = { ...d, isVisibleInHub: !d.isVisibleInHub };
     setDossiers(prev => prev.map(x => x.id === id ? updated : x));
@@ -204,7 +204,7 @@ export default function AdminDossiersManager() {
   };
 
   const toggleDossierLayout = async (id, layoutType) => {
-    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز تغییر ابعاد پرونده در هاب را ندارید.');
+    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز تغییر ابعاد پرونده در قطب را ندارید.');
     const d = dossiers.find(x => x.id === id);
     if (d.layoutSize === layoutType) return;
     const updated = { ...d, layoutSize: layoutType };
@@ -247,7 +247,7 @@ export default function AdminDossiersManager() {
         titleGradientStart: '#ffffff', titleGradientEnd: '#ffffff', preTitleColor: '#a3a3a3', descColor: '#d1d5db',
         showRadar: true, radarTitle: 'رادار موضوعی پرونده', selectedTopics: [],
         showCreators: true, creatorsTitle: 'اشخاص و پدیدآورندگان مرتبط', selectedCreators: [],
-        selectedContents: [], showTipLine: true, tipPreTitle: 'باکس اقدام', 
+        selectedContents: [], showTipLine: true, tipPreTitle: 'قاب اقدام', 
         tipTitle: 'سندی در دست دارید؟', tipDesc: '', tipBtnText: 'ارسال سند', tipBtnLink: '#', tipBtnIcon: 'upload',
         layoutSize: 'STANDARD'
       });
@@ -293,7 +293,7 @@ export default function AdminDossiersManager() {
   const searchResultsContents = allContents.filter(c => {
     // اگر از قبل انتخاب شده باشد، نشان نده
     if (formData.selectedContents.find(sc => sc.id === c.id)) return false;
-    // جستجو در هر دو بخش عنوان
+    // کاوش در هر دو بخش عنوان
     const query = contentSearch.toLowerCase();
     const base = (c.titleBase || '').toLowerCase();
     const highlight = (c.titleHighlight || '').toLowerCase();
@@ -303,7 +303,7 @@ export default function AdminDossiersManager() {
   const isTipIconUrl = formData.tipBtnIcon && (formData.tipBtnIcon.includes('/') || formData.tipBtnIcon.startsWith('http'));
 
   // ==========================================
-  // ۳. کنترل رندر لودینگ و انسداد دسترسی
+  // ۳. نظارت رندر لودینگ و انسداد دسترسی
   // ==========================================
   if (!isMounted || hasAccess === null || (hasAccess && isLoading)) return <AdminLoading />;
 
@@ -314,7 +314,7 @@ export default function AdminDossiersManager() {
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز ورود به این بخش از پنل را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -327,12 +327,12 @@ const renderEditorForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div className="space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">لینک اختصاصی (Slug)</label>
-                <input type="text" dir="ltr" value={formData.slug} onChange={(e) => setFormData({...formData, slug: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans text-left select-text" placeholder="مثال: us-embassy" />
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">پیوند اختصاصی</label>
+                <input type="text" dir="ltr" value={formData.slug} onChange={(e) => setFormData({...formData, slug: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans text-left select-text" placeholder="مثال: ashura" />
               </div>
               
               <div className="space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">رنگ اصلی (Theme)</label>
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">رنگ زمینه</label>
                 <div className="flex gap-2 items-center bg-black/40 border border-white/5 shadow-inner p-1.5 rounded-xl">
                   <input type="color" value={formData.themeColor} onChange={(e) => setFormData({...formData, themeColor: e.target.value})} className="w-10 h-10 rounded-lg border-0 bg-transparent cursor-pointer" />
                   <input type="text" value={formData.themeColor} onChange={(e) => setFormData({...formData, themeColor: e.target.value})} className="flex-1 bg-transparent text-sm text-white dir-ltr text-center uppercase outline-none font-sans select-text" />
@@ -340,22 +340,22 @@ const renderEditorForm = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">روتیتر هدر</label>
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">روعنوان</label>
                 <div className="flex gap-2">
-                  <input type="text" value={formData.preTitle} onChange={(e) => setFormData({...formData, preTitle: e.target.value})} className="flex-1 bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="اسناد محرمانه سفارت" />
-                  <div className="flex items-center justify-center bg-black/40 border border-white/5 shadow-inner p-1.5 rounded-xl shrink-0" title="رنگ روتیتر">
+                  <input type="text" value={formData.preTitle} onChange={(e) => setFormData({...formData, preTitle: e.target.value})} className="flex-1 bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="مجموعه آثار" />
+                  <div className="flex items-center justify-center bg-black/40 border border-white/5 shadow-inner p-1.5 rounded-xl shrink-0" title="رنگ روعنوان">
                     <input type="color" value={formData.preTitleColor || '#a3a3a3'} onChange={(e) => setFormData({...formData, preTitleColor: e.target.value})} className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent" />
                   </div>
                 </div>
               </div>
               
               <div className="space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">عنوان اصلی پرونده</label>
-                <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="لانه جاسوسی" />
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">عنوان</label>
+                <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="ماه محرم" />
               </div>
 
               <div className="md:col-span-2 space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">گرادینت عنوان پرونده (از بالا به پایین)</label>
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">رنگ تدریجی عنوان پرونده (از بالا به پایین)</label>
                 <div className="flex gap-4">
                   <div className="flex items-center gap-2 bg-black/40 border border-white/5 shadow-inner p-1.5 rounded-xl flex-1">
                     <input type="color" value={formData.titleGradientStart || '#ffffff'} onChange={(e) => setFormData({...formData, titleGradientStart: e.target.value})} className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent" />
@@ -369,7 +369,7 @@ const renderEditorForm = () => {
               </div>
 
               <div className="md:col-span-2 space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">توضیح دو خطی هدر</label>
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">توضیح دو خطی زیرعنوان</label>
                 <div className="flex gap-2 items-start">
                   <textarea rows="3" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="flex-1 bg-black/40 border border-white/5 shadow-inner rounded-xl p-3.5 text-sm text-white focus:border-[#8b5cf6] resize-none placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="در این پرونده ویژه به بررسی عمیق..."></textarea>
                   <div className="flex items-center justify-center bg-black/40 border border-white/5 shadow-inner p-1.5 rounded-xl shrink-0" title="رنگ توضیحات">
@@ -383,28 +383,28 @@ const renderEditorForm = () => {
               <h4 className="text-sm font-bold text-white border-b border-white/5 pb-3 flex items-center justify-between select-none">تنظیمات تصاویر <Icon name="image" className="w-4 h-4 text-gray-400" /></h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
                 <div className="space-y-2">
-                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">کاور دسکتاپ هاب (۱۶:۹)</label>
+                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">تصویر رایانه بیرون پرونده (۱۶:۹)</label>
                   <div className="flex gap-2">
                     <input type="text" readOnly value={formData.hubCoverDesktop} placeholder="انتخاب نشده" className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-gray-600 outline-none dir-ltr text-left font-sans select-text" />
                     <button onClick={() => setMediaModal({ isOpen: true, targetField: 'hubCoverDesktop' })} className="px-4 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-transparent shadow-inner rounded-xl text-xs transition-colors whitespace-nowrap cursor-pointer font-bold">انتخاب رسانه</button>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">کاور موبایل هاب (۱:۱)</label>
+                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">تصویر تلفن همراه بیرون پرونده (۱:۱)</label>
                   <div className="flex gap-2">
                     <input type="text" readOnly value={formData.hubCoverMobile} placeholder="انتخاب نشده" className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-gray-600 outline-none dir-ltr text-left font-sans select-text" />
                     <button onClick={() => setMediaModal({ isOpen: true, targetField: 'hubCoverMobile' })} className="px-4 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-transparent shadow-inner rounded-xl text-xs transition-colors whitespace-nowrap cursor-pointer font-bold">انتخاب رسانه</button>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-[11px] text-cyan-400 font-bold pl-1">کاور هدر دسکتاپ داخل پرونده (۱۶:۹)</label>
+                  <label className="block text-[11px] text-cyan-400 font-bold pl-1">تصویر هدر رایانه داخل پرونده (۱۶:۹)</label>
                   <div className="flex gap-2">
                     <input type="text" readOnly value={formData.coverDesktop} placeholder="انتخاب نشده" className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-gray-600 outline-none dir-ltr text-left font-sans select-text" />
                     <button onClick={() => setMediaModal({ isOpen: true, targetField: 'coverDesktop' })} className="px-4 bg-cyan-500/10 hover:bg-cyan-500 hover:text-white text-cyan-400 border border-transparent shadow-inner rounded-xl text-xs transition-colors whitespace-nowrap cursor-pointer font-bold">انتخاب رسانه</button>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-[11px] text-cyan-400 font-bold pl-1">کاور هدر موبایل داخل پرونده (۱:۱)</label>
+                  <label className="block text-[11px] text-cyan-400 font-bold pl-1">تصویر هدر تلفن همراه داخل پرونده (۱:۱)</label>
                   <div className="flex gap-2">
                     <input type="text" readOnly value={formData.coverMobile} placeholder="انتخاب نشده" className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-gray-600 outline-none dir-ltr text-left font-sans select-text" />
                     <button onClick={() => setMediaModal({ isOpen: true, targetField: 'coverMobile' })} className="px-4 bg-cyan-500/10 hover:bg-cyan-500 hover:text-white text-cyan-400 border border-transparent shadow-inner rounded-xl text-xs transition-colors whitespace-nowrap cursor-pointer font-bold">انتخاب رسانه</button>
@@ -418,7 +418,7 @@ const renderEditorForm = () => {
         return (
           <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
             <div className="flex items-center justify-between bg-[#050810]/50 border border-white/5 shadow-inner p-4 rounded-xl select-none">
-              <span className="text-sm font-bold text-white">نمایش رادار موضوعی (ابر تگ‌ها)</span>
+              <span className="text-sm font-bold text-white">نمایش رادار موضوعی (ابر برچسب‌ها)</span>
               <button onClick={() => setFormData({...formData, showRadar: !formData.showRadar})} className={`w-12 h-6 rounded-full transition-colors relative shadow-inner cursor-pointer border border-transparent ${formData.showRadar ? 'bg-emerald-500' : 'bg-black/60'}`}>
                 <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-md ${formData.showRadar ? 'left-1' : 'right-1'}`} />
               </button>
@@ -431,7 +431,7 @@ const renderEditorForm = () => {
               </div>
               
               <div className="relative space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">انتخاب هشتگ‌ها و دسته‌بندی‌ها</label>
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">انتخاب هشتک‌ها و دسته‌بندی‌ها</label>
                 <div className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-4 min-h-[100px] flex flex-wrap gap-2 items-start transition-all">
                    {formData.selectedTopics.map((topic, i) => (
                      <span key={i} className="bg-[#8b5cf6]/20 text-[#8b5cf6] border border-[#8b5cf6]/30 px-3 py-1.5 rounded-full text-xs flex items-center gap-2 font-bold shadow-sm select-none">
@@ -441,7 +441,7 @@ const renderEditorForm = () => {
                        </button>
                      </span>
                    ))}
-                   <input type="text" value={tagSearch} onChange={e => setTagSearch(e.target.value)} placeholder={formData.selectedTopics.length === 0 ? "جستجو..." : ""} className="bg-transparent text-sm text-white outline-none flex-grow min-w-[150px] border-none py-1 placeholder:text-gray-600 font-sans select-text" />
+                   <input type="text" value={tagSearch} onChange={e => setTagSearch(e.target.value)} placeholder={formData.selectedTopics.length === 0 ? "کاوش..." : ""} className="bg-transparent text-sm text-white outline-none flex-grow min-w-[150px] border-none py-1 placeholder:text-gray-600 font-sans select-text" />
                 </div>
                 {tagSearch && searchResultsTags.length > 0 && (
                   <div className="absolute z-[60] w-full mt-2 bg-[#0f172a]/95 backdrop-blur-3xl rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden p-2 max-h-48 overflow-y-auto custom-scrollbar select-none">
@@ -449,7 +449,7 @@ const renderEditorForm = () => {
                       // تبدیل کلمات کلیدی انگلیسی به برچسب‌های فارسی و رنگی
                       let typeLabel = { label: 'نامشخص', bg: 'bg-gray-500/10', text: 'text-gray-400' };
                       if (t.type === 'CATEGORY') typeLabel = { label: 'دسته‌بندی', bg: 'bg-[#8b5cf6]/10', text: 'text-[#8b5cf6]' };
-                      else if (t.type === 'HASHTAG') typeLabel = { label: 'هشتگ', bg: 'bg-emerald-500/10', text: 'text-emerald-400' };
+                      else if (t.type === 'HASHTAG') typeLabel = { label: 'هشتک', bg: 'bg-emerald-500/10', text: 'text-emerald-400' };
                       
                       return (
                         <button key={t.id} onClick={() => { setFormData({...formData, selectedTopics: [...formData.selectedTopics, t]}); setTagSearch(''); }} className="w-full text-right px-4 py-3 hover:bg-white/10 rounded-lg text-sm text-white flex justify-between items-center cursor-pointer font-sans">
@@ -476,7 +476,7 @@ const renderEditorForm = () => {
                 <input type="text" value={formData.creatorsTitle} onChange={(e) => setFormData({...formData, creatorsTitle: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="اشخاص و پدیدآورندگان مرتبط" />
               </div>
               <div className="relative space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">جستجو و انتخاب اشخاص</label>
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">کاوش و انتخاب پدیدآورندگان</label>
                 <div className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-4 min-h-[100px] flex flex-wrap gap-2 items-start transition-all">
                    {formData.selectedCreators.map((creator, i) => (
                      <span key={i} className="bg-white/10 text-white hover:bg-white/20 border border-white/5 shadow-inner px-3 py-1.5 rounded-full text-xs flex items-center gap-2 font-bold select-none">
@@ -486,7 +486,7 @@ const renderEditorForm = () => {
                        </button>
                      </span>
                    ))}
-                   <input type="text" value={creatorSearch} onChange={e => setCreatorSearch(e.target.value)} placeholder={formData.selectedCreators.length === 0 ? "جستجوی شخص..." : ""} className="bg-transparent text-sm text-white outline-none flex-grow min-w-[150px] border-none py-1 placeholder:text-gray-600 font-sans select-text" />
+                   <input type="text" value={creatorSearch} onChange={e => setCreatorSearch(e.target.value)} placeholder={formData.selectedCreators.length === 0 ? "کاوش شخص..." : ""} className="bg-transparent text-sm text-white outline-none flex-grow min-w-[150px] border-none py-1 placeholder:text-gray-600 font-sans select-text" />
                 </div>
                 {creatorSearch && searchResultsCreators.length > 0 && (
                   <div className="absolute z-[60] w-full mt-2 bg-[#0f172a]/95 backdrop-blur-3xl rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden p-2 max-h-48 overflow-y-auto custom-scrollbar select-none">
@@ -502,10 +502,10 @@ const renderEditorForm = () => {
       case 'content':
         return (
           <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
-             <p className="text-sm text-gray-400 mb-4 font-light select-none">با جستجو در فیلد زیر، محتواها را به این پرونده الصاق کنید. محدودیت تعدادی وجود ندارد.</p>
+             <p className="text-sm text-gray-400 mb-4 font-light select-none">با کاوش در فیلد زیر، محتواها را به این پرونده اتصال کنید. محدودیت تعدادی وجود ندارد.</p>
              <div className="relative">
                 <Icon name="search" className="absolute right-4 top-3.5 w-5 h-5 text-gray-400" />
-                <input type="text" value={contentSearch} onChange={e => setContentSearch(e.target.value)} placeholder="جستجوی عنوان محتوا..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl pr-12 pl-4 py-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" />
+                <input type="text" value={contentSearch} onChange={e => setContentSearch(e.target.value)} placeholder="کاوش عنوان محتوا..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl pr-12 pl-4 py-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" />
                 
                 {contentSearch && searchResultsContents.length > 0 && (
                   <div className="absolute z-[60] w-full mt-2 bg-[#0f172a]/95 backdrop-blur-3xl rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden p-2 max-h-60 overflow-y-auto custom-scrollbar select-none">
@@ -552,7 +552,7 @@ const renderEditorForm = () => {
         return (
           <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
             <div className="flex items-center justify-between bg-[#050810]/50 border border-white/5 shadow-inner p-4 rounded-xl select-none">
-              <span className="text-sm font-bold text-white"> باکس اقدام (انتهای صفحه)</span>
+              <span className="text-sm font-bold text-white"> قاب اقدام (انتهای صفحه)</span>
               <button onClick={() => setFormData({...formData, showTipLine: !formData.showTipLine})} className={`w-12 h-6 rounded-full transition-colors relative shadow-inner cursor-pointer border border-transparent ${formData.showTipLine ? 'bg-emerald-500' : 'bg-black/60'}`}>
                 <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-md ${formData.showTipLine ? 'left-1' : 'right-1'}`} />
               </button>
@@ -560,16 +560,16 @@ const renderEditorForm = () => {
             
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 transition-opacity ${!formData.showTipLine && 'opacity-30 pointer-events-none'}`}>
               <div className="space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">روتیتر</label>
-                <input type="text" value={formData.tipPreTitle} onChange={(e) => setFormData({...formData, tipPreTitle: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="باکس اقدام" />
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">روعنوان</label>
+                <input type="text" value={formData.tipPreTitle} onChange={(e) => setFormData({...formData, tipPreTitle: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="قاب اقدام" />
               </div>
               <div className="space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">تیتر</label>
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">عنوان</label>
                 <input type="text" value={formData.tipTitle} onChange={(e) => setFormData({...formData, tipTitle: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="سندی در دست دارید؟" />
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="block text-[11px] text-gray-300 font-bold pl-1">متن توضیحات (دو خطی)</label>
-                <textarea rows="3" value={formData.tipDesc} onChange={(e) => setFormData({...formData, tipDesc: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border-[#8b5cf6] resize-none placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="توضیحات باکس را بنویسید..."></textarea>
+                <textarea rows="3" value={formData.tipDesc} onChange={(e) => setFormData({...formData, tipDesc: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border-[#8b5cf6] resize-none placeholder:text-gray-600 outline-none transition-all font-sans select-text" placeholder="توضیحات قاب را بنویسید..."></textarea>
               </div>
               
               <div className="space-y-2">
@@ -578,7 +578,7 @@ const renderEditorForm = () => {
               </div>
               
               <div className="space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">آیکون دکمه</label>
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">نماد دکمه</label>
                 <div className="flex gap-2">
                   <div className="w-[50px] h-[50px] flex items-center justify-center bg-black/40 border border-white/5 shadow-inner rounded-xl shrink-0 overflow-hidden p-1">
                     {isTipIconUrl ? (
@@ -587,12 +587,12 @@ const renderEditorForm = () => {
                        <Icon name={formData.tipBtnIcon || 'folder'} className="w-5 h-5 text-white" />
                     )}
                   </div>
-                  <button onClick={() => setMediaModal({ isOpen: true, targetField: 'tipBtnIcon' })} className="flex-grow bg-white/5 border border-transparent shadow-inner hover:bg-white/10 text-gray-300 hover:text-white rounded-xl text-xs transition-colors cursor-pointer text-center font-bold">انتخاب آیکون از رسانه</button>
+                  <button onClick={() => setMediaModal({ isOpen: true, targetField: 'tipBtnIcon' })} className="flex-grow bg-white/5 border border-transparent shadow-inner hover:bg-white/10 text-gray-300 hover:text-white rounded-xl text-xs transition-colors cursor-pointer text-center font-bold">انتخاب نماد از رسانه</button>
                 </div>
               </div>
               
               <div className="md:col-span-2 space-y-2">
-                <label className="block text-[11px] text-gray-300 font-bold pl-1">لینک اتصال دکمه</label>
+                <label className="block text-[11px] text-gray-300 font-bold pl-1">پیوند اتصال دکمه</label>
                 <input type="text" dir="ltr" value={formData.tipBtnLink} onChange={(e) => setFormData({...formData, tipBtnLink: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3.5 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all text-left font-sans select-text" placeholder="https://..." />
               </div>
             </div>
@@ -604,7 +604,7 @@ const renderEditorForm = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-8 font-sans text-right select-none pb-20">
       
-      {/* هدر صفحه و تب‌های اصلی مدیریت */}
+      {/* هدر صفحه و تب‌های اصلی مسئولیت */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
         <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-90 pointer-events-none z-20" />
@@ -612,26 +612,26 @@ const renderEditorForm = () => {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
           <div>
             <h1 className="text-3xl font-black text-white mb-2 flex items-center gap-3">
-              <Icon name="folder" className="w-8 h-8 text-[#06b6d4]" /> مدیریت منظومه‌ها (پرونده‌ها)
+              <Icon name="folder" className="w-8 h-8 text-[#06b6d4]" /> مسئولیت منظومه‌ها (پرونده‌ها)
             </h1>
             <p className="text-sm text-gray-400 font-light max-w-xl leading-relaxed">
-              مدیریت یکپارچه محتوای هاب اصلی و ساخت/ویرایش پرونده‌های تخصصی.
+              مسئولیت یکپارچه محتوای قطب اصلی و ساخت/ویرایش پرونده‌های تخصصی.
             </p>
           </div>
           
           <div className="flex bg-[#050810]/50 border border-white/5 shadow-inner p-1.5 rounded-2xl w-full lg:w-auto">
             {can('HUB_SETTINGS') && (
-              <button onClick={() => setActiveTab('HUB_SETTINGS')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'HUB_SETTINGS' ? 'bg-[#06b6d4]/20 text-[#06b6d4] shadow-inner border-[#06b6d4]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>تنظیمات هاب</button>
+              <button onClick={() => setActiveTab('HUB_SETTINGS')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'HUB_SETTINGS' ? 'bg-[#06b6d4]/20 text-[#06b6d4] shadow-inner border-[#06b6d4]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>تنظیمات قطب</button>
             )}
             {(can('DOSSIER_EDIT') || can('DOSSIER_CREATE') || can('DOSSIER_DELETE')) && (
-              <button onClick={() => setActiveTab('DOSSIER_LIST')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'DOSSIER_LIST' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-inner border-[#8b5cf6]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>مدیریت پرونده‌ها</button>
+              <button onClick={() => setActiveTab('DOSSIER_LIST')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'DOSSIER_LIST' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-inner border-[#8b5cf6]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>مسئولیت پرونده‌ها</button>
             )}
           </div>
         </div>
       </motion.div>
 
       {/* ======================================================= */}
-      {/* تب اول: تنظیمات هاب */}
+      {/* تب اول: تنظیمات قطب */}
       <AnimatePresence mode="wait">
         {activeTab === 'HUB_SETTINGS' && can('HUB_SETTINGS') && (
           <motion.div key="hub" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
@@ -641,7 +641,7 @@ const renderEditorForm = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10 bg-[#050810]/50 p-6 rounded-3xl border border-white/5 shadow-inner">
                 <div className="space-y-2">
-                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">آیکون هاب (بالای عنوان)</label>
+                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">نماد بالای عنوان</label>
                   <div className="flex gap-2">
                     <input type="text" readOnly value={hubSettings.icon || ''} placeholder="انتخاب نشده" className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:border focus:border-[#06b6d4] outline-none transition-all dir-ltr text-left font-sans select-text" />
                     <button onClick={() => setMediaModal({ isOpen: true, targetField: 'hubIcon' })} className="px-4 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-transparent shadow-inner rounded-xl text-xs transition-colors whitespace-nowrap cursor-pointer font-bold">انتخاب رسانه</button>
@@ -649,12 +649,12 @@ const renderEditorForm = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[11px] text-gray-300 font-bold pl-1">عنوان اصلی صفحه (H1)</label>
+                  <label className="block text-[11px] text-gray-300 font-bold pl-1">عنوان اصلی صفحه</label>
                   <input type="text" value={hubSettings.title} onChange={(e)=>setHubSettings({...hubSettings, title: e.target.value})} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:border focus:border-[#06b6d4] outline-none transition-all font-sans select-text" />
                 </div>
 
                 <div className="md:col-span-2 space-y-2">
-                  <label className="block text-[11px] text-gray-300 font-bold pl-1">گرادینت عنوان (از بالا به پایین)</label>
+                  <label className="block text-[11px] text-gray-300 font-bold pl-1">رنگ تدریجی عنوان (از بالا به پایین)</label>
                   <div className="flex gap-4">
                     <div className="flex items-center gap-2 bg-black/40 border border-white/5 shadow-inner p-1.5 rounded-xl flex-1">
                       <input type="color" value={hubSettings.titleGradientStart || '#ffffff'} onChange={(e) => setHubSettings({...hubSettings, titleGradientStart: e.target.value})} className="w-8 h-8 rounded border-0 cursor-pointer bg-transparent" />
@@ -673,7 +673,7 @@ const renderEditorForm = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">تصویر پس‌زمینه دسکتاپ (۱۶:۹)</label>
+                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">تصویر پس‌زمینه رایانه (۱۶:۹)</label>
                   <div className="flex gap-2">
                     <input type="text" readOnly value={hubSettings.bgDesktop || ''} placeholder="انتخاب نشده" className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:border focus:border-[#06b6d4] outline-none transition-all dir-ltr text-left font-sans select-text" />
                     <button onClick={() => setMediaModal({ isOpen: true, targetField: 'hubBgDesktop' })} className="px-4 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-transparent shadow-inner rounded-xl text-xs transition-colors whitespace-nowrap cursor-pointer font-bold">انتخاب رسانه</button>
@@ -681,7 +681,7 @@ const renderEditorForm = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">تصویر پس‌زمینه موبایل (۱:۱)</label>
+                  <label className="block text-[11px] text-emerald-400 font-bold pl-1">تصویر پس‌زمینه تلفن همراه (۱:۱)</label>
                   <div className="flex gap-2">
                     <input type="text" readOnly value={hubSettings.bgMobile || ''} placeholder="انتخاب نشده" className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:border focus:border-[#06b6d4] outline-none transition-all dir-ltr text-left font-sans select-text" />
                     <button onClick={() => setMediaModal({ isOpen: true, targetField: 'hubBgMobile' })} className="px-4 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-transparent shadow-inner rounded-xl text-xs transition-colors whitespace-nowrap cursor-pointer font-bold">انتخاب رسانه</button>
@@ -704,13 +704,13 @@ const renderEditorForm = () => {
               </div>
             </div> 
 
-{/* بخش چیدمان پرونده‌ها در هاب */}
+{/* بخش چیدمان پرونده‌ها در قطب */}
             <div className="relative rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl mt-8">
               <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
               <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 relative z-10">
                 <div>
-                  <h2 className="text-xl font-bold text-white mb-1">چیدمان پرونده‌ها در هاب</h2>
-                  <p className="text-xs text-gray-400">با درگ کردن، ترتیب اولویت‌ها را مشخص کنید. انتخاب وضعیت «ویژه» یا «استاندارد» مستقیماً در سایت اعمال می‌شود.</p>
+                  <h2 className="text-xl font-bold text-white mb-1">چیدمان پرونده‌ها در قطب</h2>
+                  <p className="text-xs text-gray-400">با کشیدن، ترتیب اولویت‌ها را مشخص کنید. انتخاب وضعیت «ویژه» یا «استاندارد» مستقیماً در سامانه اعمال می‌شود.</p>
                 </div>
               </div>
 
@@ -733,7 +733,7 @@ const renderEditorForm = () => {
                           </div>
                           <div>
                             <h4 className="text-sm font-bold text-white font-sans select-text">{dossier.title}</h4>
-                            <span className="text-[10px] text-gray-400 font-sans mt-1 block select-text">تعداد محتوا: <strong className="text-white select-none">{toPersianDigits(dossier._count?.contents || 0)}</strong> فایل</span>
+                            <span className="text-[10px] text-gray-400 font-sans mt-1 block select-text">تعداد محتوا: <strong className="text-white select-none">{toPersianDigits(dossier._count?.contents || 0)}</strong> پرونده</span>
                           </div>
                         </div>
                         
@@ -748,7 +748,7 @@ const renderEditorForm = () => {
                              </button>
                              <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out] pointer-events-none">
                                <div className="bg-[#0f172a]/95 backdrop-blur-md border border-white/5 text-white text-[10px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-bold font-sans">
-                                 {dossier.isVisibleInHub ? "عدم نمایش در هاب" : "نمایش در هاب"}
+                                 {dossier.isVisibleInHub ? "عدم نمایش در قطب" : "نمایش در قطب"}
                                </div>
                              </div>
                            </div>
@@ -764,7 +764,7 @@ const renderEditorForm = () => {
       </AnimatePresence>
 
       {/* ======================================================= */}
-      {/* تب دوم: لیست پرونده‌ها */}
+      {/* تب دوم: فهرست پرونده‌ها */}
       {/* ======================================================= */}
       <AnimatePresence mode="wait">
         {activeTab === 'DOSSIER_LIST' && (can('DOSSIER_EDIT') || can('DOSSIER_CREATE') || can('DOSSIER_DELETE')) && (
@@ -773,11 +773,11 @@ const renderEditorForm = () => {
             <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#8b5cf6] to-transparent opacity-90 pointer-events-none z-20" />
             
             <div className="p-6 border-b border-white/10 flex flex-col md:flex-row gap-4 justify-between items-center bg-transparent relative z-10">
-              <h2 className="text-xl font-bold text-white">آرشیو تمام پرونده‌ها</h2>
+              <h2 className="text-xl font-bold text-white">پایگاه داده تمام پرونده‌ها</h2>
               <div className="flex items-center gap-4 w-full md:w-auto">
                 <div className="relative flex-grow md:w-72">
                    <Icon name="search" className="absolute right-4 top-3.5 w-4 h-4 text-gray-400" />
-                   <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="جستجوی عنوان..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl pr-12 pl-4 py-3 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" />
+                   <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="کاوش عنوان..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl pr-12 pl-4 py-3 text-sm text-white focus:border-[#8b5cf6] placeholder:text-gray-600 outline-none transition-all font-sans select-text" />
                 </div>
                 {can('DOSSIER_CREATE') && (
                   <button onClick={() => openEditor()} className="flex items-center justify-center gap-2 px-6 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)] transition-all cursor-pointer whitespace-nowrap border border-transparent">
@@ -796,7 +796,7 @@ const renderEditorForm = () => {
                 <>
                   <table className="w-full text-sm text-right text-gray-400">
                     <thead className="text-xs text-gray-300 uppercase bg-[#050810]/50 border-b border-white/10 shadow-inner">
-                      <tr><th className="px-6 py-5 font-bold font-sans rounded-r-xl">عنوان پرونده</th><th className="px-6 py-5 text-center font-bold font-sans">محتوا</th><th className="px-6 py-5 text-center font-bold font-sans">رنگ تم</th><th className="px-6 py-5 text-center font-bold font-sans rounded-l-xl">عملیات</th></tr>
+                      <tr><th className="px-6 py-5 font-bold font-sans rounded-r-xl">عنوان پرونده</th><th className="px-6 py-5 text-center font-bold font-sans">محتوا</th><th className="px-6 py-5 text-center font-bold font-sans">رنگ زمینه</th><th className="px-6 py-5 text-center font-bold font-sans rounded-l-xl">عملیات</th></tr>
                     </thead>
                     <tbody>
                       {filteredDossiers.slice(0, visibleCount).map(d => (
@@ -862,7 +862,7 @@ const renderEditorForm = () => {
                  <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none" />
                  
                  <div className="border-b border-white/10 p-5 flex justify-between items-center z-20 shrink-0">
-                   <h2 className="text-lg font-bold text-white flex items-center gap-2 font-sans"><Icon name="image" className="w-5 h-5 text-emerald-400" /> انتخاب فایل از کتابخانه رسانه</h2>
+                   <h2 className="text-lg font-bold text-white flex items-center gap-2 font-sans"><Icon name="image" className="w-5 h-5 text-emerald-400" /> انتخاب پرونده از کتابخانه رسانه</h2>
                    <button onClick={() => setMediaModal({ isOpen: false, targetField: null })} className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl cursor-pointer transition-colors border border-transparent shadow-inner"><Icon name="close" className="w-4 h-4" /></button>
                  </div>
                  
@@ -901,8 +901,8 @@ const renderEditorForm = () => {
                     {[
                       { id: 'basic', label: 'هدر و سئو', icon: 'document' },
                       { id: 'radar', label: 'رادار موضوعی و اشخاص', icon: 'trend' },
-                      { id: 'content', label: 'الصاق محتوا', icon: 'video' },
-                      { id: 'cta', label: 'باکس اقدام', icon: 'shieldCheck' },
+                      { id: 'content', label: 'اتصال محتوا', icon: 'video' },
+                      { id: 'cta', label: 'قاب اقدام', icon: 'shieldCheck' },
                     ].map(tab => (
                       <button key={tab.id} onClick={() => setEditorTab(tab.id)} className={`flex-none lg:flex-auto w-auto lg:w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all text-right cursor-pointer whitespace-nowrap font-sans border border-transparent ${editorTab === tab.id ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-sm border-[#8b5cf6]/30' : 'text-gray-400 hover:text-white hover:bg-white/5 shadow-inner'}`}>
                         <Icon name={tab.icon} className="w-4 h-4" /> {tab.label}

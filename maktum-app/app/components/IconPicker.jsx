@@ -20,14 +20,14 @@ export default function IconPicker({ value, onChange }) {
 
   return (
     <div className="relative font-sans">
-      {/* دکمه انتخاب آیکون فعلی */}
+      {/* دکمه انتخاب نماد فعلی */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full p-3 bg-[#080c16] rounded-xl text-white hover:border-[#06b6d4] transition-colors"
       >
         <span className="text-sm text-gray-300">
-          {selectedIcon ? (selectedIcon.label || selectedIcon.name) : 'انتخاب آیکون...'}
+          {selectedIcon ? (selectedIcon.label || selectedIcon.name) : 'انتخاب نماد...'}
         </span>
         {selectedIcon ? (
           <div className="w-6 h-6 text-[#06b6d4] [&>svg]:w-full [&>svg]:h-full" dangerouslySetInnerHTML={{ __html: selectedIcon.svgCode }} />
@@ -36,12 +36,12 @@ export default function IconPicker({ value, onChange }) {
         )}
       </button>
 
-      {/* مدال / پاپ‌آپ لیست آیکون‌ها */}
+      {/* مدال / باز شونده‌ فهرست نماد‌ها */}
       {isOpen && (
         <div className="absolute z-50 top-full mt-2 w-full bg-[#0b0f19] rounded-xl p-4 shadow-2xl max-h-60 overflow-y-auto">
           <input
             type="text"
-            placeholder="جستجوی آیکون..."
+            placeholder="کاوش نماد..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full mb-3 bg-[#080c16] rounded-lg p-2 text-xs text-white outline-none focus:border-[#06b6d4]"
@@ -52,7 +52,7 @@ export default function IconPicker({ value, onChange }) {
                 key={icon.id}
                 type="button"
                 onClick={() => {
-                  onChange(icon.name); // ذخیره شناسه آیکون
+                  onChange(icon.name); // ذخیره شناسه نماد
                   setIsOpen(false);
                 }}
                 title={icon.label || icon.name}

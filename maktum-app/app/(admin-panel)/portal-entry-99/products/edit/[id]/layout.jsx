@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'پنل مکتوم | ویرایش محتوا',
+  title: 'درگاه مکتوم | ویرایش محتوا',
 };
 
 export default function ProductEditLayout({ children }) {

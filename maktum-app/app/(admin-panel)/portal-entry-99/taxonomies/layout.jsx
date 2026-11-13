@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'مدیریت طبقه‌بندی‌ها',
+  title: 'مسئولیت طبقه‌بندی‌ها',
 };
 
 export default function TaxonomyLayout({ children }) {

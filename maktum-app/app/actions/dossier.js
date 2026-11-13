@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { getSessionUser } from './auth';
 
 // ==========================================
 // ۱. دریافت پرونده‌ها برای صفحه اصلی هاب (/c)
@@ -49,12 +50,12 @@ export async function getDossierBySlug(slug) {
     return { success: true, data: JSON.parse(JSON.stringify(payload)) };
   } catch (error) {
     console.error('Error fetching dossier by slug:', error);
-    return { success: false, error: 'خطا در ارتباط با دیتابیس' };
+    return { success: false, error: 'خطا در ارتباط با پایگاه داده' };
   }
 }
 
 // ==========================================
-// ۳. دریافت تمام پرونده‌ها برای پنل ادمین
+// ۳. دریافت تمام پرونده‌ها برای درگاه مسئول
 // ==========================================
 export async function getAllDossiersAdmin() {
   try {
@@ -69,10 +70,15 @@ export async function getAllDossiersAdmin() {
 }
 
 // ==========================================
-// ۴. ساخت یا ویرایش پرونده (آپدیت شده برای رفع ارور ذخیره)
+// ۴. ساخت یا ویرایش پرونده (به‌روزرسانی شده برای رفع ارور ذخیره)
 // ==========================================
 export async function saveDossier(data) {
   try {
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز.' };
+    }
+
     const { id, selectedTopics = [], selectedCreators = [], selectedContents = [], ...restData } = data;
     
     const taxonomyConnect = [...selectedTopics, ...selectedCreators].filter(t=>t.id).map(t => ({ id: t.id }));
@@ -84,7 +90,7 @@ export async function saveDossier(data) {
       restData.slug = restData.slug.trim().toLowerCase().replace(/\s+/g, '-');
     }
 
-    // پاکسازی فیلدهای سیستمی برای جلوگیری از کراش دیتابیس
+    // پاکسازی فیلدهای سامانه‌ای برای جلوگیری از کراش پایگاه داده
     delete restData.taxonomies;
     delete restData.contents;
     delete restData._count;
@@ -120,7 +126,7 @@ export async function saveDossier(data) {
     
     return { success: true };
   } catch (error) {
-    console.error("خطا در دیتابیس هنگام ذخیره پرونده:", error);
+    console.error("خطا در پایگاه داده هنگام ذخیره پرونده:", error);
     return { success: false, error: 'خطا در ذخیره پرونده' };
   }
 }
@@ -130,6 +136,11 @@ export async function saveDossier(data) {
 // ==========================================
 export async function deleteDossier(id) {
   try {
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز.' };
+    }
+
     await prisma.dossier.delete({ where: { id } });
     revalidatePath('/c');
     revalidatePath('/portal-entry-99/dossiers');
@@ -140,10 +151,15 @@ export async function deleteDossier(id) {
 }
 
 // ==========================================
-// ۶. آپدیت ترتیب چینش
+// ۶. به‌روزرسانی ترتیب چینش
 // ==========================================
 export async function updateDossiersOrder(orderedIds) {
   try {
+    const session = await getSessionUser();
+    if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+      return { success: false, error: 'دسترسی غیرمجاز.' };
+    }
+
     await Promise.all(orderedIds.map((id, index) => prisma.dossier.update({ where: { id }, data: { orderIndex: index } })));
     revalidatePath('/c');
     return { success: true };
@@ -181,6 +197,11 @@ export async function getHubSettings() {
 // ۸. ذخیره تنظیمات هاب
 // ==========================================
 export async function saveHubSettings(data) {
+  const session = await getSessionUser();
+  if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
+    return { success: false, error: 'دسترسی غیرمجاز.' };
+  }
+
   const settingsToSave = [
     { key: 'hub_title', value: data.title || '' },
     { key: 'hub_desc', value: data.description || '' },

@@ -2,19 +2,20 @@
 
 import { prisma } from '@/lib/prisma';
 
-// موتور جستجوی جامع مکتوم با قابلیت وزن‌دهی و صفحه‌بندی
+// موتور کاوش جامع مکتوم با قابلیت وزن‌دهی و صفحه‌بندی
 export async function searchArchive({ keyword, filters = [], page = 1, limit = 8 }) {
   try {
-    const safeKeyword = keyword?.trim() || '';
+    // گارد امنیتی: اگر کسی رشته بسیار بلندی (مثل حمله XSS یا DoS) فرستاد، درجا بریده می‌شود
+    const safeKeyword = typeof keyword === 'string' ? keyword.trim().slice(0, 100) : '';
     
-    // اگر طول کلمه کمتر از ۲ حرف بود، برای جلوگیری از فشار به دیتابیس جستجو متوقف می‌شود
+    // اگر طول کلمه کمتر از ۲ حرف بود، برای جلوگیری از فشار به پایگاه داده کاوش متوقف می‌شود
     if (safeKeyword.length < 2) {
       return { success: true, data: [], hasMore: false };
     }
 
     const skip = (page - 1) * limit;
 
-    // ۱. آماده‌سازی فیلترها (اگر فیلتری انتخاب نشده بود، همه چیز جستجو می‌شود)
+    // ۱. آماده‌سازی صافیها (اگر صافیی انتخاب نشده بود، همه چیز کاوش می‌شود)
     const contentTypes = ['PRODUCED', 'RAW', 'BLOG', 'TOOL'];
     let searchContents = true;
     let searchDossiers = true;
@@ -31,7 +32,7 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
     let dossierResults = [];
     const queries = [];
 
-    // جستجو در جدول محتوا (مقالات، تولیدات، ابزارها، راش‌ها)
+    // کاوش در جدول محتوا (مقالات، تولیدات، ابزارها، راش‌ها)
     if (searchContents) {
       queries.push(
         prisma.content.findMany({
@@ -42,7 +43,7 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
               // وزن اول: تطبیق مستقیم در عناوین اصلی
               { titleBase: { contains: safeKeyword } },
               { titleHighlight: { contains: safeKeyword } },
-              // وزن دوم: جستجوی رابطه‌ای (اگر کلمه در نام دسته‌بندی، هشتگ یا سازنده بود)
+              // وزن دوم: کاوش رابطه‌ای (اگر کلمه در نام دسته‌بندی، هشتک یا سازنده بود)
               { categories: { some: { name: { contains: safeKeyword } } } },
               { tags: { some: { name: { contains: safeKeyword } } } },
               { creators: { some: { name: { contains: safeKeyword } } } },
@@ -50,7 +51,7 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
               { subtitle: { contains: safeKeyword } },
               { lead: { contains: safeKeyword } },
               { metaDesc: { contains: safeKeyword } },
-              // وزن چهارم: بدنه متن (در SQLite با Contains سرچ می‌شود)
+              // وزن چهارم: بدنه متن (در SQLite با Contains کاوش می‌شود)
               { body: { contains: safeKeyword } }
             ]
           },
@@ -64,7 +65,7 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
       );
     }
 
-    // جستجو در جدول پرونده‌های باز (منظومه‌ها / Dossiers)
+    // کاوش در جدول پرونده‌های باز (منظومه‌ها / Dossiers)
     if (searchDossiers) {
       queries.push(
         prisma.dossier.findMany({
@@ -88,7 +89,7 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
     // منتظر می‌مانیم تا هر دو کوئری به صورت موازی تمام شوند
     await Promise.all(queries);
 
-    // ۳. یکپارچه‌سازی و فرمت‌بندی نتایج برای فرانت‌اند (Bento Grid)
+    // ۳. یکپارچه‌سازی و قالب‌بندی نتایج برای فرانت‌اند (Bento Grid)
     const formattedContents = contentResults.map(item => ({
       id: item.id,
       type: item.type, // 'BLOG', 'RAW', 'PRODUCED', 'TOOL'
@@ -121,7 +122,7 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
     const hasMore = combinedResults.length > limit;
     const finalResults = combinedResults.slice(0, limit);
 
-    // ۴. ذخیره لاگ جستجو به صورت Fire-and-Forget (بدون ایجاد تاخیر برای کاربر)
+    // ۴. ذخیره لاگ کاوش به صورت Fire-and-Forget (بدون ایجاد تاخیر برای کاربر)
     if (page === 1) {
       prisma.searchLog.create({
         data: {
@@ -140,7 +141,7 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
 
   } catch (error) {
     console.error("Search Error:", error);
-    return { success: false, error: 'خطا در ارتباط با پایگاه داده جستجو', data: [] };
+    return { success: false, error: 'خطا در ارتباط با پایگاه داده کاوش', data: [] };
   }
 }
 

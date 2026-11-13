@@ -21,6 +21,15 @@ const toPersianDigits = (num) => {
   return num.toString().replace(/\d/g, x => farsiDigits[x]);
 };
 
+// تابع جدید برای تبدیل اعداد بزرگ
+const formatNumber = (num) => {
+  if (num >= 1000) {
+    const formatted = (num / 1000).toFixed(1);
+    return `[${toPersianDigits(formatted)}] هزار`;
+  }
+  return toPersianDigits(num);
+};
+
 const formatTime = (seconds) => {
   if (isNaN(seconds)) return toPersianDigits("0:00");
   const m = Math.floor(seconds / 60);
@@ -104,7 +113,7 @@ function CustomAudioPlayer({ src, title }) {
           {isPlaying && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#06b6d4] opacity-75"></span>}
           <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", isPlaying ? 'bg-[#06b6d4]' : 'bg-gray-500')}></span>
         </span>
-        <h4 className="text-white font-bold truncate text-xs md:text-sm dir-rtl">{title || 'فایل صوتی'}</h4>
+        <h4 className="text-white font-bold truncate text-xs md:text-sm dir-rtl">{title || 'پرونده صوتی'}</h4>
       </div>
 
       <div className="relative w-full h-12 md:h-16 flex items-center justify-between gap-[2px] z-10" dir="ltr">
@@ -157,7 +166,8 @@ function CustomAudioPlayer({ src, title }) {
           </Tooltip>
         </div>
 
-        <div className="absolute right-0 hidden sm:flex items-center gap-2" dir="ltr">
+       {/* بخش تنظیم صدای پلیر صوتی (حذف کلاس‌های پنهان‌کننده و اضافه شدن کشویی موبایل) */}
+        <div className="absolute right-0 flex items-center gap-1 md:gap-2 group" dir="ltr">
           <Tooltip text={isMuted || volume === 0 ? 'صدادار' : 'بی‌صدا'}>
             <button onClick={toggleMute} className="text-gray-400 hover:text-white transition-colors p-1 cursor-pointer">
               <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -175,7 +185,11 @@ function CustomAudioPlayer({ src, title }) {
               </svg>
             </button>
           </Tooltip>
-          <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="w-12 md:w-16 h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, #4b5563 ${(isMuted ? 0 : volume) * 100}%)` }} />
+          {/* محفظه مخفی‌شونده برای ریل صدا در حالت موبایل */}
+          {/* محفظه مخفی‌شونده برای ریل صدا در حالت موبایل */}
+              <div className="w-0 sm:w-12 md:w-16 overflow-hidden opacity-0 sm:opacity-100 group-hover:w-12 md:group-hover:w-16 group-hover:opacity-100 group-focus-within:w-12 md:group-focus-within:w-16 group-focus-within:opacity-100 transition-all duration-300 flex items-center">
+                <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="w-12 md:w-16 h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) ${(isMuted ? 0 : volume) * 100}%)` }} />
+              </div>
         </div>
       </div>
     </div>
@@ -183,7 +197,7 @@ function CustomAudioPlayer({ src, title }) {
 }
 
 // === ۲. پلیر ویدیویی ===
-function CustomVideoPlayer({ src, mimeType, title }) {
+function CustomVideoPlayer({ src, mimeType, title, poster }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -192,10 +206,14 @@ function CustomVideoPlayer({ src, mimeType, title }) {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   const togglePlay = () => {
     if (isPlaying) videoRef.current.pause();
-    else videoRef.current.play();
+    else {
+      videoRef.current.play();
+      setHasStarted(true);
+    }
     setIsPlaying(!isPlaying);
   };
 
@@ -237,8 +255,9 @@ function CustomVideoPlayer({ src, mimeType, title }) {
   };
 
   return (
-    <div ref={containerRef} className="relative group w-full h-full flex items-center justify-center bg-black rounded-xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-transparent max-h-[75vh] font-sans my-4">
-      <div className="absolute top-0 left-0 right-0 p-3 md:p-4 bg-gradient-to-b from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-20">
+    // تغییر پس‌زمینه به گلس‌مورفیسم روشن‌تر و خواناتر
+    <div ref={containerRef} className="relative group w-full h-full flex items-center justify-center bg-black/40 backdrop-blur-md rounded-xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-white/10 max-h-[75vh] font-sans my-4">
+      <div className="absolute top-0 left-0 right-0 p-3 md:p-4 bg-gradient-to-b from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-20">
         <span className="relative flex h-2.5 w-2.5 shrink-0">
           {isPlaying && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#06b6d4] opacity-75"></span>}
           <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", isPlaying ? 'bg-[#06b6d4]' : 'bg-gray-500')}></span>
@@ -246,13 +265,22 @@ function CustomVideoPlayer({ src, mimeType, title }) {
         <h4 className="text-white text-xs font-bold truncate dir-rtl">{title || 'ویدیو'}</h4>
       </div>
 
-      <video ref={videoRef} onClick={togglePlay} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleTimeUpdate} onEnded={() => setIsPlaying(false)} className="w-full h-full max-h-[75vh] object-contain cursor-pointer outline-none" preload="metadata">
+      {!hasStarted && poster && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 pointer-events-none transition-opacity duration-300">
+          {/* اصلاح سایز هاله مشکی تا دقیقا هم‌اندازه و چسبیده به نماد پلی باشد */}
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-black/60 rounded-full flex items-center justify-center backdrop-blur-md shadow-lg border border-white/20 text-white">
+            <Icon name="playCircle" className="w-8 h-8 md:w-10 md:h-10 ml-0.5 md:ml-1" />
+          </div>
+        </div>
+      )}
+
+      <video ref={videoRef} onClick={togglePlay} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleTimeUpdate} onEnded={() => setIsPlaying(false)} className="w-full h-full max-h-[75vh] object-contain cursor-pointer outline-none" preload="none" poster={poster}>
         <source src={`${src}#t=0.1`} type={mimeType || 'video/mp4'} />
       </video>
 
-      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2 md:gap-3 z-20">
+      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2 md:gap-3 z-20">
         <div className="w-full flex items-center gap-3 px-2" dir="ltr">
-          <input type="range" min="0" max="100" value={progress} onChange={handleSeek} className="w-full h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" style={{ background: `linear-gradient(to right, #06b6d4 ${progress}%, #4b5563 ${progress}%)` }} />
+          <input type="range" min="0" max="100" value={progress} onChange={handleSeek} className="w-full h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" style={{ background: `linear-gradient(to right, #06b6d4 ${progress}%, rgba(255,255,255,0.2) ${progress}%)` }} />
         </div>
         <div className="flex items-center justify-between px-2" dir="ltr">
           <div className="flex items-center gap-2 md:gap-4">
@@ -287,7 +315,9 @@ function CustomVideoPlayer({ src, mimeType, title }) {
             <span className="text-[10px] md:text-xs text-white ml-1 md:ml-2">{formatTime(currentTime)} / {formatTime(duration)}</span>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
-            <div className="hidden sm:flex items-center gap-2" dir="ltr">
+            
+            {/* بخش تنظیم صدای پلیر ویدیویی (حذف کلاس‌های پنهان‌کننده و اضافه شدن کشویی موبایل) */}
+            <div className="flex items-center gap-1 md:gap-2 group" dir="ltr">
               <Tooltip text={isMuted || volume === 0 ? 'صدادار' : 'بی‌صدا'}>
                 <button onClick={toggleMute} className="text-gray-300 hover:text-white transition-colors p-1 cursor-pointer">
                   <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -305,8 +335,13 @@ function CustomVideoPlayer({ src, mimeType, title }) {
                   </svg>
                 </button>
               </Tooltip>
-              <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="w-12 md:w-16 h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, #4b5563 ${(isMuted ? 0 : volume) * 100}%)` }} />
+              {/* محفظه مخفی‌شونده برای ریل صدا در حالت موبایل */}
+          {/* محفظه مخفی‌شونده برای ریل صدا در حالت موبایل */}
+              <div className="w-0 sm:w-12 md:w-16 overflow-hidden opacity-0 sm:opacity-100 group-hover:w-12 md:group-hover:w-16 group-hover:opacity-100 group-focus-within:w-12 md:group-focus-within:w-16 group-focus-within:opacity-100 transition-all duration-300 flex items-center">
+                <input type="range" min="0" max="1" step="0.01" value={isMuted ? 0 : volume} onChange={handleVolumeChange} className="w-12 md:w-16 h-1 appearance-none rounded-full cursor-pointer outline-none transition-all" style={{ background: `linear-gradient(to right, #06b6d4 ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) ${(isMuted ? 0 : volume) * 100}%)` }} />
+              </div>
             </div>
+
             <Tooltip text="تمام‌صفحه">
               <button onClick={toggleFullScreen} className="text-gray-300 hover:text-white transition-colors p-1 cursor-pointer">
                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -324,7 +359,7 @@ function CustomVideoPlayer({ src, mimeType, title }) {
   );
 }
 
-// === ۳. سیستم تم و نگاشت فرمت‌ها ===
+// === ۳. سامانه تم و نگاشت قالب‌ها ===
 const THEMES = {
   RAW: { primaryText: "text-[#fbbf24]", primaryBg: "bg-[#fbbf24]", borderClass: "border-[#fbbf24]/30", badgeBg: "bg-[#fbbf24]/10 text-[#fbbf24] border-[#fbbf24]/30", glowBg: "rgba(251,191,36,0.15)", hoverText: "hover:text-[#fbbf24]", hoverBg: "hover:bg-[#fbbf24]", hoverBorder: "hover:border-[#fbbf24]", focusBorder: "focus:border-[#fbbf24]", fillCurrent: "fill-current text-[#fbbf24]", gradientVia: "via-[#fbbf24]" },
   PRODUCED: { primaryText: "text-[#f43f5e]", primaryBg: "bg-[#f43f5e]", borderClass: "border-[#f43f5e]/30", badgeBg: "bg-[#f43f5e]/10 text-[#f43f5e] border-[#f43f5e]/30", glowBg: "rgba(244,63,94,0.15)", hoverText: "hover:text-[#f43f5e]", hoverBg: "hover:bg-[#f43f5e]", hoverBorder: "hover:border-[#f43f5e]", focusBorder: "focus:border-[#f43f5e]", fillCurrent: "fill-current text-[#f43f5e]", gradientVia: "via-[#f43f5e]" },
@@ -386,7 +421,10 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
   const mainImage = data?.coverDesktop || data?.image || '/images/placeholder-cover.jpg'; 
   const mobileImage = data?.coverMobile || data?.image || mainImage; 
   
-  const authors = data?.creators?.length > 0 ? data.creators : [{ name: 'مرکز مکتوم', imageUrl: null, avatarUrl: null }];
+  const rawCreators = safeParse(data?.creators, []);
+  const authors = Array.isArray(rawCreators)
+    ? rawCreators.filter(c => c && typeof c.name === 'string' && c.name.trim() !== '')
+    : [];
 
   const displaySettings = safeParse(data?.displaySettings, {});
   const formatsList = safeParse(data?.formats, []);
@@ -460,17 +498,17 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
     e.preventDefault();
     if (!currentUser) return; 
 
-    const toastId = toast.loading('در حال تولید لینک امن دانلود...');
+    const toastId = toast.loading('در حال تولید پیوند امن بارگیری...');
     const res = await generateSecureDownloadAction(data.id, fileUrl);
     
     if (res.success) {
-      toast.success(res.message || 'لینک دانلود آماده شد!', { 
+      toast.success(res.message || 'پیوند بارگیری آماده شد!', { 
         id: toastId, 
         duration: 8000 // پیام را ۸ ثانیه نگه می‌داریم تا کاربر فرصت خواندن داشته باشد
       });
       window.open(res.url, '_blank');
     } else {
-      toast.error(res.error || 'خطا در ساخت لینک دانلود', { id: toastId });
+      toast.error(res.error || 'خطا در ساخت پیوند بارگیری', { id: toastId });
     }
   };
 
@@ -515,10 +553,10 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
   const tocSections = useMemo(() => {
     const list = [];
     if (data?.body) list.push({ id: 'sec-body', title: 'معرفی' });
-    if (fileSpecs.length > 0) list.push({ id: 'sec-files', title: 'اطلاعات فایل‌ها' });
+    if (fileSpecs.length > 0) list.push({ id: 'sec-files', title: 'اطلاعات پرونده‌ها' });
     if (timeline.length > 0) list.push({ id: 'sec-timeline', title: 'به‌روزرسانی' });
     if (previewGallery.length > 0) list.push({ id: 'sec-preview', title: 'پیش‌نمایش' });
-    if (displaySettings.isDownloadActive !== false && downloads.length > 0) list.push({ id: 'sec-download', title: 'دانلود' });
+    if (displaySettings.isDownloadActive !== false && downloads.length > 0) list.push({ id: 'sec-download', title: 'بارگیری' });
     if (isCommentsEnabled) list.push({ id: 'sec-comments', title: 'نظرات' });
     return list;
   }, [data, fileSpecs, timeline, previewGallery, downloads, isCommentsEnabled, displaySettings]);
@@ -557,45 +595,34 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
       
       <ProgressBar />
 
-      <main className="flex-grow w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 pb-0 md:pb-20 pt-0 sm:pt-6">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 space-y-6 md:space-y-12 pb-0 md:pb-20 pt-0 relative z-10">
         
-        <div className="relative z-20 px-4 sm:px-0 pt-4 sm:pt-0 pb-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent md:bg-none [&_a]:!text-white/90 [&_a:hover]:!text-white [&_svg]:!text-white/60 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+        <div className="relative z-20 px-4 sm:px-0 pt-0 bg-gradient-to-b from-black/80 via-black/40 to-transparent md:bg-none [&_a]:!text-white/90 [&_a:hover]:!text-white [&_svg]:!text-white/60 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
           <Breadcrumbs items={[{ label: 'مکتوم', href: '/' }, parentBreadcrumb, { label: title || 'بدون عنوان' }]} />
         </div>
 
-        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-0 lg:gap-8 mt-4 relative">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-0 lg:gap-8 md:relative">
           
-          {/* ۱. افزایش ارتفاع تصویر موبایل از 45vh به 62vh برای پوشش کامل فضای خالی */}
-          <div className="lg:col-span-7 fixed top-0 inset-x-0 z-0 h-[62vh] md:h-auto md:relative md:z-auto w-full md:aspect-video md:rounded-[2.5rem] md:shadow-[0_10px_40px_rgba(0,0,0,0.5)] md:p-1 md:border border-transparent group pointer-events-none md:pointer-events-auto">
+          {/* ۱. تصویر شاخص: در موبایل ثابت در جای خود در بالای صفحه (absolute) با محو تدریجی آلفا بدون نیاز به لایه تیره */}
+          <div className="lg:col-span-7 absolute top-0 inset-x-0 z-0 h-[44vh] md:h-auto md:relative md:z-auto w-full md:aspect-video md:rounded-[2.5rem] md:shadow-[0_10px_40px_rgba(0,0,0,0.5)] md:p-1 md:border border-transparent group pointer-events-none md:pointer-events-auto [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_50%,transparent_100%)] [mask-image:linear-gradient(to_bottom,black_0%,black_50%,transparent_100%)] md:[-webkit-mask-image:none] md:[mask-image:none]">
             <div className="hidden md:block absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10 rounded-[2.5rem]" />
             <div className={`hidden md:block absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
             
-            <div className="absolute inset-0 w-full h-full md:rounded-[2.2rem] overflow-hidden bg-black/40 shadow-inner">
+            <div className="absolute inset-0 w-full h-full md:rounded-[2.2rem] overflow-hidden bg-[#0b1426]/40 shadow-inner">
               {(data?.coverDesktop || data?.image) && (
                 <img src={data.coverDesktop || data.image} alt={title} className="hidden md:block absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
               )}
               {(data?.coverMobile || data?.coverDesktop || data?.image) && (
-                <img src={data?.coverMobile || data?.coverDesktop || data?.image} alt={title} className="md:hidden block absolute inset-0 w-full h-full object-cover opacity-85" />
+                <img src={data?.coverMobile || data?.coverDesktop || data?.image} alt={title} className="md:hidden block absolute inset-0 w-full h-full object-cover opacity-90" />
               )}
             </div>
             
-            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#05080f] via-[#05080f]/60 to-transparent md:hidden pointer-events-none z-10" />
-            <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#05080f] to-transparent md:hidden pointer-events-none z-10" />
+            <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#081020]/75 to-transparent md:hidden pointer-events-none z-10" />
           </div>
 
-          {/* ۲. کانتینر باکس اول - حذف سایه برش‌دهنده زیرین و محو تدریجی انتهای لایه */}
-          <div className="lg:col-span-5 relative md:bg-transparent rounded-t-[2.5rem] md:rounded-none mt-[35vh] md:mt-0 px-5 pt-7 pb-4 md:p-0 flex flex-col justify-center">
-            
-            {/* لایه شیشه‌ای و تاریک زیر باکس اول با محو تدریجی در انتها */}
-            <div className="md:hidden absolute inset-x-0 top-0 -bottom-32 bg-[#050810]/70 backdrop-blur-3xl rounded-t-[2.5rem] pointer-events-none z-[1] [mask-image:linear-gradient(to_bottom,black_calc(100%-128px),rgba(0,0,0,0.7)_calc(100%-64px),transparent_100%)]" />
-
-            {/* لایه هاله‌های نوری کمکی برای موبایل با محو تدریجی بدون برش افقی */}
-            <div className="md:hidden absolute inset-x-0 top-0 h-[420px] rounded-t-[2.5rem] overflow-hidden pointer-events-none z-[2] [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)]">
-              <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full blur-[70px] opacity-40" style={{ background: `radial-gradient(circle, ${currentTheme.glowBg.replace('0.15', '1')} 0%, transparent 70%)` }} />
-              <div className="absolute top-24 -left-16 w-60 h-60 rounded-full blur-[70px] opacity-30" style={{ background: 'radial-gradient(circle, #06b6d4 0%, transparent 70%)' }} />
-            </div>
-
-            <div className="relative z-10 p-5 rounded-3xl bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] md:p-0 md:rounded-none md:bg-transparent md:backdrop-blur-none md:border-transparent md:shadow-none space-y-5 md:space-y-6">
+          {/* ۲. کانتینر قاب اول روی پس‌زمینه اصلی و نورانی سایت */}
+          <div className="lg:col-span-5 relative md:bg-transparent rounded-t-[2.5rem] md:rounded-none mt-[35vh] md:mt-0 px-5 pt-2 pb-4 md:p-0 flex flex-col justify-center">
+            <div className="relative z-10 p-5 rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.05] shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_8px_30px_rgba(0,0,0,0.4)] md:p-0 md:rounded-none md:bg-transparent md:backdrop-blur-none md:border-transparent md:shadow-none space-y-5 md:space-y-6">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`border text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-full tracking-widest uppercase shadow-inner ${currentTheme.badgeBg}`}>
                   {parentBreadcrumb.label}
@@ -635,16 +662,6 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
         </div>
 
         <div className="relative md:bg-transparent px-5 md:px-0 pb-20 md:pb-10 mt-0 pt-1 md:pt-0">
-          
-          {/* لایه شیشه‌ای بخش پایین با شروع و پایان محوشونده تدریجی برای اتصال نامرئی به لایه بالایی */}
-          <div className="md:hidden absolute inset-x-0 -top-32 bottom-0 bg-[#050810]/70 backdrop-blur-3xl pointer-events-none z-[1] [mask-image:linear-gradient(to_bottom,transparent_0px,rgba(0,0,0,0.7)_64px,black_128px,black_calc(100%-120px),transparent_100%)]" />
-
-          <div className="md:hidden absolute inset-0 overflow-hidden pointer-events-none z-[2]">
-            <div className="absolute top-[10%] -right-16 w-72 h-72 rounded-full blur-[80px] opacity-30" style={{ background: 'radial-gradient(circle, #8b5cf6 0%, transparent 70%)' }} />
-            <div className="absolute top-[35%] -left-16 w-72 h-72 rounded-full blur-[80px] opacity-30" style={{ background: `radial-gradient(circle, ${currentTheme.glowBg.replace('0.15', '1')} 0%, transparent 70%)` }} />
-            <div className="absolute top-[60%] -right-12 w-72 h-72 rounded-full blur-[80px] opacity-30" style={{ background: 'radial-gradient(circle, #06b6d4 0%, transparent 70%)' }} />
-            <div className="absolute bottom-[8%] -left-12 w-72 h-72 rounded-full blur-[80px] opacity-30" style={{ background: 'radial-gradient(circle, #3b82f6 0%, transparent 70%)' }} />
-          </div>
 
           <div className="lg:hidden relative z-10 mt-5 mb-5 w-full">
             {hasAnyMetaInfo && (
@@ -679,7 +696,8 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                   <Tooltip text={isFavorite ? "حذف از علاقه‌‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}>
                     <button onClick={handleFavoriteClick} className={`transition-all cursor-pointer flex items-center gap-1.5 p-2 px-3 rounded-full shadow-inner ${isFavorite ? 'text-rose-500 bg-rose-500/10' : 'text-gray-400 hover:text-white bg-white/5 hover:bg-white/10'}`}>
                       <Icon name="heart" className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
-                      <span className="text-[11px] font-sans font-bold pt-0.5">{toPersianDigits(favCount)}</span>
+                      {/* اینجا تابع formatNumber جایگزین شد */}
+                      <span className="text-[11px] font-sans font-bold pt-0.5">{formatNumber(favCount)}</span>
                     </button>
                   </Tooltip>
                 </div>
@@ -694,11 +712,12 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
               
               <div className={`lg:hidden w-full transition-all ${isTocSticky ? 'h-[44px] mb-6' : 'h-0 mb-0'}`}></div>
          
+              {/* تغییر به z-30 تا زیر هدر و نوار پایین برود، و بازگشت به fixed top-4 */}
               <div className={cn(
-                "lg:hidden z-[50] transition-all duration-75 w-full flex items-center justify-center",
+                "lg:hidden z-30 transition-all duration-75 w-full flex items-center justify-center",
                 isTocSticky ? "fixed top-4 left-0 right-0 pl-[4.2rem] pr-4" : "relative mb-6 pl-[4rem] pr-1"
               )}>
-                <div className="flex items-center justify-between w-full p-1 bg-[#0b0f19]/90 backdrop-blur-xl border border-white/10 rounded-full shadow-[0_12px_20px_-8px_rgba(0,0,0,0.9),inset_0_0_15px_rgba(255,255,255,0.02)]">
+                <div className="flex items-center justify-between w-full p-1 bg-[#0b0f19]/40 backdrop-blur-xl border border-white/10 rounded-full shadow-[0_12px_20px_-8px_rgba(0,0,0,0.9),inset_0_0_15px_rgba(255,255,255,0.02)]">
                   {tocSections.map(sec => {
                     const isActive = activeSection === sec.id;
                     return (
@@ -764,7 +783,8 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                       <Tooltip text={isFavorite ? "حذف از علاقه‌‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}>
                         <button onClick={handleFavoriteClick} className={`transition-all cursor-pointer flex items-center gap-1.5 p-2.5 px-4 rounded-full shadow-inner ${isFavorite ? 'text-rose-500 bg-rose-500/10' : 'text-gray-400 hover:text-white bg-white/5 hover:bg-white/10'}`}>
                           <Icon name="heart" className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-                          <span className="text-[11px] font-sans font-bold pt-0.5">{toPersianDigits(favCount)}</span>
+                          {/* اینجا تابع formatNumber جایگزین شد */}
+                          <span className="text-[11px] font-sans font-bold pt-0.5">{formatNumber(favCount)}</span>
                         </button>
                       </Tooltip>
                     </div>
@@ -799,7 +819,8 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                   </h2>
                   
                   {activeMedia && activeMedia.url ? (
-                    <div className="preview-media-container relative z-10 w-full aspect-video rounded-2xl overflow-hidden flex items-center justify-center bg-black/80 shadow-inner border border-transparent group/vid mb-4 [&:fullscreen]:w-screen [&:fullscreen]:h-screen [&:fullscreen]:rounded-none [&:fullscreen]:bg-black">
+                    /* تغییر bg-black/80 به سبک گلس‌مورفیسم */
+                    <div className="preview-media-container relative z-10 w-full aspect-video rounded-2xl overflow-hidden flex items-center justify-center bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] group/vid mb-4 [&:fullscreen]:w-screen [&:fullscreen]:h-screen [&:fullscreen]:rounded-none [&:fullscreen]:bg-black">
                       
                       <button
                         type="button"
@@ -833,19 +854,25 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                       )}
 
                       {activeMedia.type === 'video' ? (
-                        <CustomVideoPlayer src={activeMedia.url} mimeType="video/mp4" title={activeMedia.desc || title} />
+                        <CustomVideoPlayer 
+                          src={activeMedia.url} 
+                          mimeType="video/mp4" 
+                          title={activeMedia.desc || title} 
+                          poster={activeMedia.thumbnail || null} 
+                        />
                       ) : activeMedia.type === 'audio' ? (
                         <div className="w-full flex items-center justify-center z-10 p-4">
                            <CustomAudioPlayer src={activeMedia.url} title={activeMedia.desc || title} />
                         </div>
                       ) : (
-                        <BlurImage src={activeMedia.url} className="w-full h-full object-contain" alt="Preview Image" />
+                        <BlurImage src={activeMedia.url || activeMedia.thumbnail || data?.coverDesktop || data?.image || '/images/placeholder-cover.jpg'} className="w-full h-full object-contain" alt="Preview Image" />
                       )}
                     </div>
                   ) : (
-                    <div className="relative z-10 w-full aspect-video rounded-2xl flex flex-col items-center justify-center bg-black/40 border border-transparent shadow-inner text-gray-500 mb-4">
+                    /* گلس‌مورفیسم برای حالت بدون رسانه */
+                    <div className="relative z-10 w-full aspect-video rounded-2xl flex flex-col items-center justify-center bg-white/[0.02] backdrop-blur-md border border-white/5 shadow-inner text-gray-500 mb-4">
                       <Icon name="image" className="w-8 h-8 md:w-10 md:h-10 mb-2" />
-                      <span className="text-[10px] md:text-xs font-sans">لینک رسانه معتبر نیست یا خالی است</span>
+                      <span className="text-[10px] md:text-xs font-sans">پیوند رسانه معتبر نیست یا خالی است</span>
                     </div>
                   )}
                   
@@ -855,18 +882,34 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                     <div className="flex gap-2.5 md:gap-3.5 overflow-x-auto custom-scrollbar pb-3 pt-2 px-1 relative z-10">
                       {previewGallery.map((media, idx) => {
                         const isSelected = activeMediaIndex === idx;
+                        
+                        // منطق دریافت تصویر:
+                        // ویدیو: فقط تامنیل خودش
+                        // صوت: بدون تصویر (null)
+                        // عکس: تامنیل یا نشانی خودش یا در نهایت کاور صفحه
+                        const thumbnailSrc = media.type === 'video' 
+                          ? (media.thumbnail || null) 
+                          : (media.type === 'audio' 
+                              ? null 
+                              : (media.thumbnail || media.url || data?.coverDesktop || data?.image || '/images/placeholder-cover.jpg'));
+                        
                         return (
                           <button 
                             key={idx} 
                             onClick={() => setActiveMediaIndex(idx)} 
                             className={cn(
-                              "w-24 h-16 md:w-28 md:h-20 shrink-0 rounded-xl overflow-hidden cursor-pointer relative transition-all duration-300 shadow-md",
+                              "w-24 h-16 md:w-28 md:h-20 shrink-0 rounded-xl overflow-hidden cursor-pointer relative transition-all duration-300 shadow-md flex items-center justify-center border",
                               isSelected 
-                                ? `ring-2 ring-inset ${currentTheme.borderClass.replace('/30', '')} border border-white/30 scale-105 opacity-100 z-10 shadow-[0_0_20px_rgba(0,0,0,0.8)]` 
-                                : "opacity-35 hover:opacity-75 brightness-75 hover:brightness-100 scale-95 hover:scale-100 border border-transparent"
+                                ? `ring-2 ring-inset ${currentTheme.borderClass.replace('/30', '')} border-white/30 scale-105 opacity-100 z-10 shadow-[0_0_20px_rgba(0,0,0,0.8)]` 
+                                : "opacity-35 hover:opacity-75 brightness-75 hover:brightness-100 scale-95 hover:scale-100 border-transparent"
                             )}
                           >
-                            <BlurImage src={media.thumbnail || media.url} className="w-full h-full object-cover" alt="thumbnail" />
+                            {/* اگر تصویری هست لود می‌شود، وگرنه یک پس‌زمینه خالی نشان داده می‌شود */}
+                            {thumbnailSrc ? (
+                               <BlurImage src={thumbnailSrc} className="w-full h-full object-cover" alt="thumbnail" />
+                            ) : (
+                               <div className="w-full h-full bg-black/40"></div>
+                            )}
                             
                             <div className={cn(
                               "absolute inset-0 flex items-center justify-center transition-colors duration-300",
@@ -911,8 +954,8 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                 </div>
               )}
 
-              {displaySettings.showAuthor !== false && (
-                <div className="mb-0 pt-3 mt-3 md:pt-6 md:mt-8 border-t border-white/10">
+              {displaySettings.showAuthor !== false && authors.length > 0 && (
+                <div className="order-8 lg:order-none mb-0 pt-3 mt-3 md:pt-6 md:mt-8 border-t border-white/10">
                   <div className="flex items-center gap-2 md:gap-3 mb-4">
                     <Icon name="user" className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                     <span className="text-xs md:text-sm font-bold text-gray-300 font-sans">نویسندگان و پژوهشگران:</span>
@@ -984,16 +1027,19 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                     <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
                     <form className="relative z-10" onSubmit={handleCommentSubmit}>
-                      <div className="mb-4 space-y-2">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 sm:mb-1 gap-2">
-                          {currentUser ? (
-                            <span className="text-[10px] md:text-[11px] font-bold text-[#10b981] font-sans pl-1">شما با حساب کاربری وارد شده‌اید</span>
-                          ) : (
-                            <span className="text-[10px] md:text-[11px] font-bold text-rose-400 font-sans pl-1">ابتدا وارد سایت شوید</span>
-                          )}
-                          <span className="text-[9px] text-gray-400 font-sans font-bold px-2 py-0.5 bg-black/40 rounded-lg shadow-inner w-fit">پس از تأیید نمایش داده می‌شود</span>
-                        </div>
+                    <div className="mb-4 space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 sm:mb-1 gap-2">
+                        {currentUser ? (
+                          <span className="text-[10px] md:text-[11px] font-bold text-[#10b981] font-sans pl-1">شما با حساب کاربری وارد شده‌اید</span>
+                        ) : (
+                          <span className="text-[10px] md:text-[11px] font-bold text-rose-400 font-sans pl-1">ابتدا وارد سامانه شوید</span>
+                        )}
+                        <span className="text-[9px] text-gray-400 font-sans font-bold px-2 py-0.5 bg-black/40 rounded-lg shadow-inner w-fit">پس از تأیید نمایش داده می‌شود</span>
+                      </div>
+                      
+                      <div className="relative">
                         <textarea 
+                          maxLength={500} // محدودیت قطعی در مرورگر
                           rows="4" 
                           value={commentText}
                           onChange={(e) => setCommentText(e.target.value)}
@@ -1003,20 +1049,30 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                           }}
                           onBlur={(e) => e.target.style.borderColor = 'transparent'}
                           placeholder={currentUser ? "نظر خود را درباره این محتوا بنویسید..." : "برای ثبت دیدگاه کلیک کنید..."} 
-                          className={`w-full bg-white/10 border border-transparent rounded-2xl p-3.5 md:p-4 text-white placeholder:text-white/40 text-xs md:text-sm leading-relaxed ${currentTheme.focusBorder} focus:bg-white/20 outline-none transition-all resize-none shadow-inner font-sans`}
+                          className={`w-full bg-white/10 border border-transparent rounded-2xl p-3.5 md:p-4 text-white placeholder:text-white/40 text-xs md:text-sm leading-relaxed ${currentTheme.focusBorder} focus:bg-white/20 outline-none transition-all resize-none shadow-inner font-sans pb-8`}
                           style={{ '--tw-ring-color': currentTheme.primaryText }} 
                         />
+                        {/* شمارشگر زنده کاراکترها با اعداد کاملا فارسی */}
+                        <div className="absolute bottom-3 left-4 text-[9px] md:text-[10px] font-bold font-sans pointer-events-none transition-colors duration-300">
+                          <span className={commentText.length >= 500 ? 'text-rose-500' : 'text-gray-400'}>
+                            {toPersianDigits(commentText.length)}
+                          </span>
+                          <span className="text-gray-500 mx-0.5">/</span>
+                          <span className="text-gray-500">{toPersianDigits(500)}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-end">
-                        <button 
-                          type="submit" 
-                          disabled={!commentText.trim() || !currentUser} 
-                          className={`w-full sm:w-auto bg-white/10 border border-transparent text-white hover:bg-white/20 px-8 py-3.5 md:py-3 rounded-xl text-sm font-bold ${currentTheme.hoverBg} hover:text-white transition-all duration-300 shadow-[0_5px_15px_rgba(0,0,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-sans`}
-                        >
-                          ارسال دیدگاه
-                        </button>
-                      </div>
-                    </form>
+                    </div>
+                    
+                    <div className="flex justify-end">
+                      <button 
+                        type="submit" 
+                        disabled={!commentText.trim() || !currentUser || commentText.length > 500} 
+                        className={`w-full sm:w-auto bg-white/10 border border-transparent text-white hover:bg-white/20 px-8 py-3.5 md:py-3 rounded-xl text-sm font-bold ${currentTheme.hoverBg} hover:text-white transition-all duration-300 shadow-[0_5px_15px_rgba(0,0,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-sans`}
+                      >
+                        ارسال دیدگاه
+                      </button>
+                    </div>
+                  </form>
                   </div>
 
                   <div className="space-y-4 relative z-10">
@@ -1033,7 +1089,7 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                             </div>
                           </div>
                         </div>
-                        <p className="text-xs md:text-sm text-gray-300 leading-relaxed font-light text-justify font-sans">
+                        <p className="text-xs md:text-sm text-gray-300 leading-relaxed font-light text-justify font-sans break-words whitespace-pre-wrap">
                           {comment.text}
                         </p>
                         {comment.adminReply && (
@@ -1060,7 +1116,7 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                   <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
                   <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
-                  <h3 className="text-xs md:text-sm font-bold text-white mb-5 md:mb-6 uppercase tracking-widest text-center border-b border-white/10 pb-3 md:pb-4 relative z-10 font-sans">اطلاعات فایل‌ها</h3>
+                  <h3 className="text-xs md:text-sm font-bold text-white mb-5 md:mb-6 uppercase tracking-widest text-center border-b border-white/10 pb-3 md:pb-4 relative z-10 font-sans">اطلاعات پرونده‌ها</h3>
                   <ul className="space-y-3 md:space-y-4 relative z-10">
                     {fileSpecs.map((spec, idx) => (
                       <li key={idx} className="flex items-center justify-between">
@@ -1090,12 +1146,16 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                         const descText = item.desc || item.description || '';
                         return (
                           <div key={idx} className="relative pl-2 md:pl-4 pr-6 md:pr-8">
-                            <div className={`absolute right-0 top-1 w-5 h-5 md:w-6 md:h-6 rounded-full bg-[#050810] border-2 ${idx === 0 ? `${currentTheme.borderClass.replace('/30', '')} shadow-[0_0_10px_${currentTheme.glowBg.replace('0.15', '0.5')}]` : 'border-white/20'} flex items-center justify-center z-10`}>
-                              {idx === 0 && <div className={`w-1.5 h-1.5 md:w-2 md:h-2 ${currentTheme.primaryBg} rounded-full`}></div>}
+                            <div className={`absolute right-0 top-1 w-5 h-5 md:w-6 md:h-6 rounded-full bg-[#101d38]/60 backdrop-blur-xl border ${idx === 0 ? `${currentTheme.borderClass.replace('/30', '')} shadow-[0_0_12px_${currentTheme.glowBg.replace('0.15', '0.6')},inset_0_1px_1px_rgba(255,255,255,0.2)]` : 'border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)]'} flex items-center justify-center z-10`}>
+                              {idx === 0 ? (
+                                <div className={`w-1.5 h-1.5 md:w-2 md:h-2 ${currentTheme.primaryBg} rounded-full shadow-[0_0_8px_currentColor]`}></div>
+                              ) : (
+                                <div className="w-1.5 h-1.5 rounded-full bg-white/30"></div>
+                              )}
                             </div>
 
                             <div className="flex flex-col gap-1.5 md:gap-2">
-                              <span className={`${idx === 0 ? `${currentTheme.primaryText}${currentTheme.borderClass} border shadow-inner bg-white/5` : 'bg-black/40 border border-transparent shadow-inner text-gray-400'} text-[9px] md:text-[10px] font-sans font-bold px-2.5 py-1 rounded-lg w-fit`}>
+                              <span className={`${idx === 0 ? `${currentTheme.primaryText} ${currentTheme.borderClass} bg-white/[0.07]` : 'bg-white/[0.04] border-white/10 text-gray-300'} border backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] text-[9px] md:text-[10px] font-sans font-bold px-2.5 py-1 rounded-lg w-fit`}>
                                 نسخه {toPersianDigits(item.version)}
                               </span>
                               
@@ -1127,15 +1187,17 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                   <div className={`absolute -right-10 -top-10 w-24 h-24 md:w-32 md:h-32 ${currentTheme.primaryBg} opacity-10 rounded-full blur-3xl pointer-events-none`}></div>
                   
                   <h3 className="text-lg md:text-xl font-bold text-white mb-5 md:mb-6 flex items-center gap-2 relative z-10 font-sans border-b border-white/10 pb-3 md:pb-4">
-                    <Icon name="download" className={`w-5 h-5 md:w-6 md:h-6 ${currentTheme.fillCurrent}`} /> دانلود فایل‌ها
+                    <Icon name="download" className={`w-5 h-5 md:w-6 md:h-6 ${currentTheme.fillCurrent}`} /> بارگیری پرونده‌ها
                   </h3>
 
                   <div className="relative">
                     {!currentUser && (
-                      <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#050810]/80 backdrop-blur-md rounded-2xl border border-white/10 p-4">
-                        <Icon name="lock" className="w-10 h-10 md:w-12 md:h-12 text-gray-400 mb-2 md:mb-3 opacity-80" />
-                        <h4 className="text-base md:text-lg font-bold text-white mb-1.5 md:mb-2 font-sans">دسترسی محدود</h4>
-                        <p className="text-[10px] md:text-[11px] font-sans font-light text-gray-400 mb-4 md:mb-6 text-center px-2 md:px-6 leading-relaxed">برای دانلود و مشاهده لینک‌های این محتوا باید وارد حساب کاربری خود شوید.</p>
+                      <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#101d38]/30 backdrop-blur-2xl backdrop-saturate-150 rounded-2xl border border-white/[0.1] shadow-[inset_0_1px_1px_rgba(255,255,255,0.14),0_10px_30px_rgba(4,9,20,0.35)] p-4">
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/[0.05] border border-white/[0.1] shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)] flex items-center justify-center mb-2.5 md:mb-3">
+                          <Icon name="lock" className={`w-6 h-6 md:w-7 md:h-7 ${currentTheme.primaryText} opacity-90`} />
+                        </div>
+                        <h4 className="text-base md:text-lg font-bold text-white mb-1.5 md:mb-2 font-sans drop-shadow-sm">دسترسی محدود</h4>
+                        <p className="text-[10px] md:text-[11px] font-sans font-light text-gray-300 mb-4 md:mb-5 text-center px-2 md:px-6 leading-relaxed">برای بارگیری و مشاهده پیوند‌های این محتوا باید وارد حساب کاربری خود شوید.</p>
                         
                         <button 
                           onClick={(e) => {
@@ -1143,34 +1205,34 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                             e.stopPropagation();
                             setShowAuthModal(true); 
                           }} 
-                          className="px-6 md:px-8 py-2.5 md:py-3 bg-white/10 border border-transparent shadow-inner hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer font-sans w-full sm:w-auto"
+                          className="px-6 md:px-8 py-2.5 md:py-3 bg-white/[0.08] hover:bg-white/[0.15] backdrop-blur-md border border-white/[0.14] shadow-[inset_0_1px_1px_rgba(255,255,255,0.18),0_4px_15px_rgba(0,0,0,0.25)] text-white rounded-xl text-xs font-bold transition-all cursor-pointer font-sans w-full sm:w-auto"
                         >
                           ورود / عضویت
                         </button>
                       </div>
                     )}
 
-                    <div className={cn("space-y-2.5 md:space-y-3 relative z-10 max-h-[300px] md:max-h-[350px] overflow-y-auto px-1 custom-scrollbar", !currentUser && "opacity-30 pointer-events-none select-none blur-[2px] pb-4")}>
+                    <div className={cn("space-y-2.5 md:space-y-3 relative z-10 max-h-[300px] md:max-h-[350px] overflow-y-auto px-1 custom-scrollbar", !currentUser && "opacity-35 pointer-events-none select-none blur-[3px] pb-4")}>
                       {downloads.map((dl, idx) => (
                         <button 
                           key={idx} 
                           onClick={(e) => handleDownloadClick(e, dl.url)}
-                          className={`w-full flex items-center justify-between gap-3 md:gap-4 p-3.5 md:p-4 rounded-xl bg-white/5 border border-transparent shadow-inner hover:bg-white/10 ${currentTheme.hoverBorder}/50 transition-colors group/item cursor-pointer text-right`}
+                          className={`w-full flex items-center justify-between gap-3 md:gap-4 p-3.5 md:p-4 rounded-2xl bg-white/[0.04] backdrop-blur-md border border-white/[0.07] shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)] hover:bg-white/[0.08] ${currentTheme.hoverBorder}/50 transition-all group/item cursor-pointer text-right`}
                         >
                           <div className="flex-1 min-w-0 flex flex-col gap-1 md:gap-1.5">
                             <h4 className="text-xs md:text-sm font-bold text-white leading-snug font-sans">{dl.title}</h4>
                             {dl.format && (
-                              <span className="text-[10px] md:text-xs text-gray-400 font-sans font-bold">{dl.format}</span>
+                              <span className="text-[10px] md:text-xs text-gray-300 font-sans font-bold">{dl.format}</span>
                             )}
                             {dl.desc && (
-                              <p className="text-[10px] md:text-[11px] text-gray-500 font-sans font-light text-justify leading-relaxed mt-0.5 md:mt-1">
+                              <p className="text-[10px] md:text-[11px] text-gray-400 font-sans font-light text-justify leading-relaxed mt-0.5 md:mt-1">
                                 {dl.desc}
                               </p>
                             )}
                           </div>
 
                           <div 
-                            className={`shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-black/40 shadow-inner flex items-center justify-center text-gray-400 ${currentTheme.hoverBg} border border-transparent hover:text-white transition-colors`}
+                            className={`shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/[0.06] backdrop-blur-md border border-white/[0.1] shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)] flex items-center justify-center text-gray-300 ${currentTheme.hoverBg} hover:border-transparent hover:text-white transition-all`}
                           >
                             <Icon name="download" className="w-4 h-4 md:w-5 md:h-5" />
                           </div>
@@ -1208,7 +1270,7 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
                   <div key={platform.name} className="relative flex items-center justify-center">
                     <Tooltip text={platform.name}>
                       <a href={platform.getUrl(typeof window !== 'undefined' ? window.location.href : 'https://maktum.ir', title)} target="_blank" rel="noopener noreferrer" className={`p-3 text-gray-400 flex items-center justify-center transition-all duration-300 transform hover:scale-125 ${platform.hoverColorClass} cursor-pointer`}>
-                        {/* فراخوانی آیکون اختصاصی هر پلتفرم */}
+                        {/* فراخوانی نماد اختصاصی هر پلتفرم */}
                         <Icon name={platform.icon} className="w-7 h-7 transition-colors" /> 
                       </a>
                     </Tooltip>
@@ -1217,11 +1279,11 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
               </div>
 
               <div className="flex flex-col gap-2 relative z-10">
-                <label className="text-[11px] font-bold text-gray-400 pl-1">لینک مستقیم صفحه:</label>
+                <label className="text-[11px] font-bold text-gray-400 pl-1">پیوند مستقیم صفحه:</label>
                 <div className="flex flex-col sm:flex-row items-center gap-2 bg-white/[0.03] backdrop-blur-md border border-white/[0.05] rounded-xl p-1.5 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]">
                   <input type="text" readOnly value={typeof window !== 'undefined' ? window.location.href : 'https://maktum.ir'} className="bg-transparent text-gray-300 text-[10px] md:text-[11px] w-full outline-none px-2 py-1 sm:py-0 dir-ltr text-center sm:text-left font-sans" />
                   <button onClick={handleCopyLink} className={`w-full sm:w-auto px-4 py-2 md:py-2.5 rounded-lg text-[11px] md:text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-lg border border-transparent ${isCopied ? `${currentTheme.primaryBg} text-white` : 'bg-white/[0.05] border-white/[0.05] text-white hover:bg-white/[0.1] shadow-inner'}`}>
-                    {isCopied ? 'کپی شد' : 'کپی لینک'}
+                    {isCopied ? 'رونوشت شد' : 'رونوشت پیوند'}
                   </button>
                 </div>
               </div>
@@ -1233,8 +1295,6 @@ export default function SingleProductTemplate({ data, type = 'PRODUCED', current
       <AnimatePresence>
         {showAuthModal && <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />}
       </AnimatePresence>
-
-      <div className="md:hidden relative z-20 w-full h-[550px] -mt-[550px] pointer-events-none" />
 
     </div>
   );

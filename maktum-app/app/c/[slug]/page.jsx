@@ -3,30 +3,33 @@
 import { getDossierBySlug } from '@/app/actions/dossier'; 
 import DossierDetailClientPage from './DossierDetailClientPage'; 
 import { notFound } from 'next/navigation';
+import { constructPageMetadata, generateStaticPageSchema } from '@/lib/seo'; // توابع سئو
 
 // ==========================================================
-// ۱. تولید متادیتای داینامیک اختصاصی برای هر پرونده
+// ۱. تولید متادیتای پیشرفته و متصل به شبکه‌های اجتماعی برای هر پرونده
 // ==========================================================
 export async function generateMetadata(props) {
   const params = await props.params;
   const slug = params?.slug || (params ? Object.values(params)[0] : null);
 
-  if (!slug) return { title: 'یافت نشد' };
+  if (!slug) return { title: 'مکتوم | یافت نشد' };
 
-  // دریافت اطلاعات همان پرونده از دیتابیس
   const response = await getDossierBySlug(slug);
 
   if (!response || !response.success || !response.data) {
-    return { title: 'یافت نشد' };
+    return { title: 'مکتوم | یافت نشد' };
   }
 
   const data = response.data;
+  const pageTitle = data.seoTitle || data.title;
+  const finalDesc = data.description || `مشاهده جزئیات، مقالات و ویدیوهای مرتبط با پرونده ویژه ${data.title}`;
 
-  return {
-    // عنوان و توضیحات متا دقیقاً برابر با مقادیر داخل صفحه تنظیم می‌شوند
-    title: data.seoTitle || data.title,
-    description: data.description || '',
-  };
+  return constructPageMetadata({
+    title: pageTitle,
+    description: finalDesc,
+    path: `/c/${slug}`,
+    ogImage: data.coverDesktop || undefined,
+  });
 }
 
 // ==========================================================
@@ -46,5 +49,26 @@ export default async function DossierPage(props) {
     notFound();
   }
 
-  return <DossierDetailClientPage dossier={response.data} />;
+  const data = response.data;
+  const pageTitle = data.seoTitle || data.title;
+  const finalDesc = data.description || `مشاهده جزئیات، مقالات و ویدیوهای مرتبط با پرونده ویژه ${data.title}`;
+
+  // تولید اسکیمای پویا برای هر پرونده (منظومه)
+  const schema = generateStaticPageSchema({
+    schemaType: 'CollectionPage',
+    title: pageTitle,
+    description: finalDesc,
+    path: `/c/${slug}`,
+    breadcrumbName: data.title,
+  });
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <DossierDetailClientPage dossier={data} />
+    </>
+  );
 }

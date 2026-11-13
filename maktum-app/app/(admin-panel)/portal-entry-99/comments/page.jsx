@@ -45,7 +45,7 @@ export default function AdminCommentsPage() {
     if (isWorking) return;
 
     if (user) {
-      // فقط مدیرانی که حداقل یکی از تیک‌های مربوط به نظرات را دارند می‌توانند لیست را ببینند
+      // فقط مسئولانی که حداقل یکی از تیک‌های مربوط به نظرات را دارند می‌توانند فهرست را ببینند
       setHasAccess(user.isSuperAdmin || (canAny && canAny(['COMMENT_APPROVE_REJECT', 'COMMENT_EDIT_REPLY'])));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -185,7 +185,7 @@ export default function AdminCommentsPage() {
   };
 
   // ==========================================
-  // ۳. کنترل رندر لودینگ و انسداد دسترسی
+  // ۳. نظارت رندر لودینگ و انسداد دسترسی
   // ==========================================
   if (!isMounted || hasAccess === null || (hasAccess && loading)) return <AdminLoading />;
 
@@ -196,7 +196,7 @@ export default function AdminCommentsPage() {
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز لازم برای بررسی و مدیریت نظرات را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -204,7 +204,7 @@ export default function AdminCommentsPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 font-sans text-right select-none pb-20">
       
-      {/* هدر صفحه ادمین */}
+      {/* هدر صفحه مسئول */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl">
         <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#8b5cf6] to-transparent opacity-90 pointer-events-none z-20" />
@@ -213,14 +213,14 @@ export default function AdminCommentsPage() {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
           <div>
             <h1 className="text-3xl font-black text-white mb-2 flex items-center gap-3">
-              <Icon name="chat" className="w-8 h-8 text-[#8b5cf6]" /> مدیریت نظرات <span className="text-base text-gray-500 font-medium">({toPersianDigits(stats.total)} کل)</span>
+              <Icon name="chat" className="w-8 h-8 text-[#8b5cf6]" /> مسئولیت نظرات <span className="text-base text-gray-500 font-medium">({toPersianDigits(stats.total)} کل)</span>
             </h1>
             <p className="text-sm text-gray-400 font-light max-w-xl leading-relaxed">
               بررسی، ویرایش کلمات، تایید و پاسخگویی به دیدگاه‌های کاربران در مقالات و محتواهای سه‌گانه.
             </p>
           </div>
           
-          {/* تب‌های فیلتر وضعیت با شمارنده */}
+          {/* تب‌های صافی وضعیت با شمارنده */}
           <div className="flex bg-[#050810]/50 p-1.5 rounded-2xl shadow-inner w-full lg:w-auto overflow-x-auto hide-scroll border border-white/5">
             <button onClick={() => setStatusFilter('PENDING')} className={`flex-1 lg:flex-none px-5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${statusFilter === 'PENDING' ? 'bg-[#f59e0b]/20 text-amber-400 border border-[#f59e0b]/30 shadow-md' : 'text-gray-400 hover:text-white'}`}>
               در انتظار بررسی ({toPersianDigits(stats.pending)})
@@ -235,7 +235,7 @@ export default function AdminCommentsPage() {
         </div>
       </motion.div>
 
-      {/* نوار جستجو و فیلترهای پیشرفته */}
+      {/* نوار کاوش و جزئیات پیشرفته */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative bg-[#0f172a]/40 backdrop-blur-2xl rounded-2xl p-4 shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_8px_30px_rgba(0,0,0,0.4)] border border-transparent flex flex-col md:flex-row gap-4 items-center z-20">
         <div className="relative w-full md:flex-1">
           <Icon name="search" className="w-5 h-5 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2" />
@@ -243,7 +243,7 @@ export default function AdminCommentsPage() {
             type="text" 
             value={searchQuery} 
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="جستجو در متن نظر، نام یا شماره موبایل کاربر..." 
+            placeholder="کاوش در متن نظر، نام یا شماره موبایل کاربر..." 
             className="w-full bg-black/40 rounded-xl py-3 pr-12 pl-4 text-sm text-white outline-none focus:border focus:border-[#8b5cf6] border border-white/5 transition-all shadow-inner select-text"
           />
         </div>
@@ -264,12 +264,12 @@ export default function AdminCommentsPage() {
         </div>
       </motion.div>
 
-      {/* لیست نظرات */}
+      {/* فهرست نظرات */}
       <div className="grid grid-cols-1 gap-4">
         {visibleComments.length === 0 ? (
           <div className="py-20 text-center flex flex-col items-center gap-4 text-gray-500 font-bold bg-[#0f172a]/40 backdrop-blur-xl border border-transparent rounded-3xl shadow-inner">
             <Icon name="chat" className="w-12 h-12 opacity-30" />
-            هیچ نظری با این فیلتر یافت نشد.
+            هیچ نظری با این جزئیات یافت نشد.
           </div>
         ) : (
           <>
@@ -293,7 +293,7 @@ export default function AdminCommentsPage() {
                         <span className="text-[10px] text-gray-500 font-sans block mt-0.5 select-text" dir="ltr">{toPersianDigits(comment.user?.phone)}</span>
                         {/* شمارنده نظرات کاربر */}
                         <span className="text-[9px] text-[#8b5cf6] font-bold mt-1 inline-block bg-[#8b5cf6]/10 px-2 py-0.5 rounded border border-[#8b5cf6]/20">
-                          ثبت {toPersianDigits(userTotalComments)} نظر در سایت
+                          ثبت {toPersianDigits(userTotalComments)} نظر در سامانه
                         </span>
                       </div>
                     </div>
@@ -329,7 +329,7 @@ export default function AdminCommentsPage() {
                       </span>
                     </div>
                     
-                    <p className="text-sm text-gray-300 leading-loose text-justify mb-4 select-text">
+                    <p className="text-sm text-gray-300 leading-loose text-justify mb-4 select-text break-words whitespace-pre-wrap">
                       {comment.text}
                     </p>
 
@@ -338,7 +338,7 @@ export default function AdminCommentsPage() {
                         <span className="text-[10px] text-[#8b5cf6] font-bold mb-2 flex items-center gap-1.5 relative z-10 select-none">
                           <Icon name="shieldCheck" className="w-3.5 h-3.5" /> پاسخ مکتوم:
                         </span>
-                        <p className="text-xs text-gray-300 leading-relaxed relative z-10 select-text">{comment.adminReply}</p>
+                        <p className="text-xs text-gray-300 leading-relaxed relative z-10 select-text break-words whitespace-pre-wrap">{comment.adminReply}</p>
                       </div>
                     )}
                   </div>
@@ -405,25 +405,43 @@ export default function AdminCommentsPage() {
                   
                   <div>
                     <label className="text-xs text-gray-400 mb-2 flex items-center justify-between">
-                      <span>متن پیام کاربر (قابل ویرایش در صورت وجود کلمات نامناسب)</span>
+                      <span>متن پیام کاربر (قابل ویرایش نامناسب)</span>
+                      <span className="text-[10px] font-bold">
+                        <span className={replyFormData.userText.length >= 500 ? 'text-rose-500' : 'text-gray-400'}>
+                          {toPersianDigits(replyFormData.userText.length)}
+                        </span>
+                        <span className="mx-0.5">/</span>
+                        {toPersianDigits(500)}
+                      </span>
                     </label>
                     <textarea 
+                      maxLength={500}
                       rows="4" 
                       value={replyFormData.userText} 
                       onChange={(e) => setReplyFormData({...replyFormData, userText: e.target.value})} 
-                      className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm text-gray-300 focus:border-[#8b5cf6] outline-none leading-relaxed resize-none shadow-inner transition-colors select-text" 
+                      className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm text-gray-300 focus:border-[#8b5cf6] outline-none leading-relaxed resize-none shadow-inner transition-colors select-text break-words whitespace-pre-wrap" 
                     />
                   </div>
 
                   <div className="bg-[#050810]/50 border border-white/5 shadow-inner p-5 rounded-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-2 h-full bg-[#8b5cf6]"></div>
-                    <label className="block text-sm font-bold text-[#8b5cf6] mb-3">پاسخ رسمی مکتوم به این کاربر</label>
+                    <label className="text-sm font-bold text-[#8b5cf6] mb-3 flex justify-between items-center">
+                      <span>پاسخ به این نظر</span>
+                      <span className="text-[10px] text-gray-400 font-bold">
+                        <span className={replyFormData.adminReply.length >= 500 ? 'text-rose-500' : 'text-gray-400'}>
+                          {toPersianDigits(replyFormData.adminReply.length)}
+                        </span>
+                        <span className="mx-0.5">/</span>
+                        {toPersianDigits(500)}
+                      </span>
+                    </label>
                     <textarea 
+                      maxLength={500}
                       rows="4" 
                       value={replyFormData.adminReply} 
                       onChange={(e) => setReplyFormData({...replyFormData, adminReply: e.target.value})} 
                       placeholder="پاسخ خود را اینجا بنویسید... (این متن با دیزاین متفاوت زیر نظر کاربر نمایش داده می‌شود)"
-                      className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border focus:border-[#8b5cf6] outline-none leading-relaxed resize-none shadow-inner transition-colors select-text" 
+                      className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border focus:border-[#8b5cf6] outline-none leading-relaxed resize-none shadow-inner transition-colors select-text break-words whitespace-pre-wrap" 
                     />
                   </div>
 
@@ -442,7 +460,7 @@ export default function AdminCommentsPage() {
                 <div className="p-5 border-t border-white/10 bg-black/20 flex justify-end gap-3 shrink-0">
                   <button onClick={() => setIsReplyModalOpen(false)} className="px-6 py-2.5 bg-white/5 text-gray-300 rounded-xl text-sm font-bold hover:bg-white/10 transition-colors cursor-pointer border border-transparent shadow-inner">انصراف</button>
                   <button onClick={handleSaveReply} disabled={!replyFormData.userText.trim()} className="px-8 py-2.5 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white rounded-xl text-sm font-bold shadow-[0_0_15px_rgba(139,92,246,0.4)] transition-all cursor-pointer disabled:opacity-50 border border-transparent">
-                    ثبت نهایی و ذخیره
+                     ذخیره
                   </button>
                 </div>
 

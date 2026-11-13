@@ -2,7 +2,7 @@
 
 import { GRANULAR_PERMISSIONS } from '@/lib/rbac';
 
-// بازگرداندن لیست مجوزهای دانه‌ریز به جای جدول قدیمی نقش‌ها
+// بازگرداندن فهرست مجوزهای دانه‌ریز به جای جدول قدیمی نقش‌ها
 export async function getAllRolesAction() {
   return {
     success: true,
@@ -14,13 +14,13 @@ export async function getAllRolesAction() {
 export async function saveRoleAction() {
   return {
     success: false,
-    error: 'سیستم نقش‌های ثابت غیرفعال شده است. لطفاً از چک‌لیست دسترسی در پروفایل هر کاربر استفاده کنید.'
+    error: 'نظام نقش‌های ثابت غیرفعال شده است. لطفاً از فهرست بررسی دسترسی در نماگر هر کاربر استفاده کنید.'
   };
 }
 
 export async function deleteRoleAction() {
   return {
     success: false,
-    error: 'سیستم نقش‌های ثابت غیرفعال شده است.'
+    error: 'نظام نقش‌های ثابت غیرفعال شده است.'
   };
 }

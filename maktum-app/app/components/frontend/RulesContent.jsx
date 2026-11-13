@@ -1,4 +1,4 @@
-// مسیر فایل: app/components/frontend/RulesContent.jsx
+// مسیر پرونده: app/components/frontend/RulesContent.jsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -13,7 +13,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
   const sidebarWrapperRef = useRef(null);
   const tocBoxRef = useRef(null);
 
-  // استیت‌های مربوط به فیکس شدن باکس زیر هدر (الگوبرداری شده از صفحه داخلی محتوا)
+  // استیت‌های مربوط به فیکس شدن قاب زیر هدر (الگوبرداری شده از صفحه داخلی محتوا)
   const [stickyState, setStickyState] = useState('normal'); // 'normal' | 'fixed' | 'bottom'
   const [fixedStyle, setFixedStyle] = useState({});
   const [activeRuleId, setActiveRuleId] = useState('');
@@ -42,7 +42,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
       const boxHeight = box.offsetHeight;
 
       if (wrapperRect.top <= TOP_OFFSET) {
-        // اگر کاربر تا انتهای بخش قوانین (نزدیک فوتر) اسکرول کرد، باکس در ته ستون متوقف شود
+        // اگر کاربر تا انتهای بخش قوانین (نزدیک فوتر) اسکرول کرد، قاب در ته ستون متوقف شود
         if (wrapperRect.bottom <= TOP_OFFSET + boxHeight) {
           setStickyState('bottom');
         } else {
@@ -106,7 +106,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
 
   return (
     <>
-      {/* تزریق استایل قطعی برای جلوگیری از انتخاب متن در تمامی لایه‌ها و متن‌های دیتابیس */}
+      {/* تزریق سبک قطعی برای جلوگیری از انتخاب متن در تمامی لایه‌ها و متن‌های پایگاه داده */}
       <style dangerouslySetInnerHTML={{ __html: `
         .strict-no-select, .strict-no-select * {
           -webkit-user-select: none !important;
@@ -130,7 +130,8 @@ export default function RulesContent({ hero = {}, rules = [] }) {
             
             <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
               
-              <div className="group/icon cursor-pointer w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] bg-[#0b0f19] border border-white/5 hover:border-[#06b6d4]/40 flex items-center justify-center text-[#06b6d4] mb-4 md:mb-6 shadow-[inset_0_0_15px_rgba(6,182,212,0.1),0_0_20px_rgba(6,182,212,0.15)] hover:shadow-[inset_0_0_20px_rgba(6,182,212,0.25),0_0_30px_rgba(6,182,212,0.45)] hover:-translate-y-0.5 transition-all duration-300">
+              {/* نماد هدر: گلس‌مورفیسم ملایم و شفاف منطبق با صفحه درباره ما */}
+              <div className="group/icon cursor-pointer w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] bg-white/[0.03] backdrop-blur-md border border-white/[0.05] hover:border-[#06b6d4]/40 flex items-center justify-center text-[#06b6d4] mb-4 md:mb-6 shadow-[inset_0_0_15px_rgba(6,182,212,0.1),0_0_20px_rgba(6,182,212,0.15)] hover:shadow-[inset_0_0_20px_rgba(6,182,212,0.25),0_0_30px_rgba(6,182,212,0.45)] hover:-translate-y-0.5 transition-all duration-300">
                 <Icon 
                   name="law" 
                   className="w-6 h-6 md:w-8 md:h-8 transition-transform duration-300 group-hover/icon:scale-110" 
@@ -162,7 +163,7 @@ export default function RulesContent({ hero = {}, rules = [] }) {
           </motion.section>
         )}
         
-        {/* کانتینر دو ستونه (نگهدارنده ریل سایدبار و لیست قوانین) */}
+        {/* کانتینر دو ستونه (نگهدارنده ریل سایدبار و فهرست قوانین) */}
         <div className="flex flex-col lg:flex-row gap-6 md:gap-8 items-stretch relative w-full">
           
           {/* ستون لنگر (Anchor) سایدبار که جایگاه و عرض ستون را در صفحه حفظ می‌کند */}

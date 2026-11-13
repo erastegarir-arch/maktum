@@ -21,6 +21,15 @@ const toPersianDigits = (num) => {
   return num.toString().replace(/\d/g, x => farsiDigits[x]);
 };
 
+// این تابع را دقیقاً اینجا اضافه کنید
+const formatNumber = (num) => {
+  if (num >= 1000) {
+    const formatted = (num / 1000).toFixed(1);
+    return `[${toPersianDigits(formatted)}] هزار`;
+  }
+  return toPersianDigits(num);
+};
+
 function Tooltip({ text, children }) {
   if (!text) return children;
   return (
@@ -91,7 +100,10 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
   const mainImage = data?.coverDesktop || '/images/placeholder-cover.jpg'; 
   const mobileImage = data?.coverMobile || mainImage; 
   
-  const authors = data?.creators?.length > 0 ? data.creators : [{ name: 'مرکز مکتوم', imageUrl: null, avatarUrl: null }];
+  const rawCreators = safeParse(data?.creators, []);
+  const authors = Array.isArray(rawCreators)
+    ? rawCreators.filter(c => c && typeof c.name === 'string' && c.name.trim() !== '')
+    : [];
 
   const displaySettings = safeParse(data?.displaySettings, {});
   const relatedContent = safeParse(data?.relatedContent, []);
@@ -189,37 +201,33 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
 
       <ProgressBar />
 
-      <main className="flex-grow w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 pb-0 md:pb-20 pt-0 sm:pt-6 relative">
+      {/* حذف sm:pt-6 تا برادکرمب کاملا به سقف بچسبد */}
+      <main className="flex-grow w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 pb-0 md:pb-20 pt-0 relative">
         
-        <div className="relative z-20 px-4 sm:px-0 pt-4 sm:pt-0 pb-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent md:bg-none [&_a]:!text-white/90 [&_a:hover]:!text-white [&_svg]:!text-white/60 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] max-w-4xl mx-auto">
+        {/* حذف pt-4 sm:pt-0 pb-3 تا فضای خالی اضافی دور برادکرمب از بین برود */}
+        <div className="relative z-20 px-4 sm:px-0 pt-0 pb-0 bg-gradient-to-b from-black/80 via-black/40 to-transparent md:bg-none [&_a]:!text-white/90 [&_a:hover]:!text-white [&_svg]:!text-white/60 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] max-w-4xl mx-auto">
           <Breadcrumbs items={[{ label: 'مکتوم', href: '/' }, parentBreadcrumb, { label: title || 'بدون عنوان' }]} />
         </div>
 
-        <div className="fixed top-0 inset-x-0 z-0 h-[62vh] md:relative md:top-auto md:inset-auto md:z-10 md:h-auto w-full md:aspect-video rounded-none md:rounded-[2.5rem] md:shadow-[0_10px_40px_rgba(0,0,0,0.5)] md:p-1 md:border border-transparent group pointer-events-none md:pointer-events-auto max-w-4xl mx-auto md:mt-4 md:mb-12">
+        {/* تصویر شاخص: در موبایل ثابت در جای خود در بالای صفحه (absolute) با محو تدریجی آلفا و بدون دست زدن به استایل دسکتاپ */}
+        <div className="absolute top-0 inset-x-0 z-0 h-[44vh] md:relative md:top-auto md:inset-auto md:z-10 md:h-auto w-full md:aspect-video rounded-none md:rounded-[2.5rem] md:shadow-[0_10px_40px_rgba(0,0,0,0.5)] group pointer-events-none md:pointer-events-auto max-w-4xl mx-auto mt-0 md:mt-12 md:mb-12 [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_50%,transparent_100%)] [mask-image:linear-gradient(to_bottom,black_0%,black_50%,transparent_100%)] md:[-webkit-mask-image:none] md:[mask-image:none]">
           <div className="hidden md:block absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10 rounded-[2.5rem]" />
           <div className={`hidden md:block absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
-          <div className="absolute inset-0 w-full h-full md:rounded-[2.2rem] overflow-hidden bg-black/40 shadow-inner">
+          <div className="absolute inset-0 w-full h-full md:rounded-[2.5rem] overflow-hidden bg-[#0b1426]/40 shadow-inner">
             <picture className="w-full h-full">
               <source media="(max-width: 768px)" srcSet={mobileImage} />
-              <img src={mainImage} alt={title} className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-700 group-hover:opacity-100" />
+              <img src={mainImage} alt={title} className="w-full h-full object-cover opacity-90 md:opacity-80 group-hover:scale-105 transition-all duration-700 group-hover:opacity-100" />
             </picture>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#05080f] via-[#05080f]/60 to-transparent md:hidden pointer-events-none z-10" />
-          <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#05080f] to-transparent md:hidden pointer-events-none z-10" />
+          <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#081020]/75 to-transparent md:hidden pointer-events-none z-10" />
         </div>
 
         <div className="relative w-full md:bg-transparent rounded-t-[2.5rem] md:rounded-none mt-[35vh] md:mt-0 flex flex-col justify-center">
             
-          {/* لایه شیشه‌ای با عرض سراسری و حذف کشیدگی ۱۵۰ درصدی */}
-          <div className="absolute w-screen left-1/2 -translate-x-1/2 top-0 -bottom-32 bg-[#050810]/80 backdrop-blur-3xl rounded-t-[2.5rem] pointer-events-none z-[1] md:w-full md:left-auto md:translate-x-0 md:rounded-[3rem] md:bg-white/[0.02] md:bottom-0 [mask-image:linear-gradient(to_bottom,black_calc(100%-128px),transparent_100%)] md:[mask-image:none]" />
+          {/* لایه شیشه‌ای یکپارچه و شفاف (بدون رنگ سیاه و بدون برش در انتهای صفحه موبایل) برای دیده شدن نورهای پس‌زمینه */}
+          <div className="absolute w-screen left-1/2 -translate-x-1/2 top-0 bottom-0 bg-white/[0.02] backdrop-blur-2xl rounded-t-[2.5rem] pointer-events-none z-[1] md:w-full md:left-auto md:translate-x-0 md:rounded-[3rem]" />
 
-          {/* لایه هاله‌های نوری کمکی برای موبایل */}
-          <div className="md:hidden absolute w-screen left-1/2 -translate-x-1/2 top-0 h-[420px] rounded-t-[2.5rem] overflow-hidden pointer-events-none z-[2] [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)]">
-            <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full blur-[70px] opacity-40" style={{ background: `radial-gradient(circle, ${currentTheme.glowBg.replace('0.15', '1')} 0%, transparent 70%)` }} />
-            <div className="absolute top-24 -left-16 w-60 h-60 rounded-full blur-[70px] opacity-30" style={{ background: 'radial-gradient(circle, #f59e0b 0%, transparent 70%)' }} />
-          </div>
-
-          <div className="relative w-full z-10 p-5 pt-8 pb-20 md:pb-8 md:p-10 lg:p-12 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] border border-white/[0.05] md:shadow-[0_15px_50px_rgba(0,0,0,0.5)] rounded-t-[2.5rem] md:rounded-[3rem]">
+          <div className="relative w-full z-10 p-5 pt-8 pb-20 md:pb-8 md:p-10 lg:p-12 shadow-[0_-20px_40px_rgba(0,0,0,0.4)] border border-white/[0.05] md:shadow-[0_15px_50px_rgba(0,0,0,0.5)] rounded-t-[2.5rem] md:rounded-[3rem]">
             <div className="w-full max-w-4xl mx-auto">
               
               <div className="mb-6 md:mb-8 text-right">
@@ -264,7 +272,8 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
                   <Tooltip text={isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن مقاله به علاقه‌مندی‌ها"}>
                     <button onClick={handleFavoriteClick} className={`transition-all cursor-pointer flex items-center gap-1.5 p-2 px-3 md:p-2.5 md:px-4 rounded-full border border-white/[0.05] shadow-inner ${isFavorite ? 'text-rose-500 bg-rose-500/10 border-rose-500/20' : 'text-gray-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.08]'}`}>
                       <Icon name="heart" className={`w-4 h-4 md:w-5 md:h-5 ${isFavorite ? 'fill-current' : ''}`} />
-                      <span className="text-[11px] font-sans font-bold pt-0.5">{toPersianDigits(favCount)}</span>
+                      {/* تابع جدید در اینجا جایگزین شده است */}
+                      <span className="text-[11px] font-sans font-bold pt-0.5">{formatNumber(favCount)}</span>
                     </button>
                   </Tooltip>
                 </div>
@@ -300,7 +309,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
               </div>
             )}
 
-            {displaySettings.showAuthor !== false && (
+            {displaySettings.showAuthor !== false && authors.length > 0 && (
               <div className="mb-0 pt-3 mt-3 md:pt-6 md:mt-8 border-t border-white/10">
                 <div className="flex items-center gap-2 md:gap-3 mb-4">
                   <Icon name="user" className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
@@ -380,28 +389,41 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
                         {currentUser ? (
                           <span className="text-[10px] md:text-[11px] font-bold text-[#10b981] font-sans pl-1">شما با حساب کاربری وارد شده‌اید</span>
                         ) : (
-                          <span className="text-[10px] md:text-[11px] font-bold text-rose-400 font-sans pl-1">ابتدا وارد سایت شوید</span>
+                          <span className="text-[10px] md:text-[11px] font-bold text-rose-400 font-sans pl-1">ابتدا وارد سامانه شوید</span>
                         )}
                         <span className="text-[9px] text-gray-400 font-sans font-bold px-2 py-0.5 bg-black/40 rounded-lg shadow-inner w-fit">پس از تأیید نمایش داده می‌شود</span>
                       </div>
-                      <textarea 
-                        rows="4" 
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        onFocus={(e) => {
-                          handleCommentFocus(e);
-                          e.target.style.borderColor = currentTheme.primaryBg.replace('bg-', '');
-                        }}
-                        onBlur={(e) => e.target.style.borderColor = 'transparent'}
-                        placeholder={currentUser ? "نظر خود را درباره این محتوا بنویسید..." : "برای ثبت دیدگاه کلیک کنید..."} 
-                        className={`w-full bg-white/10 border border-transparent rounded-2xl p-3.5 md:p-4 text-white placeholder:text-white/40 text-xs md:text-sm leading-relaxed ${currentTheme.focusBorder} focus:bg-white/20 outline-none transition-all resize-none shadow-inner font-sans`}
-                        style={{ '--tw-ring-color': currentTheme.primaryText }} 
-                      />
+                      
+                      <div className="relative">
+                        <textarea 
+                          maxLength={500} // محدودیت قطعی در مرورگر
+                          rows="4" 
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                          onFocus={(e) => {
+                            handleCommentFocus(e);
+                            e.target.style.borderColor = currentTheme.primaryBg.replace('bg-', '');
+                          }}
+                          onBlur={(e) => e.target.style.borderColor = 'transparent'}
+                          placeholder={currentUser ? "نظر خود را درباره این مقاله بنویسید..." : "برای ثبت دیدگاه کلیک کنید..."} 
+                          className={`w-full bg-white/10 border border-transparent rounded-2xl p-3.5 md:p-4 text-white placeholder:text-white/40 text-xs md:text-sm leading-relaxed ${currentTheme.focusBorder} focus:bg-white/20 outline-none transition-all resize-none shadow-inner font-sans pb-8`}
+                          style={{ '--tw-ring-color': currentTheme.primaryText }} 
+                        />
+                        {/* شمارشگر زنده کاراکترها با اعداد کاملا فارسی */}
+                        <div className="absolute bottom-3 left-4 text-[9px] md:text-[10px] font-bold font-sans pointer-events-none transition-colors duration-300">
+                          <span className={commentText.length >= 500 ? 'text-rose-500' : 'text-gray-400'}>
+                            {toPersianDigits(commentText.length)}
+                          </span>
+                          <span className="text-gray-500 mx-0.5">/</span>
+                          <span className="text-gray-500">{toPersianDigits(500)}</span>
+                        </div>
+                      </div>
                     </div>
+                    
                     <div className="flex justify-end">
                       <button 
                         type="submit" 
-                        disabled={!commentText.trim() || !currentUser} 
+                        disabled={!commentText.trim() || !currentUser || commentText.length > 500} 
                         className={`w-full sm:w-auto bg-white/10 border border-transparent text-white hover:bg-white/20 px-8 py-3.5 md:py-3 rounded-xl text-sm font-bold ${currentTheme.hoverBg} hover:text-white transition-all duration-300 shadow-[0_5px_15px_rgba(0,0,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-sans`}
                       >
                         ارسال دیدگاه
@@ -424,7 +446,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
                           </div>
                         </div>
                       </div>
-                      <p className="text-xs md:text-sm text-gray-300 leading-relaxed font-light text-justify font-sans">
+                      <p className="text-xs md:text-sm text-gray-300 leading-relaxed font-light text-justify font-sans break-words whitespace-pre-wrap">
                         {comment.text}
                       </p>
                       {comment.adminReply && (
@@ -451,7 +473,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
         {isShareModalOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#050810]/40 backdrop-blur-xl font-sans">
             <div className="absolute inset-0 cursor-pointer" onClick={() => setIsShareModalOpen(false)}></div>
-            {/* اعمال گلس‌مورفیسم به پاپ‌آپ اشتراک‌گذاری */}
+            {/* اعمال گلس‌مورفیسم به باز شونده‌ اشتراک‌گذاری */}
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.25 }} className="relative z-10 w-full max-w-sm p-6 rounded-3xl overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.5)] bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05]">
               <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-90 pointer-events-none z-20`} />
 
@@ -477,11 +499,11 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
               </div>
 
               <div className="flex flex-col gap-2 relative z-10">
-                <label className="text-[11px] font-bold text-gray-400 pl-1">لینک مستقیم صفحه:</label>
+                <label className="text-[11px] font-bold text-gray-400 pl-1">پیوند مستقیم صفحه:</label>
                 <div className="flex flex-col sm:flex-row items-center gap-2 bg-white/10 border border-white/10 rounded-xl p-1.5 shadow-inner">
                   <input type="text" readOnly value={typeof window !== 'undefined' ? window.location.href : 'https://maktum.ir'} className="bg-transparent text-gray-400 text-[10px] md:text-[11px] w-full outline-none px-2 py-1 sm:py-0 dir-ltr text-center sm:text-left font-sans" />
                   <button onClick={handleCopyLink} className={`w-full sm:w-auto px-4 py-2 md:py-2.5 rounded-lg text-[11px] md:text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-lg border border-transparent ${isCopied ? `${currentTheme.primaryBg} text-white` : 'bg-black/40 text-gray-300 hover:text-white hover:bg-black/60 shadow-inner'}`}>
-                    {isCopied ? 'کپی شد' : 'کپی لینک'}
+                    {isCopied ? 'رونوشت شد' : 'رونوشت پیوند'}
                   </button>
                 </div>
               </div>
@@ -493,9 +515,6 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
       <AnimatePresence>
         {showAuthModal && <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />}
       </AnimatePresence>
-
-      {/* لایه تیره پشت فوتر فقط در این صفحه (برای جلوگیری از دیده شدن عکس چسبان از زیر فوتر) */}
-      <div className="md:hidden relative z-20 w-full h-[550px] -mt-[550px] pointer-events-none" />
 
     </div>
   );

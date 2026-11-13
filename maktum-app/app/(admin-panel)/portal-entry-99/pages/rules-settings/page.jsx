@@ -20,7 +20,7 @@ const defaultPageData = {
     showUpdateDate: true,
     updateDate: "۱۴۰۳/۰۵/۲۱",
     paragraphs: [
-      "لطفاً پیش از استفاده از امکانات، ابزارها و بایگانی اسناد سایت مکتوم، مفاد این توافق‌نامه را با دقت مطالعه فرمایید."
+      "لطفاً پیش از استفاده از امکانات، ابزارها و بایگانی اسناد سامانه مکتوم، مفاد این توافق‌نامه را با دقت مطالعه فرمایید."
     ]
   },
   rules: [
@@ -29,7 +29,7 @@ const defaultPageData = {
       enabled: true,
       number: "ماده ۱.",
       title: "تعاریف و کلیات",
-      content: "<p>پلتفرم «مکتوم» یک بایگانی تحقیقاتی و رسانه‌ای است که با هدف جمع‌آوری و تحلیل اسناد تاریخی ایجاد شده است.</p><ul><li><strong>محتوای خام:</strong> فایل‌هایی که بدون ویرایش در اختیار قرار می‌گیرد.</li><li><strong>محتوای تولیدی:</strong> گزارش‌هایی که توسط تحریریه تولید شده‌اند.</li></ul>"
+      content: "<p>پلتفرم «مکتوم» یک بایگانی تحقیقاتی و رسانه‌ای است که با هدف جمع‌آوری و تحلیل اسناد تاریخی ایجاد شده است.</p><ul><li><strong>محتوای خام:</strong> پرونده‌هایی که بدون ویرایش در اختیار قرار می‌گیرد.</li><li><strong>محتوای تولیدی:</strong> گزارش‌هایی که توسط تحریریه تولید شده‌اند.</li></ul>"
     }
   ]
 };
@@ -38,7 +38,7 @@ const defaultPageData = {
 const SectionToggle = ({ checked, onChange, colorClass = "bg-[#06b6d4]" }) => (
   <label className="flex items-center cursor-pointer gap-2 select-none group/toggle">
     <span className={`text-xs font-bold transition-colors ${checked !== false ? 'text-white' : 'text-gray-500'}`}>
-      {checked !== false ? 'نمایش در سایت' : 'مخفی در سایت'}
+      {checked !== false ? 'نمایش در سامانه' : 'مخفی در سامانه'}
     </span>
     <div className="relative">
       <input 
@@ -70,7 +70,7 @@ export default function RulesSettingsPage() {
     if (isWorking) return;
 
     if (user) {
-      // فقط مدیرانی که تیک ویرایش قوانین را دارند مجاز به ورود هستند
+      // فقط مسئولانی که تیک ویرایش قوانین را دارند مجاز به ورود هستند
       setHasAccess(user.isSuperAdmin || (can && can('TERMS_EDIT')));
     } else if (typeof window !== 'undefined') {
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -98,7 +98,7 @@ export default function RulesSettingsPage() {
         try {
           const parsed = JSON.parse(stored);
 
-          // تبدیل فرمت قدیمی به content یکپارچه ادیتور در صورت وجود کدهای قدیمی
+          // تبدیل قالب قدیمی به content یکپارچه ویرایشگر در صورت وجود کدهای قدیمی
           const convertedRules = (parsed.rules || []).map(rule => {
             if (rule.content !== undefined) return rule;
 
@@ -147,7 +147,7 @@ export default function RulesSettingsPage() {
             router.refresh();
             return 'تغییرات صفحه قوانین با موفقیت ذخیره شد!';
           } else {
-            throw new Error('خطا از سمت دیتابیس');
+            throw new Error('خطا از سمت پایگاه داده');
           }
         },
         error: () => {
@@ -220,7 +220,7 @@ export default function RulesSettingsPage() {
   };
 
   // ==========================================
-  // ۳. کنترل رندر لودینگ و انسداد دسترسی
+  // ۳. نظارت رندر لودینگ و انسداد دسترسی
   // ==========================================
   if (!isMounted || hasAccess === null || (hasAccess && loading)) return <AdminLoading />;
 
@@ -231,7 +231,7 @@ export default function RulesSettingsPage() {
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز ورود به این بخش از پنل را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -246,7 +246,7 @@ export default function RulesSettingsPage() {
             <span className="w-2.5 h-2.5 rounded-full bg-[#06b6d4] shadow-[0_0_10px_#06b6d4]"></span>
             تنظیمات صفحه قوانین و مقررات
           </h1>
-          <p className="text-sm text-gray-400 font-light">مدیریت هدر، تاریخ آپدیت و مواد قانونی (ساخت فهرست مندرجات کاملاً خودکار است).</p>
+          <p className="text-sm text-gray-400 font-light">ویرایش بخش اول صفحه، تاریخ به‌روزرسانی و مواد قانونی (ساخت فهرست مندرجات کاملاً خودکار است).</p>
         </div>
       </div>
 
@@ -284,7 +284,7 @@ export default function RulesSettingsPage() {
               {/* تاریخ آخرین به‌روزرسانی */}
               <div className="space-y-2 p-4 bg-black/20 border border-white/5 rounded-2xl relative shadow-inner z-40">
                 
-                {/* استایل‌های اختصاصی برای دارک‌مود تقویم و یکپارچگی پنل ماه‌ها و سال‌ها */}
+                {/* سبک‌های اختصاصی برای دارک‌مود تقویم و یکپارچگی درگاه ماه‌ها و سال‌ها */}
                 <style dangerouslySetInnerHTML={{__html: `
                   .rmdp-wrapper, .rmdp-month-picker, .rmdp-year-picker { background: #0b0f19 !important; border: 1px solid rgba(255,255,255,0.05) !important; }
                   .rmdp-wrapper { box-shadow: 0 15px 40px rgba(0,0,0,0.8) !important; border-radius: 16px !important; }
@@ -326,10 +326,10 @@ export default function RulesSettingsPage() {
               </div>
             </div>
 
-            {/* پاراگراف‌های توضیحات */}
+            {/* بند‌های توضیحات */}
             <div className="space-y-3 pt-4 border-t border-white/10">
               <div className="flex justify-between items-center">
-                <label className="text-xs text-gray-300 font-bold pl-1">پاراگراف‌های مقدمه</label>
+                <label className="text-xs text-gray-300 font-bold pl-1">بند‌های مقدمه</label>
                 <button 
                   type="button" 
                   onClick={addHeroParagraph} 
@@ -353,7 +353,7 @@ export default function RulesSettingsPage() {
                       type="button" 
                       onClick={() => removeHeroParagraph(i)} 
                       className="p-3.5 bg-rose-500/10 border border-transparent text-rose-400 hover:bg-rose-500 hover:text-white rounded-xl text-xs shrink-0 transition-colors cursor-pointer shadow-inner"
-                      title="حذف این پاراگراف"
+                      title="حذف این بند"
                     >
                       <Icon name="trash" className="w-4 h-4" />
                     </button>
@@ -364,7 +364,7 @@ export default function RulesSettingsPage() {
           </div>
         </div>
 
-        {/* ۲. بخش مدیریت ماده‌ها (قوانین) */}
+        {/* ۲. بخش مسئولیت ماده‌ها (قوانین) */}
         <div className="relative rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden group border border-transparent z-10 bg-[#0f172a]/40 backdrop-blur-2xl">
           <div className="absolute inset-0 bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
@@ -373,9 +373,9 @@ export default function RulesSettingsPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
               <div>
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Icon name="browser" className="w-5 h-5 text-[#10b981]" /> ۲. مدیریت مواد و تبصره‌های قانونی
+                  <Icon name="browser" className="w-5 h-5 text-[#10b981]" /> ۲. مسئولیت مواد و تبصره‌های قانونی
                 </h2>
-                <p className="text-xs text-gray-400 font-light mt-1 pl-1">عناوین این باکس‌ها به صورت خودکار در «فهرست مندرجات» صفحه قرار می‌گیرند.</p>
+                <p className="text-xs text-gray-400 font-light mt-1 pl-1">عناوین این قاب‌ها به صورت خودکار در «فهرست مندرجات» صفحه قرار می‌گیرند.</p>
               </div>
               <button 
                 type="button" 
@@ -396,9 +396,9 @@ export default function RulesSettingsPage() {
                     exit={{ opacity: 0, y: -10 }}
                     className={`p-6 bg-[#050810]/50 border border-transparent rounded-2xl relative transition-all shadow-inner space-y-5 ${rule.enabled !== false ? 'border-white/5' : 'border-rose-500/30 opacity-60'}`}
                   >
-                    {/* هدر باکس قانون */}
+                    {/* هدر قاب قانون */}
                     <div className="flex justify-between items-center pb-3 border-b border-white/10">
-                      <span className="text-sm font-bold text-[#06b6d4] pl-1 select-text">باکس قانونی شماره {idx + 1}</span>
+                      <span className="text-sm font-bold text-[#06b6d4] pl-1 select-text">ماده قانونی شماره {idx + 1}</span>
                       <div className="flex items-center gap-4">
                         <SectionToggle 
                           checked={rule.enabled} 
@@ -439,14 +439,14 @@ export default function RulesSettingsPage() {
                       </div>
                     </div>
 
-                    {/* ادیتور متنی یکپارچه Tiptap برای محتوای ماده قانون */}
+                    {/* ویرایشگر متنی یکپارچه Tiptap برای محتوای ماده قانون */}
                     <div className="space-y-2">
                       <label className="text-xs text-gray-300 font-bold block pl-1">متن و بندهای این ماده</label>
                       <div className="bg-black/40 rounded-xl border border-white/5 shadow-inner">
                         <RichTextEditor 
                           value={rule.content || ''} 
                           onChange={(newContent) => handleRuleChange(idx, 'content', newContent)} 
-                          placeholder="متن، توضیحات، نقل‌قول‌ها و لیست‌های این ماده را اینجا بنویسید..."
+                          placeholder="متن، توضیحات، نقل‌قول‌ها و فهرست‌های این ماده را اینجا بنویسید..."
                           activeTheme={{ bg: 'bg-[#06b6d4]', text: 'text-[#06b6d4]' }}
                         />
                       </div>

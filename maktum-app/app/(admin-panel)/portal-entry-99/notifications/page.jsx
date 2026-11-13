@@ -25,8 +25,16 @@ import {
 // توابع کمکی و کامپوننت‌های پایه
 // ============================================================================
 const toPersianDigits = (num) => {
+  if (num === null || num === undefined) return '';
   const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-  return num?.toString().replace(/\d/g, (x) => persianDigits[x]) || '۰';
+  return num.toString().replace(/\d/g, (x) => persianDigits[x]);
+};
+
+const toEnglishDigits = (str) => {
+  if (!str) return '';
+  return str.toString()
+    .replace(/۰/g, '0').replace(/۱/g, '1').replace(/۲/g, '2').replace(/۳/g, '3').replace(/۴/g, '4')
+    .replace(/۵/g, '5').replace(/۶/g, '6').replace(/۷/g, '7').replace(/۸/g, '8').replace(/۹/g, '9');
 };
 
 const IRAN_PROVINCES = [
@@ -102,12 +110,12 @@ export default function AdminNotificationsPage() {
   const [bodyHtml, setBodyHtml] = useState('');
   const [ctaButtons, setCtaButtons] = useState([]);
   
-  // استیت‌های گزارشات و لیست‌ها
+  // استیت‌های گزارشات و فهرست‌ها
   const [rawHistoryList, setRawHistoryList] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [historyFilter, setHistoryFilter] = useState('ALL'); 
-  const [readFilter, setReadFilter] = useState('ALL'); // این خط اضافه شد
+  const [readFilter, setReadFilter] = useState('ALL'); 
   const [sortOrder, setSortOrder] = useState('NEWEST');
 
   // استیت‌های مودال‌ها
@@ -147,13 +155,13 @@ export default function AdminNotificationsPage() {
         return;
       }
     }
-    // مقادیر پیش‌فرض در صورتی که هنوز هیچ الگوی خوش‌آمدگویی در دیتابیس ثبت نشده باشد
+    // مقادیر پیش‌فرض در صورتی که هنوز هیچ الگوی خوش‌آمدگویی در پایگاه داده ثبت نشده باشد
     setTitle('به پایگاه مکتوم خوش‌آمدید! 🌟');
     setThemeColor('#8b5cf6');
     setIconUrl('');
     setCoverUrl('');
-    setBodyHtml('<p>سلام! حضور شما را در <strong>پایگاه مکتوم</strong> گرامی می‌داریم. ما در اینجا تلاش می‌کنیم تا بهترین تجربه و محتوا را در اختیار شما قرار دهیم. برای شروع، پیشنهاد می‌کنیم پروفایل خود را تکمیل کرده و از بخش‌های مختلف سایت دیدن کنید.</p>');
-    setCtaButtons([{ id: 'default1', label: 'تکمیل پروفایل', url: '/profile' }]);
+    setBodyHtml('<p>سلام! حضور شما را در <strong>پایگاه مکتوم</strong> گرامی می‌داریم. ما در اینجا تلاش می‌کنیم تا بهترین تجربه و محتوا را در اختیار شما قرار دهیم. برای شروع، پیشنهاد می‌کنیم نماگر خود را تکمیل کرده و از بخش‌های مختلف سامانه دیدن کنید.</p>');
+    setCtaButtons([{ id: 'default1', label: 'تکمیل نماگر', url: '/profile' }]);
   };
 
   useEffect(() => {
@@ -214,7 +222,7 @@ export default function AdminNotificationsPage() {
   const updateCtaButton = (id, field, value) => setCtaButtons(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
   const removeCtaButton = (id) => setCtaButtons(prev => prev.filter(b => b.id !== id));
 
-  // توابع مدیریت دکمه‌های اقدام (CTA) در مودال ویرایش
+  // توابع مسئولیت دکمه‌های اقدام در مودال ویرایش
   const addEditCtaButton = () => setEditModalData(prev => ({
     ...prev,
     ctaButtons: [...(prev.ctaButtons || []), { id: Math.random().toString(36).substr(2, 9), label: '', url: '' }]
@@ -248,7 +256,7 @@ export default function AdminNotificationsPage() {
       isTemplate: activeTab === 'TEMPLATE',
       triggerEvent: activeTab === 'TEMPLATE' ? 'WELCOME' : null,
       audienceType,
-      manualPhones,
+      manualPhones: toEnglishDigits(manualPhones), // ارسال به سرور با اعداد انگلیسی
       filters,
       title,
       bodyHtml,
@@ -262,10 +270,10 @@ export default function AdminNotificationsPage() {
     setIsSaving(false);
 
     if (res.success) {
-      toast.success(res.message);
+      toast.success(toPersianDigits(res.message)); // تبدیل اعداد پیام موفقیت به فارسی
       if (activeTab !== 'TEMPLATE') resetForm();
     } else {
-      toast.error(res.error);
+      toast.error(toPersianDigits(res.error));
     }
   };
 
@@ -297,11 +305,11 @@ export default function AdminNotificationsPage() {
     setIsSaving(false);
 
     if (res.success) {
-      toast.success(res.message);
+      toast.success(toPersianDigits(res.message));
       setEditModalData(null);
       loadHistory();
     } else {
-      toast.error(res.error);
+      toast.error(toPersianDigits(res.error));
     }
   };
 
@@ -312,11 +320,11 @@ export default function AdminNotificationsPage() {
     setIsSaving(false);
     
     if (res.success) {
-      toast.success(res.message);
+      toast.success(toPersianDigits(res.message));
       setDeleteModalId(null);
       loadHistory();
     } else {
-      toast.error(res.error);
+      toast.error(toPersianDigits(res.error));
     }
   };
 
@@ -324,15 +332,16 @@ export default function AdminNotificationsPage() {
     if (!can('NOTIF_CREATE')) return toast.error('شما مجوز تغییر وضعیت این الگو را ندارید.');
     const res = await toggleNotificationTemplateStatusAction(id, currentStatus);
     if (res.success) {
-      toast.success(res.message);
+      toast.success(toPersianDigits(res.message));
       loadHistory();
     } else {
-      toast.error(res.error);
+      toast.error(toPersianDigits(res.error));
     }
   };
 
   const filteredHistory = useMemo(() => {
-    let list = [...rawHistoryList];
+    // حذف الگوی مادرِ خام که هنوز به هیچ کاربری ارسال نشده از جدول گزارش‌ها
+    let list = rawHistoryList.filter(n => !(n.isTemplate && n.triggerEvent === 'WELCOME' && n.targetCount === 0));
     if (historyFilter === 'BULK') list = list.filter(n => !n.isTemplate);
     if (historyFilter === 'TEMPLATE') list = list.filter(n => n.isTemplate);
     
@@ -345,7 +354,7 @@ export default function AdminNotificationsPage() {
       );
     }
 
-    // منطق جدید: فیلتر بر اساس وضعیت بازدید
+    // منطق صافی بر اساس وضعیت بازدید
     if (readFilter === 'FULLY_READ') {
       list = list.filter(n => n.targetCount > 0 && n.readCount === n.targetCount);
     } else if (readFilter === 'NONE_READ') {
@@ -367,7 +376,7 @@ export default function AdminNotificationsPage() {
 
 
   // ==========================================
-  // ۳. کنترل رندر لودینگ و انسداد دسترسی
+  // ۳. نظارت رندر لودینگ و انسداد دسترسی
   // ==========================================
   if (!isMounted || hasAccess === null) return <AdminLoading />;
 
@@ -378,7 +387,7 @@ export default function AdminNotificationsPage() {
           <Icon name="lock" className="w-8 h-8 text-rose-500" />
         </div>
         <h2 className="text-2xl font-black text-white mb-2">دسترسی مسدود است</h2>
-        <p className="text-gray-400">شما مجوز لازم برای ارسال و مدیریت اعلانات را ندارید.</p>
+        <p className="text-gray-400">شما مجوز ورود به این بخش از درگاه را ندارید.</p>
       </div>
     );
   }
@@ -393,15 +402,15 @@ export default function AdminNotificationsPage() {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
           <div>
             <h1 className="text-2xl md:text-3xl font-black text-white mb-2 flex items-center gap-3 font-sans drop-shadow-md">
-              <Icon name="bell" className="w-7 h-7 text-[#8b5cf6]" /> مدیریت اعلانات
+              <Icon name="bell" className="w-7 h-7 text-[#8b5cf6]" /> مسئولیت اعلانات
             </h1>
             <p className="text-xs md:text-sm text-gray-300 font-light max-w-xl leading-relaxed font-sans">
-              طراحی، زمان‌بندی و ارسال هوشمند اعلان به داشبورد کاربران سایت
+              طراحی، زمان‌بندی و ارسال هوشمند اعلان به میزکار کاربران سامانه
             </p>
           </div>
           
           <div className="flex flex-wrap bg-[#050810]/50 p-1.5 rounded-2xl shadow-inner w-full lg:w-auto border border-white/5">
-            <button onClick={() => setActiveTab('CAMPAIGN')} className={`flex-1 lg:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all font-sans cursor-pointer border border-transparent ${activeTab === 'CAMPAIGN' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-sm border-[#8b5cf6]/30' : 'text-gray-400 hover:text-white'}`}>ارسال لیستی</button>
+            <button onClick={() => setActiveTab('CAMPAIGN')} className={`flex-1 lg:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all font-sans cursor-pointer border border-transparent ${activeTab === 'CAMPAIGN' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-sm border-[#8b5cf6]/30' : 'text-gray-400 hover:text-white'}`}>ارسال فهرستی</button>
             <button onClick={() => setActiveTab('TEMPLATE')} className={`flex-1 lg:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all font-sans cursor-pointer border border-transparent ${activeTab === 'TEMPLATE' ? 'bg-[#f59e0b]/20 text-[#f59e0b] shadow-sm border-[#f59e0b]/30' : 'text-gray-400 hover:text-white'}`}>خوش‌آمدگویی</button>
             <button onClick={() => setActiveTab('HISTORY')} className={`flex-1 lg:flex-none px-5 py-2.5 rounded-xl text-sm font-bold transition-all font-sans cursor-pointer border border-transparent ${activeTab === 'HISTORY' ? 'bg-[#06b6d4]/20 text-[#06b6d4] shadow-sm border-[#06b6d4]/30' : 'text-gray-400 hover:text-white'}`}>آمار و وضعیت</button>
           </div>
@@ -419,13 +428,13 @@ export default function AdminNotificationsPage() {
             <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
               <div className="flex bg-black/40 border border-white/5 p-1 rounded-xl shadow-inner">
                 <button onClick={() => setHistoryFilter('ALL')} className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-colors border border-transparent ${historyFilter === 'ALL' ? 'bg-white/10 text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}>همه</button>
-                <button onClick={() => setHistoryFilter('BULK')} className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-colors border border-transparent ${historyFilter === 'BULK' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-sm' : 'text-gray-400 hover:text-white'}`}>لیستی</button>
+                <button onClick={() => setHistoryFilter('BULK')} className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-colors border border-transparent ${historyFilter === 'BULK' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-sm' : 'text-gray-400 hover:text-white'}`}>فهرستی</button>
                 <button onClick={() => setHistoryFilter('TEMPLATE')} className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-colors border border-transparent ${historyFilter === 'TEMPLATE' ? 'bg-[#f59e0b]/20 text-[#f59e0b] shadow-sm' : 'text-gray-400 hover:text-white'}`}>خوش‌آمدگویی</button>
               </div>
 
-              {/* دراپ‌داون جدید برای فیلتر وضعیت بازدید */}
+              {/* دراپ‌داون وضعیت بازدید */}
               <div className="relative flex-1 sm:flex-none sm:w-36">
-                <select value={readFilter} onChange={(e) => setReadFilter(e.target.value)} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-3 py-2 text-xs text-gray-300 outline-none focus:border-[#06b6d4] appearance-none cursor-pointer select-none">
+                <select value={readFilter} onChange={(e) => setReadFilter(e.target.value)} className="w-full bg-[#050810]/70 border border-white/5 shadow-inner rounded-xl px-3 py-2 text-xs text-gray-300 outline-none focus:border-[#06b6d4] appearance-none cursor-pointer select-none">
                   <option value="ALL">وضعیت بازدید</option>
                   <option value="FULLY_READ">همه دیده‌اند</option>
                   <option value="PARTIALLY_READ">برخی دیده‌اند</option>
@@ -435,7 +444,7 @@ export default function AdminNotificationsPage() {
               </div>
 
               <div className="relative flex-1 sm:flex-none sm:w-36">
-                <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-3 py-2 text-xs text-gray-300 outline-none focus:border-[#06b6d4] appearance-none cursor-pointer select-none">
+                <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="w-full bg-[#050810]/70 border border-white/5 shadow-inner rounded-xl px-3 py-2 text-xs text-gray-300 outline-none focus:border-[#06b6d4] appearance-none cursor-pointer select-none">
                   <option value="NEWEST">جدیدترین‌ها</option>
                   <option value="OLDEST">قدیمی‌ترین‌ها</option>
                   <option value="MOST_VIEWS">بیشترین بازدید</option>
@@ -449,8 +458,8 @@ export default function AdminNotificationsPage() {
                   type="text" 
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="جستجو (عنوان/متن)..." 
-                  className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl pr-9 pl-3 py-2 text-xs text-white outline-none focus:border-[#06b6d4] select-text transition-all"
+                  placeholder="کاوش (عنوان/متن)..." 
+                  className="w-full bg-[#050810]/70 border border-white/5 shadow-inner rounded-xl pr-9 pl-3 py-2 text-xs text-white outline-none focus:border-[#06b6d4] select-text transition-all"
                 />
               </div>
             </div>
@@ -474,7 +483,7 @@ export default function AdminNotificationsPage() {
                   <tr><td colSpan="5" className="text-center py-16 text-gray-400 font-bold font-sans bg-black/20 rounded-xl shadow-inner">هیچ گزارشی یافت نشد.</td></tr>
                 ) : (
                   filteredHistory.map(h => (
-                    <tr key={h.id} className="bg-black/20 hover:bg-white/5 transition-colors group shadow-inner">
+                    <tr key={h.id} className="bg-[#050810]/70 hover:bg-white/5 transition-colors group shadow-inner">
                       
                       {/* ستون ۱: مشخصات */}
                       <td className="px-4 py-3 rounded-r-xl border-y border-transparent group-hover:border-white/5 border-l border-l-white/5">
@@ -488,7 +497,7 @@ export default function AdminNotificationsPage() {
                       {/* ستون ۲: نوع ارسال */}
                       <td className="px-4 py-3 text-center border-y border-transparent group-hover:border-white/5 border-l border-l-white/5">
                         <span className={`inline-block px-2.5 py-1 rounded text-[10px] font-bold border shadow-inner ${h.isTemplate ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-purple-500/10 text-purple-400 border-purple-500/20'}`}>
-                          {h.isTemplate ? `خوش‌آمدگویی` : 'ارسال لیستی'}
+                          {h.isTemplate ? `خوش‌آمدگویی` : 'ارسال فهرستی'}
                         </span>
                       </td>
                       
@@ -537,36 +546,25 @@ export default function AdminNotificationsPage() {
                       <td className="px-4 py-3 rounded-l-xl border-y border-transparent group-hover:border-white/5 border-r-0">
                         <div className="flex items-center justify-center gap-2">
                           
-                          {/* دکمه پیش‌نمایش برای همه مدیرانی که حق دیدن لیست را دارند مجاز است */}
+                          {/* دکمه پیش‌نمایش برای همه مسئولانی که حق دیدن فهرست را دارند مجاز است */}
                           <Tooltip text="پیش‌نمایش اعلان">
                             <button onClick={() => openLivePreviewModal(h)} className="p-1.5 bg-[#8b5cf6]/10 text-[#8b5cf6] hover:bg-[#8b5cf6] hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
                               <Icon name="eye" className="w-4 h-4" />
                             </button>
                           </Tooltip>
 
-                          {!h.isTemplate && (
-                            <>
-                              <Tooltip text="ریز بازدیدها">
-                                <button onClick={() => openViewersModal(h)} className="p-1.5 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
-                                  <Icon name="users" className="w-4 h-4" />
-                                </button>
-                              </Tooltip>
-                              {can('NOTIF_CREATE') && (
-                                <Tooltip text="ویرایش اعلان">
-                                  <button onClick={() => openEditModal(h)} className="p-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
-                                    <Icon name="pencil" className="w-4 h-4" />
-                                  </button>
-                                </Tooltip>
-                              )}
-                            </>
-                          )}
+                          <Tooltip text={h.isTemplate ? (h.recipientUser?.phone ? `دریافت‌کننده: ${toPersianDigits(h.recipientUser.phone)}` : "مشاهده کاربر دریافت‌کننده") : "ریز بازدیدها"}>
+                            <button onClick={() => openViewersModal(h)} className="p-1.5 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
+                              <Icon name="users" className="w-4 h-4" />
+                            </button>
+                          </Tooltip>
 
-                          {h.isTemplate && can('NOTIF_CREATE') && (
-                             <Tooltip text="ویرایش قالب">
-                               <button onClick={() => openEditModal(h)} className="p-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
-                                 <Icon name="pencil" className="w-4 h-4" />
-                               </button>
-                             </Tooltip>
+                          {can('NOTIF_CREATE') && (
+                            <Tooltip text={h.isTemplate ? "ویرایش خوش‌آمدگویی" : "ویرایش اعلان"}>
+                              <button onClick={() => openEditModal(h)} className="p-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg transition-colors cursor-pointer border border-transparent shadow-inner">
+                                <Icon name="pencil" className="w-4 h-4" />
+                              </button>
+                            </Tooltip>
                           )}
 
                           {can('NOTIF_DELETE') && (
@@ -604,24 +602,23 @@ export default function AdminNotificationsPage() {
                   </h2>
                   <div className="flex bg-[#050810]/50 border border-white/5 p-1 rounded-xl font-sans shadow-inner">
                     <button type="button" onClick={() => setAudienceType('ALL')} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer border border-transparent ${audienceType === 'ALL' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-sm' : 'text-gray-400 hover:text-white'}`}>همه کاربران</button>
-                    <button type="button" onClick={() => setAudienceType('FILTERED')} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer border border-transparent ${audienceType === 'FILTERED' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-sm' : 'text-gray-400 hover:text-white'}`}>فیلتر استانی/جنسیتی</button>
+                    <button type="button" onClick={() => setAudienceType('FILTERED')} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer border border-transparent ${audienceType === 'FILTERED' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-sm' : 'text-gray-400 hover:text-white'}`}>صافی استانی/جنسیتی</button>
                     <button type="button" onClick={() => setAudienceType('MANUAL')} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer border border-transparent ${audienceType === 'MANUAL' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-sm' : 'text-gray-400 hover:text-white'}`}>شماره‌های دستی</button>
                   </div>
 
                   {audienceType === 'FILTERED' && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-[fadeIn_0.3s_ease-out]">
                       <div>
-                        <label className="block text-[11px] text-gray-300 mb-2 font-sans">فیلتر استان</label>
-                        <select value={filters.province} onChange={e => setFilters({...filters, province: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-xs text-white outline-none focus:border-[#8b5cf6] font-sans shadow-inner select-none transition-all">
+                        <label className="block text-[11px] text-gray-300 mb-2 font-sans">صافی استان</label>
+                        <select value={filters.province} onChange={e => setFilters({...filters, province: e.target.value})} className="w-full bg-[#050810]/70 border border-white/5 rounded-xl p-3 text-xs text-white outline-none focus:border-[#8b5cf6] font-sans shadow-inner select-none transition-all">
                           <option value="ALL">تمامی استان‌ها</option>
-                          <option value="EMPTY">مواردی که استان ندارند</option>
                           <option value="EMPTY">مواردی که استان ندارند</option>
                           {IRAN_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[11px] text-gray-300 mb-2 font-sans">فیلتر جنسیت</label>
-                        <select value={filters.gender} onChange={e => setFilters({...filters, gender: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-xs text-white outline-none focus:border-[#8b5cf6] font-sans shadow-inner select-none transition-all">
+                        <label className="block text-[11px] text-gray-300 mb-2 font-sans">صافی جنسیت</label>
+                        <select value={filters.gender} onChange={e => setFilters({...filters, gender: e.target.value})} className="w-full bg-[#050810]/70 border border-white/5 rounded-xl p-3 text-xs text-white outline-none focus:border-[#8b5cf6] font-sans shadow-inner select-none transition-all">
                           <option value="ALL">همه</option>
                           <option value="EMPTY">نامشخص</option>
                           <option value="MALE">مرد</option>
@@ -633,8 +630,16 @@ export default function AdminNotificationsPage() {
 
                   {audienceType === 'MANUAL' && (
                     <div className="animate-[fadeIn_0.3s_ease-out] space-y-2">
-                      <label className="block text-[11px] text-gray-300 font-sans">شماره موبایل‌های ثبت‌شده در دیتابیس را وارد کنید (هر خط یک شماره)</label>
-                      <textarea rows="4" value={manualPhones} onChange={e => setManualPhones(e.target.value)} dir="ltr" placeholder="0912...&#10;0919..." className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-white text-sm font-sans focus:border-[#8b5cf6] outline-none resize-none text-left shadow-inner select-text transition-all" style={autofillFixStyle}></textarea>
+                      <label className="block text-[11px] text-gray-300 font-sans">شماره موبایل‌های ثبت‌شده در پایگاه داده را وارد کنید (هر خط یک شماره)</label>
+                      <textarea 
+                        rows="4" 
+                        value={manualPhones} 
+                        onChange={e => setManualPhones(toPersianDigits(e.target.value))} 
+                        dir="ltr" 
+                        placeholder="۰۹۱۲...&#10;۰۹۱۹..." 
+                        className="w-full bg-[#050810]/70 border border-white/5 rounded-xl p-3 text-white text-sm font-sans focus:border-[#8b5cf6] outline-none resize-none text-left shadow-inner select-text transition-all" 
+                        style={autofillFixStyle}
+                      ></textarea>
                     </div>
                   )}
                 </div>
@@ -644,8 +649,8 @@ export default function AdminNotificationsPage() {
                     <Icon name="update" className="w-5 h-5 text-[#f59e0b]" /> ۱. تنظیمات خوش‌آمدگویی
                   </h2>
                   <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <div className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-xs text-gray-300 cursor-not-allowed shadow-inner select-none">
-                      ارسال خودکار پس از عضویت در سایت یا افزودن توسط ادمین (هر تغییر جدید برای اعضای جدید اعمال می‌شود و پیام اعضای قدیمی دست‌نخورده می‌ماند)
+                    <div className="w-full bg-[#050810]/70 border border-white/5 rounded-xl p-3 text-xs text-gray-300 cursor-not-allowed shadow-inner select-none">
+                      ارسال خودکار پس از عضویت در سامانه یا افزودن توسط مسئول (هر تغییر جدید برای اعضای جدید اعمال می‌شود و پیام اعضای قدیمی دست‌نخورده می‌ماند)
                     </div>
                   </div>
                 </div>
@@ -654,17 +659,17 @@ export default function AdminNotificationsPage() {
               {/* بخش ۲: طراحی ظاهر و محتوای اعلان */}
               <div className="relative rounded-2xl shadow-lg bg-[#0f172a]/40 backdrop-blur-xl border border-white/5 p-5 space-y-6">
                 <h2 className="text-sm font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3 font-sans">
-                  <Icon name="browser" className="w-5 h-5 text-emerald-400" /> ۲. طراحی و محتوای اعلان داشبورد
+                  <Icon name="browser" className="w-5 h-5 text-emerald-400" /> ۲. طراحی و محتوای اعلان میزکار
                 </h2>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="block text-[11px] text-gray-300 font-sans">عنوان پیام (اجباری)</label>
-                    <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="مثال: خبر ویژه برای شما..." className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-[#8b5cf6] font-sans shadow-inner select-text transition-all" style={autofillFixStyle} />
+                    <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="مثال: خبر ویژه برای شما..." className="w-full bg-[#050810]/70 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-[#8b5cf6] font-sans shadow-inner select-text transition-all" style={autofillFixStyle} />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-[11px] text-gray-300 font-sans">رنگ سازمانی (تم کارت)</label>
-                    <div className="flex items-center gap-2 bg-black/40 border border-white/5 p-1.5 rounded-xl shadow-inner">
+                    <label className="block text-[11px] text-gray-300 font-sans">رنگ زمینه فیش</label>
+                    <div className="flex items-center gap-2 bg-[#050810]/70 border border-white/5 p-1.5 rounded-xl shadow-inner">
                       <input type="color" value={themeColor} onChange={e => setThemeColor(e.target.value)} className="w-8 h-8 rounded border-0 bg-transparent cursor-pointer" />
                       <input type="text" value={themeColor} onChange={e => setThemeColor(e.target.value)} className="w-full bg-transparent text-sm text-white dir-ltr text-center uppercase outline-none font-sans tracking-widest select-text" />
                     </div>
@@ -673,30 +678,30 @@ export default function AdminNotificationsPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="block text-[11px] text-gray-300 font-sans">آیکون شاخص (مربع کوچک)</label>
+                    <label className="block text-[11px] text-gray-300 font-sans">نماد شاخص (مربع کوچک)</label>
                     {iconUrl ? (
-                      <div className="flex items-center gap-2 p-2 bg-black/40 border border-white/5 rounded-xl shadow-inner">
+                      <div className="flex items-center gap-2 p-2 bg-[#050810]/70 border border-white/5 rounded-xl shadow-inner">
                         <img src={iconUrl} alt="icon" className="w-8 h-8 object-contain rounded" />
                         <button type="button" onClick={() => setMediaPickerTarget('iconUrl')} className="flex-1 py-1 text-xs bg-white/10 hover:bg-[#8b5cf6] rounded-lg transition-colors text-white font-sans cursor-pointer">تغییر</button>
                         <button type="button" onClick={() => setIconUrl('')} className="p-1 text-rose-400 hover:bg-rose-500/20 rounded-lg cursor-pointer"><Icon name="close" className="w-4 h-4" /></button>
                       </div>
                     ) : (
-                      <button type="button" onClick={() => setMediaPickerTarget('iconUrl')} className="w-full py-3 bg-black/40 border border-dashed border-white/20 hover:border-[#8b5cf6] text-gray-400 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer font-sans shadow-inner">
+                      <button type="button" onClick={() => setMediaPickerTarget('iconUrl')} className="w-full py-3 bg-[#050810]/70 border border-dashed border-white/20 hover:border-[#8b5cf6] text-gray-400 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer font-sans shadow-inner">
                         <Icon name="image" className="w-4 h-4" /> انتخاب تصویر
                       </button>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-[11px] text-gray-300 font-sans">بنر یا کاور بالای اعلان (اختیاری)</label>
+                    <label className="block text-[11px] text-gray-300 font-sans">تصویر اعلان (اختیاری)</label>
                     {coverUrl ? (
-                      <div className="flex items-center gap-2 p-2 bg-black/40 border border-white/5 rounded-xl shadow-inner">
+                      <div className="flex items-center gap-2 p-2 bg-[#050810]/70 border border-white/5 rounded-xl shadow-inner">
                         <img src={coverUrl} alt="cover" className="w-12 h-8 object-cover rounded" />
                         <button type="button" onClick={() => setMediaPickerTarget('coverUrl')} className="flex-1 py-1 text-xs bg-white/10 hover:bg-[#8b5cf6] rounded-lg transition-colors text-white font-sans cursor-pointer">تغییر بنر</button>
                         <button type="button" onClick={() => setCoverUrl('')} className="p-1 text-rose-400 hover:bg-rose-500/20 rounded-lg cursor-pointer"><Icon name="close" className="w-4 h-4" /></button>
                       </div>
                     ) : (
-                      <button type="button" onClick={() => setMediaPickerTarget('coverUrl')} className="w-full py-3 bg-black/40 border border-dashed border-white/20 hover:border-[#8b5cf6] text-gray-400 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer font-sans shadow-inner">
-                        <Icon name="image" className="w-4 h-4" /> آپلود بنر
+                      <button type="button" onClick={() => setMediaPickerTarget('coverUrl')} className="w-full py-3 bg-[#050810]/70 border border-dashed border-white/20 hover:border-[#8b5cf6] text-gray-400 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer font-sans shadow-inner">
+                        <Icon name="image" className="w-4 h-4" /> بارگذاری بنر
                       </button>
                     )}
                   </div>
@@ -704,7 +709,7 @@ export default function AdminNotificationsPage() {
 
                 <div className="space-y-2">
                   <label className="block text-[11px] text-gray-300 font-sans">متن و توضیحات کامل پیام</label>
-                  <div className="bg-black/40 rounded-xl overflow-hidden border border-white/5 shadow-inner">
+                  <div className="bg-[#050810]/70 rounded-xl overflow-hidden border border-white/5 shadow-inner">
                     <RichTextEditor 
                       value={bodyHtml} 
                       onChange={setBodyHtml} 
@@ -717,14 +722,14 @@ export default function AdminNotificationsPage() {
 
                 <div className="space-y-3 pt-4 border-t border-white/10">
                   <div className="flex justify-between items-center">
-                    <label className="block text-[11px] text-gray-300 font-sans">دکمه‌های اقدام (Call to Action)</label>
+                    <label className="block text-[11px] text-gray-300 font-sans">دکمه‌های اقدام</label>
                     <button type="button" onClick={addCtaButton} className="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg hover:bg-emerald-500 hover:text-white transition-colors cursor-pointer font-sans shadow-sm border border-transparent">+ افزودن دکمه</button>
                   </div>
                   {ctaButtons.map((btn) => (
                     <div key={btn.id} className="flex flex-col sm:flex-row gap-2 p-2 bg-[#050810]/50 border border-white/5 rounded-xl relative pr-10 shadow-inner">
                       <button type="button" onClick={() => removeCtaButton(btn.id)} className="absolute top-1/2 right-2 -translate-y-1/2 p-1.5 bg-rose-500/10 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"><Icon name="close" className="w-4 h-4" /></button>
-                      <input type="text" placeholder="عنوان دکمه (مثال: مشاهده)" value={btn.label} onChange={e => updateCtaButton(btn.id, 'label', e.target.value)} className="w-full sm:w-1/3 bg-black/40 border border-transparent rounded-lg p-2 text-xs text-white outline-none font-sans focus:border-[#8b5cf6] select-text transition-all" />
-                      <input type="text" placeholder="لینک مستقیم (http://...)" value={btn.url} onChange={e => updateCtaButton(btn.id, 'url', e.target.value)} className="w-full sm:flex-1 bg-black/40 border border-transparent rounded-lg p-2 text-xs text-white outline-none dir-ltr text-right font-sans focus:border-[#8b5cf6] select-text transition-all" />
+                      <input type="text" placeholder="عنوان دکمه (مثال: مشاهده)" value={btn.label} onChange={e => updateCtaButton(btn.id, 'label', e.target.value)} className="w-full sm:w-1/3 bg-[#050810]/70 border border-transparent rounded-lg p-2 text-xs text-white outline-none font-sans focus:border-[#8b5cf6] select-text transition-all" />
+                      <input type="text" placeholder="پیوند مستقیم (http://...)" value={btn.url} onChange={e => updateCtaButton(btn.id, 'url', e.target.value)} className="w-full sm:flex-1 bg-[#050810]/70 border border-transparent rounded-lg p-2 text-xs text-white outline-none dir-ltr text-right font-sans focus:border-[#8b5cf6] select-text transition-all" />
                     </div>
                   ))}
                 </div>
@@ -739,7 +744,7 @@ export default function AdminNotificationsPage() {
               
               <div className="flex items-center justify-between">
                 <h3 className="text-base md:text-lg font-bold text-white flex items-center gap-2 border-b border-[#8b5cf6] pb-2 font-sans">
-                  <Icon name="eye" className="w-5 h-5 text-[#8b5cf6]" /> پیش‌نمایش در پنل کاربر
+                  <Icon name="eye" className="w-5 h-5 text-[#8b5cf6]" /> پیش‌نمایش در درگاه کاربر
                 </h3>
                 <button form="notificationForm" type="submit" disabled={isSaving || !can('NOTIF_CREATE')} className="px-6 py-2.5 bg-gradient-to-l from-[#8b5cf6] to-indigo-500 hover:opacity-90 text-white rounded-xl text-sm font-bold shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2 font-sans border border-transparent">
                   {isSaving ? <Icon name="loading" className="w-4 h-4 animate-spin" /> : <Icon name="rocket" className="w-4 h-4" />}
@@ -747,7 +752,7 @@ export default function AdminNotificationsPage() {
                 </button>
               </div>
 
-              {/* کارت گرافیکی پیش‌نمایش کاملاً گلس مورفیک و شناور */}
+              {/* فیش گرافیکی پیش‌نمایش کاملاً گلس مورفیک و شناور */}
               <AnimatePresence>
                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-2">
                   
@@ -811,10 +816,10 @@ export default function AdminNotificationsPage() {
       )}
 
       {/* ============================================================================
-                                مودال‌های پاپ‌آپ پیشرفته در پورتال
+                                مودال‌های باز شونده‌ پیشرفته در پورتال
           ============================================================================ */}
 
-      {/* ۱. مودال لیست بازدیدکنندگان (Read Receipts) */}
+      {/* ۱. مودال فهرست بازدیدکنندگان (Read Receipts) */}
       <AnimatePresence>
         {viewersModalData && (
           <ModalPortal>
@@ -823,7 +828,7 @@ export default function AdminNotificationsPage() {
                 <div className="p-5 border-b border-white/10 flex justify-between items-center bg-transparent shrink-0">
                   <div>
                     <h3 className="text-white font-bold text-lg font-sans select-none">گزارش بازدید: {viewersModalData.title}</h3>
-                    <p className="text-xs text-gray-400 mt-1 select-none">مشاهده وضعیت دریافت‌کنندگان در داشبورد</p>
+                    <p className="text-xs text-gray-400 mt-1 select-none">مشاهده وضعیت دریافت‌کنندگان در میزکار</p>
                   </div>
                   <button onClick={() => setViewersModalData(null)} className="p-2 text-gray-400 hover:text-rose-500 bg-white/5 hover:bg-white/10 rounded-xl transition-colors cursor-pointer border border-transparent shadow-inner"><Icon name="close" className="w-5 h-5" /></button>
                 </div>
@@ -838,15 +843,15 @@ export default function AdminNotificationsPage() {
                   {isLoadingViewers ? (
                     <div className="flex justify-center py-10"><Icon name="loading" className="w-8 h-8 animate-spin text-[#06b6d4]" /></div>
                   ) : viewersList.length === 0 ? (
-                    <div className="text-center py-10 text-gray-500 font-bold bg-black/20 rounded-xl shadow-inner border border-white/5">رکوردی یافت نشد.</div>
+                    <div className="text-center py-10 text-gray-500 font-bold bg-[#050810]/70 rounded-xl shadow-inner border border-white/5">رکوردی یافت نشد.</div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {viewersList.map(item => (
-                        <div key={item.id} className="bg-black/40 border border-white/5 rounded-xl p-3 flex items-center justify-between shadow-inner">
+                        <div key={item.id} className="bg-[#050810]/70 border border-white/5 rounded-xl p-3 flex items-center justify-between shadow-inner">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-[#050810] flex items-center justify-center text-gray-500 border border-white/5"><Icon name="user" className="w-5 h-5" /></div>
                             <div>
-                              <div className="text-sm text-white font-bold font-sans select-none">{item.user?.firstName} {item.user?.lastName}</div>
+                              <div className="text-sm text-white font-bold font-sans select-none">{(item.user?.firstName || item.user?.lastName) ? `${item.user?.firstName || ''} ${item.user?.lastName || ''}` : 'کاربر سامانه'}</div>
                               <div className="text-xs text-gray-400 font-sans dir-ltr select-none">{toPersianDigits(item.user?.phone)}</div>
                             </div>
                           </div>
@@ -880,7 +885,7 @@ export default function AdminNotificationsPage() {
         )}
       </AnimatePresence>
 
-      {/* ۲. مودال ویرایش کامل اعلان (عنوان، رنگ، آیکون، کاور، متن و دکمه‌های اقدام) */}
+      {/* ۲. مودال ویرایش کامل اعلان (عنوان، رنگ، نماد، کاور، متن و دکمه‌های اقدام) */}
       <AnimatePresence>
         {editModalData && (
           <ModalPortal>
@@ -897,11 +902,11 @@ export default function AdminNotificationsPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs text-gray-300 mb-2">عنوان اعلان</label>
-                        <input type="text" value={editModalData.title || ''} onChange={e => setEditModalData({...editModalData, title: e.target.value})} className="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-blue-500 select-text transition-all shadow-inner" />
+                        <input type="text" value={editModalData.title || ''} onChange={e => setEditModalData({...editModalData, title: e.target.value})} className="w-full bg-[#050810]/70 border border-white/5 rounded-xl p-3 text-sm text-white outline-none focus:border-blue-500 select-text transition-all shadow-inner" />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-300 mb-2">رنگ سازمانی (تم کارت)</label>
-                        <div className="flex items-center gap-2 bg-black/40 border border-white/5 p-1.5 rounded-xl shadow-inner">
+                        <label className="block text-xs text-gray-300 mb-2">رنگ سازمانی (تم فیش)</label>
+                        <div className="flex items-center gap-2 bg-[#050810]/70 border border-white/5 p-1.5 rounded-xl shadow-inner">
                           <input type="color" value={editModalData.themeColor || '#10b981'} onChange={e => setEditModalData({...editModalData, themeColor: e.target.value})} className="w-8 h-8 rounded border-0 bg-transparent cursor-pointer" />
                           <input type="text" value={editModalData.themeColor || '#10b981'} onChange={e => setEditModalData({...editModalData, themeColor: e.target.value})} className="w-full bg-transparent text-sm text-white dir-ltr text-center uppercase outline-none font-sans tracking-widest select-text" />
                         </div>
@@ -910,31 +915,31 @@ export default function AdminNotificationsPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="block text-xs text-gray-300">آیکون شاخص (مربع کوچک)</label>
+                        <label className="block text-xs text-gray-300">نماد شاخص (مربع کوچک)</label>
                         {editModalData.iconUrl ? (
-                          <div className="flex items-center gap-2 p-2 bg-black/40 border border-white/5 rounded-xl shadow-inner">
+                          <div className="flex items-center gap-2 p-2 bg-[#050810]/70 border border-white/5 rounded-xl shadow-inner">
                             <img src={editModalData.iconUrl} alt="icon" className="w-8 h-8 object-contain rounded" />
                             <button type="button" onClick={() => setMediaPickerTarget('edit_iconUrl')} className="flex-1 py-1 text-xs bg-white/10 hover:bg-blue-500 rounded-lg transition-colors text-white font-sans cursor-pointer">تغییر</button>
                             <button type="button" onClick={() => setEditModalData({...editModalData, iconUrl: ''})} className="p-1 text-rose-400 hover:bg-rose-500/20 rounded-lg cursor-pointer"><Icon name="close" className="w-4 h-4" /></button>
                           </div>
                         ) : (
-                          <button type="button" onClick={() => setMediaPickerTarget('edit_iconUrl')} className="w-full py-3 bg-black/40 border border-dashed border-white/20 hover:border-blue-500 text-gray-400 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer font-sans shadow-inner">
+                          <button type="button" onClick={() => setMediaPickerTarget('edit_iconUrl')} className="w-full py-3 bg-[#050810]/70 border border-dashed border-white/20 hover:border-blue-500 text-gray-400 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer font-sans shadow-inner">
                             <Icon name="image" className="w-4 h-4" /> انتخاب تصویر
                           </button>
                         )}
                       </div>
 
                       <div className="space-y-2">
-                        <label className="block text-xs text-gray-300">بنر یا کاور بالای اعلان (اختیاری)</label>
+                        <label className="block text-xs text-gray-300">تصویر اعلان (اختیاری)</label>
                         {editModalData.coverUrl ? (
-                          <div className="flex items-center gap-2 p-2 bg-black/40 border border-white/5 rounded-xl shadow-inner">
+                          <div className="flex items-center gap-2 p-2 bg-[#050810]/70 border border-white/5 rounded-xl shadow-inner">
                             <img src={editModalData.coverUrl} alt="cover" className="w-12 h-8 object-cover rounded" />
                             <button type="button" onClick={() => setMediaPickerTarget('edit_coverUrl')} className="flex-1 py-1 text-xs bg-white/10 hover:bg-blue-500 rounded-lg transition-colors text-white font-sans cursor-pointer">تغییر بنر</button>
                             <button type="button" onClick={() => setEditModalData({...editModalData, coverUrl: ''})} className="p-1 text-rose-400 hover:bg-rose-500/20 rounded-lg cursor-pointer"><Icon name="close" className="w-4 h-4" /></button>
                           </div>
                         ) : (
-                          <button type="button" onClick={() => setMediaPickerTarget('edit_coverUrl')} className="w-full py-3 bg-black/40 border border-dashed border-white/20 hover:border-blue-500 text-gray-400 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer font-sans shadow-inner">
-                            <Icon name="image" className="w-4 h-4" /> آپلود بنر
+                          <button type="button" onClick={() => setMediaPickerTarget('edit_coverUrl')} className="w-full py-3 bg-[#050810]/70 border border-dashed border-white/20 hover:border-blue-500 text-gray-400 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer font-sans shadow-inner">
+                            <Icon name="image" className="w-4 h-4" /> بارگذاری بنر
                           </button>
                         )}
                       </div>
@@ -942,7 +947,7 @@ export default function AdminNotificationsPage() {
 
                     <div>
                       <label className="block text-xs text-gray-300 mb-2">متن اعلان</label>
-                      <div className="bg-black/40 rounded-xl border border-white/5 overflow-hidden shadow-inner">
+                      <div className="bg-[#050810]/70 rounded-xl border border-white/5 overflow-hidden shadow-inner">
                         <RichTextEditor 
                           value={editModalData.bodyHtml || ''} 
                           onChange={val => setEditModalData({...editModalData, bodyHtml: val})} 
@@ -955,14 +960,14 @@ export default function AdminNotificationsPage() {
 
                     <div className="space-y-3 pt-4 border-t border-white/10">
                       <div className="flex justify-between items-center">
-                        <label className="block text-xs text-gray-300 font-sans">دکمه‌های اقدام (Call to Action)</label>
+                        <label className="block text-xs text-gray-300 font-sans">دکمه‌های اقدام</label>
                         <button type="button" onClick={addEditCtaButton} className="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg hover:bg-emerald-500 hover:text-white transition-colors cursor-pointer font-sans shadow-sm border border-transparent">+ افزودن دکمه</button>
                       </div>
                       {(editModalData.ctaButtons || []).map((btn) => (
                         <div key={btn.id} className="flex flex-col sm:flex-row gap-2 p-2 bg-[#050810]/50 border border-white/5 rounded-xl relative pr-10 shadow-inner">
                           <button type="button" onClick={() => removeEditCtaButton(btn.id)} className="absolute top-1/2 right-2 -translate-y-1/2 p-1.5 bg-rose-500/10 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"><Icon name="close" className="w-4 h-4" /></button>
-                          <input type="text" placeholder="عنوان دکمه (مثال: مشاهده)" value={btn.label || ''} onChange={e => updateEditCtaButton(btn.id, 'label', e.target.value)} className="w-full sm:w-1/3 bg-black/40 border border-transparent rounded-lg p-2 text-xs text-white outline-none font-sans focus:border-blue-500 select-text transition-all" />
-                          <input type="text" placeholder="لینک مستقیم (http://...)" value={btn.url || ''} onChange={e => updateEditCtaButton(btn.id, 'url', e.target.value)} className="w-full sm:flex-1 bg-black/40 border border-transparent rounded-lg p-2 text-xs text-white outline-none dir-ltr text-right font-sans focus:border-blue-500 select-text transition-all" />
+                          <input type="text" placeholder="عنوان دکمه (مثال: مشاهده)" value={btn.label || ''} onChange={e => updateEditCtaButton(btn.id, 'label', e.target.value)} className="w-full sm:w-1/3 bg-[#050810]/70 border border-transparent rounded-lg p-2 text-xs text-white outline-none font-sans focus:border-blue-500 select-text transition-all" />
+                          <input type="text" placeholder="پیوند مستقیم (http://...)" value={btn.url || ''} onChange={e => updateEditCtaButton(btn.id, 'url', e.target.value)} className="w-full sm:flex-1 bg-[#050810]/70 border border-transparent rounded-lg p-2 text-xs text-white outline-none dir-ltr text-right font-sans focus:border-blue-500 select-text transition-all" />
                         </div>
                       ))}
                     </div>
@@ -990,7 +995,7 @@ export default function AdminNotificationsPage() {
               <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-sm bg-[#0f172a]/95 backdrop-blur-3xl rounded-[2rem] p-6 text-center border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] select-none">
                 <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-500/20 text-rose-500 shadow-inner"><Icon name="trash" className="w-8 h-8" /></div>
                 <h3 className="text-lg font-bold text-white mb-2 select-none">حذف قطعی اعلان</h3>
-                <p className="text-sm text-gray-400 mb-6 leading-relaxed select-none font-sans">آیا از حذف این مورد اطمینان دارید؟ این اعلان بلافاصله از داشبورد تمام کاربران حذف خواهد شد و غیرقابل بازگشت است.</p>
+                <p className="text-sm text-gray-400 mb-6 leading-relaxed select-none font-sans">آیا از حذف این مورد اطمینان دارید؟ این اعلان بلافاصله از میزکار تمام کاربران حذف خواهد شد و غیرقابل بازگشت است.</p>
                 <div className="flex gap-3">
                   <button onClick={handleDeleteConfirm} disabled={isSaving} className="flex-1 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-[0_0_15px_rgba(244,63,94,0.4)] cursor-pointer border border-transparent transition-all">{isSaving ? 'در حال حذف...' : 'بله، حذف شود'}</button>
                   <button onClick={() => setDeleteModalId(null)} className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 font-bold text-sm cursor-pointer border border-transparent shadow-inner transition-colors">انصراف</button>
@@ -1001,7 +1006,7 @@ export default function AdminNotificationsPage() {
         )}
       </AnimatePresence>
 
-      {/* ۴. مدیا پیکر */}
+      {/* ۴. رسانه پیکر */}
       <AnimatePresence>
         {mediaPickerTarget && (
           <ModalPortal>
@@ -1039,7 +1044,7 @@ export default function AdminNotificationsPage() {
       <AnimatePresence>
         {livePreviewData && (
           <ModalPortal>
-            <div className="fixed inset-0 z-[140000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md select-none font-sans">
+            <div className="fixed inset-0 z-[140000] flex items-center justify-center p-4 bg-slate-950/45 backdrop-blur-xl select-none font-sans">
               <div className="absolute inset-0 cursor-pointer animate-[fadeIn_0.2s_ease-out]" onClick={() => setLivePreviewData(null)}></div>
               
               <motion.div 
@@ -1047,58 +1052,63 @@ export default function AdminNotificationsPage() {
                 animate={{ opacity: 1, scale: 1 }} 
                 exit={{ opacity: 0, scale: 0.95 }}
                 onClick={(e) => e.stopPropagation()} 
-                className="relative w-full max-w-lg z-10"
+                className="relative w-full max-w-lg max-h-[85vh] flex flex-col z-10 rounded-[2rem] overflow-hidden bg-slate-900/45 backdrop-blur-2xl border border-white/15 shadow-[0_25px_70px_rgba(0,0,0,0.55),inset_0_1px_1px_rgba(255,255,255,0.2)]"
               >
-                <div className="absolute -top-12 left-0 right-0 flex justify-between items-center px-2">
-                  <span className="text-white text-sm font-bold opacity-80 flex items-center gap-2"><Icon name="eye" className="w-4 h-4"/> پیش‌نمایش کاربری</span>
-                  <button onClick={() => setLivePreviewData(null)} className="p-2 bg-white/10 hover:bg-rose-500 rounded-full text-white cursor-pointer transition-colors shadow-lg border border-white/10"><Icon name="close" className="w-4 h-4" /></button>
-                </div>
+                {/* دکمه بستن شناور و همیشه ثابت حتی در اعلان‌های بسیار طولانی */}
+                <button 
+                  onClick={() => setLivePreviewData(null)} 
+                  className="absolute top-4 left-4 z-50 w-10 h-10 flex items-center justify-center bg-slate-900/60 hover:bg-rose-500 backdrop-blur-md rounded-2xl text-white cursor-pointer transition-all shadow-lg border border-white/15"
+                >
+                  <Icon name="close" className="w-5 h-5" />
+                </button>
 
-                <div className="relative rounded-[2rem] p-4 sm:p-6 overflow-hidden bg-[#050810] border border-white/5 shadow-2xl group flex items-center justify-center min-h-[300px]">
-                    <motion.div 
-                      animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.4, 0.15] }} 
-                      transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} 
-                      className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-[45px] pointer-events-none" 
-                      style={{ backgroundColor: livePreviewData.themeColor }} 
-                    />
-                    <motion.div 
-                      animate={{ scale: [1.2, 1, 1.2], opacity: [0.1, 0.3, 0.1] }} 
-                      transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1 }} 
-                      className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full blur-[55px] pointer-events-none" 
-                      style={{ backgroundColor: livePreviewData.themeColor }} 
-                    />
+                {/* نورهای تپنده گلس‌مورفیک در پس‌زمینه کارت */}
+                <motion.div 
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.45, 0.2] }} 
+                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }} 
+                  className="absolute -top-10 -right-10 w-44 h-44 rounded-full blur-[50px] pointer-events-none" 
+                  style={{ backgroundColor: livePreviewData.themeColor }} 
+                />
+                <motion.div 
+                  animate={{ scale: [1.2, 1, 1.2], opacity: [0.15, 0.35, 0.15] }} 
+                  transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1 }} 
+                  className="absolute -bottom-10 -left-10 w-52 h-52 rounded-full blur-[60px] pointer-events-none" 
+                  style={{ backgroundColor: livePreviewData.themeColor }} 
+                />
 
-                    <div className="relative w-full z-10 bg-white/[0.03] backdrop-blur-2xl rounded-2xl p-5 border border-white/10 shadow-[inset_0_0_15px_rgba(255,255,255,0.02)]">
-                      {livePreviewData.coverUrl && (
-                        <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 bg-black/50 shadow-inner">
-                          <img src={livePreviewData.coverUrl} alt="cover" className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                      <div className="flex gap-4 mb-4 items-center">
-                        {livePreviewData.iconUrl ? (
-                          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10 shadow-sm"><img src={livePreviewData.iconUrl} className="w-7 h-7 object-contain" /></div>
-                        ) : (
-                          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10 shadow-sm"><Icon name="bell" className="w-6 h-6 text-gray-400" /></div>
-                        )}
-                        <div>
-                          <h4 className="font-bold text-base text-white mb-1.5 font-sans leading-tight select-text">{livePreviewData.title}</h4>
-                          <span className="text-[10px] text-gray-400 font-sans bg-white/5 px-2 py-0.5 rounded-full border border-white/5 select-none">لحظاتی پیش - خوانده نشده</span>
-                        </div>
+                {/* بخش قابل اسکرول داخلی برای اعلان‌های طولانی */}
+                <div className="relative z-10 flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
+                  <div className="w-full bg-white/[0.06] backdrop-blur-2xl rounded-2xl p-5 border border-white/15 shadow-[inset_0_1px_15px_rgba(255,255,255,0.05)]">
+                    {livePreviewData.coverUrl && (
+                      <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 bg-black/30 shadow-inner">
+                        <img src={livePreviewData.coverUrl} alt="cover" className="w-full h-full object-cover" />
                       </div>
-                      <div className="rich-text text-sm text-gray-300 leading-loose font-light line-clamp-4 font-sans bg-black/20 p-3 rounded-xl border border-white/5 select-text">
-                        {livePreviewData.bodyHtml ? <div dangerouslySetInnerHTML={{ __html: livePreviewData.bodyHtml }} /> : ''}
-                      </div>
-                      
-                      {livePreviewData.ctaButtons && livePreviewData.ctaButtons.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-white/5">
-                          {livePreviewData.ctaButtons.map((btn, i) => (
-                            <span key={i} className="text-xs px-4 py-2 rounded-xl text-white font-bold font-sans shadow-md select-none cursor-default" style={{ backgroundColor: livePreviewData.themeColor, boxShadow: `0 4px 15px ${livePreviewData.themeColor}40` }}>
-                              {btn.label || 'دکمه اقدام'}
-                            </span>
-                          ))}
-                        </div>
+                    )}
+                    <div className="flex gap-4 mb-4 items-center">
+                      {livePreviewData.iconUrl ? (
+                        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/15 shadow-sm"><img src={livePreviewData.iconUrl} className="w-7 h-7 object-contain" /></div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/15 shadow-sm"><Icon name="bell" className="w-6 h-6 text-gray-200" /></div>
                       )}
+                      <div>
+                        <h4 className="font-bold text-base text-white mb-1.5 font-sans leading-tight select-text">{livePreviewData.title}</h4>
+                        <span className="text-[10px] text-gray-300 font-sans bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10 select-none">لحظاتی پیش</span>
+                      </div>
                     </div>
+                    <div className="rich-text text-sm text-gray-200 leading-loose font-light font-sans bg-white/[0.04] p-4 rounded-xl border border-white/10 select-text">
+                      {livePreviewData.bodyHtml ? <div dangerouslySetInnerHTML={{ __html: livePreviewData.bodyHtml }} /> : ''}
+                    </div>
+                    
+                    {livePreviewData.ctaButtons && livePreviewData.ctaButtons.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-white/10">
+                        {livePreviewData.ctaButtons.map((btn, i) => (
+                          <span key={i} className="text-xs px-4 py-2 rounded-xl text-white font-bold font-sans shadow-md select-none cursor-default" style={{ backgroundColor: livePreviewData.themeColor, boxShadow: `0 4px 15px ${livePreviewData.themeColor}40` }}>
+                            {btn.label || 'دکمه اقدام'}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             </div>

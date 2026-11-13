@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'مدیریت نظرات',
+  title: 'مسئولیت نظرات',
 };
 
 export default function CommentsLayout({ children }) {
