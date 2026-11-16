@@ -190,7 +190,7 @@ export default function HomePageSettings() {
     if (type === 'timeline') setTimelineEvents(timelineEvents.filter(i => i.id !== id));
     
     setDeletingItem(null);
-    toast.success('آیتم با موفقیت حذف شد.');
+    toast.success('مورد با موفقیت حذف شد.');
   };
 
   const ColorPicker = ({ selected, onChange }) => (
@@ -499,7 +499,7 @@ export default function HomePageSettings() {
           </div>
 
           <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-4">
-            <h2 className="text-lg font-bold text-cyan-400">آیتم‌های روی رادار</h2>
+            <h2 className="text-lg font-bold text-cyan-400">مورد‌های روی رادار</h2>
             <button onClick={() => setRadarTopics([{ id: Date.now(), name: '', color: PALETTE[10], link: '#' }, ...radarTopics])} className="text-xs bg-cyan-500/20 text-cyan-400 px-4 py-2 rounded-lg font-bold hover:bg-cyan-500 hover:text-black border border-transparent shadow-inner"><Icon name="plus" className="w-3.5 h-3.5" /></button>
           </div>
           
@@ -509,7 +509,7 @@ export default function HomePageSettings() {
                 <div className="flex flex-wrap md:flex-nowrap gap-3 items-center">
                   <input type="text" placeholder="عنوان (مثال: #جنگ_سرد)" value={topic.name || ''} onChange={e => updateItem(setRadarTopics, topic.id, 'name', e.target.value)} className="w-full md:w-1/3 bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-cyan-500 font-bold transition-all select-text shadow-inner" />
                   <input type="text" placeholder="پیوند مقصد" value={topic.link || ''} onChange={e => updateItem(setRadarTopics, topic.id, 'link', e.target.value)} className="w-full md:flex-1 bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none dir-ltr text-right focus:border-cyan-500 transition-all select-text shadow-inner" />
-                  <button onClick={() => setDeletingItem({ type: 'radar', id: topic.id, title: topic.name || 'آیتم بی‌نام' })} className="p-3 bg-rose-500/10 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-colors text-sm font-bold shadow-inner border border-transparent"><Icon name="trash" className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => setDeletingItem({ type: 'radar', id: topic.id, title: topic.name || 'مورد بی‌نام' })} className="p-3 bg-rose-500/10 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-colors text-sm font-bold shadow-inner border border-transparent"><Icon name="trash" className="w-3.5 h-3.5" /></button>
                 </div>
                 <div className="pt-2">
                   <span className="text-[11px] text-gray-500 font-bold block mb-2">رنگ شناور (از پالت ۲۰ رنگ):</span>

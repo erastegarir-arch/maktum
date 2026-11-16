@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { getContentBySlug } from '@/app/actions/content';
 import { getSessionUser } from '@/app/actions/auth'; 
 import SingleProductTemplate from '@/app/components/frontend/SingleProductTemplate';
-import { constructPageMetadata, SITE_URL, SITE_CONFIG } from '@/lib/seo'; // توابع سئو
+import { constructPageMetadata, SITE_URL, SITE_CONFIG, getAbsoluteUrl } from '@/lib/seo';
 
 // ۱. تولید متادیتای پیشرفته و متصل به شبکه‌های اجتماعی
 export async function generateMetadata({ params }) {
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }) {
     description: finalDesc,
     path: `/f/${slug}`,
     ogImage: content.coverDesktop || undefined,
-    type: 'video.movie', // نوع محتوا برای فیسبوک و تلگرام ویدیو در نظر گرفته می‌شود
+    type: 'video.movie',
   });
 
   metadata.title = { absolute: `مکتوم | ${seoTitle}` };
@@ -37,12 +37,10 @@ export default async function FootageContentPage({ params }) {
 
   const content = await getContentBySlug(slug, 'RAW');
 
-  // شرط امنیتی کامل‌شده
   if (!content || !content.id || content.status !== 'PUBLISHED') {
     notFound();
   }
 
-  // دریافت اطلاعات سشن کاربر
   const currentUser = await getSessionUser(); 
 
   // ۳. تولید اسکیمای VideoObject برای تسخیر تب ویدیو در نتایج گوگل
@@ -56,15 +54,14 @@ export default async function FootageContentPage({ params }) {
     '@id': `${videoUrl}#video`,
     name: videoTitle,
     description: content.metaDesc || content.subtitle || videoTitle,
-    thumbnailUrl: content.coverDesktop ? [`${SITE_URL}${content.coverDesktop}`] : [SITE_CONFIG.ogImageUrl],
+    thumbnailUrl: content.coverDesktop ? [getAbsoluteUrl(content.coverDesktop)] : [SITE_CONFIG.ogImageUrl],
     uploadDate: content.publishedAt ? new Date(content.publishedAt).toISOString() : new Date().toISOString(),
-    contentUrl: videoUrl, // چون نشانی مستقیم MP4 را در اسکیما نمی‌دهیم، خود صفحه را مرجع می‌کنیم
+    contentUrl: content.previewVideoUrl ? getAbsoluteUrl(content.previewVideoUrl) : videoUrl,
     embedUrl: videoUrl,
     publisher: { '@id': `${SITE_URL}/#organization` },
     creator: { '@type': 'Person', name: authorName },
   };
 
-  // تزریق پویا لایک‌ها (ریچ اسنیپت) برای نمایش ستاره در کاوش گوگل
   if (content._count && content._count.favoritedBy > 0) {
     videoSchema.aggregateRating = {
       '@type': 'AggregateRating',
@@ -74,13 +71,15 @@ export default async function FootageContentPage({ params }) {
     };
   }
 
+  const safeVideoSchema = JSON.stringify(videoSchema).replace(/</g, '\\u003c');
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeVideoSchema }}
       />
-      <SingleProductTemplate data={content} type="RAW" currentUser={currentUser} />
+      <SingleProductTemplate currentUser="{currentUser}" data="{content}" type="RAW"/>
     </>
   );
 }

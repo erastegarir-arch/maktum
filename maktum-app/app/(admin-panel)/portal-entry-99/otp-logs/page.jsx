@@ -22,7 +22,7 @@ const safeDateTimeStr = (dateVal) => {
   try {
     const d = new Date(dateVal);
     if (isNaN(d.getTime())) return 'نامشخص';
-    return toPersianDigits(`${d.toLocaleDateString('fa-IR')} - ساعت ${d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}`);
+    return toPersianDigits(`${d.toLocaleDateString('fa-IR')} ساعت ${d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}`);
   } catch { return 'نامشخص'; }
 };
 
@@ -167,7 +167,7 @@ export default function OtpLogsPage() {
           
           <div className="flex items-center gap-3 w-full md:w-auto">
             <button onClick={loadData} disabled={loading} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-all cursor-pointer border border-transparent shadow-inner disabled:opacity-50">
-              <Icon name={loading ? "loading" : "refresh"} className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> بروزرسانی
+              <Icon name={loading ? "loading" : "update"} className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> بروزرسانی
             </button>
             <button onClick={handleClearAll} disabled={isProcessing || logs.length === 0} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer border border-rose-500/20 shadow-inner disabled:opacity-50">
               <Icon name="trash" className="w-4 h-4" /> پاکسازی همه

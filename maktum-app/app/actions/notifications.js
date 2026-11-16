@@ -404,7 +404,7 @@ export async function deleteNotificationAction(id) {
     });
 
     revalidatePath('/admin/notifications');
-    return { success: true, message: 'اعلان به طور کامل از دستگاه و درگاه کاربران حذف شد.' };
+    return { success: true, message: 'اعلان از پایگاه داده و درگاه کاربران حذف شد.' };
   } catch (error) {
     return { success: false, error: 'خطا در حذف اعلان.' };
   }

@@ -2,7 +2,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
+import { revalidatePath } from 'next/cache';
 import { getCurrentUserSessionAction } from './auth';
 import { checkUserPermission } from '@/lib/rbac';
 
@@ -11,7 +11,6 @@ import { checkUserPermission } from '@/lib/rbac';
  * @param {string} key کلید تنظیم مورد نظر
  */
 export async function getSetting(key) {
-  noStore(); // کَش را غیرفعال می‌کند تا فرانت‌اند همیشه مستقیماً از پایگاه داده بخواند
   try {
     const setting = await prisma.setting.findUnique({
       where: { key },
@@ -72,7 +71,6 @@ export async function saveSetting(key, value, group = 'GENERAL') {
 /**
  * اکشن عمومی و امن ویژه کاربران فرانت‌اند برای ثبت نام در طومار پاسداران یا ارسال پیشنهاد واژه
  */
-// حافظه نگهبان سمت سرور برای جلوگیری از حملات رگباری (Rate Limiting)
 const publicActionCooldownMap = new Map();
 
 export async function submitPersianGuidePublicAction(type, payload) {
@@ -86,7 +84,6 @@ export async function submitPersianGuidePublicAction(type, payload) {
     }
     publicActionCooldownMap.set(clientKey, now);
 
-    // پاک‌سازی خودکار حافظه نگهبان در صورت پر شدن
     if (publicActionCooldownMap.size > 500) {
       publicActionCooldownMap.clear();
     }
@@ -112,13 +109,12 @@ export async function submitPersianGuidePublicAction(type, payload) {
       const currentApproved = Array.isArray(parsed.recentPledgers) ? parsed.recentPledgers : [];
       const currentPending = Array.isArray(parsed.pendingPledgers) ? parsed.pendingPledgers : [];
 
-      // جلوگیری از سرریز شدن صف انتظار (حداکثر ۲۰۰ مورد در صف انتظار)
       if (currentPending.length >= 200) {
         return { success: false, error: 'صف بررسی پر است؛ لطفاً بعداً تلاش کنید.' };
       }
 
       const newStats = {
-        count: currentApproved.length, // شمارنده واقعی بر اساس تعداد افراد تأییدشده
+        count: currentApproved.length,
         recentPledgers: currentApproved,
         pendingPledgers: [
           {
@@ -201,5 +197,25 @@ export async function submitPersianGuidePublicAction(type, payload) {
   } catch (error) {
     console.error('Public action error:', error);
     return { success: false, error: 'خطا در ثبت اطلاعات.' };
+  }
+}
+
+/**
+ * دریافت همزمان چندین تنظیم تنها با ۱ درخواست به پایگاه داده (بهینه‌سازی سرعت Layout و صفحات)
+ * @param {string[]} keys آرایه‌ای از کلیدهای تنظیمات
+ */
+export async function getMultipleSettings(keys = []) {
+  try {
+    const records = await prisma.setting.findMany({
+      where: { key: { in: keys } },
+      select: { key: true, value: true },
+    });
+    return records.reduce((acc, item) => {
+      acc[item.key] = item.value;
+      return acc;
+    }, {});
+  } catch (error) {
+    console.error('خطا در دریافت گروهی تنظیمات:', error);
+    return {};
   }
 }

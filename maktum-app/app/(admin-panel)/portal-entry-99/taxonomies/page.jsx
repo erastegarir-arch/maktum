@@ -160,12 +160,12 @@ export default function TaxonomiesPage() {
     e.preventDefault();
     
     // نظارت دسترسی برای ثبت و ویرایش
-    if (editingId && !can('TAXONOMY_EDIT')) return toast.error('شما مجوز ویرایش این آیتم را ندارید.');
-    if (!editingId && !can('TAXONOMY_CREATE')) return toast.error('شما مجوز ایجاد آیتم جدید را ندارید.');
+    if (editingId && !can('TAXONOMY_EDIT')) return toast.error('شما مجوز ویرایش این مورد را ندارید.');
+    if (!editingId && !can('TAXONOMY_CREATE')) return toast.error('شما مجوز ایجاد مورد جدید را ندارید.');
 
     if (!name.trim()) {
-      setErrorMsg('نام آیتم الزامی است.');
-      toast.error('لطفاً نام آیتم را وارد کنید.');
+      setErrorMsg('نام مورد الزامی است.');
+      toast.error('لطفاً نام مورد را وارد کنید.');
       return;
     }
 
@@ -188,14 +188,14 @@ export default function TaxonomiesPage() {
     toast.promise(
       actionPromise,
       {
-        loading: editingId ? 'در حال ویرایش آیتم...' : 'در حال ثبت آیتم جدید...',
+        loading: editingId ? 'در حال ویرایش مورد...' : 'در حال ثبت مورد جدید...',
         success: (res) => {
           setSubmitting(false);
           if (res.success) {
             resetForm();
             loadData();
             router.refresh();
-            return editingId ? 'آیتم با موفقیت ویرایش شد.' : 'آیتم با موفقیت ثبت شد.';
+            return editingId ? 'مورد با موفقیت ویرایش شد.' : 'مورد با موفقیت ثبت شد.';
           }
           setErrorMsg(res.error || 'خطایی رخ داد.');
           throw new Error(res.error || 'خطا در ثبت اطلاعات');
@@ -249,20 +249,20 @@ export default function TaxonomiesPage() {
     toast.promise(
       deleteTaxonomy(deletingItem.id),
       {
-        loading: 'در حال حذف آیتم...',
+        loading: 'در حال حذف مورد...',
         success: (res) => {
           setIsDeleting(false);
           if (res.success) {
             setDeletingItem(null);
             loadData();
             router.refresh();
-            return 'آیتم با موفقیت حذف شد.';
+            return 'مورد با موفقیت حذف شد.';
           }
-          throw new Error(res.error || 'خطا در حذف آیتم');
+          throw new Error(res.error || 'خطا در حذف مورد');
         },
         error: (err) => {
           setIsDeleting(false);
-          return err?.message || 'خطا در حذف آیتم!';
+          return err?.message || 'خطا در حذف مورد!';
         }
       }
     );

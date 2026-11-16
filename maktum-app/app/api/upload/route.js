@@ -5,7 +5,6 @@ import path from 'path';
 import { existsSync } from 'fs';
 import { getCurrentUserSessionAction } from '@/app/actions/auth';
 
-// فهرست پسوندهای مجاز 
 const ALLOWED_EXTENSIONS = [
   '.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.ico',
   '.mp4', '.webm', '.mkv', '.mov',
@@ -13,7 +12,6 @@ const ALLOWED_EXTENSIONS = [
   '.pdf', '.zip', '.rar', '.doc', '.docx'
 ];
 
-// حداکثر حجم مجاز: ۲۰۰ مگابایت
 const MAX_FILE_SIZE = 200 * 1024 * 1024; 
 
 export async function POST(request) {
@@ -45,10 +43,10 @@ export async function POST(request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // ۴. گارد ویژه برای پرونده‌های SVG 
+    // ۴. گارد پیشرفته برای پرونده‌های SVG (مسدودسازی تمامی تگ‌ها و رویدادهای اسکریپتی)
     if (ext === '.svg') {
       const svgContent = buffer.toString('utf8');
-      if (/<script[\s>]|onload=|onerror=|javascript:/i.test(svgContent)) {
+      if (/<script[\s>]|<foreignobject|on[a-z]+\s*=|javascript:|data:text\/html/i.test(svgContent)) {
         return NextResponse.json({ success: false, error: 'پرونده SVG حاوی کدهای ناامن است و مسدود شد.' }, { status: 400 });
       }
     }
@@ -68,13 +66,11 @@ export async function POST(request) {
     await writeFile(filePath, buffer);
     const fileUrl = `/uploads/${uniqueName}`;
 
-    // تشخیص نوع رسانه
     let fileType = 'DOCUMENT';
     if (file.type.startsWith('image/')) fileType = 'IMAGE';
     else if (file.type.startsWith('video/')) fileType = 'VIDEO';
     else if (file.type.startsWith('audio/')) fileType = 'AUDIO';
 
-    // ثبت در پایگاه داده
     const newMedia = await prisma.media.create({
       data: {
         url: fileUrl,

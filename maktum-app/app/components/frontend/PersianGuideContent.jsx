@@ -69,7 +69,7 @@ function toEnglishDigits(input) {
 }
 
 // سپر امنیتی سخت‌گیرانه مکتوم: پالایش کامل کدهای مخرب، تگ‌ها، لینک‌ها و شکستن رشته‌های طولانی
-function sanitizeSafePersianInput(raw, maxLen = 1200) {
+function sanitizeSafePersianInput(raw, maxLen = 2500) {
   if (!raw) return '';
   let clean = String(raw).slice(0, maxLen);
   clean = clean
@@ -80,15 +80,237 @@ function sanitizeSafePersianInput(raw, maxLen = 1200) {
       /\b(function|const|let|var|interface|type|import|export|return|async|await|script|eval|window|document|select|insert|update|delete|drop|union)\b/gi,
       ''
     )
-    .replace(/[{}[\];`\\<>#$^*~|=+]/g, '')
-    // جلوگیری از تکرار کاراکترهای پشت سر هم (بیش از ۴ بار)
+    .replace(/[{}<>`\\#$^~|=+]/g, '')
     .replace(/(.)\1{4,}/g, '$1$1$1');
-  // شکستن خودکار هر کلمه طولانی‌تر از ۲۵ نویسه پیوسته
-  clean = clean.replace(/(\S{25})(?=\S)/g, '$1 ');
+  clean = clean.replace(/(\S{30})(?=\S)/g, '$1 ');
   return clean;
 }
 
-// موتور پیشرفته پالایش زنده متن فارسی سامانه مکتوم
+// فرهنگ درونی استثنائات برای جلوگیری از شکسته شدن واژگان هم‌شکل با افعال و پسوندها
+const NON_VERB_MI_EXCEPTIONS =
+  /^(دان|هن|ثاق|وه|ز|لیون|لیارد|لاد|کرو|راث|زان|عاد|قات|خ|ل|گو|انگین|انه|دانی|سر|مون|نا|ترا|ثم|کائیل|لان)/;
+
+const ROOT_HA_EXCEPTIONS = new Set([
+  'تنها',
+  'بها',
+  'رها',
+  'منها',
+  'سها',
+  'مها',
+  'انتها',
+  'ابتدا',
+  'اشتها',
+  'اقتضا',
+  'ادعا',
+  'بهای',
+  'رهایی',
+  'تنهایی',
+  'منهای',
+  'انتهای',
+  'اشتهای',
+]);
+
+// فهرست جامع ریشه‌های فعلی برای تشخیص «می» و «نمی» چسبیده (با سینتکس ۱۰۰٪ استاندارد)
+const PERSIAN_VERB_STEMS_REGEX = new RegExp(
+  '(^|[\\s«(\\[،؛:.])(بر|در|فرا|وا)?(ن?می)(' +
+    'شود|شوند|شوم|شوی|شویم|شوید|شد|شدند|شدم|شدی|شدیم|شدید|' +
+    'کند|کنند|کنم|کنی|کنیم|کنید|کرد|کردند|کردم|کردی|کردیم|کردید|' +
+    'گوید|گویند|گویم|گویی|گوییم|گویید|گفت|گفتند|گفتم|گفتی|گفتیم|گفتید|' +
+    'باشم|باشی|باشد|باشند|باشیم|باشید|' +
+    'توان|تواند|توانند|توانم|توانی|توانیم|توانید|توانست|توانستند|' +
+    'خواهد|خواهند|خواهم|خواهی|خواهیم|خواهید|خواست|خواستند|' +
+    'رود|روند|روم|روی|رویم|روید|رفت|رفتند|رفتم|رفتی|رفتیم|رفتید|' +
+    'آید|آیند|آیم|آیی|آییم|آیید|آمد|آمدند|آمدم|آمدی|آمدیم|آمدید|' +
+    'داند|دانند|دانم|دانی|دانیم|دانید|دانست|دانستند|' +
+    'رسد|رسند|رسم|رسی|رسیم|رسید|رسیدند|رساند|رسانند|' +
+    'گذرد|گذرند|گذرم|گذشت|گذشتند|گذارد|گذارند|گذاشت|گذاشتند|گذراند|گذرانند|' +
+    'گیرد|گیرند|گیرم|گیری|گیریم|گیرید|گرفت|گرفتند|' +
+    'دارد|دارند|دارم|داری|داریم|دارید|داشت|داشتند|' +
+    'فرماید|فرمایند|فرمود|فرمودند|نماید|نمایند|نمود|نمودند|' +
+    'نگرد|نگرند|نگریست|نگارد|نگارند|نگاشت|نویسد|نویسند|نوشت|نوشتند|' +
+    'خواند|خوانند|خوانم|خوانیم|خواندند|بیند|بینند|بینم|بینیم|دید|دیدند|' +
+    'پسندد|پسندند|پسندید|پردازد|پردازند|پرداخت|پرداختند|' +
+    'سازد|سازند|سازم|ساخت|ساختند|زند|زنند|زنم|زد|زدند|' +
+    'دهد|دهند|دهم|دهی|دهیم|دهید|داد|دادند|گردد|گردند|گردید|گردیدند|گشت|گشتند|' +
+    'کشد|کشند|کشید|کشیدند|برد|برند|بردند|خورد|خورند|خوردند|' +
+    'شناسد|شناسند|شناخت|شناختند|نشیند|نشینند|نشست|نشستند|' +
+    'فرستد|فرستند|فرستاد|فرستادند|پرسد|پرسند|پرسید|پرسیدند|' +
+    'طلبد|طلبند|طلبید|یابد|یابند|یافت|یافتند|بخشد|بخشند|بخشید|' +
+    'پذیرد|پذیرند|پذیرفت|اندازد|اندازند|انداخت|آموزد|آموزند|آموخت|' +
+    'آورد|آورند|آوردند|افزاید|افزایند|افزود|پاید|پایند|پندارد|پندارند|' +
+    'شمارد|شمارند|شمرد|سپارد|سپارند|سپرد|چرخد|چرخند|درخشد|درخشند|سوزد|سوزند' +
+    ')(?=[\\s.،؛:؟!»)»\\]]|$)',
+  'g'
+);
+
+// فرهنگ جامع واژگان مرکب، پیشوندها و املای معیار سامانه مکتوم
+const COMPOUND_ZWNJ_RULES = [
+  [/(^|[\s«(\[])به\s+(ویژه|خوبی|طور|طوری|صورت|عنوان|منظور|زودی|ندرت|شدت|سادگی|راحتی|درستی|سرعت|مرور|تدریج|علاوه|جز|واسطه|جای|روز|ناچار|کلی|تازگی|راستی|وفور)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1به\u200c$2'],
+  [/(^|[\s«(\[])بی\s+(تفاوت|دقت|دقتی|نهایت|شک|وقفه|نظیر|سابقه|مورد|فایده|اساس|رحم|صدا|کران|همتا|درنگ|توجه|توجهی|مهار|مهابا|ملاحظه|نتیجه|هدف|معنی|معنا|ادعا|تکلف|آلایش|پرده|پروا|ثمر|جان|چون|حساب|حاصل|حوصله|خبر|خطر|خود|دریغ|دلیل|ربط|روح|ریا|زبان|سواد|شمار|صبر|طاقت|طرف|عاطفه|عدالتی|عیب|غرض|قانونی|قاعده|قرار|قید|کفایتی|گناه|مانند|مزه|مسئولیت|نظم|نظمی|نیاز|واسطه|وجدان|وفا|هویت)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1بی\u200c$2'],
+  [/(^|[\s«(\[])هم\s+(پیمان|پیمانی|رسانی|زمان|زمانی|وطن|وطنان|افزایی|راستا|جهت|سو|صدا|فکر|فکری|اندیشی|خوانی|نشینی|معنی|معنا|تراز|ترازی|سطح|دوره|خانواده|گام|گامی|مسیر|مسیری|کلام|زبان|مرز|عقیده|داستان|نوا|آهنگ|ساز|سنگ|نام|وزن)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1هم\u200c$2'],
+  [/(^|[\s«(\[])(پیش|پس)\s+(فرض|نمایش|نما|نویس|درآمد|زمینه|نیاز|تنظیم|پرده|گفتار|شرط|بینی|داوری|گیری|گام|قراول|مرگ|کسوت|وند|لرزه|رو|برد|رفت)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1$2\u200c$3'],
+  [/(^|[\s«(\[])غیر\s+(مستقیم|رسمی|قانونی|مجاز|ممکن|قابل|عادی|منتظره|انتفاعی|دولتی|نظامی|ملفوظ|چسبان|علمی|اخلاقی|بومی|استاندارد|حضوری|ضروری|واقعی)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1غیر\u200c$2'],
+  [/(^|[\s«(\[])ضد\s+(اسپم|آب|ضربه|ارزش|انقلاب|نور|امنیتی|فرهنگ|اسلامی|ایرانی|ویروس|خش|افتاب|آفتاب|زنگ|سرقت|گلوله|صدا|حریق)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1ضد\u200c$2'],
+  [/(^|[\s«(\[])(درون|برون)\s+(مایه|خط|شهری|مرزی|سازمانی|گروهی|زا|گرا|نگر|سپاری|ریزی)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1$2\u200c$3'],
+  [/(^|[\s«(\[])(نیم|نیمه|تمام)\s+(فاصله|شفاف|کاره|تمام|صفحه|نگاری|وقت|رسمی|حرفه\u200cای|مستقل|خودکار|قد|رخ|قرن|سده|مدت)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1$2\u200c$3'],
+  [/(^|[\s«(\[])(کوتاه|بلند|دراز|میان)\s+(مدت|پرواز|قامتان|پایه|مرتبه|نظر|همت|آهنگ|نویس|نویسی)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1$2\u200c$3'],
+  [/(^|[\s«(\[])(تک|چند)\s+(رقمی|خطی|بعدی|ستونه|برگی|رسانه\u200cای|منظوره|وجهی|گانه|صدایی|قطبی|حزبی|فرهنگی|زبانه|تایی|نفره|ساله|ماهه|روزه|ساعته)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1$2\u200c$3'],
+  [/(^|[\s«(\[])(این|آن|بدین|همان|همین)\s+(گونه|طور|سان|جا|رو|سو|ترتیب|منظور|جهت|واسطه|وسیله|مقدار|اندازه)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1$2\u200c$3'],
+  [/(^|[\s«(\[])(چنان|چندان)\s+(که|چه)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1$2\u200c$3'],
+  [/(^|[\s«(\[])نه\s+تنها(?=[\s.،؛:؟!»)»\]]|$)/g, '$1نه\u200cتنها'],
+  [/شیوه\s*نامه/g, 'شیوه\u200cنامه'],
+  [/آیین\s*نامه/g, 'آیین\u200cنامه'],
+  [/پایان\s*نامه/g, 'پایان\u200cنامه'],
+  [/اساس\s*نامه/g, 'اساس\u200cنامه'],
+  [/گواهی\s*نامه/g, 'گواهی\u200cنامه'],
+  [/فرهنگ\s*نامه/g, 'فرهنگ\u200cنامه'],
+  [/دانش\s*نامه/g, 'دانش\u200cنامه'],
+  [/طرح\s*نامه/g, 'طرح\u200cنامه'],
+  [/فیلم\s*نامه/g, 'فیلم\u200cنامه'],
+  [/پژوهش\s*نامه/g, 'پژوهش\u200cنامه'],
+  [/واژه\s*نامه/g, 'واژه\u200cنامه'],
+  [/واژه\s+گزینی/g, 'واژه\u200cگزینی'],
+  [/به\s*روز\s*رسانی/g, 'به\u200cروزرسانی'],
+  [/بروز\s*رسانی/g, 'به\u200cروزرسانی'],
+  [/به\s+کار\s*گیری/g, 'به\u200cکارگیری'],
+  [/بکار\s*گیری/g, 'به\u200cکارگیری'],
+  [/زیست\s+بوم/g, 'زیست\u200cبوم'],
+  [/نرم\s+افزار/g, 'نرم\u200cافزار'],
+  [/سخت\s+افزار/g, 'سخت\u200cافزار'],
+  [/پیام\s+رسان/g, 'پیام\u200cرسان'],
+  [/تدوین\s+گر/g, 'تدوین\u200cگر'],
+  [/پویا\s+نگاری/g, 'پویانگاری'],
+  [/پویا\s+نمایی/g, 'پویانمایی'],
+  [/نشان\s+واژه/g, 'نشان\u200cواژه'],
+  [/کلید\s+واژه/g, 'کلیدواژه'],
+  [/فرمان\s+واژه/g, 'فرمان\u200cواژه'],
+  [/نشان\s+واره/g, 'نشان\u200cواره'],
+  [/سخن\s+برگ/g, 'سخن\u200cبرگ'],
+  [/رنگ\s+برگ/g, 'رنگ\u200cبرگ'],
+  [/شماره\s+برگ/g, 'شماره\u200cبرگ'],
+  [/فارسی\s+نویسی/g, 'فارسی\u200cنویسی'],
+  [/درست\s+نویسی/g, 'درست\u200cنویسی'],
+  [/کوتاه\s+نویسی/g, 'کوتاه\u200cنویسی'],
+  [/ساده\s+نویسی/g, 'ساده\u200cنویسی'],
+  [/شکسته\s+نویسی/g, 'شکسته\u200cنویسی'],
+  [/برنامه\s+نویسی/g, 'برنامه\u200cنویسی'],
+  [/برنامه\s+ریزی/g, 'برنامه\u200cریزی'],
+  [/تصویر\s+برداری/g, 'تصویربرداری'],
+  [/فیلم\s+برداری/g, 'فیلم\u200cبرداری'],
+  [/صدا\s+برداری/g, 'صدابرداری'],
+  [/صدا\s+گذاری/g, 'صداگذاری'],
+  [/رنگ\s+پردازی/g, 'رنگ\u200cپردازی'],
+  [/نور\s+پردازی/g, 'نورپردازی'],
+  [/صحنه\s+آرایی/g, 'صحنه\u200cآرایی'],
+  [/صفحه\s+آرایی/g, 'صفحه\u200cآرایی'],
+  [/خط\s+آرایی/g, 'خط\u200cآرایی'],
+  [/صفحه\s+کلید/g, 'صفحه\u200cکلید'],
+  [/حروف\s+نگاری/g, 'حروف\u200cنگاری'],
+  [/حروف\s+چینی/g, 'حروف\u200cچینی'],
+  [/برش\s+نگاری/g, 'برش\u200cنگاری'],
+  [/شیشه\s+نگاری/g, 'شیشه\u200cنگاری'],
+  [/کادر\s+بندی/g, 'کادربندی'],
+  [/قاب\s+بندی/g, 'قاب\u200cبندی'],
+  [/عنوان\s+بندی/g, 'عنوان\u200cبندی'],
+  [/رده\s+بندی/g, 'رده\u200cبندی'],
+  [/دسته\s+بندی/g, 'دسته\u200cبندی'],
+  [/صفحه\s+بندی/g, 'صفحه\u200cبندی'],
+  [/زمان\s+بندی/g, 'زمان\u200cبندی'],
+  [/طبقه\s+بندی/g, 'طبقه\u200cبندی'],
+  [/شبکه\s+بندی/g, 'شبکه\u200cبندی'],
+  [/بومی\s+سازی/g, 'بومی\u200cسازی'],
+  [/استاندارد\s+سازی/g, 'استانداردسازی'],
+  [/یکپارچه\s+سازی/g, 'یکپارچه\u200cسازی'],
+  [/ذخیره\s+سازی/g, 'ذخیره\u200cسازی'],
+  [/مرتب\s+سازی/g, 'مرتب\u200cسازی'],
+  [/آماده\s+سازی/g, 'آماده\u200cسازی'],
+  [/بهینه\s+سازی/g, 'بهینه\u200cسازی'],
+  [/مستند\s+سازی/g, 'مستندسازی'],
+  [/مستند\s+ساز/g, 'مستندساز'],
+  [/شبیه\s+سازی/g, 'شبیه\u200cسازی'],
+  [/ایمن\s+سازی/g, 'ایمن\u200cسازی'],
+  [/برجسته\s+سازی/g, 'برجسته\u200cسازی'],
+  [/هوشمند\s+سازی/g, 'هوشمندسازی'],
+  [/بهره\s+برداری/g, 'بهره\u200cبرداری'],
+  [/بهره\s+گیری/g, 'بهره\u200cگیری'],
+  [/بهره\s+مندی/g, 'بهره\u200cمندی'],
+  [/نتیجه\s+گیری/g, 'نتیجه\u200cگیری'],
+  [/تصمیم\s+گیری/g, 'تصمیم\u200cگیری'],
+  [/خروجی\s+گیری/g, 'خروجی\u200cگیری'],
+  [/رونوشت\s+گیری/g, 'رونوشت\u200cگیری'],
+  [/فاصله\s+گذاری/g, 'فاصله\u200cگذاری'],
+  [/نشانه\s+گذاری/g, 'نشانه\u200cگذاری'],
+  [/شماره\s+گذاری/g, 'شماره\u200cگذاری'],
+  [/نام\s+گذاری/g, 'نام\u200cگذاری'],
+  [/سرمایه\s+گذاری/g, 'سرمایه\u200cگذاری'],
+  [/آینده\s+پژوهی/g, 'آینده\u200cپژوهی'],
+  [/تاریخ\s+نگاری/g, 'تاریخ\u200cنگاری'],
+  [/کتاب\s+خوانی/g, 'کتاب\u200cخوانی'],
+  [/کتاب\s+شناسی/g, 'کتاب\u200cشناسی'],
+  [/روش\s+شناسی/g, 'روش\u200cشناسی'],
+  [/زبان\s+شناسی/g, 'زبان\u200cشناسی'],
+  [/زیبایی\s+شناسی/g, 'زیبایی\u200cشناسی'],
+  [/دانش\s+آموخته/g, 'دانش\u200cآموخته'],
+  [/علاقه\s+مند/g, 'علاقه\u200cمند'],
+  [/فوق\s+العاده/g, 'فوق\u200cالعاده'],
+  [/بین\s+المللی/g, 'بین\u200cالمللی'],
+  [/دایره\s+المعارف/g, 'دایرةالمعارف'],
+  [/صاحب\s+نظر/g, 'صاحب\u200cنظر'],
+  [/شگفت\s+انگیز/g, 'شگفت\u200cانگیز'],
+  [/دل\s+نشین/g, 'دل\u200cنشین'],
+  [/چشم\s+نواز/g, 'چشم\u200cنواز'],
+  [/گوش\s+نواز/g, 'گوش\u200cنواز'],
+  [/خوش\s+آهنگ/g, 'خوش\u200cآهنگ'],
+  [/خوش\s+تراش/g, 'خوش\u200cتراش'],
+  [/خوش\s+خوان/g, 'خوش\u200cخوان'],
+  [/کم\s+نظیر/g, 'کم\u200cنظیر'],
+  [/کم\s+حجم/g, 'کم\u200cحجم'],
+  [/گران\s+سنگ/g, 'گران\u200cسنگ'],
+  [/گفت\s+و\s+گو/g, 'گفت\u200cوگو'],
+  [/جست\s+و\s+جو/g, 'جست\u200cوجو'],
+  [/شست\s+و\s+شو/g, 'شست\u200cوشو'],
+  [/رفت\s+و\s+آمد/g, 'رفت\u200cوآمد'],
+  [/رو\s+به\s+رو/g, 'روبه\u200cرو'],
+  [/دست\s+به\s+دست/g, 'دست\u200cبه\u200cدست'],
+  [/آل\s+بویه/g, 'آل\u200cبویه'],
+  [/نظام\s+الملک/g, 'نظام\u200cالملک'],
+  [/نقش\s+جهان/g, 'نقش\u200cجهان'],
+];
+
+const ORTHOGRAPHY_WORD_FIXES = [
+  [/(^|[\s«(\[])گزارشات(?=[\s.،؛:؟!»)»\]]|$)/g, '$1گزارش\u200cها', true],
+  [/(^|[\s«(\[])پیشنهادات(?=[\s.،؛:؟!»)»\]]|$)/g, '$1پیشنهادها', false],
+  [/(^|[\s«(\[])دستورات(?=[\s.،؛:؟!»)»\]]|$)/g, '$1دستورها', false],
+  [/(^|[\s«(\[])فرمایشات(?=[\s.،؛:؟!»)»\]]|$)/g, '$1فرمایش\u200cها', true],
+  [/(^|[\s«(\[])آزمایشات(?=[\s.،؛:؟!»)»\]]|$)/g, '$1آزمایش\u200cها', true],
+  [/(^|[\s«(\[])گرایشات(?=[\s.،؛:؟!»)»\]]|$)/g, '$1گرایش\u200cها', true],
+  [/(^|[\s«(\[])نگارشات(?=[\s.،؛:؟!»)»\]]|$)/g, '$1نگارش\u200cها', true],
+  [/(^|[\s«(\[])ویرایشات(?=[\s.،؛:؟!»)»\]]|$)/g, '$1ویرایش\u200cها', true],
+  [/(^|[\s«(\[])سفارشات(?=[\s.،؛:؟!»)»\]]|$)/g, '$1سفارش\u200cها', true],
+  [/(^|[\s«(\[])گاهاً?(?=[\s.،؛:؟!»)»\]]|$)/g, '$1گاهی', false],
+  [/(^|[\s«(\[])تلفناً(?=[\s.،؛:؟!»)»\]]|$)/g, '$1به\u200cصورت تلفنی', true],
+  [/(^|[\s«(\[])زباناً(?=[\s.،؛:؟!»)»\]]|$)/g, '$1به\u200cصورت زبانی', true],
+  [/(^|[\s«(\[])ناچاراً(?=[\s.،؛:؟!»)»\]]|$)/g, '$1به\u200cناچار', true],
+  [/(^|[\s«(\[])دوماً(?=[\s.،؛:؟!»)»\]]|$)/g, '$1دوم اینکه', false],
+  [/(^|[\s«(\[])سوماً(?=[\s.،؛:؟!»)»\]]|$)/g, '$1سوم اینکه', false],
+  [/(^|[\s«(\[])اطاق(?=[\s.،؛:؟!»)»\]]|$)/g, '$1اتاق', false],
+  [/(^|[\s«(\[])طپش(?=[\s.،؛:؟!»)»\]]|$)/g, '$1تپش', false],
+  [/(^|[\s«(\[])ذغال(?=[\s.،؛:؟!»)»\]]|$)/g, '$1زغال', false],
+  [/(^|[\s«(\[])بلیط(?=[\s.،؛:؟!»)»\]]|$)/g, '$1بلیت', false],
+  [/(^|[\s«(\[])باطری(?=[\s.،؛:؟!»)»\]]|$)/g, '$1باتری', false],
+  [/(^|[\s«(\[])انیشتین(?=[\s.،؛:؟!»)»\]]|$)/g, '$1اینشتین', false],
+  [/(^|[\s«(\[])امپراطور(ی?)(?=[\s.،؛:؟!»)»\]]|$)/g, '$1امپراتور$2', false],
+  [/(^|[\s«(\[])مسأله(?=[\s.،؛:؟!»)»\]]|$)/g, '$1مسئله', false],
+  [/(^|[\s«(\[])رییس(?=[\s.،؛:؟!»)»\]]|$)/g, '$1رئیس', false],
+  [/(^|[\s«(\[])هیأت(?=[\s.،؛:؟!»)»\]]|$)/g, '$1هیئت', false],
+  [/(^|[\s«(\[])نشأت(?=[\s.،؛:؟!»)»\]]|$)/g, '$1نشئت', false],
+  [/(^|[\s«(\[])جرأت(?=[\s.،؛:؟!»)»\]]|$)/g, '$1جرئت', false],
+  [/(^|[\s«(\[])پائیز(?=[\s.،؛:؟!»)»\]]|$)/g, '$1پاییز', false],
+  [/(^|[\s«(\[])(زیبا|دانا|توانا|آشنا|روشنا|تنها|رها|دارا|بینا|شنوا|گویا|پایا|پویا|فرمانروا|نانوا|روستا|طلا|لیلا|مو|بو|جو|رو)ئی(?=[\s.،؛:؟!»)»\]]|$)/g, '$1$2یی', false],
+  [/(^|[\s«(\[])(املا|انشا|اجرا|اعضا|شعرا|فقها|علما|حکما|عرفا|شهدا|وزرا|وکلا|سفرا|امرا|اسرا|فقرا|عقلا|ماورا)ء(?=[\s.،؛:؟!»)»\]]|$)/g, '$1$2', false],
+];
+
+// موتور پیشرفته و تمام‌بومی پالایش زنده متن فارسی سامانه مکتوم
 function refinePersianText(rawText) {
   if (!rawText) {
     return { refined: '', digitsCount: 0, charsCount: 0, zwnjCount: 0 };
@@ -98,20 +320,19 @@ function refinePersianText(rawText) {
   let charsCount = 0;
   let zwnjCount = 0;
 
-  let text = sanitizeSafePersianInput(rawText, 1200);
+  let text = sanitizeSafePersianInput(rawText, 2500);
 
-  // ۱. بومی‌سازی حروف عربی (ي، ك، ة) و علایم نگارشی انگلیسی (؟ ، ؛)
-  text = text.replace(/ي/g, () => {
-    charsCount++;
+  text = text.replace(/[يیىےې]/g, (m) => {
+    if (m !== 'ی') charsCount++;
     return 'ی';
   });
-  text = text.replace(/ك/g, () => {
+  text = text.replace(/[كڪګ]/g, () => {
     charsCount++;
     return 'ک';
   });
-  text = text.replace(/ة(\s|$)/g, (_, sp) => {
+  text = text.replace(/ة(?=\s|$|[.،؛:؟!»)»\]])/g, () => {
     charsCount++;
-    return `ه${sp}`;
+    return 'ه';
   });
   text = text.replace(/\?/g, () => {
     charsCount++;
@@ -126,13 +347,11 @@ function refinePersianText(rawText) {
     return '؛';
   });
 
-  // ۲. تبدیل گیومه‌های انگلیسی به گیومه فارسی « »
-  text = text.replace(/"([^"]+)"/g, (_, inner) => {
+  text = text.replace(/["“”]([^"“”]+)["“”]/g, (_, inner) => {
     charsCount += 2;
     return `«${inner.trim()}»`;
   });
 
-  // ۳. تبدیل ارقام انگلیسی و عربی به فارسی
   const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   text = text.replace(/[0-9]/g, (d) => {
     digitsCount++;
@@ -142,67 +361,119 @@ function refinePersianText(rawText) {
     digitsCount++;
     return persianDigits[d.charCodeAt(0) - 1632];
   });
+  text = text.replace(/([۰-۹])\s*%/g, (_, num) => {
+    charsCount++;
+    return `${num}٪`;
+  });
+  text = text.replace(/([۰-۹]{2,5})\s*[*xX]\s*([۰-۹]{2,5})/g, (_, w, h) => {
+    charsCount++;
+    return `${w}×${h}`;
+  });
 
-  // ۴. اصلاح «می» و «نمی» که با فاصله کامل نوشته شده‌اند (مثال: می شود -> می‌شود)
-  text = text.replace(/(^|\s)(ن?می)\s+(?=[آ-ی])/g, (_, prefixSpace, mi) => {
+  text = text.replace(
+    /(^|[\s«(\[،؛:.])(بر|در|فرا|وا)\s+(ن?می)\s+(?=[آ-ی])/g,
+    (_, sp, pre, mi) => {
+      zwnjCount++;
+      return `${sp}${pre}${mi}\u200c`;
+    }
+  );
+  text = text.replace(/(^|[\s«(\[،؛:.])(ن?می)\s+(?=[آ-ی])/g, (_, prefixSpace, mi) => {
     zwnjCount++;
     return `${prefixSpace}${mi}\u200c`;
   });
 
-  // ۵. اصلاح «می» و «نمی» چسبیده به بن مضارع و ماضی (مثال: میشود -> می‌شود / نمیشود -> نمی‌شود)
-  const nonVerbExceptions = /^(دان|هن|ثاق|وه|ز|لیون|لیارد|لاد|کرو|راث|زان|عاد|قات|خ|ل|گو|انگین)/;
   text = text.replace(
-    /(^|\s)(ن?می)(شود|شوند|شوم|شوی|شویم|شوید|شد|شدند|کند|کنند|کنم|کنی|کنیم|کنید|کرد|کردند|گوید|گویند|گویم|گویی|گوییم|گویید|گفت|باشم|باشی|باشد|باشند|باشیم|باشید|توان|تواند|توانند|توانم|توانیم|خواهد|خواهند|خواهم|خواهی|خواهیم|خواهید|رود|روند|روم|روی|رویم|روید|رفت|آید|آیند|آیم|آیی|آییم|آیید|آمد|داند|دانند|دانم|دانی|دانیم|دانید|دانست|رسد|رسند|رسم|رسی|رسیم|رسید|گذرد|گذرند|گیرد|گیرند|گیرم|گیریم|گرفت|دارد|دارند|دارم|داری|داریم|دارید|داشت|فرماید|فرمایند|نگرد|نگارد|نویسد|نویسند|خواند|خوانند|بیند|بینند|پسندد|پردازد|پردازند|سازد|سازند|زند|زنند)(?=\s|$|[.،؛!؟»)])/g,
-    (fullMatch, sp, mi, verbRest) => {
-      if (nonVerbExceptions.test(verbRest)) return fullMatch;
+    /(^|[\s«(\[،؛:.])(بر|در|فرا|وا)?(ن?می)آ(?=[آ-ی])/g,
+    (_, sp, pre = '', mi) => {
       zwnjCount++;
-      return `${sp}${mi}\u200c${verbRest}`;
+      return `${sp}${pre}${mi}\u200cآ`;
     }
   );
 
-  // ۶. اصلاح نیم‌فاصله در پسوند جمع «ها» و صفت تفضیلی «تر / ترین»
+  text = text.replace(PERSIAN_VERB_STEMS_REGEX, (fullMatch, sp, pre = '', mi, verbRest) => {
+    if (!pre && NON_VERB_MI_EXCEPTIONS.test(verbRest)) return fullMatch;
+    zwnjCount++;
+    return `${sp}${pre}${mi}\u200c${verbRest}`;
+  });
+
   text = text.replace(
-    /([آ-ی])\s+(ها|هایی|های|هایمان|هایتان|هایشان|تر|ترین)(?=\s|$|[.،؛!؟»)])/g,
+    /(^|[\s«(\[])([آ-ی]{2,}(?:یده|فته|شته|رده|نده|وده|اده|خته|سته|مده|گفته|دیده|کرده|بوده|شده|نوشته|خوانده|ساخته|یافته|نشسته|گذشته))\s+(ام|ای|ایم|اید|اند)(?=[\s.،؛:؟!»)»\]]|$)/g,
+    (_, sp, participle, copula) => {
+      zwnjCount++;
+      return `${sp}${participle}\u200c${copula}`;
+    }
+  );
+
+  text = text.replace(
+    /([آ-ی])\s+(ها|هایی|های|هایم|هایت|هایش|هایمان|هایتان|هایشان|تر|ترین)(?=[\s.،؛:؟!»)»\]]|$)/g,
     (_, wordEnd, suffix) => {
       zwnjCount++;
       return `${wordEnd}\u200c${suffix}`;
     }
   );
   text = text.replace(
-    /([هیبپتثجچحخسشصضطظعغفقکگلمن])(ها|هایی|های)(?=\s|$|[.،؛!؟»)])/g,
-    (_, lastChar, suffix) => {
+    /(^|[\s«(\[،؛:.])([آ-ی]*[هیبپتثجچحخسشصضطظعغفقکگلمن])(ها|هایی|های|هایم|هایت|هایش|هایمان|هایتان|هایشان)(?=[\s.،؛:؟!»)»\]]|$)/g,
+    (fullMatch, sp, stem, suffix) => {
+      const fullWord = `${stem}${suffix}`;
+      if (ROOT_HA_EXCEPTIONS.has(fullWord) || stem.length < 2) return fullMatch;
       zwnjCount++;
-      return `${lastChar}\u200c${suffix}`;
+      return `${sp}${stem}\u200c${suffix}`;
     }
   );
 
-  // ۷. اصلاح یای اضافه و همزه (مثال: خانه ی من / خانهء من -> خانهٔ من)
   text = text.replace(/([آ-ی]ه)(?:\s+ی|\s*ء)(?=\s)/g, (_, word) => {
     charsCount++;
     return `${word}ٔ`;
   });
 
-  // ۸. اصلاح واژگان مرکب پرتکرار بدون نیم‌فاصله
-  const compoundFixes = [
-    [/شیوه\s+نامه/g, 'شیوه‌نامه'],
-    [/به\s+روز\s*رسانی/g, 'به‌روزرسانی'],
-    [/شبیه\s+سازی/g, 'شبیه‌سازی'],
-    [/دانش\s+آموخته/g, 'دانش‌آموخته'],
-    [/علاقه\s+مند/g, 'علاقه‌مند'],
-    [/فوق\s+العاده/g, 'فوق‌العاده'],
-    [/بین\s+المللی/g, 'بین‌المللی'],
-  ];
-  compoundFixes.forEach(([regex, replacement]) => {
-    text = text.replace(regex, () => {
+  COMPOUND_ZWNJ_RULES.forEach(([regex, replacement]) => {
+    text = text.replace(regex, (...args) => {
       zwnjCount++;
+      if (typeof replacement === 'string') {
+        return replacement
+          .replace('$1', args[1] || '')
+          .replace('$2', args[2] || '')
+          .replace('$3', args[3] || '');
+      }
       return replacement;
     });
   });
 
-  // ۹. اصلاح فاصله‌های اضافی قبل از علایم نگارشی و داخل پرانتز
+  ORTHOGRAPHY_WORD_FIXES.forEach(([regex, replacement, hasZwnj]) => {
+    text = text.replace(regex, (...args) => {
+      charsCount++;
+      if (hasZwnj) zwnjCount++;
+      return replacement
+        .replace('$1', args[1] || '')
+        .replace('$2', args[2] || '');
+    });
+  });
+
+  text = text.replace(/[؟]{2,}/g, () => {
+    charsCount++;
+    return '؟';
+  });
+  text = text.replace(/[!]{2,}/g, () => {
+    charsCount++;
+    return '!';
+  });
+  text = text.replace(/\.{2}|(?:\.{4,})/g, () => {
+    charsCount++;
+    return '...';
+  });
+  text = text.replace(/\s+-\s+/g, () => {
+    charsCount++;
+    return ' — ';
+  });
   text = text.replace(/\s+([.،؛:؟!])/g, '$1');
-  text = text.replace(/([،؛:؟!])(?=[^\s»)\].،؛!؟])/g, '$1 ');
-  text = text.replace(/\(\s+/g, '(').replace(/\s+\)/g, ')');
+  text = text.replace(/([،؛:؟!])(?=[^\s»)\].،؛!؟\d۰-۹])/g, '$1 ');
+  text = text
+    .replace(/\(\s+/g, '(')
+    .replace(/\s+\)/g, ')')
+    .replace(/«\s+/g, '«')
+    .replace(/\s+»/g, '»')
+    .replace(/\[\s+/g, '[')
+    .replace(/\s+\]/g, ']');
   text = text.replace(/\s{2,}/g, ' ');
 
   return {
@@ -553,10 +824,9 @@ export default function PersianGuideContent({ pageData: initialPageData = {} }) 
 
   return (
     <main
-      dir="rtl"
-      style={{ fontFamily: 'Vazirmatn, var(--font-vazirmatn), sans-serif' }}
-      className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 pb-20 w-full relative z-10 pt-0 select-none"
-    >
+  dir="rtl"
+  className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 pb-20 w-full relative z-10 pt-0 select-none font-sans"
+>
       {/* ۱. مسیر راهنما (Breadcrumbs) — اولین فرزند main، دقیقاً هم‌تراز و هم‌فاصله با صفحه درباره ما */}
       {pageData?.breadcrumb?.enabled !== false && (
         <div className="mb-6 md:mb-10">
@@ -594,7 +864,7 @@ export default function PersianGuideContent({ pageData: initialPageData = {} }) 
               </div>
             )}
 
-            <h1 className="text-2xl md:text-4xl lg:text-5xl font-black mb-4 md:mb-5 pt-2 pb-2 leading-[2.25] md:leading-[1.95] drop-shadow-lg text-transparent bg-clip-text bg-gradient-to-l from-[#10b981] via-[#06b6d4] to-[#a855f7]">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-black mb-4 md:mb-5 pt-2 pb-3 leading-[1.5] md:leading-[1.5] lg:leading-[1.4] drop-shadow-lg text-transparent bg-clip-text bg-gradient-to-l from-[#10b981] via-[#06b6d4] to-[#a855f7]">
               {pageData?.hero?.titlePart1}
               {pageData?.hero?.titlePart2}
             </h1>
@@ -854,101 +1124,98 @@ export default function PersianGuideContent({ pageData: initialPageData = {} }) 
                 ))}
               </div>
 
-              {Array.isArray(pageData?.tone?.principles) &&
-                pageData.tone.principles.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                    {pageData.tone.principles.map((item, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, y: 18 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: '-30px' }}
-                        transition={{ duration: 0.35, delay: idx * 0.08 }}
-                        className="p-4 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] space-y-2"
-                      >
-                        <h3
-                          className="text-sm font-bold"
-                          style={{ color: item.color || '#06b6d4' }}
-                        >
-                          {item.title}
-                        </h3>
-                        <p className="text-xs text-gray-300 leading-6 text-justify [text-align-last:right]">
-                          <XRayText
-                            text={item.desc}
-                            xrayMode={xrayMode}
-                            tooltipText={ui.xrayTooltipText}
-                          />
-                        </p>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-
-              {Array.isArray(pageData?.tone?.comparisons) &&
-                pageData.tone.comparisons.length > 0 && (
-                  <div className="space-y-3.5 pt-1">
-                    {pageData.tone.comparisons.map((comp, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, y: 18 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: '-30px' }}
-                        transition={{ duration: 0.35, delay: idx * 0.08 }}
-                        className="p-4 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] space-y-3"
-                      >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-1.5">
-                            <span className="inline-block text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-md">
-                              {ui.incorrectBadge}
-                            </span>
-                            <p className="text-xs sm:text-sm text-rose-100 leading-6 line-through decoration-rose-500/60 text-justify [text-align-last:right]">
+              {/* قاب شیشه‌ای اسکرول‌دار برای اصول و نمونه‌های مقایسه‌ای لحن */}
+              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] overflow-hidden">
+                <div className="max-h-[400px] md:max-h-[480px] overflow-y-auto custom-scrollbar p-3.5 sm:p-4 space-y-4">
+                  {Array.isArray(pageData?.tone?.principles) &&
+                    pageData.tone.principles.length > 0 && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                        {pageData.tone.principles.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="p-4 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] space-y-2"
+                          >
+                            <h3
+                              className="text-sm font-bold"
+                              style={{ color: item.color || '#06b6d4' }}
+                            >
+                              {item.title}
+                            </h3>
+                            <p className="text-xs text-gray-300 leading-6 text-justify [text-align-last:right]">
                               <XRayText
-                                text={comp.wrong}
+                                text={item.desc}
                                 xrayMode={xrayMode}
                                 tooltipText={ui.xrayTooltipText}
                               />
                             </p>
                           </div>
+                        ))}
+                      </div>
+                    )}
 
-                          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1.5 flex flex-col justify-between">
-                            <div className="space-y-1.5">
-                              <div className="flex items-center justify-between">
-                                <span className="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-md">
-                                  {ui.correctBadge}
+                  {Array.isArray(pageData?.tone?.comparisons) &&
+                    pageData.tone.comparisons.length > 0 && (
+                      <div className="space-y-3.5">
+                        {pageData.tone.comparisons.map((comp, idx) => (
+                          <div
+                            key={idx}
+                            className="p-4 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] space-y-3"
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-1.5">
+                                <span className="inline-block text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-md">
+                                  {ui.incorrectBadge}
                                 </span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopy(comp.right)}
-                                  className="p-1.5 rounded-lg bg-white/[0.06] hover:bg-[#10b981] text-gray-300 hover:text-white border border-white/10 transition-colors cursor-pointer"
-                                >
-                                  <Icon name="copy" className="w-3.5 h-3.5" />
-                                </button>
+                                <p className="text-xs sm:text-sm text-rose-100 leading-6 line-through decoration-rose-500/60 text-justify [text-align-last:right]">
+                                  <XRayText
+                                    text={comp.wrong}
+                                    xrayMode={xrayMode}
+                                    tooltipText={ui.xrayTooltipText}
+                                  />
+                                </p>
                               </div>
-                              <p className="text-xs sm:text-sm text-emerald-50 font-medium leading-6 text-justify [text-align-last:right]">
+
+                              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1.5 flex flex-col justify-between">
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-md">
+                                      {ui.correctBadge}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopy(comp.right)}
+                                      className="p-1.5 rounded-lg bg-white/[0.06] hover:bg-[#10b981] text-gray-300 hover:text-white border border-white/10 transition-colors cursor-pointer"
+                                    >
+                                      <Icon name="copy" className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  <p className="text-xs sm:text-sm text-emerald-50 font-medium leading-6 text-justify [text-align-last:right]">
+                                    <XRayText
+                                      text={comp.right}
+                                      xrayMode={xrayMode}
+                                      tooltipText={ui.xrayTooltipText}
+                                    />
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {comp.rule && (
+                              <div className="text-xs text-gray-300 bg-white/[0.03] px-3.5 py-2 rounded-xl border border-white/5 text-justify [text-align-last:right]">
+                                <strong className="text-[#06b6d4] ml-1">{ui.whyLabel}</strong>
                                 <XRayText
-                                  text={comp.right}
+                                  text={comp.rule}
                                   xrayMode={xrayMode}
                                   tooltipText={ui.xrayTooltipText}
                                 />
-                              </p>
-                            </div>
+                              </div>
+                            )}
                           </div>
-                        </div>
-
-                        {comp.rule && (
-                          <div className="text-xs text-gray-300 bg-white/[0.03] px-3.5 py-2 rounded-xl border border-white/5 text-justify [text-align-last:right]">
-                            <strong className="text-[#06b6d4] ml-1">{ui.whyLabel}</strong>
-                            <XRayText
-                              text={comp.rule}
-                              xrayMode={xrayMode}
-                              tooltipText={ui.xrayTooltipText}
-                            />
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
+                        ))}
+                      </div>
+                    )}
+                </div>
+              </div>
             </motion.section>
           )}
 
@@ -1001,87 +1268,86 @@ export default function PersianGuideContent({ pageData: initialPageData = {} }) 
                 ))}
               </div>
 
-              <div className="space-y-5">
-                {(pageData?.orthography?.subSections || []).map((sub, sIdx) => (
-                  <motion.div
-                    key={sIdx}
-                    initial={{ opacity: 0, y: 18 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-30px' }}
-                    transition={{ duration: 0.35, delay: sIdx * 0.08 }}
-                    className="p-4 sm:p-5 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] space-y-4"
-                  >
-                    <div className="space-y-1.5 border-b border-white/10 pb-2.5">
-                      <h3
-                        className="text-sm sm:text-base font-black"
-                        style={{ color: sub.color || '#06b6d4' }}
-                      >
-                        {sub.title}
-                      </h3>
-                      <p className="text-xs text-gray-300 leading-6 text-justify [text-align-last:right]">
-                        <XRayText
-                          text={sub.desc}
-                          xrayMode={xrayMode}
-                          tooltipText={ui.xrayTooltipText}
-                        />
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {(sub.examples || []).map((ex, eIdx) => (
-                        <div
-                          key={eIdx}
-                          className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-2.5 flex flex-col justify-between"
+              {/* قاب شیشه‌ای اسکرول‌دار برای زیربخش‌ها و نمونه‌های درست‌نویسی */}
+              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] overflow-hidden">
+                <div className="max-h-[420px] md:max-h-[500px] overflow-y-auto custom-scrollbar p-3.5 sm:p-4 space-y-4">
+                  {(pageData?.orthography?.subSections || []).map((sub, sIdx) => (
+                    <div
+                      key={sIdx}
+                      className="p-4 sm:p-5 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] space-y-4"
+                    >
+                      <div className="space-y-1.5 border-b border-white/10 pb-2.5">
+                        <h3
+                          className="text-sm sm:text-base font-black"
+                          style={{ color: sub.color || '#06b6d4' }}
                         >
-                          <div className="space-y-2">
-                            <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/25 flex items-center justify-between gap-2">
-                              <span className="text-xs text-rose-200 font-medium">
-                                <XRayText
-                                  text={ex.wrong}
-                                  xrayMode={xrayMode}
-                                  tooltipText={ui.xrayTooltipText}
-                                />
-                              </span>
-                              <span className="text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded shrink-0">
-                                {ui.incorrectBadge}
-                              </span>
-                            </div>
+                          {sub.title}
+                        </h3>
+                        <p className="text-xs text-gray-300 leading-6 text-justify [text-align-last:right]">
+                          <XRayText
+                            text={sub.desc}
+                            xrayMode={xrayMode}
+                            tooltipText={ui.xrayTooltipText}
+                          />
+                        </p>
+                      </div>
 
-                            <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between gap-2">
-                              <span className="text-xs text-emerald-50 font-bold">
-                                <XRayText
-                                  text={ex.right}
-                                  xrayMode={xrayMode}
-                                  tooltipText={ui.xrayTooltipText}
-                                />
-                              </span>
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopy(ex.right)}
-                                  className="p-1.5 rounded-lg bg-white/[0.06] hover:bg-[#10b981] text-gray-300 hover:text-white border border-white/10 transition-colors cursor-pointer"
-                                >
-                                  <Icon name="copy" className="w-3.5 h-3.5" />
-                                </button>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {(sub.examples || []).map((ex, eIdx) => (
+                          <div
+                            key={eIdx}
+                            className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-2.5 flex flex-col justify-between"
+                          >
+                            <div className="space-y-2">
+                              <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/25 flex items-center justify-between gap-2">
+                                <span className="text-xs text-rose-200 font-medium">
+                                  <XRayText
+                                    text={ex.wrong}
+                                    xrayMode={xrayMode}
+                                    tooltipText={ui.xrayTooltipText}
+                                  />
+                                </span>
+                                <span className="text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded shrink-0">
+                                  {ui.incorrectBadge}
+                                </span>
+                              </div>
+
+                              <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between gap-2">
+                                <span className="text-xs text-emerald-50 font-bold">
+                                  <XRayText
+                                    text={ex.right}
+                                    xrayMode={xrayMode}
+                                    tooltipText={ui.xrayTooltipText}
+                                  />
+                                </span>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCopy(ex.right)}
+                                    className="p-1.5 rounded-lg bg-white/[0.06] hover:bg-[#10b981] text-gray-300 hover:text-white border border-white/10 transition-colors cursor-pointer"
+                                  >
+                                    <Icon name="copy" className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                               </div>
                             </div>
-                          </div>
 
-                          {ex.rule && (
-                            <p className="text-[11px] text-gray-300 leading-5 text-justify [text-align-last:right]">
-                              <strong className="text-amber-400 ml-1">{ui.whyLabel}</strong>
-                              <XRayText
-                                text={ex.rule}
-                                xrayMode={xrayMode}
-                                tooltipText={ui.xrayTooltipText}
-                              />
-                            </p>
-                          )}
-                        </div>
-                      ))}
+                            {ex.rule && (
+                              <p className="text-[11px] text-gray-300 leading-5 text-justify [text-align-last:right]">
+                                <strong className="text-amber-400 ml-1">{ui.whyLabel}</strong>
+                                <XRayText
+                                  text={ex.rule}
+                                  xrayMode={xrayMode}
+                                  tooltipText={ui.xrayTooltipText}
+                                />
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </motion.div>
-                ))}
+                  ))}
+                </div>
               </div>
             </motion.section>
           )}
@@ -1120,65 +1386,64 @@ export default function PersianGuideContent({ pageData: initialPageData = {} }) 
                 ))}
               </div>
 
-              <div className="space-y-3.5">
-                {(pageData?.punctuation?.rules || []).map((item, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 18 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-30px' }}
-                    transition={{ duration: 0.35, delay: idx * 0.08 }}
-                    className="p-4 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] space-y-2.5"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-1">
-                        <span className="inline-block text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded">
-                          {ui.incorrectBadge}
-                        </span>
-                        <p className="text-xs sm:text-sm text-rose-100 leading-6 text-justify [text-align-last:right]">
-                          <XRayText
-                            text={item.wrong}
-                            xrayMode={xrayMode}
-                            tooltipText={ui.xrayTooltipText}
-                          />
-                        </p>
-                      </div>
-
-                      <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded">
-                            {ui.correctBadge}
+              {/* قاب شیشه‌ای اسکرول‌دار برای قواعد و نمونه‌های نشانه‌گذاری */}
+              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] overflow-hidden">
+                <div className="max-h-[390px] md:max-h-[460px] overflow-y-auto custom-scrollbar p-3.5 sm:p-4 space-y-3.5">
+                  {(pageData?.punctuation?.rules || []).map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] space-y-2.5"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-1">
+                          <span className="inline-block text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded">
+                            {ui.incorrectBadge}
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(item.right)}
-                            className="p-1.5 rounded-lg bg-white/[0.06] hover:bg-[#10b981] text-gray-300 hover:text-white border border-white/10 transition-colors cursor-pointer"
-                          >
-                            <Icon name="copy" className="w-3.5 h-3.5" />
-                          </button>
+                          <p className="text-xs sm:text-sm text-rose-100 leading-6 text-justify [text-align-last:right]">
+                            <XRayText
+                              text={item.wrong}
+                              xrayMode={xrayMode}
+                              tooltipText={ui.xrayTooltipText}
+                            />
+                          </p>
                         </div>
-                        <p className="text-xs sm:text-sm text-emerald-50 font-bold leading-6 text-justify [text-align-last:right]">
+
+                        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded">
+                              {ui.correctBadge}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(item.right)}
+                              className="p-1.5 rounded-lg bg-white/[0.06] hover:bg-[#10b981] text-gray-300 hover:text-white border border-white/10 transition-colors cursor-pointer"
+                            >
+                              <Icon name="copy" className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                          <p className="text-xs sm:text-sm text-emerald-50 font-bold leading-6 text-justify [text-align-last:right]">
+                            <XRayText
+                              text={item.right}
+                              xrayMode={xrayMode}
+                              tooltipText={ui.xrayTooltipText}
+                            />
+                          </p>
+                        </div>
+                      </div>
+
+                      {item.rule && (
+                        <p className="text-xs text-gray-300 bg-white/[0.03] px-3.5 py-2 rounded-xl text-justify [text-align-last:right]">
+                          <strong className="text-[#f59e0b] ml-1">{ui.whyLabel}</strong>
                           <XRayText
-                            text={item.right}
+                            text={item.rule}
                             xrayMode={xrayMode}
                             tooltipText={ui.xrayTooltipText}
                           />
                         </p>
-                      </div>
+                      )}
                     </div>
-
-                    {item.rule && (
-                      <p className="text-xs text-gray-300 bg-white/[0.03] px-3.5 py-2 rounded-xl text-justify [text-align-last:right]">
-                        <strong className="text-[#f59e0b] ml-1">{ui.whyLabel}</strong>
-                        <XRayText
-                          text={item.rule}
-                          xrayMode={xrayMode}
-                          tooltipText={ui.xrayTooltipText}
-                        />
-                      </p>
-                    )}
-                  </motion.div>
-                ))}
+                  ))}
+                </div>
               </div>
             </motion.section>
           )}
@@ -1538,60 +1803,59 @@ export default function PersianGuideContent({ pageData: initialPageData = {} }) 
                 </h2>
               </div>
 
-              <div className="space-y-2.5">
-                {pageData.faq.items.map((item, idx) => {
-                  const isOpen = openFaqIndex === idx;
-                  return (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 15 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: '-20px' }}
-                      transition={{ duration: 0.3, delay: idx * 0.06 }}
-                      className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] overflow-hidden"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setOpenFaqIndex(isOpen ? -1 : idx)}
-                        className="w-full p-4 text-right flex items-center justify-between gap-3 cursor-pointer hover:bg-white/[0.02] transition-colors"
+              {/* قاب شیشه‌ای اسکرول‌دار برای پرسش‌های متداول */}
+              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-2xl shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] overflow-hidden">
+                <div className="max-h-[390px] md:max-h-[460px] overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-2.5">
+                  {pageData.faq.items.map((item, idx) => {
+                    const isOpen = openFaqIndex === idx;
+                    return (
+                      <div
+                        key={idx}
+                        className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] overflow-hidden"
                       >
-                        <h3 className="text-xs sm:text-sm font-bold text-white leading-6">
-                          <XRayText
-                            text={item.question}
-                            xrayMode={xrayMode}
-                            tooltipText={ui.xrayTooltipText}
-                          />
-                        </h3>
-                        <span
-                          className={cn(
-                            'w-6 h-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs text-[#f59e0b] transition-transform duration-200 shrink-0',
-                            isOpen ? 'rotate-180 bg-[#f59e0b]/20' : ''
-                          )}
+                        <button
+                          type="button"
+                          onClick={() => setOpenFaqIndex(isOpen ? -1 : idx)}
+                          className="w-full p-4 text-right flex items-center justify-between gap-3 cursor-pointer hover:bg-white/[0.02] transition-colors"
                         >
-                          ▼
-                        </span>
-                      </button>
-
-                      <AnimatePresence initial={false}>
-                        {isOpen && (
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="px-4 pb-4 pt-1 text-xs sm:text-sm text-gray-300 leading-7 border-t border-white/5 text-justify [text-align-last:right]"
-                          >
+                          <h3 className="text-xs sm:text-sm font-bold text-white leading-6">
                             <XRayText
-                              text={item.answer}
+                              text={item.question}
                               xrayMode={xrayMode}
                               tooltipText={ui.xrayTooltipText}
                             />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  );
-                })}
+                          </h3>
+                          <span
+                            className={cn(
+                              'w-6 h-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs text-[#f59e0b] transition-transform duration-200 shrink-0',
+                              isOpen ? 'rotate-180 bg-[#f59e0b]/20' : ''
+                            )}
+                          >
+                            ▼
+                          </span>
+                        </button>
+
+                        <AnimatePresence initial={false}>
+                          {isOpen && (
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="px-4 pb-4 pt-1 text-xs sm:text-sm text-gray-300 leading-7 border-t border-white/5 text-justify [text-align-last:right]"
+                            >
+                              <XRayText
+                                text={item.answer}
+                                xrayMode={xrayMode}
+                                tooltipText={ui.xrayTooltipText}
+                              />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </motion.section>
           )}

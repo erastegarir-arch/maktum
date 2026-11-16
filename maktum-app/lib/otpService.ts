@@ -2,14 +2,22 @@
 import { prisma } from './prisma';
 import crypto from 'crypto';
 
-// استخراج کلیدهای امنیتی و API
-const SECRET_KEY = Buffer.from(process.env.OTP_ENCRYPTION_KEY || '', 'hex');
+// ساخت کلید ۳۲ بایتی ایمن و ضدکرش (سازگار با کلید ۶۴ کاراکتری Hex فعلی)
+function getSafeSecretKey(): Buffer {
+  const rawKey = process.env.OTP_ENCRYPTION_KEY || '';
+  if (/^[0-9a-fA-F]{64}$/.test(rawKey)) {
+    return Buffer.from(rawKey, 'hex');
+  }
+  return crypto.createHash('sha256').update(rawKey || 'MAKTUM_FALLBACK_OTP_SECRET_KEY').digest();
+}
+
+const SECRET_KEY = getSafeSecretKey();
 const MELIPAYAMAK_API_KEY = process.env.MELIPAYAMAK_API_KEY;
 const MELIPAYAMAK_BODY_ID = process.env.MELIPAYAMAK_BODY_ID;
 
-// تابع تولید کد ۵ رقمی تصادفی
+// تولید کد تصادفی از طریق موتور رمزنگاری امن Node.js
 function generateRandomCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 // تابع هش کردن کد برای جدول زنده (غیرقابل بازگردانی)
@@ -64,10 +72,14 @@ export async function sendOtpSms(phone: string, purpose: string) {
     orderBy: { createdAt: 'desc' },
   });
 
-  if (recentLogs.length > 0 && recentLogs[0].createdAt >= twoMinutesAgo) {
+  // فقط اگر پیامک قبلی «با موفقیت» ارسال شده باشد، کاربر باید ۲ دقیقه صبر کند
+  const lastSuccessfulLog = recentLogs.find((log: any) => log.isSuccess);
+  if (lastSuccessfulLog && lastSuccessfulLog.createdAt >= twoMinutesAgo) {
     throw new Error('کد تایید به تازگی ارسال شده است. لطفاً ۲ دقیقه صبر کنید.');
   }
-  if (recentLogs.length >= 5) {
+
+  const successfulCount = recentLogs.filter((log: any) => log.isSuccess).length;
+  if (successfulCount >= 5 || recentLogs.length >= 10) {
     throw new Error('سقف دریافت کد در یک ساعت تکمیل شده است.');
   }
 
@@ -76,7 +88,7 @@ export async function sendOtpSms(phone: string, purpose: string) {
   const hashedCode = hashOtpCode(phone, plainCode);
   const encryptedLogCode = encryptOtpForLog(plainCode);
 
-  // ۳. ارسال درخواست به ملی پیامک (الگوی خدماتی) با کلید API واقعی شما
+  // ۳. ارسال درخواست به ملی پیامک (با مهلت زمانی ۱۰ ثانیه برای جلوگیری از هنگ کردن سرور)
   let isSuccess = true;
   let errorMsg = null;
 
@@ -85,24 +97,23 @@ export async function sendOtpSms(phone: string, purpose: string) {
       throw new Error('کلید API ملی‌پیامک در پرونده .env تنظیم نشده است.');
     }
 
-    // اصلاح بزرگ: قرار دادن پویا API KEY شما در نشانی URL
     const response = await fetch(`https://console.melipayamak.com/api/send/shared/${MELIPAYAMAK_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        bodyId: parseInt(MELIPAYAMAK_BODY_ID || '579058'),
+        bodyId: parseInt(MELIPAYAMAK_BODY_ID || '579058', 10),
         to: phone,
         args: [plainCode],
       }),
+      signal: AbortSignal.timeout(10000), // قطع خودکار در صورت عدم پاسخ درگاه پس از ۱۰ ثانیه
     });
 
     const smsResult = await response.json();
     
-    // اگر درخواست با موفقیت به ملی‌پیامک نرسید یا خود ملی‌پیامک ارور داد
     if (!response.ok || !smsResult.recId || String(smsResult.recId).startsWith('-')) {
-       throw new Error(smsResult.message || smsResult.status || 'خطا در وب‌سرویس ملی‌پیامک');
+      throw new Error(smsResult.message || smsResult.status || 'خطا در وب‌سرویس ملی‌پیامک');
     }
   } catch (err: any) {
     isSuccess = false;
@@ -112,15 +123,17 @@ export async function sendOtpSms(phone: string, purpose: string) {
 
   // ۴. ذخیره در دیتابیس در یک تراکنش اتمیک
   await prisma.$transaction(async (tx: any) => {
-    await tx.otpCode.deleteMany({ where: { phone } });
+    if (isSuccess) {
+      await tx.otpCode.deleteMany({ where: { phone } });
 
-    await tx.otpCode.create({
-      data: {
-        phone,
-        code: hashedCode,
-        expiresAt: new Date(Date.now() + 2 * 60 * 1000), // انقضا در ۲ دقیقه
-      },
-    });
+      await tx.otpCode.create({
+        data: {
+          phone,
+          code: hashedCode,
+          expiresAt: new Date(Date.now() + 2 * 60 * 1000), // انقضا در ۲ دقیقه
+        },
+      });
+    }
 
     await tx.otpLog.create({
       data: {
@@ -134,8 +147,6 @@ export async function sendOtpSms(phone: string, purpose: string) {
   });
 
   if (!isSuccess) {
-    // پیام خطایی که دریافت می‌کنید (مثلاً کلید نامعتبر) را مستقیماً به کاربر نشان نمی‌دهیم، 
-    // اما در کنسول و دیتابیس لاگ می‌شود.
     throw new Error('سامانه پیامک موقتاً دچار اختلال است. لطفاً دقایقی دیگر تلاش کنید.');
   }
 
@@ -146,6 +157,7 @@ export async function sendOtpSms(phone: string, purpose: string) {
  * متد اعتبارسنجی کد وارد شده توسط کاربر
  */
 export async function verifyOtpCode(phone: string, inputCode: string) {
+  const cleanCode = String(inputCode || '').trim();
   const record = await prisma.otpCode.findUnique({
     where: { phone },
   });
@@ -164,7 +176,7 @@ export async function verifyOtpCode(phone: string, inputCode: string) {
     throw new Error('کد تایید منقضی شده است.');
   }
 
-  const hashedInput = hashOtpCode(phone, inputCode);
+  const hashedInput = hashOtpCode(phone, cleanCode);
   
   if (hashedInput !== record.code) {
     await prisma.otpCode.update({

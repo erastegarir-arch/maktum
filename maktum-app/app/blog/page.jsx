@@ -1,8 +1,10 @@
 import SharedArchivePage from '@/app/components/frontend/SharedArchivePage';
 import { getSetting } from '@/app/actions/settings';
 import { getContents } from '@/app/actions/content';
+import { constructPageMetadata } from '@/lib/seo';
 
-// تم رنگی اختصاصی: نارنجی تیره / آجری (Dark Amber)
+export const revalidate = 60;
+
 const THEME_BLOG = {
   hex: '#b45309',
   text: 'text-[#b45309]',
@@ -14,22 +16,39 @@ const THEME_BLOG = {
   glowRGB: '180,83,9'
 };
 
-export default async function BlogFrontPage() {
-  // دریافت تنظیمات ذخیره شده از پایگاه داده
+export async function generateMetadata() {
   const settingsData = await getSetting('blog_page_settings');
-  const pageSettings = settingsData ? JSON.parse(settingsData) : { hero: {}, featuredList: [] };
+  let pageSettings = {};
+  try { pageSettings = settingsData ? JSON.parse(settingsData) : {}; } catch {}
 
-  // دریافت محتوا از پایگاه داده
-  const rawDataFromDB = await getContents({ type: 'BLOG', status: 'PUBLISHED', limit: 12 });
+  const title = pageSettings?.seo?.metaTitle || pageSettings?.hero?.title || 'اخبار، مقالات و پژوهش‌های تحلیلی';
+  const description = pageSettings?.seo?.metaDescription || pageSettings?.hero?.subtitle || 'مقالات، گزارش‌ها و یادداشت‌های تحلیلی پژوهشگران شبکه مکتوم.';
 
-  // مپ کردن داده‌ها برای تطابق با کامپوننت مشترک + پیوند‌دهی به /blog/
+  return constructPageMetadata({
+    title,
+    description,
+    path: '/blog',
+  });
+}
+
+export default async function BlogFrontPage() {
+  const [settingsData, rawDataFromDB] = await Promise.all([
+    getSetting('blog_page_settings'),
+    getContents({ type: 'BLOG', status: 'PUBLISHED', limit: 12 })
+  ]);
+
+  let pageSettings = { hero: {}, featuredList: [] };
+  try {
+    if (settingsData) pageSettings = JSON.parse(settingsData);
+  } catch {}
+
   const archiveItems = (rawDataFromDB || []).map(item => ({
     id: item.id,
     title: `${item.titleBase || ''} ${item.titleHighlight || ''}`.trim() || 'بدون عنوان',
     image: item.coverDesktop || item.coverMobile || '',
     date: item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('fa-IR') : 'نامشخص',
     views: item.viewCount || 0,
-    url: `/blog/${item.slug}` // مسیر اختصاصی صفحه سینگل بلاگ
+    url: `/blog/${item.slug}`
   }));
 
   const breadcrumbs = [
@@ -41,12 +60,12 @@ export default async function BlogFrontPage() {
     <SharedArchivePage 
       activeTheme={THEME_BLOG}
       breadcrumbs={breadcrumbs}
-      hero={pageSettings.hero}
-      featuredList={pageSettings.featuredList}
+      hero={pageSettings.hero || {}}
+      featuredList={pageSettings.featuredList || []}
       archiveItems={archiveItems}
       hasMore={archiveItems.length >= 12}
       emptyStateTitle="هیچ مقاله‌ای یافت نشد!"
-      emptyStateDesc="یادداشت‌های پژوهشگران، تحلیل‌های اختصاصی و اخبار شبکه مکتوم به زودی در اینجا قرار می‌گیرند."
+      emptyStateDesc="محتوای این بخش در حال به‌روزرسانی است."
     />
   );
 }

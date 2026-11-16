@@ -4,14 +4,13 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser } from './auth';
 
-// تابع کمکی برای ساخت Slug از روی نام (فارسی به انگلیسی و جایگزینی فاصله‌ها)
 function generateSlug(name) {
   return name
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')        // تبدیل فاصله به خط تیره
-    .replace(/[^\w\u0600-\u06FF-]/g, '') // حذف کاراکترهای غیرمجاز (به جز فارسی و انگلیسی و خط تیره)
-    .replace(/-+/g, '-');        // حذف خط تیره‌های تکراری
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\u0600-\u06FF-]/g, '')
+    .replace(/-+/g, '-');
 }
 
 // ۱. ایجاد طبقه‌بندی جدید
@@ -51,6 +50,10 @@ export async function createTaxonomy(data) {
     });
 
     revalidatePath('/portal-entry-99/taxonomies');
+    revalidatePath('/t');
+    revalidatePath(`/t/${finalSlug}`);
+    revalidatePath('/');
+    revalidatePath('/sitemap.xml');
     return { success: true, data: newTaxonomy };
   } catch (error) {
     return { success: false, error: 'خطا در ثبت اطلاعات در پایگاه داده.' };
@@ -80,13 +83,16 @@ export async function deleteTaxonomy(id) {
 
     await prisma.taxonomy.delete({ where: { id } });
     revalidatePath('/portal-entry-99/taxonomies');
+    revalidatePath('/t');
+    revalidatePath('/');
+    revalidatePath('/sitemap.xml');
     return { success: true };
   } catch (error) {
-    return { success: false, error: 'خطا در حذف آیتم.' };
+    return { success: false, error: 'خطا در حذف مورد.' };
   }
 }
 
-// ۴. ویرایش طبقه‌بندی
+// ۴. ویرایش طبقه‌بندی (همراه با ذخیره کامل metaTitle و metaDesc)
 export async function updateTaxonomy(id, data) {
   try {
     const session = await getSessionUser();
@@ -118,10 +124,16 @@ export async function updateTaxonomy(id, data) {
         preTitle: data.preTitle || null,
         description: data.description || null,
         imageUrl: data.imageUrl || null,
+        metaTitle: data.metaTitle !== undefined ? data.metaTitle : data.name,
+        metaDesc: data.metaDesc !== undefined ? data.metaDesc : data.description,
       }
     });
 
     revalidatePath('/portal-entry-99/taxonomies');
+    revalidatePath('/t');
+    revalidatePath(`/t/${finalSlug}`);
+    revalidatePath('/');
+    revalidatePath('/sitemap.xml');
     return { success: true, data: updated };
   } catch (error) {
     return { success: false, error: 'خطا در ویرایش اطلاعات.' };
@@ -144,7 +156,7 @@ export async function getTaxonomyBySlug(slug) {
   }
 }
 
-// ۶. دریافت تمامی محتواهای مرتبط با یک طبقه‌بندی (صفحه داخلی /t/[slug])
+// ۶. دریافت تمامی محتواهای مرتبط با یک طبقه‌بندی (سبک‌سازی‌شده با select برای سرعت بالا)
 export async function getContentsByTaxonomy(slug) {
   try {
     if (!slug) return [];
@@ -157,6 +169,17 @@ export async function getContentsByTaxonomy(slug) {
           { creators:   { some: { slug: slug } } },
           { tags:       { some: { slug: slug } } }
         ]
+      },
+      select: {
+        id: true,
+        type: true,
+        slug: true,
+        titleBase: true,
+        titleHighlight: true,
+        coverDesktop: true,
+        coverMobile: true,
+        publishedAt: true,
+        viewCount: true,
       },
       orderBy: { publishedAt: 'desc' }
     });
@@ -188,22 +211,20 @@ export async function getContentsByTaxonomy(slug) {
 // ۷. دریافت تمام طبقه‌بندی‌ها به همراه شمارش دقیق محتوا (صفحه اصلی /t)
 export async function getAllTaxonomiesForArchive() {
   try {
-    // ۱. دریافت تمام طبقه‌بندی‌ها
-    const taxonomies = await prisma.taxonomy.findMany({
-      orderBy: { createdAt: 'desc' }
-    });
+    const [taxonomies, publishedContents] = await Promise.all([
+      prisma.taxonomy.findMany({
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.content.findMany({
+        where: { status: 'PUBLISHED' },
+        select: {
+          categories: { select: { id: true } },
+          creators: { select: { id: true } },
+          tags: { select: { id: true } },
+        }
+      })
+    ]);
 
-    // ۲. دریافت روابط محتواهای منتشرشده
-    const publishedContents = await prisma.content.findMany({
-      where: { status: 'PUBLISHED' },
-      select: {
-        categories: { select: { id: true } },
-        creators: { select: { id: true } },
-        tags: { select: { id: true } },
-      }
-    });
-
-    // ۳. شمارش تعداد آیتم‌های متصل به هر ID
     const countMap = {};
     for (const item of publishedContents) {
       item.categories?.forEach(c => { countMap[c.id] = (countMap[c.id] || 0) + 1; });
@@ -211,7 +232,6 @@ export async function getAllTaxonomiesForArchive() {
       item.tags?.forEach(t => { countMap[t.id] = (countMap[t.id] || 0) + 1; });
     }
 
-    // ۴. تفکیک به تفکیک نوع با شمارش دقیق
     const hashtags = taxonomies
       .filter(t => t.type === 'HASHTAG')
       .map(t => ({
@@ -246,7 +266,7 @@ export async function getAllTaxonomiesForArchive() {
     return { hashtags: [], categories: [], creators: [] };
   }
 }
-// دریافت تنظیمات
+
 export async function getArchiveSettingsAction() {
   try {
     const settings = await prisma.setting.findMany({
@@ -262,7 +282,6 @@ export async function getArchiveSettingsAction() {
   }
 }
 
-// ذخیره تنظیمات
 export async function saveArchiveSettingsAction(data) {
   try {
     const session = await getSessionUser();
@@ -283,6 +302,7 @@ export async function saveArchiveSettingsAction(data) {
         create: { key: item.key, value: item.value, group: 'ARCHIVE_PAGE' }
       });
     }
+    revalidatePath('/t');
     return { success: true };
   } catch (error) {
     return { success: false, error: 'خطا در ذخیره در پایگاه داده' };

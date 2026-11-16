@@ -141,36 +141,51 @@ export default function AboutContent({ pageData = {} }) {
             </div>
           </div>
 
-          <div className="relative z-10 lg:w-1/2 flex items-center justify-center w-full h-56 md:h-96">
+          <div className="relative z-10 lg:w-1/2 flex items-center justify-center w-full h-56 md:h-96 select-none pointer-events-none">
             <div className="relative w-48 h-48 md:w-80 md:h-80 flex items-center justify-center">
+              {/* هاله نوری پس‌زمینه برای نمایان‌تر شدن شیشه‌نگاری */}
+              <div className="absolute inset-8 rounded-full bg-gradient-to-tr from-[#a855f7]/15 via-[#06b6d4]/10 to-transparent blur-2xl -z-10" />
+
+              {/* مدارهای شیشه‌ای و پرتوهای چرخان */}
+              <div className="absolute inset-4 md:inset-6 rounded-full border border-white/[0.06] shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]" />
               <div className="absolute inset-0 flex items-center justify-center animate-[spin_30s_linear_infinite]">
-                <div className="w-full h-px bg-gradient-to-r from-transparent via-[#a855f7]/50 to-transparent absolute"></div>
-                <div className="h-full w-px bg-gradient-to-b from-transparent via-[#06b6d4]/50 to-transparent absolute"></div>
-                <div className="w-full h-px bg-gradient-to-r from-transparent via-[#10b981]/50 to-transparent absolute rotate-45"></div>
-                <div className="w-full h-px bg-gradient-to-r from-transparent via-[#f59e0b]/50 to-transparent absolute -rotate-45"></div>
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-[#a855f7]/50 to-transparent absolute" />
+                <div className="h-full w-px bg-gradient-to-b from-transparent via-[#06b6d4]/50 to-transparent absolute" />
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-[#10b981]/50 to-transparent absolute rotate-45" />
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-[#f59e0b]/50 to-transparent absolute -rotate-45" />
               </div>
-              
-              <div className="relative z-20 w-16 h-16 md:w-24 md:h-24 bg-[#080c16] border border-[#a855f7] rounded-full flex items-center justify-center shadow-[inset_0_0_15px_rgba(168,85,247,0.2),0_0_30px_rgba(168,85,247,0.4)]">
-                <Icon name="cube" className="w-6 h-6 md:w-10 md:h-10 text-[#a855f7]" />
+
+              {/* هسته مرکزی گلس‌مورفیک */}
+              <div className="relative z-20 w-16 h-16 md:w-24 md:h-24 bg-white/[0.04] backdrop-blur-2xl border border-[#a855f7]/50 rounded-full flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),inset_0_0_20px_rgba(168,85,247,0.3),0_0_35px_rgba(168,85,247,0.35)]">
+                <div className="absolute inset-1.5 rounded-full border border-white/[0.08]" />
+                <Icon name="cube" className="w-6 h-6 md:w-10 md:h-10 text-[#a855f7] drop-shadow-[0_0_12px_rgba(168,85,247,0.8)]" />
               </div>
+
+              {/* گوی شیشه‌ای بالا (فیروزه‌ای) */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 md:-translate-y-4 animate-[float_4s_ease-in-out_infinite]">
-                <div className="w-8 h-8 md:w-12 md:h-12 bg-[#080c16] border border-[#06b6d4] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.3)] text-[#06b6d4]">
-                  <Icon name="footage" className="w-3 h-3 md:w-5 md:h-5" />
+                <div className="w-9 h-9 md:w-13 md:h-13 bg-white/[0.04] backdrop-blur-xl border border-[#06b6d4]/45 rounded-full flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),inset_0_0_12px_rgba(6,182,212,0.25),0_8px_20px_rgba(0,0,0,0.4)] text-[#06b6d4]">
+                  <Icon name="footage" className="w-3.5 h-3.5 md:w-5 md:h-5 drop-shadow-[0_0_8px_rgba(6,182,212,0.7)]" />
                 </div>
               </div>
+
+              {/* گوی شیشه‌ای پایین (طلایی) */}
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-2 md:translate-y-4 animate-[float_5s_ease-in-out_infinite_1s]">
-                <div className="w-8 h-8 md:w-12 md:h-12 bg-[#080c16] border border-[#f59e0b] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(245,158,11,0.3)] text-[#f59e0b]">
-                  <Icon name="portfolio" className="w-3 h-3 md:w-5 md:h-5" />
+                <div className="w-9 h-9 md:w-13 md:h-13 bg-white/[0.04] backdrop-blur-xl border border-[#f59e0b]/45 rounded-full flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),inset_0_0_12px_rgba(245,158,11,0.25),0_8px_20px_rgba(0,0,0,0.4)] text-[#f59e0b]">
+                  <Icon name="portfolio" className="w-3.5 h-3.5 md:w-5 md:h-5 drop-shadow-[0_0_8px_rgba(245,158,11,0.7)]" />
                 </div>
               </div>
+
+              {/* گوی شیشه‌ای چپ (زمردی) */}
               <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-4 animate-[float_6s_ease-in-out_infinite_2s]">
-                <div className="w-8 h-8 md:w-12 md:h-12 bg-[#080c16] border border-[#10b981] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.3)] text-[#10b981]">
-                  <Icon name="product" className="w-3 h-3 md:w-5 md:h-5" />
+                <div className="w-9 h-9 md:w-13 md:h-13 bg-white/[0.04] backdrop-blur-xl border border-[#10b981]/45 rounded-full flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),inset_0_0_12px_rgba(16,185,129,0.25),0_8px_20px_rgba(0,0,0,0.4)] text-[#10b981]">
+                  <Icon name="product" className="w-3.5 h-3.5 md:w-5 md:h-5 drop-shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
                 </div>
               </div>
+
+              {/* گوی شیشه‌ای راست (یاقوتی) */}
               <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-4 animate-[float_4.5s_ease-in-out_infinite_0.5s]">
-                <div className="w-8 h-8 md:w-12 md:h-12 bg-[#080c16] border border-[#f43f5e] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(244,63,94,0.3)] text-[#f43f5e]">
-                  <Icon name="networking" className="w-3 h-3 md:w-5 md:h-5" />
+                <div className="w-9 h-9 md:w-13 md:h-13 bg-white/[0.04] backdrop-blur-xl border border-[#f43f5e]/45 rounded-full flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),inset_0_0_12px_rgba(244,63,94,0.25),0_8px_20px_rgba(0,0,0,0.4)] text-[#f43f5e]">
+                  <Icon name="networking" className="w-3.5 h-3.5 md:w-5 md:h-5 drop-shadow-[0_0_8px_rgba(244,63,94,0.7)]" />
                 </div>
               </div>
             </div>

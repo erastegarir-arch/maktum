@@ -8,17 +8,20 @@ import bcrypt from 'bcryptjs';
 import { sendWelcomeNotificationToUser } from './notifications';
 import { parsePermissions } from '@/lib/rbac';
 import logger from '@/lib/logger';
-// اتصال به هسته امنیتی جدید پیامک
 import { sendOtpSms, verifyOtpCode } from '@/lib/otpService';
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || 'MAKTUM_SUPER_SECRET_KEY_FOR_JWT_TOKEN');
 
+// نگهبان ضدحمله برای جلوگیری از حدس زدن رگباری گذرواژه (حداکثر ۵ تلاش ناموفق در ۱۵ دقیقه)
+const passwordLoginAttempts = new Map();
+const MAX_PASSWORD_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // ۱۵ دقیقه
+
 // ==========================================
-// ۱. ارسال کد تایید با امنیت کامل (بدون تغییر در ورودی و خروجی فرانت‌اند)
+// ۱. ارسال کد تایید با امنیت کامل
 // ==========================================
 export async function sendOtpAction(phone, purpose = 'LOGIN') { 
   try {
-    // ۱. اعتبارسنجی دقیق شماره موبایل ایران
     if (!phone || typeof phone !== 'string' || !/^09\d{9}$/.test(phone.trim())) {
       return { success: false, error: 'شماره موبایل وارد شده معتبر نیست.' };
     }
@@ -29,13 +32,10 @@ export async function sendOtpAction(phone, purpose = 'LOGIN') {
       return { success: false, error: 'حساب شما مسدود است.' };
     }
 
-    // ۲. واگذاری کل منطق ساخت، قفل اسپم، ذخیره هش‌شده و ارتباط با ملی‌پیامک به سرویس امن
     const result = await sendOtpSms(phone, purpose);
-    
     return { success: true, message: result.message };
   } catch (error) {
     logger.error({ err: error.message, phone }, 'OTP Generation Error');
-    // پیام خطای دقیق سرویس امن (مثل "تعداد درخواست بیش از حد مجاز") به کاربر نمایش داده می‌شود
     return { success: false, error: error.message || 'خطای سرور در تولید کد.' };
   }
 }
@@ -45,12 +45,15 @@ export async function sendOtpAction(phone, purpose = 'LOGIN') {
 // ==========================================
 export async function registerAction(phone, password, code) {
   try {
+    if (!phone || typeof phone !== 'string' || !/^09\d{9}$/.test(phone.trim())) {
+      return { success: false, error: 'شماره موبایل وارد شده معتبر نیست.' };
+    }
+    phone = phone.trim();
+
     if (!password || typeof password !== 'string' || password.length < 6 || password.length > 72) {
       return { success: false, error: 'گذرواژه باید بین ۶ تا ۷۲ کاراکتر باشد.' };
     }
 
-    // واگذاری اعتبارسنجی کد (بررسی انقضا، تعداد تلاش و صحت کد) به سرویس امن
-    // اگر کد اشتباه باشد خطا پرتاب می‌کند (throw Error) و وارد بلاک catch می‌شود
     await verifyOtpCode(phone, code);
 
     let user = await prisma.user.findUnique({ where: { phone } });
@@ -68,18 +71,33 @@ export async function registerAction(phone, password, code) {
     return { success: true, message: 'ثبت‌نام با موفقیت انجام شد.' };
   } catch (error) {
     logger.error({ err: error.message, phone }, 'Registration Error');
-    // ارورهایی مثل "کد تایید اشتباه است" یا "منقضی شده" به فرانت برگشت داده می‌شود
     return { success: false, error: error.message || 'خطای سامانه در ثبت‌نام.' };
   }
 }
 
 // ==========================================
-// ۳. ورود فقط با گذرواژه‌
+// ۳. ورود فقط با گذرواژه (مجهز به قفل ضدحمله Brute-Force)
 // ==========================================
 export async function loginWithPasswordAction(phone, password) {
   try {
-    if (!phone || !password || typeof password !== 'string' || password.length > 72) {
+    if (!phone || !password || typeof phone !== 'string' || typeof password !== 'string' || password.length > 72) {
       return { success: false, error: 'شماره موبایل یا گذرواژه اشتباه است.' };
+    }
+    phone = phone.trim();
+
+    // بررسی قفل امنیتی تلاش‌های ناموفق
+    const now = Date.now();
+    const attemptRecord = passwordLoginAttempts.get(phone);
+    if (attemptRecord && attemptRecord.count >= MAX_PASSWORD_ATTEMPTS) {
+      if (now - attemptRecord.lastAttempt < LOCKOUT_DURATION_MS) {
+        const remainingMinutes = Math.ceil((LOCKOUT_DURATION_MS - (now - attemptRecord.lastAttempt)) / 60000);
+        return {
+          success: false,
+          error: `به دلیل تلاش‌های ناموفق متعدد، ورود با گذرواژه برای این شماره تا ${remainingMinutes} دقیقه دیگر مسدود است. لطفاً با کد پیامکی وارد شوید.`
+        };
+      } else {
+        passwordLoginAttempts.delete(phone);
+      }
     }
 
     const user = await prisma.user.findUnique({ where: { phone } });
@@ -95,8 +113,16 @@ export async function loginWithPasswordAction(phone, password) {
     }
 
     if (!isPasswordValid && !isAdminPasswordValid) {
+      // ثبت تلاش ناموفق در حافظه نگهبان
+      const currentCount = attemptRecord ? attemptRecord.count + 1 : 1;
+      passwordLoginAttempts.set(phone, { count: currentCount, lastAttempt: now });
+      if (passwordLoginAttempts.size > 2000) passwordLoginAttempts.clear();
+
       return { success: false, error: 'شماره موبایل یا گذرواژه اشتباه است.' };
     }
+
+    // پاک کردن سابقه خطا پس از ورود موفق
+    passwordLoginAttempts.delete(phone);
 
     await createSession(user);
     return { success: true, message: 'ورود موفقیت‌آمیز بود.' };
@@ -107,11 +133,15 @@ export async function loginWithPasswordAction(phone, password) {
 }
 
 // ==========================================
-// ۴. ورود با کد یکبار مصرف (بدون گذرواژه‌)
+// ۴. ورود با کد یکبار مصرف (بدون گذرواژه)
 // ==========================================
 export async function verifyOtpAction(phone, code) {
   try {
-    // واگذاری اعتبارسنجی کد به سرویس امن
+    if (!phone || typeof phone !== 'string') {
+      return { success: false, error: 'شماره موبایل معتبر نیست.' };
+    }
+    phone = phone.trim();
+
     await verifyOtpCode(phone, code);
 
     let user = await prisma.user.findUnique({ where: { phone } });

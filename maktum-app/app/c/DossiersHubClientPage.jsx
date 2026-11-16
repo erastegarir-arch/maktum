@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Icon from '@/app/components/Icon'; 
 import Breadcrumbs from '@/app/components/Breadcrumbs';
+import BlurImage from '@/app/components/BlurImage';
 
 // کاور اسلایدر با ماسک نرم به عنوان پس‌زمینه
 // اصلاح Z-Index: به جای z-0 از -z-20 استفاده شده تا کاملاً زیر گوی‌های متحرک محیطی قرار بگیرد
@@ -75,7 +76,7 @@ const DossierCard = ({ dossier, isVIP, index }) => {
         <div className="absolute inset-0 z-0">
           {(dossier.coverMobile || dossier.coverDesktop) && (
             // کاهش کدری تصویر از opacity-95 به opacity-85 برای درخشش بیشتر در لایه‌های زیرین
-            <img src={dossier.coverDesktop || dossier.coverMobile} className={`w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-105 ${!isVIP && 'grayscale-[40%] group-hover:grayscale-0'}`} alt={dossier.title} />
+            <BlurImage src={dossier.coverDesktop || dossier.coverMobile} className={`w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-105 ${!isVIP && 'grayscale-[40%] group-hover:grayscale-0'}`} alt={dossier.title} />
           )}
           {/* گرادینت شفاف برای عدم مسدودسازی نور محیط */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#050810] via-[#050810]/50 to-transparent opacity-95 group-hover:opacity-100 transition-opacity" />

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
-// کلید مخفی که در auth.js هم استفاده کردیم (باید دقیقاً همان باشد)
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || 'MAKTUM_SUPER_SECRET_KEY_FOR_JWT_TOKEN');
 
 export async function proxy(request) {
@@ -11,28 +10,26 @@ export async function proxy(request) {
   if (url.pathname.startsWith('/portal-entry-99')) {
     const token = request.cookies.get('maktum_session')?.value;
 
-    // اگر کوکی وجود نداشت، پرتاب به صفحه اصلی
     if (!token) {
       return NextResponse.redirect(new URL('/', request.url));
     }
 
     try {
-      // گذرواژه‌گشایی و اعتبارسنجی توکن در لبه سرور (Edge)
       const verified = await jwtVerify(token, SECRET_KEY);
       const payload = verified.payload;
 
-      // بررسی اینکه آیا کاربر مسئول است یا خیر
       if (!payload.isAdmin && !payload.isSuperAdmin) {
-        // کاربر عادی است و حق ورود به درگاه را ندارد. پرتاب به صفحه خطای ۴۰۳ (عدم دسترسی)
         return NextResponse.redirect(new URL('/forbidden', request.url));
       }
 
-      // اگر کاربر مسئول بود، اجازه عبور می‌دهیم. 
+      // اضافه کردن هدر مخفی‌ساز از موتورهای جستجو بدون لو دادن آدرس در robots.txt
+      const response = NextResponse.next();
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+      return response;
 
     } catch (err) {
-      // توکن نامعتبر، دستکاری شده یا منقضی شده است
       const response = NextResponse.redirect(new URL('/', request.url));
-      response.cookies.delete('maktum_session'); // پاک کردن توکن مخرب
+      response.cookies.delete('maktum_session');
       return response;
     }
   }
@@ -47,6 +44,9 @@ export async function proxy(request) {
     
     try {
       await jwtVerify(token, SECRET_KEY);
+      const response = NextResponse.next();
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+      return response;
     } catch (err) {
       const response = NextResponse.redirect(new URL('/', request.url));
       response.cookies.delete('maktum_session');
@@ -58,6 +58,5 @@ export async function proxy(request) {
 }
 
 export const config = {
-  // این میدلور روی تمامی مسیرها اجرا می‌شود به جز پرونده‌های ایستا و APIها
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

@@ -3,11 +3,10 @@
 import { getDossierBySlug } from '@/app/actions/dossier'; 
 import DossierDetailClientPage from './DossierDetailClientPage'; 
 import { notFound } from 'next/navigation';
-import { constructPageMetadata, generateStaticPageSchema } from '@/lib/seo'; // توابع سئو
+import { constructPageMetadata, generateStaticPageSchema } from '@/lib/seo';
 
-// ==========================================================
-// ۱. تولید متادیتای پیشرفته و متصل به شبکه‌های اجتماعی برای هر پرونده
-// ==========================================================
+export const revalidate = 60;
+
 export async function generateMetadata(props) {
   const params = await props.params;
   const slug = params?.slug || (params ? Object.values(params)[0] : null);
@@ -21,20 +20,17 @@ export async function generateMetadata(props) {
   }
 
   const data = response.data;
-  const pageTitle = data.seoTitle || data.title;
-  const finalDesc = data.description || `مشاهده جزئیات، مقالات و ویدیوهای مرتبط با پرونده ویژه ${data.title}`;
+  const pageTitle = data.metaTitle || data.seoTitle || data.title;
+  const finalDesc = data.metaDesc || data.description || `مشاهده جزئیات، مقالات و ویدیوهای مرتبط با پرونده ویژه ${data.title}`;
 
   return constructPageMetadata({
     title: pageTitle,
     description: finalDesc,
-    path: `/c/${slug}`,
+    path: `/c/${decodeURIComponent(slug)}`,
     ogImage: data.coverDesktop || undefined,
   });
 }
 
-// ==========================================================
-// ۲. کامپوننت اصلی صفحه (کدهای قبلی شما)
-// ==========================================================
 export default async function DossierPage(props) {
   const params = await props.params;
   const slug = params?.slug || (params ? Object.values(params)[0] : null);
@@ -50,23 +46,24 @@ export default async function DossierPage(props) {
   }
 
   const data = response.data;
-  const pageTitle = data.seoTitle || data.title;
-  const finalDesc = data.description || `مشاهده جزئیات، مقالات و ویدیوهای مرتبط با پرونده ویژه ${data.title}`;
+  const pageTitle = data.metaTitle || data.seoTitle || data.title;
+  const finalDesc = data.metaDesc || data.description || `مشاهده جزئیات، مقالات و ویدیوهای مرتبط با پرونده ویژه ${data.title}`;
 
-  // تولید اسکیمای پویا برای هر پرونده (منظومه)
   const schema = generateStaticPageSchema({
     schemaType: 'CollectionPage',
     title: pageTitle,
     description: finalDesc,
-    path: `/c/${slug}`,
+    path: `/c/${decodeURIComponent(slug)}`,
     breadcrumbName: data.title,
   });
+
+  const safeSchemaJson = JSON.stringify(schema).replace(/</g, '\\u003c');
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        dangerouslySetInnerHTML={{ __html: safeSchemaJson }}
       />
       <DossierDetailClientPage dossier={data} />
     </>

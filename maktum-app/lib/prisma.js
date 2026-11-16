@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-// در جاوااسکریپت نیازی به تعریف تایپ نیست
+// نگهداری اتصال در حافظه سراسری سرور برای جلوگیری از باز شدن اتصال‌های تکراری
 const globalForPrisma = globalThis;
 
 export const prisma =
@@ -9,11 +9,10 @@ export const prisma =
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   });
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+// ذخیره در تمام محیط‌ها (چه آزمایشی و چه سرور اصلی) برای پایداری کامل
+globalForPrisma.prisma = prisma;
 
-// فعال‌سازی حالت WAL و تنظیمات ضد-قفل
+// فعال‌سازی حالت WAL و تنظیمات ضد-قفل دیتابیس SQLite
 async function initSqliteHighConcurrency() {
   if (globalForPrisma.prismaInitialized) return;
   
@@ -28,6 +27,7 @@ async function initSqliteHighConcurrency() {
     
     console.log('✅ [SQLite] WAL Mode & High Concurrency PRAGMAs activated.');
   } catch (err) {
+    globalForPrisma.prismaInitialized = false; // اگر خطا داد، دفعه بعد دوباره تلاش کند
     console.error('❌ [SQLite] PRAGMA init error:', err);
   }
 }

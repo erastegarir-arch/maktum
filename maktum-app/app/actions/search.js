@@ -2,37 +2,47 @@
 
 import { prisma } from '@/lib/prisma';
 
+// نگهبان جلوگیری از پر شدن دیتابیس در صورت جستجوهای رگباری تکراری
+const searchLogCooldown = new Map();
+
+// تابع دقیق تشخیص مسیر صحیح هر نوع محتوا (جلوگیری از خطای 404 در راش و تولیدات)
+function getPrefixByType(type) {
+  const t = type?.toUpperCase();
+  if (t === 'BLOG') return '/blog';
+  if (t === 'RAW') return '/f';
+  if (t === 'PRODUCED') return '/p';
+  if (t === 'TOOL') return '/tool';
+  return '/p';
+}
+
 // موتور کاوش جامع مکتوم با قابلیت وزن‌دهی و صفحه‌بندی
 export async function searchArchive({ keyword, filters = [], page = 1, limit = 8 }) {
   try {
-    // گارد امنیتی: اگر کسی رشته بسیار بلندی (مثل حمله XSS یا DoS) فرستاد، درجا بریده می‌شود
     const safeKeyword = typeof keyword === 'string' ? keyword.trim().slice(0, 100) : '';
     
-    // اگر طول کلمه کمتر از ۲ حرف بود، برای جلوگیری از فشار به پایگاه داده کاوش متوقف می‌شود
     if (safeKeyword.length < 2) {
       return { success: true, data: [], hasMore: false };
     }
 
-    const skip = (page - 1) * limit;
+    const skip = (Math.max(1, Number(page) || 1) - 1) * limit;
 
-    // ۱. آماده‌سازی صافیها (اگر صافیی انتخاب نشده بود، همه چیز کاوش می‌شود)
+    // ۱. آماده‌سازی صافی‌ها
     const contentTypes = ['PRODUCED', 'RAW', 'BLOG', 'TOOL'];
     let searchContents = true;
     let searchDossiers = true;
     let activeContentTypes = contentTypes;
 
-    if (filters.length > 0) {
+    if (Array.isArray(filters) && filters.length > 0) {
       searchDossiers = filters.includes('DOSSIER');
       activeContentTypes = filters.filter(f => contentTypes.includes(f));
       searchContents = activeContentTypes.length > 0;
     }
 
-    // ۲. اجرای کوئری‌ها به صورت همزمان (Parallel Promise) برای بالاترین سرعت ممکن
+    // ۲. اجرای کوئری‌ها به صورت همزمان (Parallel Promise)
     let contentResults = [];
     let dossierResults = [];
     const queries = [];
 
-    // کاوش در جدول محتوا (مقالات، تولیدات، ابزارها، راش‌ها)
     if (searchContents) {
       queries.push(
         prisma.content.findMany({
@@ -40,18 +50,14 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
             status: 'PUBLISHED',
             type: { in: activeContentTypes },
             OR: [
-              // وزن اول: تطبیق مستقیم در عناوین اصلی
               { titleBase: { contains: safeKeyword } },
               { titleHighlight: { contains: safeKeyword } },
-              // وزن دوم: کاوش رابطه‌ای (اگر کلمه در نام دسته‌بندی، هشتک یا سازنده بود)
               { categories: { some: { name: { contains: safeKeyword } } } },
               { tags: { some: { name: { contains: safeKeyword } } } },
               { creators: { some: { name: { contains: safeKeyword } } } },
-              // وزن سوم: توضیحات و لید
               { subtitle: { contains: safeKeyword } },
               { lead: { contains: safeKeyword } },
               { metaDesc: { contains: safeKeyword } },
-              // وزن چهارم: بدنه متن (در SQLite با Contains کاوش می‌شود)
               { body: { contains: safeKeyword } }
             ]
           },
@@ -59,13 +65,12 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
             categories: { select: { name: true } }
           },
           orderBy: { publishedAt: 'desc' },
-          take: limit + 1, // یکی بیشتر می‌گیریم تا بفهمیم آیا صفحه بعدی وجود دارد یا نه
+          take: limit + 1,
           skip: skip
-        }).then(res => contentResults = res)
+        }).then(res => { contentResults = res; })
       );
     }
 
-    // کاوش در جدول پرونده‌های باز (منظومه‌ها / Dossiers)
     if (searchDossiers) {
       queries.push(
         prisma.dossier.findMany({
@@ -82,21 +87,20 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
           orderBy: { publishedAt: 'desc' },
           take: limit + 1,
           skip: skip
-        }).then(res => dossierResults = res)
+        }).then(res => { dossierResults = res; })
       );
     }
 
-    // منتظر می‌مانیم تا هر دو کوئری به صورت موازی تمام شوند
     await Promise.all(queries);
 
-    // ۳. یکپارچه‌سازی و قالب‌بندی نتایج برای فرانت‌اند (Bento Grid)
+    // ۳. یکپارچه‌سازی و قالب‌بندی نتایج با لینک‌های اصلاح‌شده (/f و /p)
     const formattedContents = contentResults.map(item => ({
       id: item.id,
-      type: item.type, // 'BLOG', 'RAW', 'PRODUCED', 'TOOL'
+      type: item.type,
       title: `${item.titleBase} ${item.titleHighlight || ''}`.trim(),
       subtitle: item.subtitle || item.lead || item.readTime || '',
       image: item.coverDesktop || item.coverMobile || '',
-      url: `/${item.type.toLowerCase()}/${item.slug}`,
+      url: `${getPrefixByType(item.type)}/${item.slug}`,
       category: item.categories?.[0]?.name || getCategoryName(item.type),
       date: item.publishedAt,
       color: getColorByType(item.type)
@@ -114,23 +118,27 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
       color: item.themeColor || '#06b6d4'
     }));
 
-    // ترکیب همه نتایج و سورت کردن مجدد براساس تاریخ انتشار
     const combinedResults = [...formattedDossiers, ...formattedContents];
     combinedResults.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // تشخیص دکمه «نمایش بیشتر»
     const hasMore = combinedResults.length > limit;
     const finalResults = combinedResults.slice(0, limit);
 
-    // ۴. ذخیره لاگ کاوش به صورت Fire-and-Forget (بدون ایجاد تاخیر برای کاربر)
+    // ۴. ذخیره هوشمند لاگ کاوش (با محافظ ضداسپم ۱۰ ثانیه‌ای برای کلمات تکراری)
     if (page === 1) {
-      prisma.searchLog.create({
-        data: {
-          keyword: safeKeyword,
-          // ثبت تعداد واقعی نتایجی که پیدا شد
-          resultsCount: contentResults.length + dossierResults.length 
-        }
-      }).catch(err => console.error('Failed to log search:', err));
+      const now = Date.now();
+      const lastLogged = searchLogCooldown.get(safeKeyword) || 0;
+      if (now - lastLogged > 10000) {
+        searchLogCooldown.set(safeKeyword, now);
+        if (searchLogCooldown.size > 1000) searchLogCooldown.clear();
+
+        prisma.searchLog.create({
+          data: {
+            keyword: safeKeyword,
+            resultsCount: contentResults.length + dossierResults.length 
+          }
+        }).catch(err => console.error('Failed to log search:', err));
+      }
     }
 
     return { 
@@ -145,9 +153,6 @@ export async function searchArchive({ keyword, filters = [], page = 1, limit = 8
   }
 }
 
-// ------------------------------------------------
-// توابع کمکی برای تزریق رنگ و نام فارسی به فرانت‌اند
-// ------------------------------------------------
 function getCategoryName(type) {
   switch (type) {
     case 'BLOG': return 'مقاله';
@@ -160,10 +165,10 @@ function getCategoryName(type) {
 
 function getColorByType(type) {
   switch (type) {
-    case 'BLOG': return '#a855f7'; // بنفش
-    case 'RAW': return '#fbbf24';  // کهربایی
-    case 'PRODUCED': return '#06b6d4'; // فیروزه‌ای
-    case 'TOOL': return '#10b981'; // سبز
-    default: return '#6b7280'; // خاکستری
+    case 'BLOG': return '#a855f7';
+    case 'RAW': return '#fbbf24';
+    case 'PRODUCED': return '#06b6d4';
+    case 'TOOL': return '#10b981';
+    default: return '#6b7280';
   }
 }

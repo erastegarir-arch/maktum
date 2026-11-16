@@ -15,6 +15,15 @@ import AdminLoading from '@/app/(admin-panel)/loading';
 
 const cn = (...inputs) => twMerge(clsx(inputs));
 
+// تبدیل خودکار تمام ارقام انگلیسی و عربی به فارسی
+const toPersianDigits = (input) => {
+  if (input === null || input === undefined) return '';
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return String(input)
+    .replace(/[0-9]/g, (w) => persianDigits[+w])
+    .replace(/[٠-٩]/g, (w) => persianDigits[w.charCodeAt(0) - 1632]);
+};
+
 const SectionToggle = ({ checked, onChange, colorClass }) => (
   <label className="flex items-center cursor-pointer gap-2 select-none">
     <span className={cn('text-xs font-bold transition-colors', checked !== false ? 'text-white' : 'text-gray-500')}>
@@ -242,9 +251,58 @@ export default function PersianGuideSettingsPage() {
     }
   };
 
-  const handleResetToDefault = () => {
-    setData(defaultPersianGuideData);
-    toast.success('مقادیر پیش‌فرض بازگردانی شد. برای ثبت نهایی، دکمه «ذخیره» را بزنید.');
+  const handleResetToDefault = async () => {
+    const allowed = Boolean(user?.isSuperAdmin || (can && can('PERSIAN_GUIDE_EDIT')));
+    if (!allowed) {
+      return toast.error('شما مجوز «شیوه‌نامه فارسی‌نویسی» را برای بازنشانی اطلاعات این صفحه ندارید.');
+    }
+
+    setSaving(true);
+    const loadingToast = toast.loading('در حال بازخوانی از فایل پیش‌فرض و ثبت در پایگاه داده...');
+
+    try {
+      // کپی عمیق و تازه از فایل lib برای بازنشانی کامل تمام بخش‌ها
+      const freshDefault = JSON.parse(JSON.stringify(defaultPersianGuideData));
+
+      const approvedList = Array.isArray(pledgeStats.recentPledgers)
+        ? pledgeStats.recentPledgers
+        : [];
+      const realApprovedCount = approvedList.length;
+      const publicNamesOnly = approvedList.map((item) =>
+        typeof item === 'object' ? item.name : String(item)
+      );
+
+      const syncedData = {
+        ...freshDefault,
+        pledge: {
+          ...freshDefault.pledge,
+          initialPledgeCount: realApprovedCount,
+          recentPledgers: publicNamesOnly,
+        },
+      };
+
+      const resMain = await saveSetting(
+        'persian_guide_page_data',
+        JSON.stringify(syncedData),
+        'PERSIAN_GUIDE_PAGE'
+      );
+      if (!resMain?.success) {
+        throw new Error(resMain?.error || 'خطا در ثبت اطلاعات پیش‌فرض');
+      }
+
+      await saveSetting('persian_guide_seo_title', syncedData.seo?.title || '', 'PERSIAN_GUIDE_PAGE');
+      await saveSetting('persian_guide_seo_desc', syncedData.seo?.description || '', 'PERSIAN_GUIDE_PAGE');
+
+      setData(syncedData);
+      setSaving(false);
+      toast.success('تغییرات فایل پیش‌فرض با موفقیت بازنشانی شد!', {
+        id: loadingToast,
+      });
+      router.refresh();
+    } catch (err) {
+      setSaving(false);
+      toast.error(err?.message || 'خطا در بازنشانی اطلاعات!', { id: loadingToast });
+    }
   };
 
   const copyHelperChar = (char, label) => {
@@ -510,10 +568,10 @@ export default function PersianGuideSettingsPage() {
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-90 pointer-events-none z-20" />
 
         <form onSubmit={handleSave} className="p-6 md:p-8 space-y-10 relative z-10">
-          {/* ۰-الف. تنظیمات سئو فنی و مسیر راهنما (Breadcrumb) */}
+          {/* ۰-الف. تنظیمات سئو فنی و مسیر راهنما*/}
           <div className="space-y-4 p-6 bg-[#050810]/50 shadow-inner rounded-2xl border border-white/5">
             <div className="flex justify-between items-center border-b border-white/10 pb-3">
-              <h2 className="text-lg font-bold text-[#10b981]">۰. تنظیمات سئو فنی و مسیر راهنما (Breadcrumb)</h2>
+              <h2 className="text-lg font-bold text-[#10b981]">۰. تنظیمات سئو فنی و مسیر راهنما</h2>
               <SectionToggle
                 checked={data.breadcrumb?.enabled}
                 onChange={(val) =>
@@ -525,7 +583,7 @@ export default function PersianGuideSettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-xs text-gray-300 font-bold pl-1">عنوان سئو (Meta Title)</label>
+                <label className="text-xs text-gray-300 font-bold pl-1">عنوان سئو</label>
                 <input
                   type="text"
                   value={data.seo?.title || ''}
@@ -534,7 +592,7 @@ export default function PersianGuideSettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs text-gray-300 font-bold pl-1">مسیر کانونیکال (Canonical Path)</label>
+                <label className="text-xs text-gray-300 font-bold pl-1">مسیر کانونیکال</label>
                 <input
                   type="text"
                   dir="ltr"
@@ -579,7 +637,7 @@ export default function PersianGuideSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-gray-300 font-bold pl-1">توضیحات متا (Meta Description)</label>
+              <label className="text-xs text-gray-300 font-bold pl-1">توضیحات متا</label>
               <textarea
                 rows={2}
                 value={data.seo?.description || ''}
@@ -657,7 +715,7 @@ export default function PersianGuideSettingsPage() {
             </div>
           </div>
 
-          {/* ۱. بخش پیشانی (Hero) */}
+          {/* ۱. بخش پیشانی*/}
           <div
             className={cn(
               'space-y-4 p-6 bg-[#050810]/50 shadow-inner rounded-2xl border transition-colors',
@@ -665,7 +723,7 @@ export default function PersianGuideSettingsPage() {
             )}
           >
             <div className="flex justify-between items-center border-b border-white/10 pb-3">
-              <h2 className="text-lg font-bold text-[#10b981]">۱. بخش پیشانی صفحه (Hero) و نماد</h2>
+              <h2 className="text-lg font-bold text-[#10b981]">۱. بخش پیشانی صفحه و نماد</h2>
               <SectionToggle
                 checked={data.hero.enabled}
                 onChange={(val) => setData((prev) => ({ ...prev, hero: { ...prev.hero, enabled: val } }))}
@@ -675,7 +733,7 @@ export default function PersianGuideSettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <label className="text-xs text-gray-300 font-bold pl-1">نام نماد (Icon Name)</label>
+                <label className="text-xs text-gray-300 font-bold pl-1">نام نماد</label>
                 <input
                   type="text"
                   dir="ltr"
@@ -1226,7 +1284,7 @@ export default function PersianGuideSettingsPage() {
           >
             <div className="flex justify-between items-center border-b border-white/10 pb-3">
               <h2 className="text-lg font-bold text-[#10b981]">
-                ۶. جدول جامع واژه‌گزینی و برابرنهادهای مکتوم ({(data.lexicon.items || []).length} واژه)
+                ۶. جدول جامع واژه‌گزینی و برابرنهادهای مکتوم ({toPersianDigits((data.lexicon.items || []).length)} واژه)
               </h2>
               <SectionToggle
                 checked={data.lexicon.enabled}
@@ -1391,7 +1449,7 @@ export default function PersianGuideSettingsPage() {
             </div>
           </div>
 
-          {/* ۸. پرسش‌های متداول (FAQ) */}
+          {/* ۸. پرسش‌های متداول*/}
           <div
             className={cn(
               'space-y-4 p-6 bg-[#050810]/50 shadow-inner rounded-2xl border transition-colors',
@@ -1399,7 +1457,7 @@ export default function PersianGuideSettingsPage() {
             )}
           >
             <div className="flex justify-between items-center border-b border-white/10 pb-3">
-              <h2 className="text-lg font-bold text-[#f59e0b]">۸. بخش پرسش‌های متداول نگارشی (FAQ)</h2>
+              <h2 className="text-lg font-bold text-[#f59e0b]">۸. بخش پرسش‌های متداول نگارشی</h2>
               <SectionToggle
                 checked={data.faq.enabled}
                 onChange={(val) => setData((prev) => ({ ...prev, faq: { ...prev.faq, enabled: val } }))}
@@ -1602,14 +1660,14 @@ export default function PersianGuideSettingsPage() {
               <div className="flex items-center gap-2 bg-[#10b981]/10 border border-[#10b981]/30 px-3.5 py-1.5 rounded-xl">
                 <span className="text-xs text-gray-300 font-bold">تعداد واقعی هم‌پیمانان تأییدشده:</span>
                 <span className="text-sm text-[#10b981] font-black">
-                  {(pledgeStats.recentPledgers || []).length} نفر
+                  {toPersianDigits((pledgeStats.recentPledgers || []).length)} نفر
                 </span>
               </div>
             </div>
 
             <div className="space-y-2.5">
               <label className="text-xs text-amber-400 font-bold block">
-                الف) اسامی جدید در انتظار تأیید مدیر ({(pledgeStats.pendingPledgers || []).length} مورد)
+                الف) اسامی جدید در انتظار تأیید مدیر ({toPersianDigits((pledgeStats.pendingPledgers || []).length)} مورد)
               </label>
               {(pledgeStats.pendingPledgers || []).length === 0 ? (
                 <p className="text-xs text-gray-500 bg-black/30 p-3 rounded-xl">
@@ -1776,7 +1834,7 @@ export default function PersianGuideSettingsPage() {
                 ۱۲. پیشنهادهای برابرنهاد فارسی ارسالی توسط کاربران
               </h2>
               <span className="text-xs text-[#06b6d4] font-bold">
-                {userSuggestions.length} پیشنهاد در صف بررسی
+                {toPersianDigits(userSuggestions.length)} پیشنهاد در صف بررسی
               </span>
             </div>
 

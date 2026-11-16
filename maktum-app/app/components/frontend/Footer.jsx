@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -97,6 +98,11 @@ function SocialIconItem({ social, allIcons }) {
 
 export default function Footer({ initialData }) {
   const pathname = usePathname();
+  const [brokenFooterImgs, setBrokenFooterImgs] = useState({});
+  const markFooterImgBroken = (url) => {
+    if (!url) return;
+    setBrokenFooterImgs((prev) => ({ ...prev, [url]: true }));
+  };
 
   if (pathname?.startsWith('/portal-entry-99') || pathname?.startsWith('/admin')) {
     return null;
@@ -117,7 +123,11 @@ export default function Footer({ initialData }) {
   } = initialData || {};
 
   const cleanFooterIcon = footerIcon?.trim() || '';
-  const isFooterIconUrl = cleanFooterIcon && (cleanFooterIcon.includes('/') || cleanFooterIcon.startsWith('http') || cleanFooterIcon.startsWith('.'));
+  const isFooterIconUrl = Boolean(
+    cleanFooterIcon &&
+      !brokenFooterImgs[cleanFooterIcon] &&
+      (cleanFooterIcon.includes('/') || cleanFooterIcon.startsWith('http') || cleanFooterIcon.startsWith('.'))
+  );
   const footerIconSvg = !isFooterIconUrl && cleanFooterIcon ? allIcons.find(i => i.name === cleanFooterIcon)?.svgCode : null;
   const hasFooterIcon = Boolean(isFooterIconUrl || footerIconSvg);
   const hasFooterText = Boolean(footerText && footerText.trim() !== '');

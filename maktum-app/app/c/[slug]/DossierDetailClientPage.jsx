@@ -6,6 +6,7 @@ import Icon from '@/app/components/Icon';
 import Link from 'next/link';
 import Breadcrumbs from '@/app/components/Breadcrumbs';
 import EmptyState from '@/app/components/EmptyState'; 
+import BlurImage from '@/app/components/BlurImage';
 
 const getContentTypeConfig = (type) => {
   const t = type?.toUpperCase() || '';
@@ -80,7 +81,7 @@ const ContentCard = ({ content, index }) => {
         <div className="absolute top-0 inset-x-0 h-[2px] transition-opacity duration-300 opacity-0 group-hover:opacity-100 pointer-events-none z-20" style={{ background: `linear-gradient(to right, transparent, ${typeConfig.hex}, transparent)` }} />
         <div className="absolute inset-0 pointer-events-none rounded-inherit bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),var(--theme-glow),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 hidden md:block" />
 
-        {content.coverDesktop && <img src={content.coverDesktop} alt={content.titleBase} className="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-105" />}
+        <BlurImage src={content.coverDesktop || content.coverMobile} alt={content.titleBase} className="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#050810] via-[#050810]/60 to-transparent opacity-85 transition-opacity group-hover:opacity-95" />
         
         <div className="absolute -bottom-10 inset-x-0 h-1/2 transition-all duration-700 opacity-30 group-hover:opacity-60 mix-blend-screen pointer-events-none" style={{ background: `radial-gradient(ellipse at bottom, ${typeConfig.hex}60 0%, transparent 70%)` }} />
@@ -221,7 +222,7 @@ export default function DossierDetailClientPage({ dossier }) {
                   <motion.div initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex flex-col items-center gap-3 md:gap-5 group cursor-pointer w-20 md:w-32">
                     <div className="relative w-20 h-20 md:w-32 md:h-32 rounded-full overflow-hidden shadow-[inset_0_0_15px_rgba(255,255,255,0.05),0_15px_35px_rgba(0,0,0,0.5)] transition-transform duration-500 group-hover:-translate-y-2 border border-white/[0.05] group-hover:border-white/[0.15] bg-white/[0.03] backdrop-blur-md">
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors z-10" />
-                      {creator.imageUrl ? <img src={creator.imageUrl} alt={creator.name} className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500 opacity-90 group-hover:opacity-100" /> : <div className="w-full h-full flex items-center justify-center text-gray-500"><Icon name="user" className="w-8 h-8 md:w-10 md:h-10" /></div>}
+                      {creator.imageUrl ? <BlurImage src={creator.imageUrl} alt={creator.name} className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500 opacity-90 group-hover:opacity-100" /> : <div className="w-full h-full flex items-center justify-center text-gray-500"><Icon name="user" className="w-8 h-8 md:w-10 md:h-10" /></div>}
                     </div>
                     <span className="text-xs md:text-base font-bold text-gray-300 group-hover:text-white transition-colors text-center leading-tight font-sans">{creator.name}</span>
                   </motion.div>

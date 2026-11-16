@@ -55,7 +55,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
     if (!user) return [];
 
     return ALL_MENU_ITEMS.reduce((acc, item) => {
-      // اگر آیتم فهرست دارد (مثل چیدمان)، فقط زیرفهرست‌های مجاز را نگه می‌داریم
+      // اگر مورد فهرست دارد (مثل چیدمان)، فقط زیرفهرست‌های مجاز را نگه می‌داریم
       if (item.subItems) {
         const allowedSubs = item.subItems.filter(sub => !sub.permission || (can && can(sub.permission)));
         if (allowedSubs.length > 0) {
@@ -64,7 +64,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
         return acc;
       }
 
-      // اگر آیتم نیاز به مجوز خاصی ندارد
+      // اگر مورد نیاز به مجوز خاصی ندارد
       if (!item.requiredAny || item.requiredAny.length === 0) {
         acc.push(item);
         return acc;
@@ -113,7 +113,7 @@ export default function Sidebar({ mobileMenuOpen, setMobileMenuOpen }) {
 
   const hideTooltip = () => setActiveTooltip(null);
 
-  // موتور رندر آیتم‌های منو
+  // موتور رندر مورد‌های منو
   const renderMenuItems = (forMobile = false) => (
     <div className="flex-1 overflow-y-auto py-5 px-3 space-y-2 custom-scrollbar relative z-10 w-full">
       {menuItems.map((item) => {

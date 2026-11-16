@@ -66,7 +66,7 @@ export default function AdminDossiersManager() {
     if (isWorking) return;
 
     if (user) {
-      // فقط مسئولی مجاز به ورود است که حداقل یکی از مجوزهای منظومه (تنظیمات قطب یا مسئولیت پرونده‌ها) را داشته باشد
+      // فقط مسئولی مجاز به ورود است که حداقل یکی از مجوزهای منظومه (تنظیمات کانون یا مسئولیت پرونده‌ها) را داشته باشد
       const allowed = user.isSuperAdmin || (canAny && canAny(['HUB_SETTINGS', 'DOSSIER_EDIT', 'DOSSIER_CREATE', 'DOSSIER_DELETE']));
       setHasAccess(!!allowed);
 
@@ -94,7 +94,7 @@ export default function AdminDossiersManager() {
   const [allTaxonomies, setAllTaxonomies] = useState([]);
   const [allContents, setAllContents] = useState([]);
 
-  // استیت‌های تب قطب
+  // استیت‌های تب کانون
   const [hubSettings, setHubSettings] = useState({ 
     title: '', description: '', metaTitle: '', metaDesc: '',
     icon: '', bgDesktop: '', bgMobile: '', titleGradientStart: '#ffffff', titleGradientEnd: '#ffffff'
@@ -156,18 +156,18 @@ export default function AdminDossiersManager() {
   };
 
   const handleSaveHubSettings = async () => {
-    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز ویرایش تنظیمات قطب را ندارید.');
+    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز ویرایش تنظیمات کانون را ندارید.');
     setIsSavingHub(true);
     const res = await saveHubSettings(hubSettings);
     setIsSavingHub(false);
-    if(res.success) toast.success('تنظیمات صفحه قطب با موفقیت ذخیره شد.');
+    if(res.success) toast.success('تنظیمات صفحه کانون با موفقیت ذخیره شد.');
     else toast.error('خطا در ذخیره تنظیمات');
   };
 
   const handleDragStart = (e, index) => {
     if (!can('HUB_SETTINGS')) {
       e.preventDefault();
-      return toast.error('شما مجوز تغییر چیدمان قطب را ندارید.');
+      return toast.error('شما مجوز تغییر چیدمان کانون را ندارید.');
     }
     setDraggedItem(index);
     e.dataTransfer.effectAllowed = 'move';
@@ -195,7 +195,7 @@ export default function AdminDossiersManager() {
   };
 
   const toggleDossierVisibility = async (id) => {
-    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز تغییر وضعیت نمایش در قطب را ندارید.');
+    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز تغییر وضعیت نمایش در کانون را ندارید.');
     const d = dossiers.find(x => x.id === id);
     const updated = { ...d, isVisibleInHub: !d.isVisibleInHub };
     setDossiers(prev => prev.map(x => x.id === id ? updated : x));
@@ -204,7 +204,7 @@ export default function AdminDossiersManager() {
   };
 
   const toggleDossierLayout = async (id, layoutType) => {
-    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز تغییر ابعاد پرونده در قطب را ندارید.');
+    if (!can('HUB_SETTINGS')) return toast.error('شما مجوز تغییر ابعاد پرونده در کانون را ندارید.');
     const d = dossiers.find(x => x.id === id);
     if (d.layoutSize === layoutType) return;
     const updated = { ...d, layoutSize: layoutType };
@@ -615,13 +615,13 @@ const renderEditorForm = () => {
               <Icon name="folder" className="w-8 h-8 text-[#06b6d4]" /> مسئولیت منظومه‌ها (پرونده‌ها)
             </h1>
             <p className="text-sm text-gray-400 font-light max-w-xl leading-relaxed">
-              مسئولیت یکپارچه محتوای قطب اصلی و ساخت/ویرایش پرونده‌های تخصصی.
+              مسئولیت یکپارچه محتوای کانون اصلی و ساخت/ویرایش پرونده‌های تخصصی.
             </p>
           </div>
           
           <div className="flex bg-[#050810]/50 border border-white/5 shadow-inner p-1.5 rounded-2xl w-full lg:w-auto">
             {can('HUB_SETTINGS') && (
-              <button onClick={() => setActiveTab('HUB_SETTINGS')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'HUB_SETTINGS' ? 'bg-[#06b6d4]/20 text-[#06b6d4] shadow-inner border-[#06b6d4]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>تنظیمات قطب</button>
+              <button onClick={() => setActiveTab('HUB_SETTINGS')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'HUB_SETTINGS' ? 'bg-[#06b6d4]/20 text-[#06b6d4] shadow-inner border-[#06b6d4]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>تنظیمات کانون</button>
             )}
             {(can('DOSSIER_EDIT') || can('DOSSIER_CREATE') || can('DOSSIER_DELETE')) && (
               <button onClick={() => setActiveTab('DOSSIER_LIST')} className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer border border-transparent ${activeTab === 'DOSSIER_LIST' ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] shadow-inner border-[#8b5cf6]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>مسئولیت پرونده‌ها</button>
@@ -631,7 +631,7 @@ const renderEditorForm = () => {
       </motion.div>
 
       {/* ======================================================= */}
-      {/* تب اول: تنظیمات قطب */}
+      {/* تب اول: تنظیمات کانون */}
       <AnimatePresence mode="wait">
         {activeTab === 'HUB_SETTINGS' && can('HUB_SETTINGS') && (
           <motion.div key="hub" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
@@ -704,12 +704,12 @@ const renderEditorForm = () => {
               </div>
             </div> 
 
-{/* بخش چیدمان پرونده‌ها در قطب */}
+{/* بخش چیدمان پرونده‌ها در کانون */}
             <div className="relative rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden border border-transparent bg-[#0f172a]/40 backdrop-blur-2xl mt-8">
               <div className="absolute inset-0 bg-white/[0.02] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] pointer-events-none -z-10" />
               <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 relative z-10">
                 <div>
-                  <h2 className="text-xl font-bold text-white mb-1">چیدمان پرونده‌ها در قطب</h2>
+                  <h2 className="text-xl font-bold text-white mb-1">چیدمان پرونده‌ها در کانون</h2>
                   <p className="text-xs text-gray-400">با کشیدن، ترتیب اولویت‌ها را مشخص کنید. انتخاب وضعیت «ویژه» یا «استاندارد» مستقیماً در سامانه اعمال می‌شود.</p>
                 </div>
               </div>
@@ -748,7 +748,7 @@ const renderEditorForm = () => {
                              </button>
                              <div className="absolute bottom-full mb-2 hidden group-hover/tooltip:flex flex-col items-center z-50 animate-[fadeIn_0.2s_ease-out] pointer-events-none">
                                <div className="bg-[#0f172a]/95 backdrop-blur-md border border-white/5 text-white text-[10px] py-1.5 px-3 rounded-xl shadow-xl whitespace-nowrap font-bold font-sans">
-                                 {dossier.isVisibleInHub ? "عدم نمایش در قطب" : "نمایش در قطب"}
+                                 {dossier.isVisibleInHub ? "عدم نمایش در کانون" : "نمایش در کانون"}
                                </div>
                              </div>
                            </div>

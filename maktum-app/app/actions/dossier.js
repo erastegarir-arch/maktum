@@ -4,9 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { getSessionUser } from './auth';
 
-// ==========================================
 // ۱. دریافت پرونده‌ها برای صفحه اصلی هاب (/c)
-// ==========================================
 export async function getAllDossiers() {
   try {
     const dossiers = await prisma.dossier.findMany({
@@ -20,9 +18,7 @@ export async function getAllDossiers() {
   }
 }
 
-// ==========================================
-// ۲. دریافت اطلاعات کامل یک پرونده (حل مشکل ارور صفحه داخلی)
-// ==========================================
+// ۲. دریافت اطلاعات کامل یک پرونده
 export async function getDossierBySlug(slug) {
   try {
     const cleanSlug = decodeURIComponent(slug).trim().toLowerCase();
@@ -54,9 +50,7 @@ export async function getDossierBySlug(slug) {
   }
 }
 
-// ==========================================
 // ۳. دریافت تمام پرونده‌ها برای درگاه مسئول
-// ==========================================
 export async function getAllDossiersAdmin() {
   try {
     const dossiers = await prisma.dossier.findMany({
@@ -69,9 +63,7 @@ export async function getAllDossiersAdmin() {
   }
 }
 
-// ==========================================
-// ۴. ساخت یا ویرایش پرونده (به‌روزرسانی شده برای رفع ارور ذخیره)
-// ==========================================
+// ۴. ساخت یا ویرایش پرونده
 export async function saveDossier(data) {
   try {
     const session = await getSessionUser();
@@ -81,8 +73,8 @@ export async function saveDossier(data) {
 
     const { id, selectedTopics = [], selectedCreators = [], selectedContents = [], ...restData } = data;
     
-    const taxonomyConnect = [...selectedTopics, ...selectedCreators].filter(t=>t.id).map(t => ({ id: t.id }));
-    const contentConnect = selectedContents.filter(c=>c.id).map(c => ({ id: c.id }));
+    const taxonomyConnect = [...selectedTopics, ...selectedCreators].filter(t => t.id).map(t => ({ id: t.id }));
+    const contentConnect = selectedContents.filter(c => c.id).map(c => ({ id: c.id }));
 
     restData.status = 'PUBLISHED';
     
@@ -90,7 +82,6 @@ export async function saveDossier(data) {
       restData.slug = restData.slug.trim().toLowerCase().replace(/\s+/g, '-');
     }
 
-    // پاکسازی فیلدهای سامانه‌ای برای جلوگیری از کراش پایگاه داده
     delete restData.taxonomies;
     delete restData.contents;
     delete restData._count;
@@ -118,10 +109,12 @@ export async function saveDossier(data) {
       });
     }
 
+    revalidatePath('/');
     revalidatePath('/c');
     if (restData.slug) {
       revalidatePath(`/c/${restData.slug}`);
     }
+    revalidatePath('/sitemap.xml');
     revalidatePath('/portal-entry-99/dossiers');
     
     return { success: true };
@@ -131,9 +124,7 @@ export async function saveDossier(data) {
   }
 }
 
-// ==========================================
 // ۵. حذف پرونده
-// ==========================================
 export async function deleteDossier(id) {
   try {
     const session = await getSessionUser();
@@ -142,7 +133,9 @@ export async function deleteDossier(id) {
     }
 
     await prisma.dossier.delete({ where: { id } });
+    revalidatePath('/');
     revalidatePath('/c');
+    revalidatePath('/sitemap.xml');
     revalidatePath('/portal-entry-99/dossiers');
     return { success: true };
   } catch (error) {
@@ -150,9 +143,7 @@ export async function deleteDossier(id) {
   }
 }
 
-// ==========================================
 // ۶. به‌روزرسانی ترتیب چینش
-// ==========================================
 export async function updateDossiersOrder(orderedIds) {
   try {
     const session = await getSessionUser();
@@ -161,6 +152,7 @@ export async function updateDossiersOrder(orderedIds) {
     }
 
     await Promise.all(orderedIds.map((id, index) => prisma.dossier.update({ where: { id }, data: { orderIndex: index } })));
+    revalidatePath('/');
     revalidatePath('/c');
     return { success: true };
   } catch (error) {
@@ -168,9 +160,7 @@ export async function updateDossiersOrder(orderedIds) {
   }
 }
 
-// ==========================================
 // ۷. دریافت تنظیمات هاب
-// ==========================================
 export async function getHubSettings() {
   const keys = [
     'hub_title', 'hub_desc', 'hub_meta_title', 'hub_meta_desc',
@@ -181,7 +171,7 @@ export async function getHubSettings() {
   
   const map = settings.reduce((acc, curr) => ({ ...acc, [curr.key]: curr.value }), {});
   return {
-    title: map.hub_title || 'پرونده‌های ویـژه مـدار',
+    title: map.hub_title || 'پرونده‌های ویژه مکتوم',
     description: map.hub_desc || '',
     metaTitle: map.hub_meta_title || 'پرونده‌های ویژه مکتوم',
     metaDesc: map.hub_meta_desc || '',
@@ -193,9 +183,7 @@ export async function getHubSettings() {
   };
 }
 
-// ==========================================
 // ۸. ذخیره تنظیمات هاب
-// ==========================================
 export async function saveHubSettings(data) {
   const session = await getSessionUser();
   if (!session || (!session.isAdmin && !session.isSuperAdmin)) {

@@ -97,7 +97,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
   const parentBreadcrumb = { label: 'بلاگ', href: '/blog' };
 
   const title = `${data?.titleBase || ''} ${data?.titleHighlight || ''}`.trim();
-  const mainImage = data?.coverDesktop || '/images/placeholder-cover.jpg'; 
+  const mainImage = data?.coverDesktop || ''; 
   const mobileImage = data?.coverMobile || mainImage; 
   
   const rawCreators = safeParse(data?.creators, []);
@@ -216,7 +216,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
           <div className="absolute inset-0 w-full h-full md:rounded-[2.5rem] overflow-hidden bg-[#0b1426]/40 shadow-inner">
             <picture className="w-full h-full">
               <source media="(max-width: 768px)" srcSet={mobileImage} />
-              <img src={mainImage} alt={title} className="w-full h-full object-cover opacity-90 md:opacity-80 group-hover:scale-105 transition-all duration-700 group-hover:opacity-100" />
+              <BlurImage src={mainImage} alt={title} className="w-full h-full object-cover opacity-90 md:opacity-80 group-hover:scale-105 transition-all duration-700 group-hover:opacity-100" />
             </picture>
           </div>
           <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#081020]/75 to-transparent md:hidden pointer-events-none z-10" />
@@ -326,7 +326,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
                       <a key={index} href={`/t/${author.slug || author.name}`} className="inline-flex items-center gap-2 group cursor-pointer bg-white/5 hover:bg-white/10 border border-transparent shadow-inner transition-colors pr-1.5 pl-3 md:pl-4 py-1.5 rounded-full w-max">
                         <div className="w-7 h-7 md:w-8 md:h-8 rounded-full overflow-hidden border border-transparent shadow-inner shrink-0 relative bg-black/40 flex items-center justify-center">
                           {authorImage ? (
-                            <img src={authorImage} alt={author.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                            <BlurImage src={authorImage} alt={author.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                           ) : (
                             <Icon name="user" className="w-4 h-4 text-gray-500" />
                           )}
@@ -356,7 +356,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
                       <div className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent ${currentTheme.gradientVia} to-transparent opacity-0 group-hover:opacity-90 transition-opacity pointer-events-none z-20`} />
                       
                       <div className="relative w-full aspect-square md:aspect-video rounded-xl bg-black/40 shadow-inner overflow-hidden mb-3 flex items-center justify-center z-10 border border-transparent">
-                        <BlurImage src={rel.image || '/images/placeholder-cover.jpg'} className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" alt={rel.title || "Related"} />
+                        <BlurImage src={rel.image || ''} className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" alt={rel.title || "Related"} />
                       </div>
                       <div className="flex-grow z-10">
                         <h3 className={`text-[11px] md:text-xs font-bold text-white mb-2 leading-relaxed ${currentTheme.hoverText} transition-colors line-clamp-2 font-sans`}>{rel.title}</h3>

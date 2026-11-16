@@ -1,28 +1,24 @@
 // lib/seo.js
 
-// نشانی پایه سامانه از متغیر محیطی خوانده می‌شود و در صورت نبود، دامنه اصلی قرار می‌گیرد
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://maktum.ir').replace(/\/$/, '');
 
 export const SITE_CONFIG = {
   name: 'مکتوم',
-  alternateName: ['Maktum', 'پلتفرم مکتوم', 'پایگاه داده رسانه‌ای مکتوم'],
+  alternateName: ['Maktum', 'پلتفرم مکتوم', 'پایگاه داده رسانه‌ای مکتوم', 'شبکه مکتوم'],
   title: 'مکتوم | پایگاه داده باز محتوای رسانه‌ای، راش، مستند و پژوهش‌های تحلیلی',
   description:
     'پلتفرم غیرتجاری و باز مکتوم؛ مرجع تخصصی پایگاه داده، توزیع رایگان فوتیج و راش‌های ویدیویی (B-Roll)، مستندها، ابزارهای تولید محتوا، مقالات تحلیلی و پرونده‌های ویژه پژوهشی.',
   locale: 'fa_IR',
   language: 'fa-IR',
   themeColor: '#050810',
-  logoUrl: `${SITE_URL}/images/logo.png`, // مسیر لوگوی اصلی در پوشه public
-  ogImageUrl: `${SITE_URL}/images/og-default.jpg`, // تصویر پیش‌فرض اشتراک‌گذاری (۱۲۰۰ در ۶۳۰ پیکسل)
+  logoUrl: `${SITE_URL}/images/logo.png`,
+  ogImageUrl: `${SITE_URL}/images/og-default.jpg`,
   socials: [
     'https://t.me/MaktumHist',
-    // در صورت داشتن صفحات دیگر در شبکه‌های اجتماعی، پیوند آن‌ها را اینجا اضافه کنید
+    // هر زمان شبکه اجتماعی جدیدی ساختید، لینک آن را در خط جدید داخل گیومه اضافه کنید
   ],
 };
 
-/**
- * تابع کمکی برای ساخت نشانی مطلق (Absolute URL) و استانداردسازی Canonical
- */
 export function getAbsoluteUrl(path = '/') {
   if (!path) return SITE_URL;
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
@@ -30,15 +26,15 @@ export function getAbsoluteUrl(path = '/') {
   return `${SITE_URL}${cleanPath}`;
 }
 
-/**
- * ۱. اسکیمای هسته مرکزی سامانه (Organization + WebSite + SearchAction + SiteNavigationElement)
- * این گراف، هویت برند مکتوم را بدون نیاز به دفتر فیزیکی در Knowledge Graph گوگل ثبت می‌کند
- * و باعث شکل‌گیری Sitelinks (زیرشاخه‌های سامانه در نتایج اول گوگل) می‌شود.
- */
 export function generateCoreGraphSchema() {
   const mainRoutes = [
     { name: 'پرونده‌های ویژه (منظومه‌ها)', url: getAbsoluteUrl('/c') },
     { name: 'پایگاه داده موضوعی و پدیدآورندگان', url: getAbsoluteUrl('/t') },
+    { name: 'محتوای راش و فوتیج خام', url: getAbsoluteUrl('/f') },
+    { name: 'مستندها و محتوای تولیدی', url: getAbsoluteUrl('/p') },
+    { name: 'مقالات و پژوهش‌های تحلیلی', url: getAbsoluteUrl('/blog') },
+    { name: 'ابزارهای کاربردی رسانه', url: getAbsoluteUrl('/tool') },
+    { name: 'شیوه‌نامه فارسی‌نویسی و پاسداشت زبان فارسی', url: getAbsoluteUrl('/persian-guide') },
     { name: 'درباره مکتوم', url: getAbsoluteUrl('/about') },
     { name: 'همکاری با مکتوم', url: getAbsoluteUrl('/collaborate') },
     { name: 'قوانین و مرامنامه', url: getAbsoluteUrl('/terms') },
@@ -47,7 +43,6 @@ export function generateCoreGraphSchema() {
   return {
     '@context': 'https://schema.org',
     '@graph': [
-      // الف) تعریف هویت سازمانی و برند مکتوم (Online-Only Organization)
       {
         '@type': ['Organization', 'ResearchOrganization'],
         '@id': `${SITE_URL}/#organization`,
@@ -72,6 +67,7 @@ export function generateCoreGraphSchema() {
           'مستندسازی و پژوهش تاریخی',
           'تولید محتوای رسانه‌ای',
           'ابزارهای رسانه و دیجیتال',
+          'پاسداشت زبان و ادب فارسی',
         ],
         contactPoint: {
           '@type': 'ContactPoint',
@@ -80,8 +76,6 @@ export function generateCoreGraphSchema() {
           availableLanguage: ['Persian', 'fa'],
         },
       },
-
-      // ب) تعریف وب‌سامانه و فعال‌سازی قاب کاوش در نتایج گوگل (Sitelinks Search Box)
       {
         '@type': 'WebSite',
         '@id': `${SITE_URL}/#website`,
@@ -96,14 +90,12 @@ export function generateCoreGraphSchema() {
             '@type': 'SearchAction',
             target: {
               '@type': 'EntryPoint',
-              urlTemplate: `${SITE_URL}/?search={search_term_string}`,
+              urlTemplate: `${SITE_URL}/t?q={search_term_string}`,
             },
             'query-input': 'required name=search_term_string',
           },
         ],
       },
-
-      // ج) معرفی صریح ساختار منوی اصلی به گوگل برای تشکیل Sitelinks
       {
         '@type': 'ItemList',
         '@id': `${SITE_URL}/#navigation`,
@@ -119,9 +111,6 @@ export function generateCoreGraphSchema() {
   };
 }
 
-/**
- * ۲. تابع سازنده متادیتای استاندارد Next.js 16 برای صفحات ثابت و قطب‌ها
- */
 export function constructPageMetadata({
   title,
   description,
@@ -191,11 +180,8 @@ export function constructPageMetadata({
   };
 }
 
-/**
- * ۳. تابع سازنده اسکیمای صفحات هویتی (درباره ما، همکاری با ما، قوانین، قطب‌ها)
- */
 export function generateStaticPageSchema({
-  schemaType = 'WebPage', // 'AboutPage' | 'ContactPage' | 'CollectionPage' | 'WebPage'
+  schemaType = 'WebPage',
   title,
   description,
   path,

@@ -1,17 +1,16 @@
 import { getSetting } from '@/app/actions/settings';
 import CollaborationContent from '../components/frontend/CollaborationContent';
-import { constructPageMetadata } from '@/lib/seo'; // اضافه شدن تابع سئو
+import { constructPageMetadata } from '@/lib/seo';
 import ProgressBar from '@/app/components/ProgressBar';
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-export const revalidate = 0;
+export const revalidate = 60;
 
-// تولید متادیتای پویا برای سئو صفحه همکاری با ما
 export async function generateMetadata() {
-  const seoTitle = await getSetting('collaborate_seo_title');
-  const pageTitle = await getSetting('collaborate_title');
-  const seoDesc = await getSetting('collaborate_seo_desc');
+  const [seoTitle, pageTitle, seoDesc] = await Promise.all([
+    getSetting('collaborate_seo_title'),
+    getSetting('collaborate_title'),
+    getSetting('collaborate_seo_desc'),
+  ]);
 
   return constructPageMetadata({
     title: seoTitle || pageTitle || 'همکاری با ما',

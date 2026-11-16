@@ -1,17 +1,16 @@
 import { getSetting } from '@/app/actions/settings';
 import AboutContent from '@/app/components/frontend/AboutContent';
-import { constructPageMetadata } from '@/lib/seo'; // اضافه شدن تابع سئو
+import { constructPageMetadata } from '@/lib/seo';
 import ProgressBar from '@/app/components/ProgressBar';
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-export const revalidate = 0;
+export const revalidate = 60;
 
-// تولید متادیتای پویا برای سئو
 export async function generateMetadata() {
-  const seoTitle = await getSetting('about_seo_title');
-  const pageTitle = await getSetting('about_title');
-  const seoDesc = await getSetting('about_seo_desc');
+  const [seoTitle, pageTitle, seoDesc] = await Promise.all([
+    getSetting('about_seo_title'),
+    getSetting('about_title'),
+    getSetting('about_seo_desc'),
+  ]);
 
   return constructPageMetadata({
     title: seoTitle || pageTitle || 'درباره ما',

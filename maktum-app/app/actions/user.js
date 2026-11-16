@@ -5,14 +5,14 @@ import { getCurrentUserSessionAction } from './auth';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 
-// ==========================================
-// توابع امنیتی و پاکسازی ورودی‌های کاربر (نماگر)
-// ==========================================
 const toPersianDigits = (num) => {
   if (num === null || num === undefined) return '۰';
   const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   return num.toString().replace(/\d/g, x => farsiDigits[x]);
 };
+
+// نگهبان ضدحمله برای جلوگیری از حدس زدن گذرواژه قبلی در صفحه پروفایل
+const passwordChangeAttempts = new Map();
 
 function sanitizeField(text, maxLength, fieldName) {
   if (!text) return { isValid: true, value: null };
@@ -25,7 +25,6 @@ function sanitizeField(text, maxLength, fieldName) {
     return { isValid: false, error: `${fieldName} نمی‌تواند بیشتر از ${toPersianDigits(maxLength)} کاراکتر باشد.` };
   }
   
-  // مسدود کردن قطعی کدهای مخرب و تگ‌های HTML
   const hasHTMLTags = /<[a-z][\s\S]*>/i.test(cleanText);
   if (hasHTMLTags) {
     return { isValid: false, error: `استفاده از کدهای غیرمجاز در ${fieldName} ممنوع است.` };
@@ -34,7 +33,7 @@ function sanitizeField(text, maxLength, fieldName) {
   return { isValid: true, value: cleanText };
 }
 
-// ۱. دریافت کامل اطلاعات کاربری که وارد شده است
+// ۱. دریافت کامل اطلاعات کاربری که وارد شده است (مرتب‌شده و بهینه)
 export async function getUserProfile() {
   try {
     const authRes = await getCurrentUserSessionAction();
@@ -44,6 +43,8 @@ export async function getUserProfile() {
       where: { id: authRes.user.id },
       include: {
         favorites: {
+          orderBy: { createdAt: 'desc' },
+          take: 50,
           include: {
             content: {
               select: { id: true, titleBase: true, titleHighlight: true, slug: true, type: true, coverDesktop: true, coverMobile: true, publishedAt: true }
@@ -51,6 +52,8 @@ export async function getUserProfile() {
           }
         },
         downloads: { 
+          orderBy: { downloadedAt: 'desc' },
+          take: 50,
           include: {
             content: {
               select: { id: true, titleBase: true, titleHighlight: true, slug: true, type: true, coverDesktop: true, coverMobile: true, publishedAt: true }
@@ -62,7 +65,6 @@ export async function getUserProfile() {
 
     if (user) {
       user.downloadHistory = user.downloads;
-      // حذف فیلدهای امنیتی قبل از ارسال به سمت کلاینت
       delete user.password; 
       delete user.adminPassword;
       delete user.adminPermissions;
@@ -81,51 +83,39 @@ export async function updateUserProfileAction(data) {
     const authRes = await getCurrentUserSessionAction();
     if (!authRes.success) return { success: false, error: 'شما وارد سامانه نشده‌اید.' };
 
-    // ====================================================
-    // --- شروع لایه امنیتی، پاکسازی داده‌ها و اعتبارسنجی ---
-    // ====================================================
-    
-    // ۱. بررسی فیلدهای متنی با محدودیت‌های دقیق
-    const vFirstName = sanitizeField(data.firstName, 50, 'نام');
+    const vFirstName = sanitizeField(data?.firstName, 50, 'نام');
     if (!vFirstName.isValid) return { success: false, error: vFirstName.error };
     if (!vFirstName.value || vFirstName.value.length < 2) return { success: false, error: 'وارد کردن «نام» (حداقل ۲ کاراکتر) الزامی است.' };
 
-    const vLastName = sanitizeField(data.lastName, 50, 'نام خانوادگی');
+    const vLastName = sanitizeField(data?.lastName, 50, 'نام خانوادگی');
     if (!vLastName.isValid) return { success: false, error: vLastName.error };
 
-    const vMajor = sanitizeField(data.major, 100, 'رشته تحصیلی');
+    const vMajor = sanitizeField(data?.major, 100, 'رشته تحصیلی');
     if (!vMajor.isValid) return { success: false, error: vMajor.error };
 
-    const vEmail = sanitizeField(data.email, 100, 'ایمیل');
+    const vEmail = sanitizeField(data?.email, 100, 'ایمیل');
     if (!vEmail.isValid) return { success: false, error: vEmail.error };
-    // اعتبارسنجی دقیق قالب ایمیل در سمت سرور
     if (vEmail.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(vEmail.value)) {
-      return { success: false, error: 'نشانی رایانمه نامعتبر است.' };
+      return { success: false, error: 'نشانی رایانامه نامعتبر است.' };
     }
 
-    const vArtField = sanitizeField(data.artResearchField, 150, 'حوزه فعالیت هنری');
+    const vArtField = sanitizeField(data?.artResearchField, 150, 'حوزه فعالیت هنری');
     if (!vArtField.isValid) return { success: false, error: vArtField.error };
 
-    const vInterests = sanitizeField(data.cooperationInterests, 500, 'زمینه‌های همکاری');
+    const vInterests = sanitizeField(data?.cooperationInterests, 500, 'زمینه‌های همکاری');
     if (!vInterests.isValid) return { success: false, error: vInterests.error };
 
-    // ۲. پاکسازی فیلدهای فهرستی و تقویم برای جلوگیری از دور زدن فیلدها توسط هکر
-    const vBirthYear = sanitizeField(data.birthYear, 20, 'تاریخ تولد');
-    const vProvince = sanitizeField(data.province, 50, 'استان');
-    const vCity = sanitizeField(data.city, 50, 'شهر');
-    const vEducation = sanitizeField(data.educationDegree, 50, 'مدرک تحصیلی');
-
-    // ====================================================
-    // --- پایان لایه امنیتی ---
-    // ====================================================
+    const vBirthYear = sanitizeField(data?.birthYear, 20, 'تاریخ تولد');
+    const vProvince = sanitizeField(data?.province, 50, 'استان');
+    const vCity = sanitizeField(data?.city, 50, 'شهر');
+    const vEducation = sanitizeField(data?.educationDegree, 50, 'مدرک تحصیلی');
 
     await prisma.user.update({
       where: { id: authRes.user.id },
       data: {
         firstName: vFirstName.value,
         lastName: vLastName.value,
-        // جنسیت فقط می‌تواند یکی از این دو مقدار باشد، در غیر این صورت null می‌شود (ضد تقلب)
-        gender: data.gender === 'MALE' || data.gender === 'FEMALE' ? data.gender : null,
+        gender: data?.gender === 'MALE' || data?.gender === 'FEMALE' ? data.gender : null,
         birthYear: vBirthYear.isValid ? vBirthYear.value : null,
         province: vProvince.isValid ? vProvince.value : null,
         city: vCity.isValid ? vCity.value : null,
@@ -145,29 +135,47 @@ export async function updateUserProfileAction(data) {
   }
 }
 
-// ۳. تغییر گذرواژه کاربر از داخل میزکار کاربری
+// ۳. تغییر گذرواژه کاربر از داخل میزکار کاربری (مجهز به اعتبارسنجی کامل و ضدحمله)
 export async function updatePasswordAction(oldPassword, newPassword) {
   try {
     const authRes = await getCurrentUserSessionAction();
     if (!authRes.success) return { success: false, error: 'شما وارد سامانه نشده‌اید.' };
 
+    // بررسی طول و صحت گذرواژه جدید (جلوگیری از رمز خالی یا حمله DoS به bcrypt)
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6 || newPassword.length > 72) {
+      return { success: false, error: 'گذرواژه جدید باید بین ۶ تا ۷۲ کاراکتر باشد.' };
+    }
+
+    const userId = authRes.user.id;
+    const now = Date.now();
+    const attempt = passwordChangeAttempts.get(userId);
+    if (attempt && attempt.count >= 5 && now - attempt.time < 15 * 60 * 1000) {
+      return { success: false, error: 'تعداد تلاش‌های ناموفق بیش از حد مجاز است. لطفاً ۱۵ دقیقه دیگر تلاش کنید.' };
+    }
+
     const user = await prisma.user.findUnique({
-      where: { id: authRes.user.id },
+      where: { id: userId },
       select: { password: true }
     });
 
     if (!user) return { success: false, error: 'کاربر یافت نشد.' };
 
     if (user.password) {
-      if (!oldPassword) return { success: false, error: 'لطفاً گذرواژه قبلی خود را وارد کنید.' };
+      if (!oldPassword || typeof oldPassword !== 'string' || oldPassword.length > 72) {
+        return { success: false, error: 'لطفاً گذرواژه قبلی خود را به درستی وارد کنید.' };
+      }
       const isMatch = await bcrypt.compare(oldPassword, user.password);
-      if (!isMatch) return { success: false, error: 'گذرواژه قبلی اشتباه است.' };
+      if (!isMatch) {
+        passwordChangeAttempts.set(userId, { count: (attempt?.count || 0) + 1, time: now });
+        return { success: false, error: 'گذرواژه قبلی اشتباه است.' };
+      }
     }
 
+    passwordChangeAttempts.delete(userId);
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await prisma.user.update({
-      where: { id: authRes.user.id },
+      where: { id: userId },
       data: { password: hashedPassword }
     });
 

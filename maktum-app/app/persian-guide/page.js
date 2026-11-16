@@ -1,4 +1,4 @@
-// src/app/(frontend)/persian-guide/page.js
+// مسیر: app/persian-guide/page.js
 
 import { getSetting } from '@/app/actions/settings';
 import PersianGuideContent from '@/app/components/frontend/PersianGuideContent';
@@ -6,18 +6,19 @@ import { constructPageMetadata } from '@/lib/seo';
 import { defaultPersianGuideData } from '@/lib/persianGuideDefaults';
 import ProgressBar from '@/app/components/ProgressBar';
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-export const revalidate = 0;
+// کش هوشمند ۶۰ ثانیه‌ای (با هر تغییر در پنل مدیریت یا ثبت طومار، از طریق revalidatePath درجا بروز می‌شود)
+export const revalidate = 60;
 
 export async function generateMetadata() {
-  const seoTitle = await getSetting('persian_guide_seo_title');
-  const pageTitle = await getSetting('persian_guide_title');
-  const seoDesc = await getSetting('persian_guide_seo_desc');
+  const [seoTitle, pageTitle, seoDesc, rawData] = await Promise.all([
+    getSetting('persian_guide_seo_title'),
+    getSetting('persian_guide_title'),
+    getSetting('persian_guide_seo_desc'),
+    getSetting('persian_guide_page_data'),
+  ]);
 
   let parsedSeo = defaultPersianGuideData.seo;
   try {
-    const rawData = await getSetting('persian_guide_page_data');
     if (rawData) {
       const parsed = JSON.parse(rawData);
       if (parsed.seo) parsedSeo = { ...defaultPersianGuideData.seo, ...parsed.seo };

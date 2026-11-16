@@ -3,34 +3,23 @@
 import { prisma } from '@/lib/prisma';
 import { getSessionUser } from './auth'; 
 
-// ==========================================
-// تابع تبدیل اعداد انگلیسی به فارسی برای پیام‌های سمت سرور
-// ==========================================
 const toPersianDigits = (num) => {
   if (num === null || num === undefined) return '۰';
   const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   return num.toString().replace(/\d/g, x => farsiDigits[x]);
 };
 
-// ==========================================
-// گارد امنیتی (بازرسی و پاکسازی ورودی‌های متنی)
-// ==========================================
 function sanitizeAndValidateText(text, maxLength = 500) {
-  // ۱. بررسی اینکه ورودی حتماً یک رشته متنی باشد (جلوگیری از حملات NoSQL/Object Injection)
   if (!text || typeof text !== 'string') {
     return { isValid: false, error: 'محتوای ارسالی نامعتبر است.' };
   }
 
-  // ۱.۵. گارد محافظ سرور (DoS Protection): 
-  // اگر رشته ارسالی بیش از دو برابر حد مجاز باشد (حمله مگابایتی)، درجا مسدود می‌شود تا پردازنده درگیر نشود
   if (text.length > maxLength * 2) {
     return { isValid: false, error: 'طول متن ارسالی غیرطبیعی و بیش از حد مجاز است.' };
   }
   
-  // ۲. حذف فاصله‌های اضافی از ابتدا و انتهای متن
   const cleanText = text.trim();
   
-  // ۳. بررسی طول مجاز متن (با اعداد تماماً فارسی در پیام‌ها)
   if (cleanText.length < 2) {
     return { isValid: false, error: `متن دیدگاه بسیار کوتاه است (حداقل ${toPersianDigits(2)} کاراکتر).` };
   }
@@ -38,7 +27,6 @@ function sanitizeAndValidateText(text, maxLength = 500) {
     return { isValid: false, error: `متن نمی‌تواند بیشتر از ${toPersianDigits(maxLength)} کاراکتر باشد.` };
   }
   
-  // ۴. مسدود کردن کدهای مخرب (جلوگیری از تزریق HTML و اسکریپت)
   const hasHTMLTags = /<[a-z][\s\S]*>/i.test(cleanText);
   if (hasHTMLTags) {
     return { isValid: false, error: 'استفاده از کدهای غیرمجاز و کاراکترهای نامعتبر ممنوع است.' };
@@ -52,8 +40,7 @@ function sanitizeAndValidateText(text, maxLength = 500) {
 // ==========================================
 export async function toggleFavoriteAction(contentId) {
   try {
-    // جلوگیری از ارسال دیتای مخرب به جای ID
-    if (typeof contentId !== 'string') {
+    if (typeof contentId !== 'string' || !contentId.trim()) {
       return { success: false, error: 'شناسه محتوا نامعتبر است.' };
     }
 
@@ -87,31 +74,40 @@ export async function toggleFavoriteAction(contentId) {
 }
 
 // ==========================================
-// سامانه مسئولیت پیوند بارگیری و ثبت تاریخچه
+// سامانه مسئولیت پیوند بارگیری و ثبت تاریخچه (مجهز به محافظ ضدتکرار)
 // ==========================================
 export async function generateSecureDownloadAction(contentId, fileUrl) {
   try {
-    // بررسی امنیتی نوع داده‌های ورودی
-    if (typeof contentId !== 'string' || typeof fileUrl !== 'string') {
+    if (typeof contentId !== 'string' || typeof fileUrl !== 'string' || !contentId.trim() || !fileUrl.trim()) {
       return { success: false, error: 'اطلاعات درخواست نامعتبر است.' };
     }
 
     const session = await getSessionUser();
     
-    // ۱. بررسی ورود کاربر (فقط کاربران وارد‌شده مجاز به بارگیری هستند)
     if (!session) {
       return { success: false, error: 'برای بارگیری پرونده‌ها باید وارد حساب کاربری خود شوید.', requireAuth: true };
     }
 
-    // ۲. ثبت در تاریخچه بارگیری برای آمارگیری و گزارش‌ها
-    await prisma.downloadHistory.create({
-      data: {
+    // بررسی اینکه آیا کاربر در ۵ دقیقه گذشته همین پرونده را دانلود کرده است یا خیر (جلوگیری از پر شدن دیتابیس با کلیک‌های پیاپی)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const recentDownload = await prisma.downloadHistory.findFirst({
+      where: {
         userId: session.userId,
-        contentId: contentId
-      }
+        contentId: contentId,
+        downloadedAt: { gte: fiveMinutesAgo }
+      },
+      select: { id: true }
     });
 
-    // ۳. ارسال پیوند مستقیم پرونده به همراه پیام موفقیت
+    if (!recentDownload) {
+      await prisma.downloadHistory.create({
+        data: {
+          userId: session.userId,
+          contentId: contentId
+        }
+      });
+    }
+
     return { 
       success: true, 
       url: fileUrl, 
@@ -125,12 +121,11 @@ export async function generateSecureDownloadAction(contentId, fileUrl) {
 }
 
 // ==========================================
-// سامانه ثبت نظر کاربر
+// سامانه ثبت نظر کاربر (مجهز به قفل ضداسپم ۶۰ ثانیه‌ای)
 // ==========================================
 export async function submitCommentAction(contentId, text) {
   try {
-    // ۱. بررسی امنیتی شناسه محتوا
-    if (typeof contentId !== 'string') {
+    if (typeof contentId !== 'string' || !contentId.trim()) {
       return { success: false, error: 'شناسه محتوا نامعتبر است.' };
     }
 
@@ -139,14 +134,28 @@ export async function submitCommentAction(contentId, text) {
       return { success: false, error: 'برای ثبت دیدگاه باید وارد سامانه شوید.' };
     }
 
-    // ۲. فعال‌سازی گارد امنیتی روی متن ارسالی کاربر (با ارسال عدد ۵۰۰)
     const validation = sanitizeAndValidateText(text, 500);
     if (!validation.isValid) {
-      // بازگرداندن ارور دقیق و با اعداد کاملا فارسی به کاربر
       return { success: false, error: validation.error };
     }
 
-    // استفاده از متن پاکسازی شده و امن (validation.text)
+    // بررسی قفل ضداسپم: حداقل ۶۰ ثانیه فاصله بین دو دیدگاه از یک کاربر
+    const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+    const recentComment = await prisma.comment.findFirst({
+      where: {
+        userId: session.userId,
+        createdAt: { gte: oneMinuteAgo }
+      },
+      select: { id: true }
+    });
+
+    if (recentComment) {
+      return {
+        success: false,
+        error: `لطفاً از ارسال دیدگاه‌های پیاپی خودداری فرمایید و ${toPersianDigits(1)} دقیقه دیگر تلاش کنید.`
+      };
+    }
+
     await prisma.comment.create({
       data: {
         text: validation.text,

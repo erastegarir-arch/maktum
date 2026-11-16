@@ -6,6 +6,7 @@ import Breadcrumbs from '@/app/components/Breadcrumbs';
 import Icon from '@/app/components/Icon';
 import EmptyState from '@/app/components/EmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
+import BlurImage from '@/app/components/BlurImage';
 
 const BaseSkeleton = ({ className = "", rounded = "rounded-xl" }) => (
   <div className={`relative overflow-hidden bg-white/5 border border-transparent shadow-inner backdrop-blur-sm ${rounded} ${className}`}>
@@ -68,20 +69,11 @@ const ArchiveItemCard = ({ item, theme }) => {
       <div className="hidden md:block absolute inset-0 pointer-events-none rounded-inherit bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),var(--theme-glow),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20" />
       
       <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-        {(item.coverDesktop || item.coverMobile || item.image) ? (
-          <picture className="w-full h-full">
-            <source media="(max-width: 768px)" srcSet={item.coverMobile || item.coverDesktop || item.image} />
-            <img 
-              src={item.coverDesktop || item.image || item.coverMobile} 
-              alt={item.title} 
-              className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-80 group-hover:scale-110 group-hover:opacity-100" 
-            />
-          </picture>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center opacity-20 bg-black/50">
-            <Icon name="image" className="w-12 h-12 md:w-16 md:h-16 text-gray-500" />
-          </div>
-        )}
+        <BlurImage
+          src={item.coverDesktop || item.image || item.coverMobile}
+          alt={item.title}
+          className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-80 group-hover:scale-110 group-hover:opacity-100"
+        />
       </div>
       
       <div 
@@ -200,13 +192,13 @@ export default function SharedArchivePage({
                   <div className="w-full md:w-5/12 flex justify-center items-center order-1 md:order-none mt-2 md:mt-0">
                     <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-80 md:h-80 flex items-center justify-center">
                       <div className={`absolute inset-0 ${activeTheme.bg}/20 blur-2xl rounded-full pointer-events-none`}></div>
-                      {slide.image && (
-                        <img 
-                          src={slide.image} 
+                      <div className="relative z-10 w-full h-full rounded-2xl overflow-hidden flex items-center justify-center">
+                        <BlurImage 
+                          src={slide.image || slide.coverDesktop || slide.coverMobile} 
                           alt={slide.title} 
-                          className={`relative z-10 w-full h-full object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] transition-transform duration-[2000ms] ${index === currentSlide ? 'scale-100' : 'scale-90'}`} 
+                          className={`w-full h-full object-cover rounded-2xl drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] transition-transform duration-[2000ms] ${index === currentSlide ? 'scale-100' : 'scale-90'}`} 
                         />
-                      )}
+                      </div>
                     </div>
                   </div>
 

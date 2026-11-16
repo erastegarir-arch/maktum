@@ -1,8 +1,10 @@
 import SharedArchivePage from '@/app/components/frontend/SharedArchivePage';
 import { getSetting } from '@/app/actions/settings';
 import { getContents } from '@/app/actions/content';
+import { constructPageMetadata } from '@/lib/seo';
 
-// تم رنگی اختصاصی: صورتی (Rose)
+export const revalidate = 60;
+
 const THEME_PRODUCED = {
   hex: '#f43f5e',
   text: 'text-[#f43f5e]',
@@ -14,20 +16,39 @@ const THEME_PRODUCED = {
   glowRGB: '244,63,94'
 };
 
-export default async function ProducedContentFrontPage() {
+export async function generateMetadata() {
   const settingsData = await getSetting('produced_page_settings');
-  const pageSettings = settingsData ? JSON.parse(settingsData) : { hero: {}, featuredList: [] };
+  let pageSettings = {};
+  try { pageSettings = settingsData ? JSON.parse(settingsData) : {}; } catch {}
 
-  const rawDataFromDB = await getContents({ type: 'PRODUCED', status: 'PUBLISHED', limit: 12 });
+  const title = pageSettings?.seo?.metaTitle || pageSettings?.hero?.title || 'مستندها و محتوای تولیدی';
+  const description = pageSettings?.seo?.metaDescription || pageSettings?.hero?.subtitle || 'تماشا و بارگیری مستندهای اختصاصی، ویدیوهای تحلیلی و پادکست‌های شبکه مکتوم.';
 
-  // مپ کردن داده‌ها برای تطابق با کامپوننت مشترک + پیوند‌دهی به /p/
+  return constructPageMetadata({
+    title,
+    description,
+    path: '/p',
+  });
+}
+
+export default async function ProducedContentFrontPage() {
+  const [settingsData, rawDataFromDB] = await Promise.all([
+    getSetting('produced_page_settings'),
+    getContents({ type: 'PRODUCED', status: 'PUBLISHED', limit: 12 })
+  ]);
+
+  let pageSettings = { hero: {}, featuredList: [] };
+  try {
+    if (settingsData) pageSettings = JSON.parse(settingsData);
+  } catch {}
+
   const archiveItems = (rawDataFromDB || []).map(item => ({
     id: item.id,
     title: `${item.titleBase || ''} ${item.titleHighlight || ''}`.trim() || 'بدون عنوان',
     image: item.coverDesktop || item.coverMobile || '',
     date: item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('fa-IR') : 'نامشخص',
     views: item.viewCount || 0,
-    url: `/p/${item.slug}` // مسیر اختصاصی صفحه سینگل محتوای تولیدی
+    url: `/p/${item.slug}`
   }));
 
   const breadcrumbs = [
@@ -39,12 +60,12 @@ export default async function ProducedContentFrontPage() {
     <SharedArchivePage 
       activeTheme={THEME_PRODUCED}
       breadcrumbs={breadcrumbs}
-      hero={pageSettings.hero}
-      featuredList={pageSettings.featuredList}
+      hero={pageSettings.hero || {}}
+      featuredList={pageSettings.featuredList || []}
       archiveItems={archiveItems}
       hasMore={archiveItems.length >= 12}
       emptyStateTitle="هیچ محتوای تولیدی یافت نشد!"
-      emptyStateDesc="مستندها، مصاحبه‌ها و پادکست‌های تحلیلی به زودی در این بخش قرار می‌گیرند."
+      emptyStateDesc="محتوای این بخش در حال به‌روزرسانی است."
     />
   );
 }

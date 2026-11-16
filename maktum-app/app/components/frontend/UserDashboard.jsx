@@ -621,7 +621,7 @@ export default function UserDashboard({ initialUser }) {
         }
       `}} />
 
-      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 pb-20 relative z-10 pt-0 w-full">
+      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 pb-20 relative pt-0 w-full">
 
         <div className="mb-6 md:mb-10">
           <Breadcrumbs items={[{ label: 'مکتوم', href: '/' }, { label: 'حساب کاربری' }]} />
@@ -1336,7 +1336,7 @@ export default function UserDashboard({ initialUser }) {
                 <div className="overflow-y-auto custom-scrollbar relative z-10 flex-1">
                   {selectedNotification.notification.coverUrl && (
                     <div className="w-full aspect-video sm:aspect-[21/9] bg-white/[0.03] relative shrink-0 border-b border-white/15 shadow-inner">
-                      <img src={selectedNotification.notification.coverUrl} alt="cover" className="w-full h-full object-cover" />
+                      <BlurImage src={selectedNotification.notification.coverUrl} alt="cover" className="w-full h-full object-cover" />
                     </div>
                   )}
 

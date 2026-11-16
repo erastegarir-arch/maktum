@@ -2,15 +2,13 @@
 import { Suspense } from 'react';
 import ArchivesClientPage from '@/app/components/frontend/ArchivesClientPage';
 import { getAllTaxonomiesForArchive } from '@/app/actions/taxonomies';
-import { prisma } from '@/lib/prisma'; // اضافه شدن اتصال به پایگاه داده
+import { prisma } from '@/lib/prisma';
 import { constructPageMetadata } from '@/lib/seo';
 
-// ==========================================
-// ۱. تابع کمکی برای خواندن تنظیمات از پایگاه داده
-// ==========================================
+export const revalidate = 60;
+
 async function getArchivePageSettings() {
   try {
-    // خواندن مقادیر کلیدهای مربوط به این صفحه از جدول Settings
     const settings = await prisma.setting.findMany({
       where: {
         key: {
@@ -19,7 +17,6 @@ async function getArchivePageSettings() {
       }
     });
 
-    // تبدیل مقادیر دریافت‌شده به یک آبجکت ساختاریافته
     const mapped = settings.reduce((acc, item) => {
       acc[item.key] = item.value;
       return acc;
@@ -32,7 +29,6 @@ async function getArchivePageSettings() {
       description: mapped['archive_desc'] || "کاوش در میان هزاران دسته‌بندی، کلیدواژه، و نمایه پدیدآورندگان. مسیر خود را در پایگاه داده پیدا کنید."
     };
   } catch (error) {
-    // بازگرداندن مقادیر پیش‌فرض در صورت قطع ارتباط با پایگاه داده
     return {
       badge: "بایگانی مرجع مکتوم",
       title: "کاوش در بایگانی مکتوم",
@@ -42,9 +38,6 @@ async function getArchivePageSettings() {
   }
 }
 
-// ==========================================
-// ۲. تولید متادیتای سئو (خودکار از پایگاه داده)
-// ==========================================
 export async function generateMetadata() {
   const pageSettings = await getArchivePageSettings();
   
@@ -55,18 +48,13 @@ export async function generateMetadata() {
   });
 }
 
-// ==========================================
-// ۳. کامپوننت اصلی سرور
-// ==========================================
 export default async function ArchiveIndexServerPage() {
-  // الف) دریافت تنظیمات متنی صفحه از پایگاه داده (جایگزین مقادیر هاردکد شده)
-  const pageSettings = await getArchivePageSettings();
-  
-  // ب) دریافت تمامی دیتاهای ۳ گروه همراه با تعداد محتوایشان
-  const data = await getAllTaxonomiesForArchive();
+  const [pageSettings, data] = await Promise.all([
+    getArchivePageSettings(),
+    getAllTaxonomiesForArchive()
+  ]);
 
   return (
-    // Suspense برای مسئولیت استفاده از useSearchParams در کامپوننت کلاینت الزامی است
     <Suspense fallback={<div className="min-h-screen bg-[#05080f] flex items-center justify-center"><p className="text-gray-500 font-sans">در حال بارگذاری...</p></div>}>
       <ArchivesClientPage 
         pageContent={{ hero: pageSettings }}

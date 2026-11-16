@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { getSessionUser } from './auth'; // <--- اضافه‌شده برای بررسی کاربر
+import { getSessionUser } from './auth';
 
 const safeJsonParse = (data) => {
   if (!data) return null;
@@ -14,7 +14,26 @@ const safeJsonParse = (data) => {
   }
 };
 
-export async function getContents({ search = '', type = 'ALL', status = 'ALL' } = {}) {
+// تابع کمکی برای پاک‌سازی کش تمام بخش‌های مرتبط پس از ایجاد، ویرایش یا حذف محتوا
+function revalidateAllContentPaths(slug = null) {
+  revalidatePath('/portal-entry-99/products');
+  revalidatePath('/');
+  revalidatePath('/blog');
+  revalidatePath('/f');
+  revalidatePath('/p');
+  revalidatePath('/tool');
+  revalidatePath('/t');
+  revalidatePath('/c');
+  revalidatePath('/sitemap.xml');
+  if (slug) {
+    revalidatePath(`/blog/${slug}`);
+    revalidatePath(`/f/${slug}`);
+    revalidatePath(`/p/${slug}`);
+    revalidatePath(`/tool/${slug}`);
+  }
+}
+
+export async function getContents({ search = '', type = 'ALL', status = 'ALL', limit = null } = {}) {
   try {
     const where = {};
     if (search.trim()) {
@@ -27,11 +46,18 @@ export async function getContents({ search = '', type = 'ALL', status = 'ALL' } 
     if (type !== 'ALL') where.type = type;
     if (status !== 'ALL') where.status = status;
 
-    const contents = await prisma.content.findMany({
+    const queryOptions = {
       where,
       orderBy: { createdAt: 'desc' },
       include: { categories: true, creators: true, tags: true }
-    });
+    };
+
+    // اعمال محدودیت تعداد در صفحات آرشیو فرانت‌اند برای جلوگیری از بار سنگین روی دیتابیس
+    if (limit && Number(limit) > 0) {
+      queryOptions.take = Number(limit);
+    }
+
+    const contents = await prisma.content.findMany(queryOptions);
     return contents;
   } catch (error) {
     console.error('Error fetching contents:', error);
@@ -87,14 +113,13 @@ export async function createContent(formData) {
         changelog: safeJsonParse(formData.changelog),
         downloadLinks: safeJsonParse(formData.downloadLinks),
         previewGallery: safeJsonParse(formData.previewGallery),
-        // توجه: برای create از connect استفاده می‌شود
         categories: { connect: (formData.categoryIds || []).map(id => ({ id })) },
         creators: { connect: (formData.creatorIds || []).map(id => ({ id })) },
         tags: { connect: (formData.tagIds || []).map(id => ({ id })) }
       }
     });
-    revalidatePath('/portal-entry-99/products');
-    revalidatePath('/');
+
+    revalidateAllContentPaths(newContent.slug);
     return { success: true, data: newContent };
   } catch (error) {
     console.error('Error creating content:', error);
@@ -142,15 +167,14 @@ export async function updateContent(id, formData) {
         changelog: safeJsonParse(formData.changelog),
         downloadLinks: safeJsonParse(formData.downloadLinks),
         previewGallery: safeJsonParse(formData.previewGallery),
-        // توجه: برای update از set استفاده می‌شود
         categories: { set: (formData.categoryIds || []).map(id => ({ id })) },
         creators: { set: (formData.creatorIds || []).map(id => ({ id })) },
         tags: { set: (formData.tagIds || []).map(id => ({ id })) }
       }
     });
-    revalidatePath('/portal-entry-99/products');
+
     revalidatePath(`/portal-entry-99/products/edit/${id}`);
-    revalidatePath('/');
+    revalidateAllContentPaths(updatedContent.slug);
     return { success: true, data: updatedContent };
   } catch (error) {
     console.error('Error updating content:', error);
@@ -160,15 +184,14 @@ export async function updateContent(id, formData) {
 
 export async function deleteContent(id) {
   try {
-    // گارد امنیتی: فقط مسئولان مجاز به حذف محتوا هستند
     const session = await getSessionUser();
     if (!session || (!session.isAdmin && !session.isSuperAdmin)) {
       return { success: false, error: 'دسترسی غیرمجاز! شما مجوز حذف محتوا را ندارید.' };
     }
 
     if (!id) return { success: false, error: 'شناسه محتوا مشخص نیست.' };
-    await prisma.content.delete({ where: { id } });
-    revalidatePath('/portal-entry-99/products');
+    const deleted = await prisma.content.delete({ where: { id } });
+    revalidateAllContentPaths(deleted?.slug);
     return { success: true };
   } catch (error) {
     console.error('Error deleting content:', error);
@@ -185,12 +208,9 @@ export async function getTaxonomies() {
   }
 }
 
-// ======================================================================
-// دریافت محتوا با آمار لایک‌ها و نظرات تایید شده برای نمایش به کاربر
-// ======================================================================
 export async function getContentBySlug(slug, type = null) {
   try {
-    const session = await getSessionUser(); // خواندن کاربر وارد شده
+    const session = await getSessionUser();
 
     const where = { slug };
     if (type) where.type = type;
@@ -208,7 +228,6 @@ export async function getContentBySlug(slug, type = null) {
           where: { userId: session.userId },
           select: { id: true }
         } : false,
-        // واکشی نظرات تایید شده از پایگاه داده به همراه مشخصات نویسنده
         comments: {
           where: { status: 'APPROVED' },
           orderBy: { createdAt: 'desc' },
@@ -223,7 +242,6 @@ export async function getContentBySlug(slug, type = null) {
 
     const isFavoritedByMe = session && content.favoritedBy && content.favoritedBy.length > 0;
 
-    // مپ کردن نظرات پایگاه داده به قالبی که قالب فرانت‌اِند شما نیاز دارد
     const formattedComments = content.comments ? content.comments.map(c => ({
       id: c.id,
       user: c.user?.firstName || c.user?.lastName ? `${c.user.firstName || ''} ${c.user.lastName || ''}`.trim() : 'کاربر مکتوم',
@@ -235,7 +253,7 @@ export async function getContentBySlug(slug, type = null) {
     return {
       ...content,
       isFavoritedByMe,
-      comments: formattedComments // جایگزین شدن نظرات واقعی به جای حالت متنی قدیمی
+      comments: formattedComments
     };
   } catch (error) {
     console.error("خطا در دریافت محتوا با اسلاگ:", error);

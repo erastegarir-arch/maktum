@@ -5,6 +5,7 @@ import { useState, useRef, useMemo } from 'react';
 import Breadcrumbs from '@/app/components/Breadcrumbs';
 import Icon from '@/app/components/Icon'; 
 import EmptyState from '@/app/components/EmptyState';
+import BlurImage from '@/app/components/BlurImage';
 
 // ==========================================
 // ۱. توابع کمکی (Helper Functions)
@@ -68,20 +69,11 @@ const ContentCard = ({ item }) => {
       <div className="hidden md:block absolute inset-0 pointer-events-none rounded-inherit bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(255,255,255,0.05),transparent_40%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20" />
       
       <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-        {(item.coverDesktop || item.coverMobile || item.image) ? (
-          <picture className="w-full h-full">
-            <source media="(max-width: 768px)" srcSet={item.coverMobile || item.image || item.coverDesktop} />
-            <img 
-              src={item.coverDesktop || item.image || item.coverMobile} 
-              alt={item.title} 
-              className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-90 group-hover:scale-110 group-hover:opacity-100" 
-            />
-          </picture>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center opacity-20 bg-black/50">
-            <Icon name={theme.metaIcon} className="w-12 h-12 md:w-16 md:h-16 text-gray-500" />
-          </div>
-        )}
+        <BlurImage 
+          src={item.coverDesktop || item.image || item.coverMobile} 
+          alt={item.title} 
+          className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-90 group-hover:scale-110 group-hover:opacity-100" 
+        />
       </div>
       
       <div 
@@ -128,7 +120,13 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
 
   const renderAvatar = () => {
     if (tType === 'CREATOR' && taxonomy.imageUrl) {
-      return <img src={taxonomy.imageUrl} alt={taxonomy.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/icon:scale-110" />;
+      return (
+        <BlurImage
+          src={taxonomy.imageUrl}
+          alt={taxonomy.name}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover/icon:scale-110"
+        />
+      );
     }
     return <Icon name={activeTheme.icon} className={`w-12 h-12 md:w-16 md:h-16 ${activeTheme.text} transition-transform duration-500 group-hover/icon:scale-110`} />;
   };

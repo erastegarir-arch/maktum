@@ -101,8 +101,19 @@ function getIconByType(type) {
 export default function SearchModal({ isOpen, onClose }) {
   const router = useRouter();
   
+  // سقف مجاز کاراکتر و پاکسازی امنیتی ورودی کاوش در برابر تزریق کد (XSS/Injection)
+  const MAX_SEARCH_LENGTH = 80;
+  const sanitizeSearchInput = (val) => {
+    if (!val || typeof val !== 'string') return '';
+    return val
+      .replace(/[<>"'`\\;{}()[\]\u0000-\u001F\u007F]/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .slice(0, MAX_SEARCH_LENGTH);
+  };
+
   const [query, setQuery] = useState('');
-  const debouncedQuery = useDebounce(query, 400); 
+  // افزایش تاخیر به ۷۵۰ میلی‌ثانیه برای جلوگیری از ثبت کلمات نیمه‌کاره هنگام تایپ
+  const debouncedQuery = useDebounce(query, 750); 
   
   const [activeFilters, setActiveFilters] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -112,6 +123,7 @@ export default function SearchModal({ isOpen, onClose }) {
   
   const [activeIndex, setActiveIndex] = useState(-1); 
   const resultsRef = useRef(null);
+  const lastSearchRef = useRef('');
 
   useEffect(() => {
     if (isOpen) {
@@ -120,6 +132,7 @@ export default function SearchModal({ isOpen, onClose }) {
       setResults([]);
       setActiveIndex(-1);
       setPage(1);
+      lastSearchRef.current = '';
     }
     return () => {
       document.body.style.overflow = 'unset';
@@ -165,13 +178,24 @@ export default function SearchModal({ isOpen, onClose }) {
   }, [activeIndex]);
 
   const performSearch = useCallback(async (isLoadMore = false) => {
-    if (debouncedQuery.trim().length < 2) {
+    const cleanKeyword = sanitizeSearchInput(debouncedQuery).trim();
+
+    if (cleanKeyword.length < 2) {
+      lastSearchRef.current = '';
       setResults([]);
       setIsLoading(false);
       return;
     }
 
     const targetPage = isLoadMore ? page + 1 : 1;
+    const searchSignature = `${cleanKeyword}|${[...activeFilters].sort().join(',')}|${targetPage}`;
+
+    // قفل امنیتی برای جلوگیری از ارسال و ثبت دوگانه‌ی یک جستجوی واحد در دیتابیس
+    if (lastSearchRef.current === searchSignature) {
+      return;
+    }
+    lastSearchRef.current = searchSignature;
+
     if (!isLoadMore) {
       setIsLoading(true);
       setActiveIndex(-1);
@@ -179,7 +203,7 @@ export default function SearchModal({ isOpen, onClose }) {
 
     try {
       const response = await searchArchive({
-        keyword: debouncedQuery,
+        keyword: cleanKeyword,
         filters: activeFilters,
         page: targetPage,
         limit: 10 
@@ -260,11 +284,13 @@ export default function SearchModal({ isOpen, onClose }) {
               <input 
                 type="text" 
                 autoFocus
+                maxLength={MAX_SEARCH_LENGTH}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => setQuery(sanitizeSearchInput(e.target.value))}
                 className="bg-transparent border-none outline-none text-white text-base md:text-xl w-full placeholder:text-gray-500 font-black font-sans tracking-wide" 
                 placeholder="در مکتوم کاوش کنید..." 
                 autoComplete="off" 
+                spellCheck={false}
               />
 
               {query && (

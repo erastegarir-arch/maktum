@@ -66,7 +66,6 @@ const SpotlightCard = ({ children, themeColor, link = "#" }) => {
       onMouseMove={handleMouseMove}
       className="relative flex flex-col aspect-square md:aspect-video rounded-[1.5rem] md:rounded-[2rem] group overflow-hidden transition-all duration-500 hover:-translate-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.02)] border border-white/[0.05] hover:border-white/[0.15] bg-white/[0.02] backdrop-blur-2xl"
     >
-      <div className="absolute inset-0 z-0 bg-[url('/images/noise.png')] opacity-5 mix-blend-overlay group-hover:opacity-15 transition-opacity duration-500 pointer-events-none" />
       <div className={`absolute top-0 inset-x-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-20`} style={{ background: `linear-gradient(to right, transparent, ${themeColor}, transparent)` }} />
       <div
         className="absolute inset-0 pointer-events-none rounded-inherit z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:block"
@@ -256,7 +255,6 @@ export default function HomePageClient({ initialData }) {
              layout
              className={`relative rounded-[2rem] md:rounded-[3rem] bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.02)] overflow-hidden flex flex-col items-center justify-center text-center group transition-all duration-700 ${isCountdownFinished ? 'p-6 md:p-10' : 'p-8 md:p-16'}`}
            >
-             <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-5 group-hover:opacity-10 transition-opacity duration-500 mix-blend-overlay pointer-events-none -z-10"></div>
              <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-full blur-[100px] rounded-full pointer-events-none -z-10 transition-colors duration-1000 ${isCountdownFinished ? 'bg-emerald-500/10' : 'bg-rose-500/5 group-hover:bg-rose-500/10'}`}></div>
              
              <Icon name={isCountdownFinished ? 'folder' : 'lockKey'} className={`w-10 h-10 md:w-14 md:h-14 mb-4 md:mb-6 ${isCountdownFinished ? 'text-emerald-400' : 'text-rose-500 animate-pulse drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]'}`} />
@@ -357,7 +355,6 @@ export default function HomePageClient({ initialData }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {data.dossiers.map((dossier, i) => (
               <Link key={i} href={dossier.link || '#'} target="_blank" rel="noopener noreferrer" className="relative p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] shadow-[inset_0_0_15px_rgba(255,255,255,0.02),0_15px_40px_rgba(0,0,0,0.5)] group overflow-hidden hover:-translate-y-2 hover:border-white/[0.15] transition-all duration-500 flex flex-col h-full">
-                <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-5 mix-blend-overlay group-hover:opacity-10 transition-opacity duration-500 pointer-events-none -z-10" />
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ background: `radial-gradient(circle at top right, ${dossier.color}15, transparent 60%)` }}></div>
                 <div className="absolute -left-6 -bottom-6 opacity-5 group-hover:opacity-15 transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-12" style={{ color: dossier.color }}>
                   <Icon name="folder" className="w-32 h-32 md:w-40 md:h-40" />
@@ -383,8 +380,6 @@ export default function HomePageClient({ initialData }) {
       <ScrollReveal key="radar">
         <section className="relative p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] shadow-[inset_0_0_20px_rgba(255,255,255,0.02),0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col md:flex-row items-center gap-8 md:gap-10 mx-4 sm:mx-6 lg:mx-8">
           
-          <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-[0.04] mix-blend-overlay pointer-events-none -z-10" />
-
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] md:w-[600px] md:h-[600px] lg:w-[800px] lg:h-[800px] pointer-events-none opacity-80 mix-blend-screen">
             <div className="absolute inset-0 rounded-full border border-cyan-500/10 scale-90"></div>
             <div className="absolute inset-0 rounded-full border border-cyan-500/10 scale-75"></div>
@@ -440,13 +435,7 @@ export default function HomePageClient({ initialData }) {
             {data.blog.map((item, i) => (
               <SpotlightCard key={i} themeColor="#f59e0b" link={`/blog/${item.slug}`}>
                 <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-                  {(item.coverDesktop || item.coverMobile) ? (
-                    <BlurImage src={item.coverDesktop || item.coverMobile} alt={item.titleBase} className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-80 group-hover:scale-110 group-hover:opacity-100" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center opacity-20 bg-black/50">
-                      <Icon name="blog" className="w-12 h-12 md:w-16 md:h-16 text-gray-500" />
-                    </div>
-                  )}
+                  <BlurImage src={item.coverDesktop || item.coverMobile} alt={item.titleBase} className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-80 group-hover:scale-110 group-hover:opacity-100" />
                 </div>
                 <div className="absolute bottom-0 inset-x-0 h-[70%] z-10 pointer-events-none opacity-90 transition-opacity group-hover:opacity-100" style={{ background: `linear-gradient(to top, #050810 0%, #f59e0b60 30%, transparent 100%)` }} />
                 <div className="relative z-20 mt-auto p-4 md:p-5 flex flex-col justify-end h-full">
@@ -479,13 +468,7 @@ export default function HomePageClient({ initialData }) {
             {data.raw.map((item, i) => (
               <SpotlightCard key={i} themeColor="#eab308" link={`/f/${item.slug}`}>
                 <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-                  {(item.coverDesktop || item.coverMobile) ? (
-                    <BlurImage src={item.coverDesktop || item.coverMobile} alt={item.titleBase} className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-80 group-hover:scale-110 group-hover:opacity-100" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center opacity-20 bg-black/50">
-                      <Icon name="footage" className="w-12 h-12 md:w-16 md:h-16 text-gray-500" />
-                    </div>
-                  )}
+                  <BlurImage src={item.coverDesktop || item.coverMobile} alt={item.titleBase} className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-80 group-hover:scale-110 group-hover:opacity-100" />
                 </div>
                 <div className="absolute bottom-0 inset-x-0 h-[70%] z-10 pointer-events-none opacity-90 transition-opacity group-hover:opacity-100" style={{ background: `linear-gradient(to top, #050810 0%, #eab30860 30%, transparent 100%)` }} />
                 <div className="relative z-20 mt-auto p-4 md:p-5 flex flex-col justify-end h-full">
@@ -518,13 +501,7 @@ export default function HomePageClient({ initialData }) {
             {data.produced.map((item, i) => (
               <SpotlightCard key={i} themeColor="#f43f5e" link={`/p/${item.slug}`}>
                 <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-                  {(item.coverDesktop || item.coverMobile) ? (
-                    <BlurImage src={item.coverDesktop || item.coverMobile} alt={item.titleBase} className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-80 group-hover:scale-110 group-hover:opacity-100" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center opacity-20 bg-black/50">
-                      <Icon name="product" className="w-12 h-12 md:w-16 md:h-16 text-gray-500" />
-                    </div>
-                  )}
+                  <BlurImage src={item.coverDesktop || item.coverMobile} alt={item.titleBase} className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-80 group-hover:scale-110 group-hover:opacity-100" />
                 </div>
                 <div className="absolute bottom-0 inset-x-0 h-[70%] z-10 pointer-events-none opacity-90 transition-opacity group-hover:opacity-100" style={{ background: `linear-gradient(to top, #050810 0%, #f43f5e60 30%, transparent 100%)` }} />
                 <div className="relative z-20 mt-auto p-4 md:p-5 flex flex-col justify-end h-full">
@@ -557,13 +534,7 @@ export default function HomePageClient({ initialData }) {
             {data.tools.map((item, i) => (
               <SpotlightCard key={i} themeColor="#10b981" link={`/tool/${item.slug}`}>
                 <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-                  {(item.coverDesktop || item.coverMobile) ? (
-                    <BlurImage src={item.coverDesktop || item.coverMobile} alt={item.titleBase} className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-80 group-hover:scale-110 group-hover:opacity-100" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center opacity-20 bg-black/50">
-                      <Icon name="pen-nib" className="w-12 h-12 md:w-16 md:h-16 text-gray-500" />
-                    </div>
-                  )}
+                  <BlurImage src={item.coverDesktop || item.coverMobile} alt={item.titleBase} className="w-full h-full object-cover object-center transition-transform duration-[1.5s] ease-out opacity-80 group-hover:scale-110 group-hover:opacity-100" />
                 </div>
                 <div className="absolute bottom-0 inset-x-0 h-[70%] z-10 pointer-events-none opacity-90 transition-opacity group-hover:opacity-100" style={{ background: `linear-gradient(to top, #050810 0%, #10b98160 30%, transparent 100%)` }} />
                 <div className="relative z-20 mt-auto p-4 md:p-5 flex flex-col justify-end h-full">
@@ -609,9 +580,7 @@ export default function HomePageClient({ initialData }) {
     cta: data.ctaBox && data.ctaBox.title ? (
       <ScrollReveal key="cta">
         <section className="relative p-8 md:p-16 rounded-[2rem] md:rounded-[3rem] overflow-hidden group shadow-[inset_0_0_20px_rgba(255,255,255,0.02),0_20px_50px_rgba(0,0,0,0.5)] border border-cyan-500/20 hover:border-cyan-400/40 bg-white/[0.02] backdrop-blur-3xl mx-4 sm:mx-6 lg:mx-8 transition-colors duration-500">
-          
-          <div className="absolute inset-0 bg-[url('/images/noise.png')] opacity-10 mix-blend-overlay -z-10" />
-          
+                   
           <div className="absolute -top-20 -left-20 w-64 h-64 bg-cyan-600/20 rounded-full blur-[80px] group-hover:scale-150 transition-transform duration-1000 z-0 animate-[pulse_4s_ease-in-out_infinite]"></div>
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-600/20 rounded-full blur-[80px] group-hover:scale-150 transition-transform duration-1000 z-0 animate-[pulse_5s_ease-in-out_infinite_reverse]"></div>
           
@@ -708,7 +677,7 @@ export default function HomePageClient({ initialData }) {
               <div className="absolute inset-0 z-0 w-full h-full pointer-events-none">
                 <picture>
                   {slide.imgMobile && <source media="(max-width: 768px)" srcSet={slide.imgMobile} />}
-                  <img src={slide.imgDesktop || slide.imgMobile || '/images/noise.png'} alt={slide.title} className="w-full h-full object-cover md:object-[20%_center] scale-110 opacity-70" draggable="false" />
+                  <BlurImage src={slide.imgDesktop || slide.imgMobile} alt={slide.title} className="w-full h-full object-cover md:object-[20%_center] scale-110 opacity-70" draggable="false" />
                 </picture>
               </div>
 

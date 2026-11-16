@@ -1,22 +1,16 @@
-// مسیر پرونده: app/layout.jsx
+// مسیر پرونده: app/layout.js
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import Header from '@/app/components/frontend/Header';
 import Footer from '@/app/components/frontend/Footer';
-import { getSetting } from '@/app/actions/settings';
+import { getSetting, getMultipleSettings } from '@/app/actions/settings';
 import { getIcons } from '@/app/actions/icons';
 import AmbientBackground from '@/app/components/frontend/AmbientBackground';
 import Script from 'next/script';
-// وارد کردن موتور مرکزی سئوی مکتوم
 import { SITE_URL, SITE_CONFIG, generateCoreGraphSchema } from '@/lib/seo';
-
-// تامین‌کننده تاریخ
 import { DateSettingsProvider } from '@/app/components/providers/DateSettingsContext';
-
-// کامپوننت واسط برای انیمیشن‌های روان بین صفحات
 import PageTransitionProvider from '@/app/components/providers/PageTransitionProvider';
 
-// تابع ایمن برای پارس کردن JSON در سمت سرور (جلوگیری از خطای 500 در صورت نقص داده)
 const safeJsonParse = (str, fallback = []) => {
   if (!str || typeof str !== 'string') return fallback;
   try {
@@ -27,9 +21,6 @@ const safeJsonParse = (str, fallback = []) => {
   }
 };
 
-// ==========================================
-// تنظیمات Viewport استاندارد (هماهنگ با تم سرمه‌ای تیره)
-// ==========================================
 export const viewport = {
   themeColor: SITE_CONFIG.themeColor || '#0b1426',
   width: 'device-width',
@@ -38,9 +29,6 @@ export const viewport = {
   colorScheme: 'dark',
 };
 
-// ==========================================
-// اعمال سراسری فاونماد، متا دیتا و گراف برند
-// ==========================================
 export async function generateMetadata() {
   let dynamicFavicon = null;
   try {
@@ -55,8 +43,7 @@ export async function generateMetadata() {
     },
     description: SITE_CONFIG.description,
     applicationName: SITE_CONFIG.name,
-    generator: 'Next.js 16',
-    referrer: 'origin-when-cross-origin',
+     referrer: 'origin-when-cross-origin',
     keywords: [
       'مکتوم',
       'پایگاه داده رسانه‌ای مکتوم',
@@ -70,8 +57,6 @@ export async function generateMetadata() {
     publisher: SITE_CONFIG.name,
     formatDetection: { email: false, address: false, telephone: false },
     alternates: {
-      canonical: SITE_URL,
-      languages: { 'fa-IR': SITE_URL },
       types: { 'application/rss+xml': `${SITE_URL}/feed.xml` },
     },
     icons: {
@@ -105,7 +90,6 @@ export async function generateMetadata() {
         'max-snippet': -1,
       },
     },
-    // تاییدیه موتورهای کاوش (از پرونده .env خوانده می‌شود)
     verification: {
       google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
       yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION || undefined,
@@ -117,7 +101,6 @@ export async function generateMetadata() {
 }
 
 export default async function RootLayout({ children }) {
-  // ۱. دریافت کل نمادها و تنظیمات روی سرور با پرامیس‌های هم‌زمان (شامل header_settings برای رندر فوری هدر)
   const settingsKeys = [
     'header_settings', 'header_icon', 'header_text', 'header_links',
     'footer_icon', 'footer_text', 'footer_desc', 'copyright_text', 'footer_fast_links', 'footer_companion_links', 'footer_social_links',
@@ -126,23 +109,15 @@ export default async function RootLayout({ children }) {
     'satra_type', 'satra_code', 'satra_img', 'satra_url'
   ];
 
-  const settingsPromises = settingsKeys.map(key => getSetting(key).catch(() => null));
-
-  const [allIcons, ...settingsResults] = await Promise.all([
+  // ✅ دریافت تمام ۲۳ تنظیم هدر و فوتر تنها با ۱ کوئری واحد از دیتابیس به صورت موازی با آیکون‌ها
+  const [allIcons, settings] = await Promise.all([
     getIcons().catch(() => []),
-    ...settingsPromises
+    getMultipleSettings(settingsKeys),
   ]);
 
-  const settings = settingsKeys.reduce((acc, key, index) => {
-    acc[key] = settingsResults[index];
-    return acc;
-  }, {});
-
-  // استخراج ایمن تنظیمات هدر برای رندر سمت سرور (SSR) بدون تاخیر
   const parsedHeaderSettings = safeJsonParse(settings['header_settings'], null);
   const headerLinks = safeJsonParse(settings['header_links'], []);
 
-  // استخراج ایمن تنظیمات فوتر
   const fastLinks = safeJsonParse(settings['footer_fast_links'], []);
   const companionLinks = safeJsonParse(settings['footer_companion_links'], []);
   const socialLinks = safeJsonParse(settings['footer_social_links'], []);
@@ -186,13 +161,11 @@ export default async function RootLayout({ children }) {
     }
   };
 
-  // ایمن‌سازی رشته JSON-LD در برابر تزریق تگ اسکریپت (XSS Protection)
   const safeSchemaJson = JSON.stringify(generateCoreGraphSchema()).replace(/</g, '\\u003c');
 
   return (
     <html lang="fa" dir="rtl" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
-        {/* پیش‌بارگذاری فونت اصلی برای حذف کامل پرش متن (CLS = 0) و افزایش سرعت LCP */}
         <link
           rel="preload"
           href="/fonts/Vazirmatn[wght].woff2"
@@ -205,17 +178,14 @@ export default async function RootLayout({ children }) {
       </head>
       <body 
         suppressHydrationWarning
-        className="text-white min-h-screen flex flex-col antialiased relative selection:bg-cyan-500/30"
+        className="text-white min-h-dvh flex flex-col antialiased relative selection:bg-cyan-500/30"
       >
-        {/* تزریق ایمن گراف دانش مکتوم، قاب کاوش گوگل و ساختار Sitelinks */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeSchemaJson }}
         />
         
         <DateSettingsProvider>
-          
-          {/* ۱. اسکریپت اصلی ایران آنالیتیکس */}
           <Script
             id="iran-analytics-init"
             strategy="afterInteractive"
@@ -228,14 +198,12 @@ export default async function RootLayout({ children }) {
               `,
             }}
           />
-          {/* ۲. اسکریپت تگ ایران آنالیتیکس */}
           <Script 
             src="https://c.iran-analytics.ir/iratag/js?id=IRA-CNY5F0Z" 
             strategy="afterInteractive" 
             async 
           />
 
-          {/* ۳. اسکریپت گفتینو */}
           <Script
             id="goftino-widget"
             strategy="afterInteractive"
@@ -244,34 +212,30 @@ export default async function RootLayout({ children }) {
             }}
           />
 
-          {/* ۱. پس‌زمینه زنده در لایه صفر */}
           <AmbientBackground />
           
           <Toaster
             position="bottom-center"
-            containerClassName="mb-24 md:mb-6"
+            containerClassName="mb-24 md:mb-6 px-4"
             toastOptions={{
               duration: 4000,
-              className: "bg-[#0b1426]/80 backdrop-blur-2xl border border-white/[0.08] shadow-[0_15px_40px_rgba(0,0,0,0.8),inset_0_0_15px_rgba(255,255,255,0.03)] text-white text-[11px] md:text-sm font-sans rounded-2xl font-bold",
+              className: "!bg-[#0b1426]/80 backdrop-blur-2xl border border-white/[0.1] shadow-[0_15px_40px_rgba(4,9,20,0.85),inset_0_1px_1px_rgba(255,255,255,0.12)] !text-white text-xs md:text-sm font-sans rounded-2xl font-bold max-w-[92vw] md:max-w-md",
               style: {
-                background: 'transparent',
-                color: '#fff',
                 direction: 'rtl',
                 padding: '12px 16px',
               },
               success: { 
                 iconTheme: { primary: '#10b981', secondary: '#0b1426' },
-                className: "bg-emerald-500/[0.08] backdrop-blur-2xl border border-emerald-500/[0.2] shadow-[0_10px_30px_rgba(16,185,129,0.15),inset_0_0_15px_rgba(16,185,129,0.05)] text-white text-[11px] md:text-sm font-sans rounded-2xl font-bold",
+                className: "!bg-emerald-950/65 backdrop-blur-2xl border border-emerald-500/30 shadow-[0_12px_32px_rgba(16,185,129,0.2),inset_0_1px_1px_rgba(255,255,255,0.15)] !text-white text-xs md:text-sm font-sans rounded-2xl font-bold max-w-[92vw] md:max-w-md",
               },
               error: { 
                 iconTheme: { primary: '#f43f5e', secondary: '#0b1426' },
-                className: "bg-rose-500/[0.08] backdrop-blur-2xl border border-rose-500/[0.2] shadow-[0_10px_30px_rgba(244,63,94,0.15),inset_0_0_15px_rgba(244,63,94,0.05)] text-white text-[11px] md:text-sm font-sans rounded-2xl font-bold",
+                className: "!bg-rose-950/65 backdrop-blur-2xl border border-rose-500/30 shadow-[0_12px_32px_rgba(244,63,94,0.2),inset_0_1px_1px_rgba(255,255,255,0.15)] !text-white text-xs md:text-sm font-sans rounded-2xl font-bold max-w-[92vw] md:max-w-md",
               },
             }}
           />
 
-          {/* ۲. کانتینر اصلی سامانه با معماری ترانزیشن */}
-          <div className="relative z-10 flex flex-col min-h-screen w-full">
+          <div className="relative z-10 flex flex-col min-h-dvh w-full">
             <Header initialData={headerData} />
             
             <PageTransitionProvider>
