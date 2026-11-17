@@ -25,6 +25,7 @@ function revalidateAllContentPaths(slug = null) {
   revalidatePath('/t');
   revalidatePath('/c');
   revalidatePath('/sitemap.xml');
+  revalidatePath('/feed.xml');
   if (slug) {
     revalidatePath(`/blog/${slug}`);
     revalidatePath(`/f/${slug}`);

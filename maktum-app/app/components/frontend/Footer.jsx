@@ -162,7 +162,9 @@ export default function Footer({ initialData }) {
             >
               {isFooterIconUrl ? (
                 <img 
+                  key={cleanFooterIcon}
                   src={cleanFooterIcon} 
+                  onError={() => markFooterImgBroken(cleanFooterIcon)}
                   alt={footerText || 'لوگوی مکتوم'} 
                   loading="lazy"
                   decoding="async"
@@ -284,10 +286,12 @@ export default function Footer({ initialData }) {
                   {badge.data?.type === 'code' && badge.data?.code && (
                     <div className="scale-90 md:scale-105 origin-left" dangerouslySetInnerHTML={{ __html: badge.data.code }} />
                   )}
-                  {badge.data?.type === 'image' && badge.data?.img && (
+                  {badge.data?.type === 'image' && badge.data?.img && !brokenFooterImgs[badge.data.img] && (
                     <Link href={sanitizeUrl(badge.data.url)} target="_blank" rel="noopener noreferrer" className="block">
                       <img 
+                        key={badge.data.img}
                         src={badge.data.img} 
+                        onError={() => markFooterImgBroken(badge.data.img)}
                         alt={badge.name} 
                         loading="lazy"
                         decoding="async"

@@ -10,7 +10,7 @@ export const SITE_CONFIG = {
     'پلتفرم غیرتجاری و باز مکتوم؛ مرجع تخصصی پایگاه داده، توزیع رایگان فوتیج و راش‌های ویدیویی (B-Roll)، مستندها، ابزارهای تولید محتوا، مقالات تحلیلی و پرونده‌های ویژه پژوهشی.',
   locale: 'fa_IR',
   language: 'fa-IR',
-  themeColor: '#050810',
+  themeColor: '#0b1426',
   logoUrl: `${SITE_URL}/images/logo.png`,
   ogImageUrl: `${SITE_URL}/images/og-default.jpg`,
   socials: [
