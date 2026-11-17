@@ -1,22 +1,25 @@
+// مسیر پرونده: app/manifest.js
 import { SITE_CONFIG } from '@/lib/seo';
 
 export default function manifest() {
   return {
-    id: '/',
+    id: '/?source=pwa',
     name: SITE_CONFIG?.name || 'پایگاه مکتوم',
     short_name: 'مکتوم',
-    description: SITE_CONFIG?.description || 'سامانه جامع آرشیو، مستندات و رسانه‌های مکتوم',
-    start_url: '/',
+    description:
+      SITE_CONFIG?.description ||
+      'سامانه جامع آرشیو، مستندات و رسانه‌های مکتوم',
+    start_url: '/?utm_source=pwa',
     scope: '/',
-    display: 'standalone', // اجرای سامانه به شکل اپلیکیشن مستقل و بدون نوار آدرس مرورگر
-    display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
-    orientation: 'portrait-primary', // بهینه‌سازی چرخش صفحه در تلفن‌های همراه
+    display: 'standalone',
+    display_override: ['standalone', 'window-controls-overlay', 'minimal-ui'],
+    orientation: 'portrait-primary',
     background_color: '#050810',
     theme_color: SITE_CONFIG?.themeColor || '#050810',
     dir: 'rtl',
     lang: 'fa-IR',
-    categories: ['media', 'books', 'education'],
-    prefer_related_applications: false, // جلوگیری از نمایش بنرهای مزاحم نصبی و اولویت دادن به نسخه وب
+    categories: ['media', 'books', 'education', 'news'],
+    prefer_related_applications: false,
     icons: [
       {
         src: '/favicon.ico',
@@ -24,22 +27,31 @@ export default function manifest() {
         type: 'image/x-icon',
       },
       {
-        src: '/images/logo.png',
+        src: '/icons/icon-192x192.png',
         sizes: '192x192',
         type: 'image/png',
-        purpose: 'any', // نمایش استاندارد در دسکتاپ و iOS بدون برش حاشیه‌ها
+        purpose: 'any',
       },
       {
-        src: '/images/logo.png',
+        src: '/icons/icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/images/logo.png',
+        src: '/icons/maskable-icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
-        purpose: 'maskable', // سازگاری کامل با آیکون‌های تطبیقی (Adaptive Icons) در اندروید
+        purpose: 'maskable',
+      },
+    ],
+    shortcuts: [
+      {
+        name: 'صفحه اصلی مکتوم',
+        short_name: 'صفحه اصلی',
+        description: 'ورود مستقیم به صفحه اول پایگاه مکتوم',
+        url: '/?utm_source=pwa_shortcut',
+        icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' }],
       },
     ],
   };

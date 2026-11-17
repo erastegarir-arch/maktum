@@ -15,7 +15,7 @@ import { getUserUnreadNotificationCountAction } from '@/app/actions/notification
 
 const cn = (...inputs) => twMerge(clsx(inputs));
 
-// حافظه کش سطح ماژول برای جلوگیری از چشمک زدن یا درخواست تکراری هنگام جابه‌جایی بین صفحات
+// حافظه کش سطح ماژول برای جلوگیری از چشمک زدن هنگام جابه‌جایی بین صفحات
 let cachedHeaderSettings = null;
 
 const toPersianDigits = (num) => {
@@ -54,10 +54,8 @@ const normalizeNavItems = (items) => {
     .filter((item) => item.label !== '');
 };
 
-// استخراج همگام (Synchronous) تنظیمات اولیه در لحظه صفر برای جلوگیری از خالی آمدن هدر (CLS = 0)
+// استخراج همگام (Synchronous) تنظیمات اولیه با اولویت دیتای تازه سرور
 const buildInitialHeaderState = (initialData) => {
-  if (cachedHeaderSettings) return cachedHeaderSettings;
-
   let parsedSettings = {};
   if (initialData?.headerSettings) {
     try {
@@ -66,6 +64,8 @@ const buildInitialHeaderState = (initialData) => {
           ? JSON.parse(initialData.headerSettings)
           : initialData.headerSettings;
     } catch (e) {}
+  } else if (cachedHeaderSettings) {
+    return cachedHeaderSettings;
   }
 
   let rawLinks = parsedSettings?.navItems || initialData?.headerLinks || [];
@@ -173,6 +173,15 @@ export default function Header({ initialData = {} }) {
     buildInitialHeaderState(initialData)
   );
 
+  // همگام‌سازی فوری در صورت تغییر initialData از سمت سرور
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      const freshState = buildInitialHeaderState(initialData);
+      setHeaderSettings(freshState);
+      setBrokenHeaderImgs({});
+    }
+  }, [initialData]);
+
   useEffect(() => {
     let isCancelled = false;
 
@@ -219,7 +228,7 @@ export default function Header({ initialData = {} }) {
               showSiteTitle: parsed.showSiteTitle !== false,
               activeColor: parsed.activeColor || '#06b6d4',
               navItems: resolvedNavItems,
-              mobileHeaderCenterImg: parsed.mobileHeaderCenterImg || '',
+              mobileHeaderCenterImg: (parsed.mobileHeaderCenterImg || '').trim(),
               bottomNavLinks: Array.isArray(parsed.bottomNavLinks)
                 ? parsed.bottomNavLinks
                 : [],
@@ -227,6 +236,7 @@ export default function Header({ initialData = {} }) {
 
             cachedHeaderSettings = nextSettings;
             setHeaderSettings(nextSettings);
+            setBrokenHeaderImgs({});
           } catch (e) {}
         }
 
@@ -247,7 +257,7 @@ export default function Header({ initialData = {} }) {
     return () => {
       isCancelled = true;
     };
-  }, []);
+  }, [pathname]);
 
   if (
     pathname?.startsWith('/portal-entry-99') ||
@@ -307,10 +317,6 @@ export default function Header({ initialData = {} }) {
 
   return (
     <>
-      {/* ======================================================================= */}
-      {/* هماهنگ‌ساز خودکار لایه‌ها (Stacking Context) برای منوهای چسبان صفحات */}
-      {/* تضمین قرارگیری باکس‌های عادی زیر هاله (z<25) و منوهای چسبان روی هاله (z=35) */}
-      {/* ======================================================================= */}
       <style dangerouslySetInnerHTML={{ __html: `
         #maktum-top-halo ~ *:has(.sticky),
         #maktum-top-halo ~ * :is(main, section, article, div):has(.sticky):not(.sticky) {
@@ -325,10 +331,6 @@ export default function Header({ initialData = {} }) {
         }
       `}} />
 
-      {/* ======================================================================= */}
-      {/* ۱. هاله تیره پوشش شکاف بالای هدر و منوهای چسبان (لایه z-[25]) */}
-      {/* بالاتر از باکس‌های صفحه (z-0..20) و پایین‌تر از منوهای چسبان (z-35) و هدر (z-40) */}
-      {/* ======================================================================= */}
       <div
         id="maktum-top-halo"
         aria-hidden="true"
@@ -349,9 +351,6 @@ export default function Header({ initialData = {} }) {
         }}
       />
 
-      {/* ======================================================================= */}
-      {/* ۲. هدر شناور دسکتاپ (لایه z-40) */}
-      {/* ======================================================================= */}
       <header className="hidden md:block fixed top-4 inset-x-0 z-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 font-sans select-none pointer-events-none">
         <motion.div
           animate={{
@@ -361,7 +360,6 @@ export default function Header({ initialData = {} }) {
           transition={{ duration: 0.35, ease: 'easeOut' }}
           className="relative rounded-full overflow-visible group pointer-events-auto mx-auto transition-all transform-gpu"
         >
-          {/* پس‌زمینه گلس‌مورفیسم کریستالی و شفاف با بلور عمیق */}
           <div
             className={cn(
               'absolute inset-0 rounded-full pointer-events-none -z-10 transition-all duration-300 border transform-gpu backdrop-blur-2xl backdrop-saturate-150',
@@ -371,7 +369,6 @@ export default function Header({ initialData = {} }) {
             )}
           />
 
-          {/* خط نوری فیروزه‌ای بالای هدر */}
           <div className="absolute top-0 inset-x-10 h-[1.5px] bg-gradient-to-r from-transparent via-[#06b6d4] to-transparent opacity-85 pointer-events-none z-20" />
 
           <motion.div
@@ -475,7 +472,6 @@ export default function Header({ initialData = {} }) {
               </nav>
             </div>
 
-            {/* دکمه‌های سمت چپ هدر دسکتاپ */}
             <div className="flex items-center gap-2.5">
               <HeaderTooltip text="کاوش در سامانه">
                 <div
@@ -579,9 +575,6 @@ export default function Header({ initialData = {} }) {
         </motion.div>
       </header>
 
-      {/* ======================================================================= */}
-      {/* ۳. نوار بالای موبایل (لوگوی مکتوم دقیقاً هم‌اندازه با آیکون کاربری: 42x42) */}
-      {/* ======================================================================= */}
       <div
         className="md:hidden absolute top-4 inset-x-4 z-30 flex items-center justify-between font-sans select-none pointer-events-none"
         dir="rtl"
@@ -602,6 +595,7 @@ export default function Header({ initialData = {} }) {
         <div className="flex-1 flex justify-center items-center px-3 h-full pointer-events-auto">
           {headerSettings.mobileHeaderCenterImg && !brokenHeaderImgs[headerSettings.mobileHeaderCenterImg] && (
             <img
+              key={headerSettings.mobileHeaderCenterImg}
               src={headerSettings.mobileHeaderCenterImg}
               onError={() => markImgBroken(headerSettings.mobileHeaderCenterImg)}
               alt={headerSettings.siteTitle || 'بنر هدر'}
@@ -611,13 +605,9 @@ export default function Header({ initialData = {} }) {
           )}
         </div>
 
-        {/* فضای متقارن سمت چپ هم‌اندازه با آیکون کاربری (42px) برای وسط‌چین ماندن دقیق بنر */}
         <div className="w-[42px] h-[42px] shrink-0" />
       </div>
 
-      {/* ======================================================================= */}
-      {/* ۴. نماد کاربری موبایل و دکمه کاوش (مخفی در صفحه پروفایل طبق تنظیمات اختصاصی) */}
-      {/* ======================================================================= */}
       {!isProfilePage && (
         <>
           <div
@@ -664,7 +654,6 @@ export default function Header({ initialData = {} }) {
                   <Icon name="user" className="w-5 h-5 pointer-events-none" />
                 </div>
 
-                {/* تولتیپ ورود | عضویت با حالت چشمک‌زن نرم */}
                 <motion.span
                   onClick={() => setIsAuthOpen(true)}
                   animate={{
@@ -710,9 +699,6 @@ export default function Header({ initialData = {} }) {
         </>
       )}
 
-      {/* ======================================================================= */}
-      {/* ۵. هاله تیره و نوری پایین صفحه موبایل (به سبک تلگرام - لایه z-[38]) */}
-      {/* ======================================================================= */}
       <div
         id="maktum-bottom-halo"
         aria-hidden="true"
@@ -729,16 +715,12 @@ export default function Header({ initialData = {} }) {
         }}
       />
 
-      {/* ======================================================================= */}
-      {/* ۶. منوی ناوبری چسبان پایین موبایل (لایه z-40 با فاصله نزدیک به لبه پایین) */}
-      {/* ======================================================================= */}
       <nav
         aria-label="منوی ناوبری موبایل"
         className="md:hidden fixed bottom-2.5 inset-x-4 z-40 pb-[env(safe-area-inset-bottom,0px)] font-sans select-none pointer-events-none"
         dir="rtl"
       >
         <div className="relative rounded-3xl shadow-[0_14px_38px_rgba(2,6,15,0.65)] border border-white/[0.13] pointer-events-auto">
-          {/* خط نوری ظریف بالای نوار ناوبری موبایل */}
           <div className="absolute top-0 inset-x-8 h-[1px] bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none z-20" />
 
           <div className="absolute inset-0 rounded-3xl bg-[#081020]/52 backdrop-blur-2xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.18),inset_0_0_22px_rgba(6,182,212,0.04)] pointer-events-none -z-10 overflow-hidden" />

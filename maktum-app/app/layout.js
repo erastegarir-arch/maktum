@@ -21,8 +21,9 @@ const safeJsonParse = (str, fallback = []) => {
   }
 };
 
+export const dynamic = 'force-dynamic';
 export const viewport = {
-  themeColor: SITE_CONFIG.themeColor || '#0b1426',
+  themeColor: SITE_CONFIG.themeColor || '#050810',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -43,7 +44,8 @@ export async function generateMetadata() {
     },
     description: SITE_CONFIG.description,
     applicationName: SITE_CONFIG.name,
-     referrer: 'origin-when-cross-origin',
+    manifest: '/manifest.webmanifest',
+    referrer: 'origin-when-cross-origin',
     keywords: [
       'مکتوم',
       'پایگاه داده رسانه‌ای مکتوم',
@@ -59,10 +61,21 @@ export async function generateMetadata() {
     alternates: {
       types: { 'application/rss+xml': `${SITE_URL}/feed.xml` },
     },
+    appleWebApp: {
+      capable: true,
+      title: SITE_CONFIG.name || 'مکتوم',
+      statusBarStyle: 'black-translucent',
+    },
     icons: {
-      icon: dynamicFavicon || '/favicon.ico',
+      icon: [
+        { url: dynamicFavicon || '/favicon.ico' },
+        { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+        { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+      ],
       shortcut: dynamicFavicon || '/favicon.ico',
-      apple: dynamicFavicon || '/favicon.ico',
+      apple: [
+        { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      ],
     },
     openGraph: {
       type: 'website',
@@ -162,6 +175,7 @@ export default async function RootLayout({ children }) {
   };
 
   const safeSchemaJson = JSON.stringify(generateCoreGraphSchema()).replace(/</g, '\\u003c');
+  const gaId = process.env.NEXT_PUBLIC_GA_ID || 'G-94P0SWLCN4';
 
   return (
     <html lang="fa" dir="rtl" data-scroll-behavior="smooth" suppressHydrationWarning>
@@ -173,8 +187,20 @@ export default async function RootLayout({ children }) {
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        <link rel="dns-prefetch" href="https://c.iran-analytics.ir" />
+        <link rel="dns-prefetch" href="https://t.iran-analytics.ir" />
         <link rel="dns-prefetch" href="https://www.goftino.com" />
+
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer=window.dataLayer||[];
+              function IRA(){dataLayer.push(arguments);}
+              IRA('js',new Date());
+              IRA('config','IRA-CNY5F0Z');
+            `,
+          }}
+        />
+        <script async src="https://t.iran-analytics.ir/iratag/js?id=IRA-CNY5F0Z"></script>
       </head>
       <body 
         suppressHydrationWarning
@@ -186,23 +212,27 @@ export default async function RootLayout({ children }) {
         />
         
         <DateSettingsProvider>
-          <Script
-            id="iran-analytics-init"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer=window.dataLayer||[];
-                function IRA(){dataLayer.push(arguments);}
-                IRA('js',new Date());
-                IRA('config','IRA-CNY5F0Z');
-              `,
-            }}
-          />
-          <Script 
-            src="https://c.iran-analytics.ir/iratag/js?id=IRA-CNY5F0Z" 
-            strategy="afterInteractive" 
-            async 
-          />
+          {gaId && (
+            <>
+              <Script
+                src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+                strategy="afterInteractive"
+                async
+              />
+              <Script
+                id="google-analytics"
+                strategy="afterInteractive"
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${gaId}');
+                  `,
+                }}
+              />
+            </>
+          )}
 
           <Script
             id="goftino-widget"
