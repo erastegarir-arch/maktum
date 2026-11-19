@@ -13,7 +13,7 @@ const getContentTypeConfig = (type) => {
   if(t.includes('VIDEO') || t.includes('AUDIO') || t.includes('PRODUCED') || t === 'محتوای تولیدی') return { label: 'محتوای تولیدی', bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-transparent', icon: 'video', hex: '#f43f5e', prefix: '/p' };
   if(t.includes('RAW') || t.includes('FOOTAGE') || t === 'فوتیج و راش') return { label: 'فوتیج و راش', bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-transparent', icon: 'footage', hex: '#f59e0b', prefix: '/f' };
   if(t.includes('TOOL') || t === 'ابزارها' || t === 'محتوای ابزارها') return { label: 'ابزارها', bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-transparent', icon: 'project', hex: '#06b6d4', prefix: '/tool' };
-  if(t.includes('BLOG') || t.includes('ARTICLE') || t === 'بلاگ') return { label: 'بلاگ', bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-transparent', icon: 'fileText', hex: '#10b981', prefix: '/blog' };
+  if(t.includes('BLOG') || t.includes('ARTICLE') || t === 'تارنگار') return { label: 'تارنگار', bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-transparent', icon: 'fileText', hex: '#10b981', prefix: '/blog' };
   return { label: type || 'نامشخص', bg: 'bg-white/5', text: 'text-gray-300', border: 'border-transparent', icon: 'document', hex: '#9ca3af', prefix: '/p' };
 };
 
@@ -243,7 +243,7 @@ export default function DossierDetailClientPage({ dossier }) {
               
               {/* تب‌های صافی با مخفی‌کننده اسکرول بار برای موبایل */}
               <div className="flex gap-2 bg-white/[0.02] backdrop-blur-md shadow-[inset_0_0_15px_rgba(255,255,255,0.01)] p-1.5 rounded-2xl border border-white/[0.05] overflow-x-auto w-full md:w-auto pb-2 md:pb-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                {['همه', 'فوتیج و راش', 'محتوای تولیدی', 'ابزارها', 'بلاگ'].map((cat, i) => (
+                {['همه', 'فوتیج و راش', 'محتوای تولیدی', 'ابزارها', 'تارنگار'].map((cat, i) => (
                   <button key={i} onClick={() => { setActiveFilter(cat); setVisibleCount(6); }} className={`px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-xs md:text-sm font-bold transition-colors whitespace-nowrap font-sans border ${activeFilter === cat ? 'bg-white/[0.08] text-white shadow-md border-white/[0.1]' : 'bg-transparent border-transparent text-gray-400 hover:text-white hover:bg-white/[0.05]'}`}>{cat}</button>
                 ))}
               </div>

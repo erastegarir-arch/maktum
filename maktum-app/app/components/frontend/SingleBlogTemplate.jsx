@@ -94,7 +94,7 @@ export default function SingleBlogTemplate({ data, type = 'BLOG', currentUser = 
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const currentTheme = THEMES[type] || THEMES.BLOG;
-  const parentBreadcrumb = { label: 'بلاگ', href: '/blog' };
+  const parentBreadcrumb = { label: 'تارنگار', href: '/blog' };
 
   const title = `${data?.titleBase || ''} ${data?.titleHighlight || ''}`.trim();
   const mainImage = data?.coverDesktop || ''; 

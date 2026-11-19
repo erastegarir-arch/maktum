@@ -29,7 +29,7 @@ export default async function BlogLayout({ children }) {
     title: seoTitle,
     description: seoDesc,
     path: '/blog',
-    breadcrumbName: 'اخبار و مقالات',
+    breadcrumbName: 'تارنگار',
   });
 
   return (

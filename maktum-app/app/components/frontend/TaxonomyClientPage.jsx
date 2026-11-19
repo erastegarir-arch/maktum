@@ -36,7 +36,7 @@ const TAXONOMY_THEMES = {
 
 const CONTENT_THEMES = {
   PRODUCED: { category: 'محتوای تولیدی', badgeText: 'text-[#f43f5e]', hoverTitle: 'group-hover:text-[#f43f5e]', gradientVia: 'via-[#f43f5e]', filterId: 'produced', metaIcon: 'video' },
-  BLOG: { category: 'بلاگ', badgeText: 'text-[#b45309]', hoverTitle: 'group-hover:text-[#b45309]', gradientVia: 'via-[#b45309]', filterId: 'article', metaIcon: 'article' },
+  BLOG: { category: 'تارنگار', badgeText: 'text-[#b45309]', hoverTitle: 'group-hover:text-[#b45309]', gradientVia: 'via-[#b45309]', filterId: 'article', metaIcon: 'article' },
   RAW: { category: 'محتوای خام', badgeText: 'text-[#fbbf24]', hoverTitle: 'group-hover:text-[#fbbf24]', gradientVia: 'via-[#fbbf24]', filterId: 'raw', metaIcon: 'folder' },
   TOOL: { category: 'ابزارها', badgeText: 'text-[#10b981]', hoverTitle: 'group-hover:text-[#10b981]', gradientVia: 'via-[#10b981]', filterId: 'tools', metaIcon: 'pen-nib' },
 };
@@ -222,7 +222,7 @@ export default function TaxonomyClientPage({ taxonomy, contents }) {
                     { id: 'raw', label: 'راش و فوتیج' },
                     { id: 'produced', label: 'تولیدی' },
                     { id: 'tools', label: 'ابزارها' },
-                    { id: 'article', label: 'بلاگ' }
+                    { id: 'article', label: 'تارنگار' }
                   ].map(filter => (
                     <button 
                       key={filter.id}

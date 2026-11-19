@@ -21,7 +21,7 @@ const TABS = [
   { id: 'RAW', label: 'محتوای خام', color: '#fbbf24', bg: 'bg-[#fbbf24]', hover: 'hover:bg-[#fbbf24]', text: 'text-[#fbbf24]', border: 'border-[#fbbf24]', glow: 'shadow-[0_0_15px_rgba(251,191,36,0.3)]', key: 'raw_page_settings' },
   { id: 'PRODUCED', label: 'محتوای تولیدی', color: '#f43f5e', bg: 'bg-[#f43f5e]', hover: 'hover:bg-[#f43f5e]', text: 'text-[#f43f5e]', border: 'border-[#f43f5e]', glow: 'shadow-[0_0_15px_rgba(244,63,94,0.3)]', key: 'produced_page_settings' },
   { id: 'TOOL', label: 'ابزارهای کاربردی', color: '#10b981', bg: 'bg-[#10b981]', hover: 'hover:bg-[#10b981]', text: 'text-[#10b981]', border: 'border-[#10b981]', glow: 'shadow-[0_0_15px_rgba(16,185,129,0.3)]', key: 'tool_page_settings' },
-  { id: 'BLOG', label: 'اخبار و مقالات', color: '#b45309', bg: 'bg-[#b45309]', hover: 'hover:bg-[#b45309]', text: 'text-[#b45309]', border: 'border-[#b45309]', glow: 'shadow-[0_0_15px_rgba(180,83,9,0.3)]', key: 'blog_page_settings' }
+  { id: 'BLOG', label: 'تارنگار', color: '#b45309', bg: 'bg-[#b45309]', hover: 'hover:bg-[#b45309]', text: 'text-[#b45309]', border: 'border-[#b45309]', glow: 'shadow-[0_0_15px_rgba(180,83,9,0.3)]', key: 'blog_page_settings' }
 ];
 
 const DEFAULT_STATE = { hero: { badge: '', titlePart1: '', titlePart2: '', description: '' }, featuredList: [], seo: { title: '', description: '' } };

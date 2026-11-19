@@ -22,7 +22,7 @@ const toPersianDigits = (num) => {
 };
 
 const CONTENT_TYPES = {
-  BLOG: { label: 'مقاله بلاگ', color: 'text-[#f59e0b] bg-[#f59e0b]/10 border-[#f59e0b]/20' },
+  BLOG: { label: 'مقاله تارنگار', color: 'text-[#f59e0b] bg-[#f59e0b]/10 border-[#f59e0b]/20' },
   PRODUCED: { label: 'محتوای تولیدی', color: 'text-[#f43f5e] bg-[#f43f5e]/10 border-[#f43f5e]/20' },
   RAW: { label: 'محتوای خام', color: 'text-[#fbbf24] bg-[#fbbf24]/10 border-[#fbbf24]/20' },
   TOOL: { label: 'ابزارها', color: 'text-[#10b981] bg-[#10b981]/10 border-[#10b981]/20' },
@@ -251,7 +251,7 @@ export default function AdminCommentsPage() {
         <div className="flex w-full md:w-auto gap-3">
           <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="bg-black/40 rounded-xl px-4 py-3 text-xs text-gray-300 outline-none focus:border focus:border-[#8b5cf6] border border-white/5 shadow-inner appearance-none cursor-pointer flex-1 md:flex-none min-w-[140px]">
             <option value="ALL">همه محتواها</option>
-            <option value="BLOG">مقالات بلاگ</option>
+            <option value="BLOG">مقالات تارنگار</option>
             <option value="PRODUCED">محتوای تولیدی</option>
             <option value="RAW">محتوای خام</option>
             <option value="TOOL">ابزارها</option>

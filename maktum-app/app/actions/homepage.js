@@ -29,7 +29,7 @@ export async function getTagsList() {
   }
 }
 
-// ۳. دریافت آخرین محتواهای منتشر شده برای صفحه اصلی (بلاگ، راش و...)
+// ۳. دریافت آخرین محتواهای منتشر شده برای صفحه اصلی (تارنگار، راش و...)
 export async function getLatestContents() {
   try {
     const contents = await prisma.content.findMany({

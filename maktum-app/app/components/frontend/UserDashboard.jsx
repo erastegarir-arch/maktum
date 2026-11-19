@@ -60,7 +60,7 @@ const getContentLink = (type, slug) => {
 
 const getContentTypeLabel = (type) => {
   switch(type) {
-    case 'BLOG': return { label: 'مقاله بلاگ', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' };
+    case 'BLOG': return { label: 'مقاله تارنگار', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' };
     case 'PRODUCED': return { label: 'محتوای تولیدی', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' };
     case 'RAW': return { label: 'محتوای خام', color: 'bg-[#fbbf24]/10 text-[#fbbf24] border-[#fbbf24]/20' };
     case 'TOOL': return { label: 'ابزارها', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' };
@@ -936,7 +936,7 @@ export default function UserDashboard({ initialUser }) {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                             <div className="relative group/input">
                               <label className="flex text-[11px] md:text-xs text-gray-400 font-bold mb-1.5 md:mb-2 pl-1 justify-between items-center">
-                                <span>ایمیل</span>
+                                <span>رایانامه</span>
                                 <span className="text-[9px] font-normal opacity-0 group-focus-within/input:opacity-100 transition-opacity">
                                   <span className={formData.email.length >= 100 ? 'text-rose-500' : 'text-gray-400'}>{toPersianDigits(formData.email.length)}</span><span className="text-gray-500 mx-0.5">/</span><span className="text-gray-500">{toPersianDigits(100)}</span>
                                 </span>

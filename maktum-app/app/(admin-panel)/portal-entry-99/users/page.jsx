@@ -76,7 +76,7 @@ const safeParse = (val, fallback = []) => {
 
 const getContentTypeLabel = (type) => {
   switch(type) {
-    case 'BLOG': return { label: 'مقاله بلاگ', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+    case 'BLOG': return { label: 'مقاله تارنگار', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
     case 'PRODUCED': return { label: 'محتوای تولیدی', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
     case 'RAW': return { label: 'محتوای خام', color: 'bg-[#fbbf24]/10 text-[#fbbf24] border-[#fbbf24]/20' };
     case 'TOOL': return { label: 'ابزارها', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
@@ -560,7 +560,7 @@ export default function AdminUsersPage() {
     if (exportFields.education) headers.push('مدرک و رشته');
     if (exportFields.artField) headers.push('فعالیت هنری');
     if (exportFields.cooperation) headers.push('زمینه‌های همکاری');
-    if (exportFields.email) headers.push('ایمیل');
+    if (exportFields.email) headers.push('رایانامه');
     if (exportFields.role) headers.push('نقش و دسترسی');
     if (exportFields.status) headers.push('وضعیت حساب');
     if (exportFields.downloadsCount) headers.push('تعداد بارگیری');
@@ -919,7 +919,7 @@ export default function AdminUsersPage() {
                      const labels = { 
                        id: 'شناسه سامانه‌ای', phone: 'موبایل', name: 'نام و خانوادگی', gender: 'جنسیت', 
                        birth: 'تاریخ تولد', location: 'استان و شهر', education: 'مدرک و رشته', 
-                       artField: 'فعالیت هنری', cooperation: 'زمینه‌های همکاری', email: 'ایمیل', 
+                       artField: 'فعالیت هنری', cooperation: 'زمینه‌های همکاری', email: 'رایانامه', 
                        role: 'نقش و دسترسی', status: 'وضعیت حساب', joined: 'تاریخ عضویت',
                        downloadsCount: 'تعداد بارگیری‌ها', favoritesCount: 'تعداد علاقه‌مندی‌ها', commentsCount: 'تعداد نظرات'
                      };
@@ -1381,7 +1381,7 @@ export default function AdminUsersPage() {
                             </div>
 
                             <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">رشته تحصیلی</label><input maxLength={100} type="text" disabled={!canEditPersonalInfo} value={editFormData.major || ''} onChange={(e) => setEditFormData({...editFormData, major: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none transition-colors select-text disabled:opacity-50" style={autofillFixStyle} /></div>
-                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">ایمیل</label><input maxLength={100} type="email" dir="ltr" disabled={!canEditPersonalInfo} value={editFormData.email || ''} onChange={(e) => setEditFormData({...editFormData, email: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] text-left font-sans shadow-inner outline-none transition-colors select-text disabled:opacity-50" style={autofillFixStyle} /></div>
+                            <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">رایانامه</label><input maxLength={100} type="email" dir="ltr" disabled={!canEditPersonalInfo} value={editFormData.email || ''} onChange={(e) => setEditFormData({...editFormData, email: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] text-left font-sans shadow-inner outline-none transition-colors select-text disabled:opacity-50" style={autofillFixStyle} /></div>
                             <div><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">حوزه فعالیت هنری/پژوهشی</label><input maxLength={150} type="text" disabled={!canEditPersonalInfo} value={editFormData.artResearchField || ''} onChange={(e) => setEditFormData({...editFormData, artResearchField: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] font-sans shadow-inner outline-none transition-colors select-text disabled:opacity-50" style={autofillFixStyle} /></div>
 
                             <div className="col-span-1 md:col-span-2 lg:col-span-3"><label className="block text-xs text-gray-400 mb-2 font-sans pl-1">زمینه‌های تمایل به همکاری</label><textarea maxLength={500} rows="3" disabled={!canEditPersonalInfo} value={editFormData.cooperationInterests || ''} onChange={(e) => setEditFormData({...editFormData, cooperationInterests: e.target.value})} className="w-full bg-black/40 rounded-xl px-4 py-3 text-sm text-white focus:border-[#8b5cf6] resize-none font-sans border border-white/10 shadow-inner outline-none leading-relaxed text-justify transition-colors select-text disabled:opacity-50 break-words" style={autofillFixStyle}></textarea></div>
@@ -1470,7 +1470,7 @@ export default function AdminUsersPage() {
                           <div className="bg-black/20 p-4 rounded-2xl border border-white/5 shadow-inner"><span className="text-gray-500 block mb-2 text-[11px] font-sans font-bold">تاریخ تولد</span><span className="text-white font-bold font-sans dir-ltr text-right block text-sm select-text">{selectedUser.birthYear ? toPersianDigits(selectedUser.birthYear) : 'نامشخص'}</span></div>
                           <div className="bg-black/20 p-4 rounded-2xl border border-white/5 shadow-inner"><span className="text-gray-500 block mb-2 text-[11px] font-sans font-bold">استان و شهر</span><span className="text-white font-bold font-sans text-sm select-text">{selectedUser.province || selectedUser.city ? `${selectedUser.province || ''} / ${selectedUser.city || ''}` : 'نامشخص'}</span></div>
                           <div className="bg-black/20 p-4 rounded-2xl border border-white/5 shadow-inner"><span className="text-gray-500 block mb-2 text-[11px] font-sans font-bold">مدرک و رشته</span><span className="text-white font-bold font-sans text-sm select-text">{selectedUser.educationDegree || selectedUser.major ? `${selectedUser.educationDegree || ''} - ${selectedUser.major || ''}` : 'نامشخص'}</span></div>
-                          <div className="bg-black/20 p-4 rounded-2xl border border-white/5 shadow-inner"><span className="text-gray-500 block mb-2 text-[11px] font-sans font-bold">ایمیل</span><span className="text-white font-bold font-sans text-sm block truncate select-text" dir="ltr">{selectedUser.email || 'نامشخص'}</span></div>
+                          <div className="bg-black/20 p-4 rounded-2xl border border-white/5 shadow-inner"><span className="text-gray-500 block mb-2 text-[11px] font-sans font-bold">رایانامه</span><span className="text-white font-bold font-sans text-sm block truncate select-text" dir="ltr">{selectedUser.email || 'نامشخص'}</span></div>
                           <div className="bg-black/20 p-4 rounded-2xl border border-white/5 shadow-inner"><span className="text-gray-500 block mb-2 text-[11px] font-sans font-bold">حوزه فعالیت هنری</span><span className="text-white font-bold font-sans text-sm select-text">{selectedUser.artResearchField || 'نامشخص'}</span></div>
                           <div className="col-span-1 md:col-span-3 bg-black/20 p-5 rounded-2xl border border-white/5 shadow-inner"><span className="text-gray-500 block mb-3 text-[11px] font-sans font-bold">زمینه‌های تمایل به همکاری</span><p className="text-white font-light text-sm text-justify leading-relaxed font-sans select-text">{selectedUser.cooperationInterests || 'تکمیل نشده است.'}</p></div>
                         </div>

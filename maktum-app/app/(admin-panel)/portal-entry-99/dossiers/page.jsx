@@ -40,7 +40,7 @@ const getContentTypeConfig = (type) => {
   if(t.includes('PRODUCED') || t.includes('AUDIO') || t === 'تولیدی') return { label: 'تولیدی', bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20' };
   if(t.includes('RAW') || t.includes('FOOTAGE') || t === 'فوتیج و راش') return { label: 'فوتیج و راش', bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' };
   if(t.includes('TOOL') || t === 'ابزارها' || t === 'ابزارها') return { label: 'ابزارها', bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/20' };
-  if(t.includes('BLOG') || t.includes('ARTICLE') || t === 'بلاگ') return { label: 'بلاگ', bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' };
+  if(t.includes('BLOG') || t.includes('ARTICLE') || t === 'تارنگار') return { label: 'تارنگار', bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' };
   return { label: type || 'نامشخص', bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/20' };
 };
 

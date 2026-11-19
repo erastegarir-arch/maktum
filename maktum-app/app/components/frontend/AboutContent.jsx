@@ -335,7 +335,7 @@ export default function AboutContent({ pageData = {} }) {
                       <Icon name="email" className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
                     <div className="w-full sm:w-auto text-center sm:text-right">
-                      <p className="text-[10px] md:text-xs text-gray-400 mb-1">پست الکترونیک</p>
+                      <p className="text-[10px] md:text-xs text-gray-400 mb-1">رایانامه</p>
                       <a href={`mailto:${contactEmail.value}`} dir="ltr" className="text-sm md:text-base text-white font-sans font-bold hover:text-[#10b981] transition-colors block">
                         {contactEmail.value}
                       </a>
@@ -397,17 +397,19 @@ export default function AboutContent({ pageData = {} }) {
             </div>
 
             {hasAddress && (
-              <div className="w-full max-w-4xl mx-auto bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] px-5 md:px-8 py-4 md:py-5 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start gap-3 md:gap-4 text-center sm:text-right">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/30 flex items-center justify-center text-[#10b981] shadow-inner shrink-0">
-                  <Icon name="location" className="w-5 h-5 md:w-6 md:h-6" />
+              <Tooltip content={contact.address?.tooltip} position="top">
+                <div className="w-full max-w-4xl mx-auto bg-white/[0.03] backdrop-blur-md border border-white/[0.05] shadow-[inset_0_0_15px_rgba(255,255,255,0.02)] px-5 md:px-8 py-4 md:py-5 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start gap-3 md:gap-4 text-center sm:text-right">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/30 flex items-center justify-center text-[#10b981] shadow-inner shrink-0">
+                    <Icon name="location" className="w-5 h-5 md:w-6 md:h-6" />
+                  </div>
+                  <div className="flex-1 pt-1 w-full text-center sm:text-right">
+                    <p className="text-[10px] md:text-xs text-gray-400 mb-1 md:mb-2">نشانی دفتر / مرکز</p>
+                    <p className="text-[11px] md:text-sm text-white font-sans leading-relaxed text-justify [text-align-last:center] sm:[text-align-last:right]">
+                      {contactAddress}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 pt-1 w-full text-center sm:text-right">
-                  <p className="text-[10px] md:text-xs text-gray-400 mb-1 md:mb-2">نشانی دفتر / مرکز</p>
-                  <p className="text-[11px] md:text-sm text-white font-sans leading-relaxed text-justify [text-align-last:center] sm:[text-align-last:right]">
-                    {contactAddress}
-                  </p>
-                </div>
-              </div>
+              </Tooltip>
             )}
 
             {validSocials.length > 0 && (

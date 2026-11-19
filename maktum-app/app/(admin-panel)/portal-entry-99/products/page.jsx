@@ -18,7 +18,7 @@ const TYPE_MAP = {
   PRODUCED: { label: 'تولیدی', icon: 'product', color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
   RAW: { label: 'خام', icon: 'footage', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
   TOOL: { label: 'ابزار', icon: 'pen-nib', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-  BLOG: { label: 'بلاگ', icon: 'blog', color: 'text-blue-400 bg-blue-500/10 border border-blue-500/20' }
+  BLOG: { label: 'تارنگار', icon: 'blog', color: 'text-blue-400 bg-blue-500/10 border border-blue-500/20' }
 };
 
 // نگاشت وضعیت محتوا (حذف وضعیت بایگانی)
@@ -246,7 +246,7 @@ export default function ProductsListPage() {
               <option value="PRODUCED" className="bg-[#0b0f19]">محتوای تولیدی</option>
               <option value="RAW" className="bg-[#0b0f19]">محتوای خام</option>
               <option value="TOOL" className="bg-[#0b0f19]">ابزارها</option>
-              <option value="BLOG" className="bg-[#0b0f19]">مقاله / بلاگ</option>
+              <option value="BLOG" className="bg-[#0b0f19]">مقاله / تارنگار</option>
             </select>
           </div>
 

@@ -414,7 +414,7 @@ export default function EditContentPage() {
             { id: 'RAW', label: 'محتوای خام', icon: 'footage', themeObj: THEMES.RAW },
             { id: 'PRODUCED', label: 'محتوای تولیدی', icon: 'product', themeObj: THEMES.PRODUCED },
             { id: 'TOOL', label: 'ابزارها', icon: 'pen-nib', themeObj: THEMES.TOOL },
-            { id: 'BLOG', label: 'بلاگ', icon: 'blog', themeObj: THEMES.BLOG }
+            { id: 'BLOG', label: 'تارنگار', icon: 'blog', themeObj: THEMES.BLOG }
           ].map(t => (
             <button
               key={t.id}

@@ -93,7 +93,7 @@ export async function updateUserProfileAction(data) {
     const vMajor = sanitizeField(data?.major, 100, 'رشته تحصیلی');
     if (!vMajor.isValid) return { success: false, error: vMajor.error };
 
-    const vEmail = sanitizeField(data?.email, 100, 'ایمیل');
+    const vEmail = sanitizeField(data?.email, 100, 'ایمرایانامهیل');
     if (!vEmail.isValid) return { success: false, error: vEmail.error };
     if (vEmail.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(vEmail.value)) {
       return { success: false, error: 'نشانی رایانامه نامعتبر است.' };

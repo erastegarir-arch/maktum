@@ -86,7 +86,7 @@ export default async function HomePage() {
   const allContents = contentsRes?.success ? contentsRes.data : [];
 
   const contentConfig = parseJSON(contentConfigRaw, {
-    blog: { title: 'آخرین مطالب بلاگ', subtitle: 'مقالات، گزارش‌ها و یادداشت‌های تحلیلی' },
+    blog: { title: 'آخرین مطالب تارنگار', subtitle: 'مقالات، گزارش‌ها و یادداشت‌های تحلیلی' },
     raw: { title: 'محتوای راش و خام', subtitle: 'اسناد مکتوب، تصاویر و ویدیوها' },
     produced: { title: 'محتوای تولیدی', subtitle: 'مستندهای اختصاصی و پادکست‌ها' },
     tools: { title: 'ابزارهای کاربردی', subtitle: 'تسهیل در پژوهش با ابزارهای هوشمند' }

@@ -37,7 +37,7 @@ function getFixedUrl(url) {
 // ==========================================
 function getLabelByType(type) {
   switch (type) {
-    case 'BLOG': return 'مقالات بلاگ';
+    case 'BLOG': return 'مقالات تارنگار';
     case 'RAW': return 'محتوای راش و خام';
     case 'PRODUCED': return 'محتوای تولیدی';
     case 'TOOL': return 'ابزارها';
@@ -316,7 +316,7 @@ export default function SearchModal({ isOpen, onClose }) {
               { id: 'DOSSIER', label: 'منظومه‌ها', icon: 'dossiers', color: 'text-indigo-400' },
               { id: 'PRODUCED', label: 'محتوای تولیدی', icon: 'product', color: 'text-cyan-400' },
               { id: 'RAW', label: 'محتوای راش و خام', icon: 'footage', color: 'text-amber-400' },
-              { id: 'BLOG', label: 'مقالات بلاگ', icon: 'blog', color: 'text-purple-400' },
+              { id: 'BLOG', label: 'مقالات تارنگار', icon: 'blog', color: 'text-purple-400' },
               { id: 'TOOL', label: 'ابزارها', icon: 'pen-nib', color: 'text-emerald-400' }
             ].map(filter => {
               const isActive = activeFilters.includes(filter.id);

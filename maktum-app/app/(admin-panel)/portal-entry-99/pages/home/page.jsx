@@ -29,7 +29,7 @@ const DEFAULT_LAYOUT = [
   { id: 'countdown', label: 'شمارشگر معکوس', isActive: true },
   { id: 'dossiers', label: 'پرونده‌های باز', isActive: true },
   { id: 'radar', label: 'رادار موضوعی', isActive: true },
-  { id: 'blog', label: 'آخرین مطالب بلاگ', isActive: true },
+  { id: 'blog', label: 'آخرین مطالب تارنگار', isActive: true },
   { id: 'raw', label: 'محتوای راش', isActive: true },
   { id: 'produced', label: 'محتوای تولیدی', isActive: true },
   { id: 'tools', label: 'ابزارهای کاربردی', isActive: true },
@@ -98,7 +98,7 @@ export default function HomePageSettings() {
   const [ctaBox, setCtaBox] = useState({ preTitle: 'پورتال ارتباط امن', title: 'سندی در دست دارید؟', desc: '', btnText: 'ارسال امن سند', btnLink: '/submit' });
 
   const [contentConfig, setContentConfig] = useState({
-    blog: { title: 'آخرین مطالب بلاگ', subtitle: 'مقالات، گزارش‌ها و یادداشت‌های تحلیلی' },
+    blog: { title: 'آخرین مطالب تارنگار', subtitle: 'مقالات، گزارش‌ها و یادداشت‌های تحلیلی' },
     raw: { title: 'محتوای راش و خام', subtitle: 'اسناد مکتوب، تصاویر و ویدیوها' },
     produced: { title: 'محتوای تولیدی', subtitle: 'مستندهای اختصاصی و پادکست‌ها' },
     tools: { title: 'ابزارهای کاربردی', subtitle: 'تسهیل در پژوهش با ابزارهای هوشمند' }
@@ -133,7 +133,7 @@ export default function HomePageSettings() {
         setCtaBox(parseJSON(await getSetting('home_cta'), { preTitle: 'پورتال ارتباط امن', title: 'سندی در دست دارید؟', desc: '', btnText: 'ارسال امن سند', btnLink: '/submit' }));
         
         setContentConfig(parseJSON(await getSetting('home_content_config'), {
-          blog: { title: 'آخرین مطالب بلاگ', subtitle: 'مقالات، گزارش‌ها و یادداشت‌های تحلیلی' },
+          blog: { title: 'آخرین مطالب تارنگار', subtitle: 'مقالات، گزارش‌ها و یادداشت‌های تحلیلی' },
           raw: { title: 'محتوای راش و خام', subtitle: 'اسناد مکتوب، تصاویر و ویدیوها' },
           produced: { title: 'محتوای تولیدی', subtitle: 'مستندهای اختصاصی و پادکست‌ها' },
           tools: { title: 'ابزارهای کاربردی', subtitle: 'تسهیل در پژوهش با ابزارهای هوشمند' }
@@ -526,13 +526,13 @@ export default function HomePageSettings() {
       {activeTab === 'CONTENT_TITLES' && (
         <div className="p-6 bg-[#050810]/50 rounded-3xl border border-white/5 space-y-8 shadow-inner">
           <p className="text-sm text-gray-400 font-light mb-6 bg-black/40 p-4 rounded-xl border border-white/5 shadow-inner">
-            در این بخش می‌توانید عنوان و زیرعنوان مربوط به ۴ بخش محتوایی سامانه (بلاگ، راش، تولیدی و ابزارها) را شخصی‌سازی کنید. محتوای این بخش‌ها مستقیماً از پایگاه داده پست‌ها خوانده می‌شود.
+            در این بخش می‌توانید عنوان و زیرعنوان مربوط به ۴ بخش محتوایی سامانه (تارنگار، راش، تولیدی و ابزارها) را شخصی‌سازی کنید. محتوای این بخش‌ها مستقیماً از پایگاه داده پست‌ها خوانده می‌شود.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* بلاگ */}
+            {/* تارنگار */}
             <div className="bg-black/20 p-5 rounded-2xl border border-white/5 space-y-3 shadow-inner">
-              <h3 className="text-sm font-bold text-amber-500 flex items-center gap-2"><Icon name="blog" className="w-4 h-4"/> بخش بلاگ</h3>
+              <h3 className="text-sm font-bold text-amber-500 flex items-center gap-2"><Icon name="blog" className="w-4 h-4"/> بخش تارنگار</h3>
               <input type="text" placeholder="عنوان اصلی" value={contentConfig.blog.title} onChange={e => setContentConfig({...contentConfig, blog: {...contentConfig.blog, title: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-amber-500 transition-all select-text shadow-inner" />
               <input type="text" placeholder="زیر عنوان" value={contentConfig.blog.subtitle} onChange={e => setContentConfig({...contentConfig, blog: {...contentConfig.blog, subtitle: e.target.value}})} className="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-sm text-white outline-none focus:border-amber-500 transition-all select-text shadow-inner" />
             </div>

@@ -53,7 +53,7 @@ export default async function BlogFrontPage() {
 
   const breadcrumbs = [
     { label: 'مکتوم', href: '/' },
-    { label: 'اخبار و مقالات' }
+    { label: 'تارنگار' }
   ];
 
   return (

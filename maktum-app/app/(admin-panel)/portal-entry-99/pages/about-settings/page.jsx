@@ -359,11 +359,12 @@ export default function AboutSettingsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-white/5 mt-6">
-              {/* ایمیل */}
+              {/* رایانامه */}
               <div className="space-y-3 bg-white/5 p-4 rounded-xl border border-transparent shadow-inner">
-                <h4 className="text-sm font-bold text-white flex items-center gap-2"><Icon name="email" className="w-4 h-4 text-[#10b981]" /> ایمیل</h4>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2"><Icon name="email" className="w-4 h-4 text-[#10b981]" /> رایانامه</h4>
                 <div className="space-y-2">
-                  <input type="text" value={data.contact.email?.value || ''} onChange={e => setData(prev => ({ ...prev, contact: { ...prev.contact, email: { ...prev.contact.email, value: e.target.value } } }))} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-lg p-2.5 text-sm text-white placeholder:text-gray-600 dir-ltr text-right outline-none focus:border focus:border-[#10b981] focus:bg-black/60 transition-all select-text" placeholder="نشانی ایمیل..." />
+                  <input type="text" value={data.contact.email?.value || ''} onChange={e => setData(prev => ({ ...prev, contact: { ...prev.contact, email: { ...prev.contact.email, value: e.target.value } } }))} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-lg p-2.5 text-sm text-white placeholder:text-gray-600 dir-ltr text-right outline-none focus:border focus:border-[#10b981] focus:bg-black/60 transition-all select-text" placeholder="نشانی رایانامه..." />
+                  <input type="text" value={data.contact.email?.tooltip || ''} onChange={e => setData(prev => ({ ...prev, contact: { ...prev.contact, email: { ...prev.contact.email, tooltip: e.target.value } } }))} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-lg p-2.5 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] focus:bg-black/60 transition-all select-text" placeholder="متن تول‌تیپ (مثال: ارسال رایانامه به مکتوم)" />
                 </div>
               </div>
 
@@ -372,6 +373,7 @@ export default function AboutSettingsPage() {
                 <h4 className="text-sm font-bold text-white flex items-center gap-2"><Icon name="phone" className="w-4 h-4 text-[#10b981]" /> شماره پشتیبانی</h4>
                 <div className="space-y-2">
                   <input type="text" value={data.contact.phone?.value || ''} onChange={e => setData(prev => ({ ...prev, contact: { ...prev.contact, phone: { ...prev.contact.phone, value: e.target.value } } }))} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-lg p-2.5 text-sm text-white placeholder:text-gray-600 dir-ltr text-right outline-none focus:border focus:border-[#10b981] focus:bg-black/60 transition-all select-text" placeholder="شماره تماس..." />
+                  <input type="text" value={data.contact.phone?.tooltip || ''} onChange={e => setData(prev => ({ ...prev, contact: { ...prev.contact, phone: { ...prev.contact.phone, tooltip: e.target.value } } }))} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-lg p-2.5 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] focus:bg-black/60 transition-all select-text" placeholder="متن تول‌تیپ (مثال: تماس تلفنی با پشتیبانی مکتوم)" />
                 </div>
               </div>
 
@@ -403,9 +405,10 @@ export default function AboutSettingsPage() {
             </div>
 
             {/* نشانی (کشیده زیر تمام کادرها) */}
-            <div className="pt-2">
-              <label className="text-xs text-gray-300 font-bold pl-1 block mb-2">نشانی فیزیکی دفتر / مرکز</label>
+            <div className="pt-2 space-y-2">
+              <label className="text-xs text-gray-300 font-bold pl-1 block">نشانی فیزیکی دفتر / مرکز</label>
               <textarea rows="2" value={data.contact.address?.value || ''} onChange={e => setData(prev => ({ ...prev, contact: { ...prev.contact, address: { ...prev.contact.address, value: e.target.value } } }))} placeholder="نشانی کامل جهت نمایش در نقشه و سامانه..." className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-4 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] focus:bg-black/60 transition-all resize-none select-text"></textarea>
+              <input type="text" value={data.contact.address?.tooltip || ''} onChange={e => setData(prev => ({ ...prev, contact: { ...prev.contact, address: { ...prev.contact.address, tooltip: e.target.value } } }))} className="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl p-3 text-sm text-white placeholder:text-gray-600 outline-none focus:border focus:border-[#10b981] focus:bg-black/60 transition-all select-text" placeholder="متن تول‌تیپ نشانی (مثال: نشانی دفتر مرکزی مکتوم)" />
             </div>
 
             {/* مسئولیت محتوای باز شونده‌ شبکه‌های اجتماعی */}
